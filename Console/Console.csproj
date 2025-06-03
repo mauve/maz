@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>maz</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Identity" />
+    <PackageReference Include="Azure.Monitor.Query" />
+    <PackageReference Include="DotMake.CommandLine" />
+  </ItemGroup>
+</Project>

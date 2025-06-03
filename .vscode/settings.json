@@ -1,0 +1,7 @@
+{
+    "[csharp]": {
+        "editor.formatOnType": true,
+        "editor.inlineSuggest.suppressSuggestions": false,
+        "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    }
+}

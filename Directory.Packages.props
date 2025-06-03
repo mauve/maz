@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Azure.Identity" Version="1.14.0" />
+    <PackageVersion Include="Azure.Monitor.Query" Version="1.6.0" />
+    <PackageVersion Include="DotMake.CommandLine" Version="2.4.0" />
+  </ItemGroup>
+</Project>
