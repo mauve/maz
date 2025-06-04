@@ -132,40 +132,6 @@ public class RootCommand
     )]
     public string? TokenFilePath { get; set; }
 
-    [CliOption(
-        Description = """
-                The subscription ID.
-
-                Defaults to the value of environment variable AZURE_SUBSCRIPTION_ID.
-            """,
-        Aliases = ["-s", "--sub"],
-        Required = false,
-        Recursive = true
-    )]
-    public string? SubscriptionOption { get; set; }
-
-    public string SubscriptionId =>
-        SubscriptionOption
-        ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID")
-        ?? throw new ArgumentException("Missing argument --subscription");
-
-    [CliOption(
-        Description = """
-                The name of the resource group.
-                
-                Defaults to the value of environment variable AZURE_RESOURCE_GROUP.
-            """,
-        Required = false,
-        Recursive = true,
-        Aliases = ["-g", "--grp"]
-    )]
-    public string? ResourceGroupNameOption { get; set; }
-
-    public string ResourceGroupName =>
-        ResourceGroupNameOption
-        ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP")
-        ?? throw new ArgumentException("Missing argument --resource-group");
-
     private AzureCliCredential AzureCliCredential
     {
         get
