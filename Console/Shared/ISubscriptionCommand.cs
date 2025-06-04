@@ -15,7 +15,9 @@ public interface ISubscriptionCommand
                 The subscription ID. Can be either a resource identifier (e.g., /subscriptions/{subscriptionId}),
                 a plain subscription ID GUID, or a the display name of a subscription you have access to.
 
-                Defaults to the value of environment variable AZURE_SUBSCRIPTION_ID.
+                Defaults to the value of environment variable AZURE_SUBSCRIPTION_ID, if neither this
+                argument is specified nor the environment variable is set, then the default
+                subscription is used.
             """,
         Aliases = ["-s", "--sub", "--subscription"],
         Required = false
@@ -43,9 +45,13 @@ public static class ISubscriptionCommandExtensions
         bool allowDisplayName = true
     )
     {
-        var requestedSubscriptionId = self.RequireSubscriptionId();
-
-        if (requestedSubscriptionId.StartsWith("/subscriptions/"))
+        var requestedSubscriptionId =
+            self.SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        if (requestedSubscriptionId is null)
+        {
+            return await armClient.GetDefaultSubscriptionAsync();
+        }
+        else if (requestedSubscriptionId.StartsWith("/subscriptions/"))
         {
             return armClient.GetSubscriptionResource(
                 new ResourceIdentifier(requestedSubscriptionId)

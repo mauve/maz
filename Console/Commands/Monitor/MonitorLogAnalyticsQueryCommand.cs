@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
 using DotMake.CommandLine;
