@@ -106,4 +106,81 @@ public class GroupCommand
             }
         }
     }
+
+    [CliCommand(Description = "Show details of a resource group.")]
+    public class ShowCommand : IBasicRenderCommand, IResourceGroupCommand
+    {
+        public required RootCommand Parent { get; set; }
+
+        public string? OutputFormat { get; set; }
+        public bool OutputIndented { get; set; }
+        public string? ResourceGroupName { get; set; }
+        public string? SubscriptionId { get; set; }
+
+        public async Task RunAsync(CliContext context)
+        {
+            var rendererFactory = this.GetRendererFactory();
+
+            var armClient = new ArmClient(Parent.Credential, SubscriptionId);
+            var subscription = await this.GetSubscriptionResourceAsync(armClient);
+
+            var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
+
+            var resourceGroup = await subscription.GetResourceGroupAsync(
+                this.RequireResourceGroupName(),
+                context.CancellationToken
+            );
+
+            await renderer.RenderAsync(context.Output, resourceGroup, context.CancellationToken);
+        }
+    }
+
+    [CliCommand(Description = "Delete a resource group.")]
+    public class DeleteCommand : IResourceGroupCommand, IConfirmationCommand
+    {
+        public required RootCommand Parent { get; set; }
+
+        public string? ResourceGroupName { get; set; }
+
+        public string? SubscriptionId { get; set; }
+
+        public bool Confirm { get; set; }
+
+        [CliOption(
+            Description = "Specify if the command should wait for the operation to complete.",
+            Aliases = ["--wait"],
+            Required = false
+        )]
+        public WaitUntil WaitUntil { get; set; } = WaitUntil.Completed;
+
+        [CliOption(
+            Description = "The resource types you want to force delete. Currently, only the following is supported: Microsoft.Compute/virtualMachines, Microsoft.Compute/virtualMachineScaleSets",
+            Aliases = ["--force-deletion-types"],
+            Required = false,
+            AllowMultipleArgumentsPerToken = true
+        )]
+        public List<string> ForceDeletionTypes { get; set; } = [];
+
+        public async Task RunAsync(CliContext context)
+        {
+            var armClient = new ArmClient(Parent.Credential, SubscriptionId);
+            var subscription = await this.GetSubscriptionResourceAsync(armClient);
+
+            var resourceGroup = await subscription.GetResourceGroupAsync(
+                this.RequireResourceGroupName(),
+                context.CancellationToken
+            );
+
+            var forceDeletionTypes =
+                ForceDeletionTypes.Count == 0 ? null : string.Join(",", ForceDeletionTypes);
+
+            this.RequireConfirmation(Parent.Interactive);
+
+            await resourceGroup.Value.DeleteAsync(
+                WaitUntil,
+                forceDeletionTypes,
+                context.CancellationToken
+            );
+        }
+    }
 }
