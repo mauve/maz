@@ -131,7 +131,11 @@ public class GroupCommand
                 context.CancellationToken
             );
 
-            await renderer.RenderAsync(context.Output, resourceGroup, context.CancellationToken);
+            await renderer.RenderAsync(
+                context.Output,
+                resourceGroup.Value,
+                context.CancellationToken
+            );
         }
     }
 
