@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
 using DotMake.CommandLine;
@@ -48,6 +49,20 @@ public class MonitorLogAnalyticsQueryCommand
 
     [CliOption(Description = "Additional workspaces to include in the query.", Required = false)]
     public List<string> AdditionalWorkspaces { get; set; } = [];
+
+    [CliOption(
+        Description = "Output results as JSON Lines (one JSON object per row).",
+        Required = false,
+        Aliases = ["--jsonl"]
+    )]
+    public bool OutputJsonl { get; set; } = false;
+
+    [CliOption(
+        Description = "Output results as a JSON array.",
+        Required = false,
+        Aliases = ["--jsonarray"]
+    )]
+    public bool OutputJsonArray { get; set; } = false;
 
     public required MonitorLogAnalyticsCommand Parent { get; set; }
 
@@ -118,21 +133,55 @@ public class MonitorLogAnalyticsQueryCommand
         }
 
         var table = result.Table;
-        foreach (var row in table.Rows)
+        if (OutputJsonl || OutputJsonArray)
         {
-            context.Output.WriteLine(
-                string.Join(
-                    "\t",
-                    row.Select(v =>
-                        v switch
-                        {
-                            DateTimeOffset dt => dt.ToString("o"),
-                            TimeSpan ts => ts.ToString("o"),
-                            _ => v?.ToString() ?? "null",
-                        }
+            var columns = table.Columns;
+            var rows = new List<Dictionary<string, object?>>();
+            foreach (var row in table.Rows)
+            {
+                var obj = new Dictionary<string, object?>();
+                for (int i = 0; i < columns.Count; i++)
+                {
+                    obj[columns[i].Name] = row[i] switch
+                    {
+                        DateTimeOffset dt => dt.ToString("o"),
+                        TimeSpan ts => ts.ToString("o"),
+                        _ => row[i],
+                    };
+                }
+                rows.Add(obj);
+            }
+
+            if (OutputJsonArray)
+            {
+                context.Output.WriteLine(JsonSerializer.Serialize(rows));
+            }
+            else
+            {
+                foreach (var obj in rows)
+                {
+                    context.Output.WriteLine(JsonSerializer.Serialize(obj));
+                }
+            }
+        }
+        else
+        {
+            foreach (var row in table.Rows)
+            {
+                context.Output.WriteLine(
+                    string.Join(
+                        "\t",
+                        row.Select(v =>
+                            v switch
+                            {
+                                DateTimeOffset dt => dt.ToString("o"),
+                                TimeSpan ts => ts.ToString("o"),
+                                _ => v?.ToString() ?? "null",
+                            }
+                        )
                     )
-                )
-            );
+                );
+            }
         }
 
         if (IncludeStatistics)
