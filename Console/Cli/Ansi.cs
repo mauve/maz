@@ -35,6 +35,7 @@ internal static partial class Ansi
             return text;
         text = DefaultValueRegex().Replace(text, m => $"\x1b[33m{m.Value}\x1b[0m");
         text = EnvVarTagRegex().Replace(text, m => $"\x1b[36m{m.Value}\x1b[0m");
+        text = AllowedValuesTagRegex().Replace(text, m => $"\x1b[32m{m.Value}\x1b[0m");
         return text;
     }
 
@@ -43,4 +44,7 @@ internal static partial class Ansi
 
     [GeneratedRegex(@"\[env: [^\]]+\]")]
     private static partial Regex EnvVarTagRegex();
+
+    [GeneratedRegex(@"\[allowed: [^\]]+\]")]
+    private static partial Regex AllowedValuesTagRegex();
 }
