@@ -6,4 +6,5 @@
   </Configurations>
   <Project Path="Console/Console.csproj" />
   <Project Path="CliGenerator/CliGenerator.csproj" />
+  <Project Path="CliGenerator.Tests/CliGenerator.Tests.csproj" />
 </Solution>
