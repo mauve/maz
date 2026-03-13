@@ -17,6 +17,7 @@ public class RootCommandDef : CommandDef
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
     public readonly MonitorCommandDef Monitor;
+    public readonly CompletionCommandDef Completion;
 
     public RootCommandDef()
     {
@@ -25,6 +26,7 @@ public class RootCommandDef : CommandDef
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
         Monitor = new MonitorCommandDef(Auth);
+        Completion = new CompletionCommandDef();
     }
 
     protected override Command CreateCommand() => new RootCommand(Description);

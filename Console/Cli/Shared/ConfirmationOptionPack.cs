@@ -17,7 +17,9 @@ public partial class ConfirmationOptionPack : OptionPack
             return;
 
         if (!interactive || System.Console.IsInputRedirected)
-            throw new InvocationException("This command requires confirmation. Use --yes to confirm.");
+            throw new InvocationException(
+                "This command requires confirmation. Use --yes to confirm."
+            );
 
         System.Console.Write("Are you sure you want to continue? (y/N): ");
         var response = System.Console.ReadLine()?.Trim().ToLowerInvariant();

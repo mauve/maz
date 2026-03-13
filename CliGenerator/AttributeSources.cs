@@ -16,9 +16,9 @@ internal static class AttributeSources
                 public string[] Aliases { get; }
                 public bool Required { get; set; }
                 public bool Global { get; set; }
+                public bool Advanced { get; set; }
+                public string? EnvVar { get; set; }
                 public Type? ConverterType { get; set; }
-                /// <summary>A C# expression for the default value, e.g. "true" or "new() { \"a\", \"b\" }".</summary>
-                public string? DefaultExpr { get; set; }
                 public CliOptionAttribute(params string[] aliases) { Aliases = aliases; }
             }
 

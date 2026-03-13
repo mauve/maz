@@ -32,8 +32,8 @@ public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
     public partial string? ManagedBy { get; }
 
     /// <summary>Specify whether to wait for operation completion.</summary>
-    [CliOption("--wait-until", DefaultExpr = "Azure.WaitUntil.Completed")]
-    public partial WaitUntil WaitUntil { get; }
+    [CliOption("--wait-until")]
+    public partial WaitUntil WaitUntil { get; } = Azure.WaitUntil.Completed;
 
     private readonly AuthOptionPack _auth = auth;
 
@@ -43,20 +43,12 @@ public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
         var armClient = new ArmClient(_auth.GetCredential());
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
-        var data = new ResourceGroupData(Location.GetLocation())
-        {
-            ManagedBy = ManagedBy,
-        };
+        var data = new ResourceGroupData(Location.GetLocation()) { ManagedBy = ManagedBy };
         Tags.AppendTagsTo(data.Tags);
 
         var op = await subscription
             .GetResourceGroups()
-            .CreateOrUpdateAsync(
-                WaitUntil,
-                ResourceGroup.RequireResourceGroupName(),
-                data,
-                ct
-            );
+            .CreateOrUpdateAsync(WaitUntil, ResourceGroup.RequireResourceGroupName(), data, ct);
 
         await rendererFactory
             .CreateRendererForType(op.Value.GetType())
@@ -84,7 +76,9 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
         var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
 
-        await foreach (var rg in subscription.GetResourceGroups().GetAllAsync(cancellationToken: ct))
+        await foreach (
+            var rg in subscription.GetResourceGroups().GetAllAsync(cancellationToken: ct)
+        )
             await renderer.RenderAsync(System.Console.Out, rg, ct);
 
         return 0;
@@ -109,7 +103,10 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
         var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
 
-        var rg = await subscription.GetResourceGroupAsync(ResourceGroup.RequireResourceGroupName(), ct);
+        var rg = await subscription.GetResourceGroupAsync(
+            ResourceGroup.RequireResourceGroupName(),
+            ct
+        );
         await renderer.RenderAsync(System.Console.Out, rg.Value, ct);
 
         return 0;
@@ -125,8 +122,8 @@ public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
     public readonly ConfirmationOptionPack Confirmation = new();
 
     /// <summary>Specify whether to wait for operation completion.</summary>
-    [CliOption("--wait-until", DefaultExpr = "Azure.WaitUntil.Completed")]
-    public partial WaitUntil WaitUntil { get; }
+    [CliOption("--wait-until")]
+    public partial WaitUntil WaitUntil { get; } = Azure.WaitUntil.Completed;
 
     /// <summary>Resource types to force delete. Supported: Microsoft.Compute/virtualMachines, Microsoft.Compute/virtualMachineScaleSets.</summary>
     [CliOption("--force-deletion-types", "--force-deletion-type")]
@@ -141,7 +138,10 @@ public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
         var armClient = new ArmClient(_auth.GetCredential());
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
-        var rg = await subscription.GetResourceGroupAsync(ResourceGroup.RequireResourceGroupName(), ct);
+        var rg = await subscription.GetResourceGroupAsync(
+            ResourceGroup.RequireResourceGroupName(),
+            ct
+        );
 
         var forceDeletionTypes = ForceDeletionTypes is { Count: > 0 } types
             ? string.Join(",", types)
