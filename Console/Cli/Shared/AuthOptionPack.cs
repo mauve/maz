@@ -50,7 +50,7 @@ public partial class AuthOptionPack : OptionPack
 
     /// <summary>Specifies the credential types that will be used for authentication.</summary>
     [CliOption("--auth-allowed-credential-types", Global = true)]
-    public partial List<string> AllowedCredentialTypes { get; } = ["cli", "devicecode", "env"];
+    public partial List<CredentialType> AllowedCredentialTypes { get; } = [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
 
     /// <summary>Path to the workload identity token file.</summary>
     [CliOption("--auth-token-file-path", Global = true, EnvVar = "AZURE_FEDERATED_TOKEN_FILE")]
@@ -75,27 +75,27 @@ public partial class AuthOptionPack : OptionPack
         List<TokenCredential> credentials = [];
         foreach (var type in allowedTypes)
         {
-            switch (type.ToLowerInvariant())
+            switch (type)
             {
-                case "cli":
+                case CredentialType.Cli:
                     credentials.Add(
                         BuildCliCredential(authorityHost, defaultTenantId, additionalTenants)
                     );
                     break;
-                case "dev":
+                case CredentialType.Dev:
                     credentials.Add(
                         BuildDevCliCredential(authorityHost, defaultTenantId, additionalTenants)
                     );
                     break;
-                case "ps":
+                case CredentialType.PowerShell:
                     credentials.Add(
                         BuildPowerShellCredential(authorityHost, defaultTenantId, additionalTenants)
                     );
                     break;
-                case "env":
+                case CredentialType.Env:
                     credentials.Add(BuildEnvironmentCredential(authorityHost, additionalTenants));
                     break;
-                case "mi":
+                case CredentialType.ManagedIdentity:
                     credentials.Add(
                         BuildManagedIdentityCredential(
                             authorityHost,
@@ -104,7 +104,7 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                case "browser":
+                case CredentialType.Browser:
                     credentials.Add(
                         BuildBrowserCredential(
                             authorityHost,
@@ -114,7 +114,7 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                case "vs":
+                case CredentialType.VisualStudio:
                     credentials.Add(
                         BuildVisualStudioCredential(
                             authorityHost,
@@ -123,7 +123,7 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                case "shared":
+                case CredentialType.SharedTokenCache:
                     credentials.Add(
                         BuildSharedTokenCacheCredential(
                             authorityHost,
@@ -133,7 +133,7 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                case "devicecode":
+                case CredentialType.DeviceCode:
                     credentials.Add(
                         BuildDeviceCodeCredential(
                             authorityHost,
@@ -143,7 +143,7 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                case "wid":
+                case CredentialType.WorkloadIdentity:
                     credentials.Add(
                         BuildWorkloadIdentityCredential(
                             authorityHost,
@@ -154,8 +154,6 @@ public partial class AuthOptionPack : OptionPack
                         )
                     );
                     break;
-                default:
-                    throw new ArgumentException($"Unknown credential type: {type}");
             }
         }
 

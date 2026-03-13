@@ -228,10 +228,20 @@ public class CliOptionGenerator : IIncrementalGenerator
             // Custom parser for element type
             if (elemTypeSymbol != null)
             {
-                var elemInner = GetParserInnerExpr(elemTypeSymbol, out _);
-                if (elemInner != null)
-                    m.CustomParserExpr =
-                        $"r => r.Tokens.Select(t => {string.Format(elemInner, "t.Value")}).ToList()";
+                var enumDescs = GetEnumDescriptions(elemTypeSymbol);
+                if (enumDescs != null)
+                {
+                    var elemTypeName = GetNonNullableTypeName(elemTypeSymbol);
+                    m.CustomParserExpr = BuildEnumCollectionSwitchParser(elemTypeName, enumDescs);
+                    AppendAllowedValues(ref m.Description, enumDescs);
+                }
+                else
+                {
+                    var elemInner = GetParserInnerExpr(elemTypeSymbol, out _);
+                    if (elemInner != null)
+                        m.CustomParserExpr =
+                            $"r => r.Tokens.Select(t => {string.Format(elemInner, "t.Value")}).ToList()";
+                }
             }
         }
         else
@@ -250,9 +260,19 @@ public class CliOptionGenerator : IIncrementalGenerator
             }
 
             // Custom parser for non-collection type
-            var parser = GetSingleValueParserExpr(typeSymbol, m.HasNullableAnnotation);
-            if (parser != null)
-                m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
+            var enumDescs = GetEnumDescriptions(typeSymbol);
+            if (enumDescs != null)
+            {
+                var typeName = GetNonNullableTypeName(typeSymbol);
+                m.CustomParserExpr = BuildEnumSwitchParser(typeName, enumDescs, m.HasNullableAnnotation);
+                AppendAllowedValues(ref m.Description, enumDescs);
+            }
+            else
+            {
+                var parser = GetSingleValueParserExpr(typeSymbol, m.HasNullableAnnotation);
+                if (parser != null)
+                    m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
+            }
         }
 
         // Read default from property initializer (e.g. = true, = ["a", "b"])
@@ -428,6 +448,70 @@ public class CliOptionGenerator : IIncrementalGenerator
         if (isNullable)
             return $"r => r.Tokens.Count > 0 ? {string.Format(inner, "r.Tokens[0].Value")} : ({typeName}?)null";
         return $"r => {string.Format(inner, "r.Tokens[0].Value")}";
+    }
+
+    // Returns (MemberName, DescriptionValue)[] if the type is an enum with
+    // at least one [Description] attribute on its members; otherwise null.
+    static (string memberName, string descValue)[]? GetEnumDescriptions(ITypeSymbol sym)
+    {
+        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt) sym = nnt.TypeArguments[0];
+        if (sym.TypeKind != TypeKind.Enum) return null;
+
+        var pairs = sym.GetMembers()
+            .OfType<IFieldSymbol>()
+            .Where(f => f.IsConst)
+            .Select(f => {
+                var desc = f.GetAttributes()
+                    .FirstOrDefault(a => a.AttributeClass?.Name == "DescriptionAttribute")
+                    ?.ConstructorArguments.FirstOrDefault().Value?.ToString();
+                return (f.Name, desc);
+            })
+            .Where(x => x.desc != null)
+            .Select(x => (x.Name, x.desc!))
+            .ToArray();
+
+        return pairs.Length > 0 ? pairs : null;
+    }
+
+    static string BuildEnumSwitchParser(string typeName, (string, string)[] descs, bool isNullable)
+    {
+        var allowedList = string.Join(", ", descs.Select(d => d.Item2));
+        var cases = string.Join(" ", descs.Select(d =>
+            $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
+        var throwExpr = $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
+        var switchExpr = $"r.Tokens[0].Value switch {{ {cases} {throwExpr} }}";
+
+        if (isNullable)
+            return $"r => r.Tokens.Count > 0 ? ({typeName}?)({switchExpr}) : ({typeName}?)null";
+        return $"r => {switchExpr}";
+    }
+
+    static string BuildEnumCollectionSwitchParser(string typeName, (string, string)[] descs)
+    {
+        var allowedList = string.Join(", ", descs.Select(d => d.Item2));
+        var cases = string.Join(" ", descs.Select(d =>
+            $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
+        var throwExpr = $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
+        return $"r => r.Tokens.Select(t => t.Value switch {{ {cases} {throwExpr} }}).ToList()";
+    }
+
+    static void AppendAllowedValues(ref string description, (string, string)[] descs)
+    {
+        var list = string.Join(", ", descs.Select(d => d.Item2));
+        var tag = $"[allowed: {list}]";
+        description = string.IsNullOrEmpty(description) ? tag : $"{description} {tag}";
+    }
+
+    static string GetNonNullableTypeName(ITypeSymbol sym)
+    {
+        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt) sym = nnt.TypeArguments[0];
+        var fmt = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+        );
+        return sym.WithNullableAnnotation(NullableAnnotation.None).ToDisplayString(fmt);
     }
 
     static bool IsBuiltinParseable(ITypeSymbol sym)

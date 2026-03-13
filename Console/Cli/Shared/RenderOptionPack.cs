@@ -5,9 +5,9 @@ namespace Console.Cli.Shared;
 
 public partial class RenderOptionPack : OptionPack
 {
-    /// <summary>The output format. Defaults to 'column'. Allowed: json, table, column.</summary>
+    /// <summary>The output format. Defaults to 'column'.</summary>
     [CliOption("--output-format", "-f", "--format")]
-    public partial string? OutputFormat { get; }
+    public partial OutputFormat? Format { get; }
 
     /// <summary>Whether to output rendered content in an indented format.</summary>
     [CliOption("--output-indented", "-i", "--indent")]
@@ -20,18 +20,16 @@ public partial class RenderOptionPack : OptionPack
     public override string HelpTitle => "Output";
 
     public IRendererFactory GetRendererFactory() =>
-        OutputFormat switch
+        Format switch
         {
-            "json" => new JsonRendererFactory(
+            OutputFormat.Json => new JsonRendererFactory(
                 OutputIndented
                     ? new JsonSerializerOptions { WriteIndented = true }
                     : JsonSerializerOptions.Default
             ),
-            "table" => new TableRendererFactory(),
-            "column" or null => new ColumnRendererFactory(GetValueFormatterOptions()),
-            var fmt => throw new InvocationException(
-                $"Unsupported output format '{fmt}'. Supported formats: json, table, column."
-            ),
+            OutputFormat.Table => new TableRendererFactory(),
+            OutputFormat.Column or null => new ColumnRendererFactory(GetValueFormatterOptions()),
+            var fmt => throw new InvocationException($"Unsupported output format '{fmt}'."),
         };
 
     public ValueFormatterOptions GetValueFormatterOptions() =>
