@@ -4,8 +4,11 @@
     <AssemblyName>maz</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CliGenerator\CliGenerator.csproj"
-                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="..\CliGenerator\CliGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Identity" />

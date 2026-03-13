@@ -15,27 +15,39 @@ public class CliOptionGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         context.RegisterPostInitializationOutput(static ctx =>
-            ctx.AddSource("CliAttributes.g.cs", SourceText.From(AttributeSources.Source, Encoding.UTF8)));
+            ctx.AddSource(
+                "CliAttributes.g.cs",
+                SourceText.From(AttributeSources.Source, Encoding.UTF8)
+            )
+        );
 
-        var provider = context.SyntaxProvider
-            .ForAttributeWithMetadataName(
+        var provider = context
+            .SyntaxProvider.ForAttributeWithMetadataName(
                 "Console.Cli.CliOptionAttribute",
                 predicate: static (node, _) => node is PropertyDeclarationSyntax,
-                transform: static (ctx, _) => (IPropertySymbol)ctx.TargetSymbol)
+                transform: static (ctx, _) => (IPropertySymbol)ctx.TargetSymbol
+            )
             .Collect()
-            .SelectMany(static (props, _) =>
-                props
-                    .GroupBy<IPropertySymbol, INamedTypeSymbol>(
-                        p => p.ContainingType,
-                        SymbolEqualityComparer.Default)
-                    .Select(static g => BuildClassModel(g.Key, g)));
+            .SelectMany(
+                static (props, _) =>
+                    props
+                        .GroupBy<IPropertySymbol, INamedTypeSymbol>(
+                            p => p.ContainingType,
+                            SymbolEqualityComparer.Default
+                        )
+                        .Select(static g => BuildClassModel(g.Key, g))
+            );
 
-        context.RegisterSourceOutput(provider, static (ctx, model) =>
-        {
-            if (model is null) return;
-            var source = Emit(model);
-            ctx.AddSource($"{model.ClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
-        });
+        context.RegisterSourceOutput(
+            provider,
+            static (ctx, model) =>
+            {
+                if (model is null)
+                    return;
+                var source = Emit(model);
+                ctx.AddSource($"{model.ClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
+            }
+        );
     }
 
     // ── Model ──────────────────────────────────────────────────────────────
@@ -47,21 +59,25 @@ public class CliOptionGenerator : IIncrementalGenerator
         public bool IsCommandDef;
         public bool IsOptionPack;
         public string? XmlDescription;
-        public List<OptionPropModel> Options = new();
-        public List<ChildModel> Children = new();
+        public string? XmlRemarks;
+        public List<OptionPropModel> Options = [];
+        public List<ChildModel> Children = [];
     }
 
     sealed class OptionPropModel
     {
         public string Name = "";
-        public string OptionType = "";       // e.g. "Option<string?>"
-        public string ValueType = "";        // T in Option<T>
+        public string OptionType = ""; // e.g. "Option<string?>"
+        public string ValueType = ""; // T in Option<T>
         public string PrimaryAlias = "";
         public string[] ExtraAliases = Array.Empty<string>();
         public bool IsGlobal;
         public bool IsRequired;
+        public bool IsAdvanced;
         public string Description = "";
+        public string? EnvVar;
         public string? DefaultExpression;
+        public string? EnvVarAccessorSuffix;
         public string? CustomParserExpr;
         public bool AllowMultiple;
         public string? ArityExpr;
@@ -83,7 +99,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         var model = new ClassModel
         {
             Namespace = cls.ContainingNamespace.IsGlobalNamespace
-                ? "" : cls.ContainingNamespace.ToDisplayString(),
+                ? ""
+                : cls.ContainingNamespace.ToDisplayString(),
             ClassName = cls.Name,
         };
 
@@ -91,12 +108,21 @@ public class CliOptionGenerator : IIncrementalGenerator
         for (var b = cls.BaseType; b != null; b = b.BaseType)
         {
             var bn = b.ToDisplayString();
-            if (bn == "Console.Cli.CommandDef") { model.IsCommandDef = true; break; }
-            if (bn == "Console.Cli.OptionPack") { model.IsOptionPack = true; break; }
+            if (bn == "Console.Cli.CommandDef")
+            {
+                model.IsCommandDef = true;
+                break;
+            }
+            if (bn == "Console.Cli.OptionPack")
+            {
+                model.IsOptionPack = true;
+                break;
+            }
         }
 
         // XML doc description on class
         model.XmlDescription = GetXmlSummary(cls);
+        model.XmlRemarks = GetXmlRemarks(cls);
 
         // Options
         foreach (var prop in props)
@@ -112,13 +138,15 @@ public class CliOptionGenerator : IIncrementalGenerator
                 bool isOP = IsOptionPackType(member.Type);
                 if (isCD || isOP)
                 {
-                    model.Children.Add(new ChildModel
-                    {
-                        Name = member.Name,
-                        IsCommandDef = isCD,
-                        IsOptionPack = isOP,
-                        TypeName = fieldTypeName,
-                    });
+                    model.Children.Add(
+                        new ChildModel
+                        {
+                            Name = member.Name,
+                            IsCommandDef = isCD,
+                            IsOptionPack = isOP,
+                            TypeName = fieldTypeName,
+                        }
+                    );
                 }
             }
         }
@@ -132,7 +160,9 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         // [CliOption] attribute
         var attr = prop.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Console.Cli.CliOptionAttribute");
+            .FirstOrDefault(a =>
+                a.AttributeClass?.ToDisplayString() == "Console.Cli.CliOptionAttribute"
+            );
 
         string[] aliases = Array.Empty<string>();
         if (attr != null)
@@ -145,8 +175,10 @@ public class CliOptionGenerator : IIncrementalGenerator
                 aliases = new[] { ctorArg.Value.ToString()! };
 
             m.IsGlobal = GetNamedBool(attr, "Global");
-            if (GetNamedBool(attr, "Required")) m.IsRequired = true;
-            m.DefaultExpression = GetNamedString(attr, "DefaultExpr");
+            if (GetNamedBool(attr, "Required"))
+                m.IsRequired = true;
+            m.IsAdvanced = GetNamedBool(attr, "Advanced");
+            m.EnvVar = GetNamedString(attr, "EnvVar");
         }
 
         m.PrimaryAlias = aliases.Length > 0 ? aliases[0] : KebabCase(prop.Name);
@@ -157,9 +189,13 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         // Type info
         var typeSymbol = prop.Type;
-        m.HasNullableAnnotation = prop.NullableAnnotation == NullableAnnotation.Annotated
-            || (typeSymbol is INamedTypeSymbol nt && nt.OriginalDefinition.SpecialType == SpecialType.None
-                && nt.Name == "Nullable");
+        m.HasNullableAnnotation =
+            prop.NullableAnnotation == NullableAnnotation.Annotated
+            || (
+                typeSymbol is INamedTypeSymbol nt
+                && nt.OriginalDefinition.SpecialType == SpecialType.None
+                && nt.Name == "Nullable"
+            );
 
         // Collection detection
         var (isCollection, elemType, elemTypeSymbol) = GetCollectionInfo(typeSymbol);
@@ -192,7 +228,8 @@ public class CliOptionGenerator : IIncrementalGenerator
             {
                 var elemInner = GetParserInnerExpr(elemTypeSymbol, out _);
                 if (elemInner != null)
-                    m.CustomParserExpr = $"r => r.Tokens.Select(t => {string.Format(elemInner, "t.Value")}).ToList()";
+                    m.CustomParserExpr =
+                        $"r => r.Tokens.Select(t => {string.Format(elemInner, "t.Value")}).ToList()";
             }
         }
         else
@@ -216,26 +253,57 @@ public class CliOptionGenerator : IIncrementalGenerator
                 m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
         }
 
-        // DefaultExpression already set from attribute; also check syntax initializer as fallback
+        // Read default from property initializer (e.g. = true, = ["a", "b"])
         if (m.DefaultExpression == null && hasDefault)
             m.DefaultExpression = GetDefaultExpression(prop);
+
+        // EnvVar: build a property-accessor fallback suffix (no DefaultValueFactory, avoids [] in help).
+        if (m.EnvVar != null && m.DefaultExpression == null)
+        {
+            var inner = GetParserInnerExpr(typeSymbol, out var nonNullTypeName);
+            if (inner == null)
+            {
+                // string or other System.CommandLine-native type: null-coalesce with env var
+                m.EnvVarAccessorSuffix =
+                    $" ?? System.Environment.GetEnvironmentVariable(\"{m.EnvVar}\")";
+            }
+            else
+            {
+                // type needs conversion (e.g. Uri): wrap with null guard
+                var converted = string.Format(inner, "__s");
+                m.EnvVarAccessorSuffix =
+                    $" ?? (System.Environment.GetEnvironmentVariable(\"{m.EnvVar}\") is string __s"
+                    + $" ? ({nonNullTypeName}?){converted} : ({nonNullTypeName}?)null)";
+            }
+        }
+
+        if (m.EnvVar != null)
+            m.Description = string.IsNullOrEmpty(m.Description)
+                ? $"[env: {m.EnvVar}]"
+                : $"{m.Description} [env: {m.EnvVar}]";
 
         return m;
     }
 
     // ── Type helpers ───────────────────────────────────────────────────────
 
-    static (bool isCollection, string? elemType, ITypeSymbol? elemTypeSymbol) GetCollectionInfo(ITypeSymbol typeSymbol)
+    static (bool isCollection, string? elemType, ITypeSymbol? elemTypeSymbol) GetCollectionInfo(
+        ITypeSymbol typeSymbol
+    )
     {
         if (typeSymbol is INamedTypeSymbol nt)
         {
             // List<T>, IEnumerable<T>, IReadOnlyList<T>
             var orig = nt.OriginalDefinition.ToDisplayString();
-            if ((orig == "System.Collections.Generic.List<T>"
-                || orig == "System.Collections.Generic.IEnumerable<T>"
-                || orig == "System.Collections.Generic.IReadOnlyList<T>"
-                || orig == "System.Collections.Generic.IReadOnlyCollection<T>")
-                && nt.TypeArguments.Length == 1)
+            if (
+                (
+                    orig == "System.Collections.Generic.List<T>"
+                    || orig == "System.Collections.Generic.IEnumerable<T>"
+                    || orig == "System.Collections.Generic.IReadOnlyList<T>"
+                    || orig == "System.Collections.Generic.IReadOnlyCollection<T>"
+                )
+                && nt.TypeArguments.Length == 1
+            )
             {
                 var elem = nt.TypeArguments[0];
                 return (true, GetTypeDisplayString(elem), elem);
@@ -254,7 +322,8 @@ public class CliOptionGenerator : IIncrementalGenerator
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
             genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
             miscellaneousOptions: SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
-                | SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+                | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+        );
         return sym.ToDisplayString(opts);
     }
 
@@ -273,14 +342,16 @@ public class CliOptionGenerator : IIncrementalGenerator
     static bool IsCommandDefType(ITypeSymbol sym)
     {
         for (var b = sym.BaseType; b != null; b = b.BaseType)
-            if (b.ToDisplayString() == "Console.Cli.CommandDef") return true;
+            if (b.ToDisplayString() == "Console.Cli.CommandDef")
+                return true;
         return sym.ToDisplayString() == "Console.Cli.CommandDef";
     }
 
     static bool IsOptionPackType(ITypeSymbol sym)
     {
         for (var b = sym.BaseType; b != null; b = b.BaseType)
-            if (b.ToDisplayString() == "Console.Cli.OptionPack") return true;
+            if (b.ToDisplayString() == "Console.Cli.OptionPack")
+                return true;
         return sym.ToDisplayString() == "Console.Cli.OptionPack";
     }
 
@@ -296,20 +367,25 @@ public class CliOptionGenerator : IIncrementalGenerator
         nonNullTypeName = "";
 
         // System.CommandLine handles these natively
-        if (IsBuiltinParseable(sym)) return null;
+        if (IsBuiltinParseable(sym))
+            return null;
 
         // Use non-nullable display name for constructor expressions
         var typeNameFmt = new SymbolDisplayFormat(
             globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
             genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
-        var typeName = sym.WithNullableAnnotation(NullableAnnotation.None).ToDisplayString(typeNameFmt);
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+        );
+        var typeName = sym.WithNullableAnnotation(NullableAnnotation.None)
+            .ToDisplayString(typeNameFmt);
         nonNullTypeName = typeName;
 
         // Check [CliParser] attribute on type
         var cliParserAttr = sym.GetAttributes()
-            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Console.Cli.CliParserAttribute");
+            .FirstOrDefault(a =>
+                a.AttributeClass?.ToDisplayString() == "Console.Cli.CliParserAttribute"
+            );
         if (cliParserAttr != null)
         {
             var converterType = cliParserAttr.ConstructorArguments[0].Value?.ToString();
@@ -320,18 +396,22 @@ public class CliOptionGenerator : IIncrementalGenerator
         // Check for static T Parse(string) method
         var parseMethod = sym.GetMembers("Parse")
             .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.IsStatic
+            .FirstOrDefault(m =>
+                m.IsStatic
                 && m.Parameters.Length == 1
                 && m.Parameters[0].Type.SpecialType == SpecialType.System_String
-                && !m.ReturnsVoid);
+                && !m.ReturnsVoid
+            );
         if (parseMethod != null)
             return $"{typeName}.Parse({{0}})";
 
         // Check for T(string) constructor
         var stringCtor = sym.GetMembers(".ctor")
             .OfType<IMethodSymbol>()
-            .FirstOrDefault(m => m.Parameters.Length == 1
-                && m.Parameters[0].Type.SpecialType == SpecialType.System_String);
+            .FirstOrDefault(m =>
+                m.Parameters.Length == 1
+                && m.Parameters[0].Type.SpecialType == SpecialType.System_String
+            );
         if (stringCtor != null)
             return $"new {typeName}({{0}})";
 
@@ -341,7 +421,8 @@ public class CliOptionGenerator : IIncrementalGenerator
     static string? GetSingleValueParserExpr(ITypeSymbol sym, bool isNullable)
     {
         var inner = GetParserInnerExpr(sym, out var typeName);
-        if (inner == null) return null;
+        if (inner == null)
+            return null;
         if (isNullable)
             return $"r => r.Tokens.Count > 0 ? {string.Format(inner, "r.Tokens[0].Value")} : ({typeName}?)null";
         return $"r => {string.Format(inner, "r.Tokens[0].Value")}";
@@ -363,10 +444,13 @@ public class CliOptionGenerator : IIncrementalGenerator
             case SpecialType.System_DateTime:
                 return true;
         }
-        if (sym.TypeKind == TypeKind.Enum) return true;
+        if (sym.TypeKind == TypeKind.Enum)
+            return true;
         var name = sym.ToDisplayString();
-        if (name == "System.Guid" || name == "Guid") return true;
-        if (name == "System.DateTimeOffset" || name == "DateTimeOffset") return true;
+        if (name == "System.Guid" || name == "Guid")
+            return true;
+        if (name == "System.DateTimeOffset" || name == "DateTimeOffset")
+            return true;
         return false;
     }
 
@@ -383,10 +467,12 @@ public class CliOptionGenerator : IIncrementalGenerator
     static string? GetXmlSummary(ISymbol symbol)
     {
         var xml = symbol.GetDocumentationCommentXml();
-        if (string.IsNullOrWhiteSpace(xml)) return null;
+        if (string.IsNullOrWhiteSpace(xml))
+            return null;
         var start = xml!.IndexOf("<summary>", StringComparison.Ordinal);
         var end = xml.IndexOf("</summary>", StringComparison.Ordinal);
-        if (start < 0 || end < 0) return null;
+        if (start < 0 || end < 0)
+            return null;
         var raw = xml.Substring(start + 9, end - start - 9);
         // Normalize whitespace
         var lines = raw.Split('\n');
@@ -394,9 +480,54 @@ public class CliOptionGenerator : IIncrementalGenerator
         foreach (var line in lines)
         {
             var trimmed = line.Trim();
-            if (trimmed.Length > 0) { if (sb.Length > 0) sb.Append(' '); sb.Append(trimmed); }
+            if (trimmed.Length > 0)
+            {
+                if (sb.Length > 0)
+                    sb.Append(' ');
+                sb.Append(trimmed);
+            }
         }
         return sb.Length > 0 ? sb.ToString() : null;
+    }
+
+    static string? GetXmlRemarks(ISymbol symbol)
+    {
+        var xml = symbol.GetDocumentationCommentXml();
+        if (string.IsNullOrWhiteSpace(xml))
+            return null;
+        var start = xml!.IndexOf("<remarks>", StringComparison.Ordinal);
+        var end = xml.IndexOf("</remarks>", StringComparison.Ordinal);
+        if (start < 0 || end < 0)
+            return null;
+        var raw = xml.Substring(start + 9, end - start - 9);
+
+        // Split into lines, remove common leading whitespace, trim surrounding blank lines
+        var lines = raw.Split('\n');
+        // Find minimum indent of non-empty lines
+        int minIndent = int.MaxValue;
+        foreach (var line in lines)
+        {
+            if (line.Trim().Length == 0) continue;
+            int indent = 0;
+            while (indent < line.Length && (line[indent] == ' ' || line[indent] == '\t'))
+                indent++;
+            if (indent < minIndent) minIndent = indent;
+        }
+        if (minIndent == int.MaxValue) minIndent = 0;
+
+        var result = new List<string>();
+        foreach (var line in lines)
+        {
+            var stripped = line.Length >= minIndent ? line.Substring(minIndent) : line;
+            result.Add(stripped.TrimEnd());
+        }
+
+        // Remove leading and trailing blank lines
+        while (result.Count > 0 && result[0].Trim().Length == 0) result.RemoveAt(0);
+        while (result.Count > 0 && result[result.Count - 1].Trim().Length == 0) result.RemoveAt(result.Count - 1);
+
+        if (result.Count == 0) return null;
+        return string.Join("\n", result);
     }
 
     static string? GetNamedString(AttributeData attr, string name)
@@ -416,7 +547,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         var sb = new StringBuilder("--");
         for (int i = 0; i < name.Length; i++)
         {
-            if (char.IsUpper(name[i]) && i > 0) sb.Append('-');
+            if (char.IsUpper(name[i]) && i > 0)
+                sb.Append('-');
             sb.Append(char.ToLower(name[i]));
         }
         return sb.ToString();
@@ -435,7 +567,10 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine();
 
         bool hasNs = !string.IsNullOrEmpty(model.Namespace);
-        if (hasNs) { sb.AppendLine($"namespace {model.Namespace};").AppendLine(); }
+        if (hasNs)
+        {
+            sb.AppendLine($"namespace {model.Namespace};").AppendLine();
+        }
 
         sb.AppendLine($"partial class {model.ClassName}");
         sb.AppendLine("{");
@@ -443,24 +578,34 @@ public class CliOptionGenerator : IIncrementalGenerator
         // Private option fields
         foreach (var opt in model.Options)
         {
-            sb.Append($"    private readonly {opt.OptionType} _opt_{opt.Name} = new({Quote(opt.PrimaryAlias)}, new string[] {{");
+            sb.Append(
+                $"    private readonly {opt.OptionType} _opt_{opt.Name} = new({Quote(opt.PrimaryAlias)}, new string[] {{"
+            );
             sb.Append(string.Join(", ", opt.ExtraAliases.Select(Quote)));
             sb.Append("})");
 
             var initParts = new List<string>();
-            if (!string.IsNullOrEmpty(opt.Description)) initParts.Add($"Description = {Quote(opt.Description)}");
-            if (opt.IsRequired) initParts.Add("Required = true");
-            if (opt.AllowMultiple) initParts.Add("AllowMultipleArgumentsPerToken = true");
-            if (opt.ArityExpr != null) initParts.Add($"Arity = {opt.ArityExpr}");
-            if (opt.DefaultExpression != null) initParts.Add($"DefaultValueFactory = _ => {opt.DefaultExpression}");
-            if (opt.CustomParserExpr != null) initParts.Add($"CustomParser = {opt.CustomParserExpr}");
-            if (opt.IsGlobal) initParts.Add("Recursive = true");
+            if (!string.IsNullOrEmpty(opt.Description))
+                initParts.Add($"Description = {Quote(opt.Description)}");
+            if (opt.IsRequired)
+                initParts.Add("Required = true");
+            if (opt.AllowMultiple)
+                initParts.Add("AllowMultipleArgumentsPerToken = true");
+            if (opt.ArityExpr != null)
+                initParts.Add($"Arity = {opt.ArityExpr}");
+            if (opt.DefaultExpression != null)
+                initParts.Add($"DefaultValueFactory = _ => {opt.DefaultExpression}");
+            if (opt.CustomParserExpr != null)
+                initParts.Add($"CustomParser = {opt.CustomParserExpr}");
+            if (opt.IsGlobal)
+                initParts.Add("Recursive = true");
 
             if (initParts.Count > 0)
             {
                 sb.AppendLine();
                 sb.AppendLine("    {");
-                foreach (var p in initParts) sb.AppendLine($"        {p},");
+                foreach (var p in initParts)
+                    sb.AppendLine($"        {p},");
                 sb.Append("    }");
             }
             sb.AppendLine(";");
@@ -473,7 +618,26 @@ public class CliOptionGenerator : IIncrementalGenerator
         {
             string returnType = opt.ValueType;
             string nullSuppressor = opt.IsRequired ? "!" : "";
-            sb.AppendLine($"    public partial {returnType} {opt.Name} => GetValue(_opt_{opt.Name}){nullSuppressor};");
+            string envSuffix = opt.EnvVarAccessorSuffix ?? "";
+            if (opt.DefaultExpression != null)
+            {
+                // Use the `field` keyword so the declaring partial's `= value` initializer compiles (CS8050).
+                // `field` holds the initializer value and is returned before ParseResult is available.
+                sb.AppendLine($"    public partial {returnType} {opt.Name}");
+                sb.AppendLine("    {");
+                sb.AppendLine("        get");
+                sb.AppendLine("        {");
+                sb.AppendLine("            if (!HasParseResult) return field;");
+                sb.AppendLine($"            return GetValue(_opt_{opt.Name});");
+                sb.AppendLine("        }");
+                sb.AppendLine("    }");
+            }
+            else
+            {
+                sb.AppendLine(
+                    $"    public partial {returnType} {opt.Name} => GetValue(_opt_{opt.Name}){nullSuppressor}{envSuffix};"
+                );
+            }
         }
 
         sb.AppendLine();
@@ -481,17 +645,35 @@ public class CliOptionGenerator : IIncrementalGenerator
         // AddGeneratedOptions / AddOptionsTo
         if (model.IsCommandDef)
         {
-            sb.AppendLine("    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)");
+            sb.AppendLine(
+                "    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)"
+            );
             sb.AppendLine("    {");
-            foreach (var opt in model.Options) sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            foreach (var opt in model.Options)
+            {
+                if (opt.IsAdvanced)
+                    sb.AppendLine(
+                        $"        global::Console.Cli.AdvancedOptionRegistry.Register(_opt_{opt.Name});"
+                    );
+                sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            }
             sb.AppendLine("    }");
         }
         else if (model.IsOptionPack)
         {
             // OptionPack subclasses override AddGeneratedOptions, called from AddOptionsTo
-            sb.AppendLine("    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)");
+            sb.AppendLine(
+                "    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)"
+            );
             sb.AppendLine("    {");
-            foreach (var opt in model.Options) sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            foreach (var opt in model.Options)
+            {
+                if (opt.IsAdvanced)
+                    sb.AppendLine(
+                        $"        global::Console.Cli.AdvancedOptionRegistry.Register(_opt_{opt.Name});"
+                    );
+                sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            }
             sb.AppendLine("    }");
         }
 
@@ -504,21 +686,31 @@ public class CliOptionGenerator : IIncrementalGenerator
             sb.AppendLine();
             sb.AppendLine("    protected override bool HasGeneratedChildren => true;");
             sb.AppendLine();
-            sb.AppendLine("    protected override void AddGeneratedChildren(global::System.CommandLine.Command cmd)");
+            sb.AppendLine(
+                "    protected override void AddGeneratedChildren(global::System.CommandLine.Command cmd)"
+            );
             sb.AppendLine("    {");
             foreach (var child in childPacks)
-                sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
+                sb.AppendLine(
+                    $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
+                );
             foreach (var child in childCmds)
-                sb.AppendLine($"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());");
+                sb.AppendLine(
+                    $"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
+                );
             sb.AppendLine("    }");
         }
         else if (childPacks.Count > 0 && model.IsOptionPack)
         {
             sb.AppendLine();
-            sb.AppendLine("    protected override void AddChildPacksTo(global::System.CommandLine.Command cmd)");
+            sb.AppendLine(
+                "    protected override void AddChildPacksTo(global::System.CommandLine.Command cmd)"
+            );
             sb.AppendLine("    {");
             foreach (var child in childPacks)
-                sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
+                sb.AppendLine(
+                    $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
+                );
             sb.AppendLine("    }");
         }
 
@@ -526,7 +718,18 @@ public class CliOptionGenerator : IIncrementalGenerator
         if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlDescription))
         {
             sb.AppendLine();
-            sb.AppendLine($"    public override string Description => {Quote(model.XmlDescription!)};");
+            sb.AppendLine(
+                $"    public override string Description => {Quote(model.XmlDescription!)};"
+            );
+        }
+
+        // Remarks override for CommandDef
+        if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlRemarks))
+        {
+            sb.AppendLine();
+            sb.AppendLine(
+                $"    protected override string? Remarks => {Quote(model.XmlRemarks!)};"
+            );
         }
 
         sb.AppendLine("}");

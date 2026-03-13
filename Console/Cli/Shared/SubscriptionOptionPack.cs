@@ -10,14 +10,21 @@ public partial class SubscriptionOptionPack : OptionPack
     /// a plain GUID, or the display name of a subscription you have access to.
     /// Defaults to AZURE_SUBSCRIPTION_ID, or the default subscription if unset.
     /// </summary>
-    [CliOption("--subscription-id", "-s", "--sub", "--subscription")]
+    [CliOption(
+        "--subscription-id",
+        "-s",
+        "--sub",
+        "--subscription",
+        EnvVar = "AZURE_SUBSCRIPTION_ID"
+    )]
     public partial string? SubscriptionId { get; }
 
     public override string HelpTitle => "Subscription";
 
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {
-        var requested = SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        var requested =
+            SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
 
         if (requested is null)
             return await armClient.GetDefaultSubscriptionAsync();
@@ -27,7 +34,9 @@ public partial class SubscriptionOptionPack : OptionPack
 
         if (Guid.TryParse(requested, out var guid))
             return armClient.GetSubscriptionResource(
-                Azure.ResourceManager.Resources.SubscriptionResource.CreateResourceIdentifier(guid.ToString())
+                Azure.ResourceManager.Resources.SubscriptionResource.CreateResourceIdentifier(
+                    guid.ToString()
+                )
             );
 
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())

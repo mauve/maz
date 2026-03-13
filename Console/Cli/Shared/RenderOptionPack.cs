@@ -19,7 +19,9 @@ public partial class RenderOptionPack : OptionPack
         OutputFormat switch
         {
             "json" => new JsonRendererFactory(
-                OutputIndented ? new JsonSerializerOptions { WriteIndented = true } : JsonSerializerOptions.Default
+                OutputIndented
+                    ? new JsonSerializerOptions { WriteIndented = true }
+                    : JsonSerializerOptions.Default
             ),
             "table" or null => new TableRendererFactory(),
             var fmt => throw new InvocationException(

@@ -31,8 +31,8 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
     public partial bool IncludeStatistics { get; }
 
     /// <summary>Additional workspaces to include in the query.</summary>
-    [CliOption("--additional-workspaces", DefaultExpr = "new System.Collections.Generic.List<string>()")]
-    public partial List<string> AdditionalWorkspaces { get; }
+    [CliOption("--additional-workspaces")]
+    public partial List<string> AdditionalWorkspaces { get; } = [];
 
     /// <summary>Output results as JSON Lines (one JSON object per row).</summary>
     [CliOption("--output-jsonl", "--jsonl")]
@@ -67,7 +67,11 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
                 var visualization = result.GetVisualization();
                 if (visualization != null)
                 {
-                    await using var fileStream = new FileStream(visOutput, FileMode.Create, FileAccess.Write);
+                    await using var fileStream = new FileStream(
+                        visOutput,
+                        FileMode.Create,
+                        FileAccess.Write
+                    );
                     await visualization.ToStream().CopyToAsync(fileStream, ct);
                     System.Console.Error.WriteLine($"Visualization saved to {visOutput}");
                 }
@@ -108,12 +112,17 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
                 foreach (var row in table.Rows)
                 {
                     System.Console.WriteLine(
-                        string.Join("\t", row.Select(v => v switch
-                        {
-                            DateTimeOffset dt => dt.ToString("o"),
-                            TimeSpan ts => ts.ToString("o"),
-                            _ => v?.ToString() ?? "null",
-                        }))
+                        string.Join(
+                            "\t",
+                            row.Select(v =>
+                                v switch
+                                {
+                                    DateTimeOffset dt => dt.ToString("o"),
+                                    TimeSpan ts => ts.ToString("o"),
+                                    _ => v?.ToString() ?? "null",
+                                }
+                            )
+                        )
                     );
                 }
             }
@@ -137,7 +146,9 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
             {
                 var tsColumn = ResolveTimestampColumn(result.Table, TailTimestampColumn);
                 if (tsColumn == null)
-                    throw new InvocationException("No suitable timestamp column found. Use --tail-timestamp-column to specify the column.");
+                    throw new InvocationException(
+                        "No suitable timestamp column found. Use --tail-timestamp-column to specify the column."
+                    );
 
                 var latest = GetLatestTimestamp(result.Table, tsColumn);
                 if (latest != null)
@@ -153,7 +164,11 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
         return 0;
     }
 
-    private async Task<LogsQueryResult> ExecuteQuery(LogsQueryClient client, QueryTimeRange timeRange, CancellationToken ct)
+    private async Task<LogsQueryResult> ExecuteQuery(
+        LogsQueryClient client,
+        QueryTimeRange timeRange,
+        CancellationToken ct
+    )
     {
         var queryText = Query;
         var opts = new LogsQueryOptions
@@ -166,7 +181,13 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
         var resourceId = ResourceId;
 
         if (workspaceId != null)
-            return await client.QueryWorkspaceAsync(workspaceId.ToString(), queryText, timeRange, opts, ct);
+            return await client.QueryWorkspaceAsync(
+                workspaceId.ToString(),
+                queryText,
+                timeRange,
+                opts,
+                ct
+            );
 
         if (resourceId != null)
             return await client.QueryResourceAsync(new(resourceId), queryText, timeRange, opts, ct);
@@ -191,10 +212,15 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
         int colIndex = -1;
         for (int i = 0; i < table.Columns.Count; i++)
         {
-            if (table.Columns[i].Name == columnName) { colIndex = i; break; }
+            if (table.Columns[i].Name == columnName)
+            {
+                colIndex = i;
+                break;
+            }
         }
 
-        if (colIndex < 0) return null;
+        if (colIndex < 0)
+            return null;
 
         DateTimeOffset? latest = null;
         foreach (var row in table.Rows)

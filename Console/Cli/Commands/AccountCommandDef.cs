@@ -33,7 +33,7 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
             if (!All && !sub.Data.State.Equals(SubscriptionState.Enabled))
                 continue;
             System.Console.WriteLine(
-                $"{sub.Data.SubscriptionId}: {sub.Data.DisplayName,30} ({sub.Data.State,15}) {sub.Data.TenantId}"
+                $"{sub.Data.SubscriptionId}: {sub.Data.DisplayName, 30} ({sub.Data.State, 15}) {sub.Data.TenantId}"
             );
         }
         return 0;
@@ -58,7 +58,7 @@ public class AccountListLocationsCommandDef(AuthOptionPack auth) : CommandDef
         foreach (var location in subscription.GetLocations(cancellationToken: ct))
         {
             System.Console.WriteLine(
-                $"{location.Name,20}: {location.DisplayName,30} ({location.LocationType})"
+                $"{location.Name, 20}: {location.DisplayName, 30} ({location.LocationType})"
             );
         }
         return 0;

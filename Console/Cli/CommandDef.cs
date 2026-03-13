@@ -21,17 +21,24 @@ public abstract partial class CommandDef
     public virtual string[] Aliases => [];
     public virtual string Description => "";
 
+    protected virtual string? Remarks => null;
+
     protected ParseResult ParseResult { get; private set; } = null!;
+    protected bool HasParseResult => ParseResult is not null;
 
     protected T GetValue<T>(Option<T> option) => ParseResult.GetValue(option)!;
+
     protected T GetValue<T>(Argument<T> argument) => ParseResult.GetValue(argument);
 
-    protected virtual Task<int> ExecuteAsync(CancellationToken cancellationToken) => Task.FromResult(0);
+    protected virtual Task<int> ExecuteAsync(CancellationToken cancellationToken) =>
+        Task.FromResult(0);
 
     internal virtual Command Build()
     {
         var cmd = CreateCommand();
         ConfigureCommand(cmd);
+        if (Remarks is { } r)
+            RemarksRegistry.Register(cmd, r);
         return cmd;
     }
 
@@ -51,15 +58,18 @@ public abstract partial class CommandDef
         foreach (var field in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             var value = field.GetValue(this);
-            if (value is null) continue;
+            if (value is null)
+                continue;
 
             if (value is OptionPack pack)
             {
-                if (!HasGeneratedChildren) pack.AddOptionsTo(cmd);
+                if (!HasGeneratedChildren)
+                    pack.AddOptionsTo(cmd);
             }
             else if (value is CommandDef subDef)
             {
-                if (!HasGeneratedChildren) cmd.Add(subDef.Build());
+                if (!HasGeneratedChildren)
+                    cmd.Add(subDef.Build());
             }
             else if (value is Option opt)
                 cmd.Add(opt);
@@ -67,29 +77,29 @@ public abstract partial class CommandDef
                 cmd.Add(arg);
         }
 
-        var executeMethod = GetType().GetMethod(
-            nameof(ExecuteAsync),
-            BindingFlags.NonPublic | BindingFlags.Instance
-        );
+        var executeMethod = GetType()
+            .GetMethod(nameof(ExecuteAsync), BindingFlags.NonPublic | BindingFlags.Instance);
         bool hasHandler = executeMethod!.DeclaringType != typeof(CommandDef);
 
         var self = this;
         if (hasHandler)
         {
-            cmd.SetAction(async (result, ct) =>
-            {
-                self.ParseResult = result;
-                InjectParseResult(self, result);
-                try
+            cmd.SetAction(
+                async (result, ct) =>
                 {
-                    return await self.ExecuteAsync(ct);
+                    self.ParseResult = result;
+                    InjectParseResult(self, result);
+                    try
+                    {
+                        return await self.ExecuteAsync(ct);
+                    }
+                    catch (InvocationException ex)
+                    {
+                        System.Console.Error.WriteLine(ex.Message);
+                        return ex.ExitCode;
+                    }
                 }
-                catch (InvocationException ex)
-                {
-                    System.Console.Error.WriteLine(ex.Message);
-                    return ex.ExitCode;
-                }
-            });
+            );
         }
         else
         {
@@ -97,12 +107,13 @@ public abstract partial class CommandDef
         }
     }
 
-    private static void InjectParseResult(object obj, ParseResult result)
-        => InjectParseResult(obj, result, new HashSet<object>(ReferenceEqualityComparer.Instance));
+    private static void InjectParseResult(object obj, ParseResult result) =>
+        InjectParseResult(obj, result, new HashSet<object>(ReferenceEqualityComparer.Instance));
 
     private static void InjectParseResult(object obj, ParseResult result, HashSet<object> visited)
     {
-        if (!visited.Add(obj)) return;
+        if (!visited.Add(obj))
+            return;
         var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         for (var type = obj.GetType(); type != null && type != typeof(object); type = type.BaseType)
         {

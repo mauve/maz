@@ -36,6 +36,7 @@ public abstract partial class OptionPack
     public virtual string HelpSectionDescription => "";
 
     private ParseResult _result = null!;
+    protected bool HasParseResult => _result is not null;
 
     internal void SetParseResult(ParseResult r) => _result = r;
 

@@ -9,8 +9,8 @@ public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
     public override string Name => "get-token";
 
     /// <summary>The scopes required for the token.</summary>
-    [CliOption("--scopes", "--resource", "--resources", DefaultExpr = "new System.Collections.Generic.List<string> { \"https://management.azure.com/.default\" }")]
-    public partial List<string> Scopes { get; }
+    [CliOption("--scopes", "--resource", "--resources")]
+    public partial List<string> Scopes { get; } = ["https://management.azure.com/.default"];
 
     /// <summary>The parent request ID for the token request.</summary>
     [CliOption("--parent-request-id")]
@@ -45,8 +45,8 @@ public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
     public partial string? ProofOfPossessionRequestMethod { get; }
 
     /// <summary>Print the raw token.</summary>
-    [CliOption("--print-raw-token", DefaultExpr = "true")]
-    public partial bool PrintRawToken { get; }
+    [CliOption("--print-raw-token")]
+    public partial bool PrintRawToken { get; } = true;
 
     private readonly AuthOptionPack _auth = auth;
 
