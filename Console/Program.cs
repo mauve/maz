@@ -1,12 +1,7 @@
-﻿using Console;
-using DotMake.CommandLine;
+using System.CommandLine;
+using Console.Cli;
 
-try
-{
-    Cli.Run<RootCommand>(args);
-}
-catch (InvocationException ex)
-{
-    System.Console.Error.WriteLine(ex.Message);
-    Environment.Exit(ex.ExitCode);
-}
+var rootDef = new RootCommandDef();
+var rootCmd = rootDef.Build();
+var config = new CommandLineConfiguration(rootCmd);
+return rootCmd.Parse(args, config).Invoke();
