@@ -5,4 +5,5 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="Console/Console.csproj" />
+  <Project Path="CliGenerator/CliGenerator.csproj" />
 </Solution>

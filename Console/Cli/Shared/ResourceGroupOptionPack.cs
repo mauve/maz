@@ -1,36 +1,28 @@
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
-using System.CommandLine;
 
 namespace Console.Cli.Shared;
 
-public class ResourceGroupOptionPack : OptionPack
+public partial class ResourceGroupOptionPack : OptionPack
 {
     public readonly SubscriptionOptionPack Subscription = new();
 
-    public readonly Option<string?> ResourceGroupName;
+    /// <summary>
+    /// The name of the resource group.
+    /// Defaults to AZURE_RESOURCE_GROUP.
+    /// </summary>
+    [CliOption("--resource-group", "-g", "--grp")]
+    public partial string? ResourceGroupName { get; }
 
-    public ResourceGroupOptionPack()
-    {
-        ResourceGroupName = new Option<string?>("--resource-group", ["-g", "--grp"])
-        {
-            Description =
-                """
-            The name of the resource group.
-            Defaults to AZURE_RESOURCE_GROUP.
-            """
-        };
-    }
-
-    internal override void AddOptionsTo(Command cmd)
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
     {
         Subscription.AddOptionsTo(cmd);
-        cmd.Add(ResourceGroupName);
+        AddGeneratedOptions(cmd);
     }
 
     public string RequireResourceGroupName()
     {
-        var name = GetValue(ResourceGroupName) ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+        var name = ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         if (string.IsNullOrWhiteSpace(name))
             throw new InvocationException("--resource-group is required.");
         return name;

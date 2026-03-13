@@ -1,5 +1,3 @@
-using System.CommandLine;
-
 namespace Console.Cli.Shared;
 
 public record Tag(string Key, string Value)
@@ -15,26 +13,18 @@ public record Tag(string Key, string Value)
     }
 }
 
-public class TagOptionPack : OptionPack
+public partial class TagOptionPack : OptionPack
 {
-    public readonly Option<List<Tag>> Tags;
+    /// <summary>Tags as key=value pairs for the resource.</summary>
+    [CliOption("--tags")]
+    public partial List<Tag> Tags { get; }
 
-    public TagOptionPack()
-    {
-        Tags = new Option<List<Tag>>("--tags", [])
-        {
-            Description = "Tags as key=value pairs for the resource.",
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.ZeroOrMore,
-            CustomParser = r => r.Tokens.Select(t => Tag.Parse(t.Value)).ToList()
-        };
-    }
-
-    internal override void AddOptionsTo(Command cmd) => cmd.Add(Tags);
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
+        => AddGeneratedOptions(cmd);
 
     public void AppendTagsTo(IDictionary<string, string> tags)
     {
-        foreach (var tag in GetValue(Tags) ?? [])
+        foreach (var tag in Tags ?? [])
             tags[tag.Key] = tag.Value;
     }
 }

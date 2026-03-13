@@ -1,4 +1,3 @@
-using System.CommandLine;
 using System.Text.Json;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
@@ -6,82 +5,52 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Monitor;
 
-public class MonitorLogAnalyticsQueryCommandDef : CommandDef
+/// <summary>Query Azure Monitor Log Analytics workspaces or Azure resource logs.</summary>
+public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "query";
-    public override string Description => "Query Azure Monitor Log Analytics workspaces or Azure resource logs.";
 
-    public readonly Option<string> Query;
-    public readonly Option<Guid?> WorkspaceId;
-    public readonly Option<string?> ResourceId;
-    public readonly Option<string?> VisualizationOutput;
-    public readonly Option<bool> IncludeStatistics;
-    public readonly Option<List<string>> AdditionalWorkspaces;
-    public readonly Option<bool> OutputJsonl;
-    public readonly Option<bool> OutputJsonArray;
-    public readonly Option<int?> Tail;
-    public readonly Option<string?> TailTimestampColumn;
+    /// <summary>The LogAnalytics query to execute.</summary>
+    [CliOption("--query", "-q", Required = true)]
+    public partial string Query { get; }
 
-    private readonly AuthOptionPack _auth;
+    /// <summary>The workspace ID to query against.</summary>
+    [CliOption("--workspace-id", "--workspace")]
+    public partial Guid? WorkspaceId { get; }
 
-    public MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth)
-    {
-        _auth = auth;
+    /// <summary>The resource ID to query against.</summary>
+    [CliOption("--resource-id", "--resource")]
+    public partial string? ResourceId { get; }
 
-        Query = new Option<string>("--query", ["-q"])
-        {
-            Description = "The LogAnalytics query to execute.",
-            Required = true
-        };
+    /// <summary>Save the visualization output to a file.</summary>
+    [CliOption("--visualization-output", "--vis-output")]
+    public partial string? VisualizationOutput { get; }
 
-        WorkspaceId = new Option<Guid?>("--workspace-id", ["--workspace"])
-        {
-            Description = "The workspace ID to query against."
-        };
+    /// <summary>Include query statistics in the output.</summary>
+    [CliOption("--include-statistics", "--stats")]
+    public partial bool IncludeStatistics { get; }
 
-        ResourceId = new Option<string?>("--resource-id", ["--resource"])
-        {
-            Description = "The resource ID to query against."
-        };
+    /// <summary>Additional workspaces to include in the query.</summary>
+    [CliOption("--additional-workspaces", DefaultExpr = "new System.Collections.Generic.List<string>()")]
+    public partial List<string> AdditionalWorkspaces { get; }
 
-        VisualizationOutput = new Option<string?>("--visualization-output", ["--vis-output"])
-        {
-            Description = "Save the visualization output to a file."
-        };
+    /// <summary>Output results as JSON Lines (one JSON object per row).</summary>
+    [CliOption("--output-jsonl", "--jsonl")]
+    public partial bool OutputJsonl { get; }
 
-        IncludeStatistics = new Option<bool>("--include-statistics", ["--stats"])
-        {
-            Description = "Include query statistics in the output."
-        };
+    /// <summary>Output results as a JSON array.</summary>
+    [CliOption("--output-json-array", "--jsonarray")]
+    public partial bool OutputJsonArray { get; }
 
-        AdditionalWorkspaces = new Option<List<string>>("--additional-workspaces", [])
-        {
-            Description = "Additional workspaces to include in the query.",
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.ZeroOrMore,
-            DefaultValueFactory = _ => []
-        };
+    /// <summary>Continuously poll for new results at the specified interval in seconds.</summary>
+    [CliOption("--tail")]
+    public partial int? Tail { get; }
 
-        OutputJsonl = new Option<bool>("--output-jsonl", ["--jsonl"])
-        {
-            Description = "Output results as JSON Lines (one JSON object per row)."
-        };
+    /// <summary>The timestamp column for tail queries. Defaults to TimeGenerated or ts_t.</summary>
+    [CliOption("--tail-timestamp-column", "--tail-column")]
+    public partial string? TailTimestampColumn { get; }
 
-        OutputJsonArray = new Option<bool>("--output-json-array", ["--jsonarray"])
-        {
-            Description = "Output results as a JSON array."
-        };
-
-        Tail = new Option<int?>("--tail", [])
-        {
-            Description = "Continuously poll for new results at the specified interval in seconds."
-        };
-
-        TailTimestampColumn = new Option<string?>("--tail-timestamp-column", ["--tail-column"])
-        {
-            Description = "The timestamp column for tail queries. Defaults to TimeGenerated or ts_t."
-        };
-    }
+    private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
@@ -92,7 +61,7 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
         {
             var result = await ExecuteQuery(client, timeRange, ct);
 
-            var visOutput = GetValue(VisualizationOutput);
+            var visOutput = VisualizationOutput;
             if (visOutput != null)
             {
                 var visualization = result.GetVisualization();
@@ -109,7 +78,7 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
             }
 
             var table = result.Table;
-            if (GetValue(OutputJsonl) || GetValue(OutputJsonArray))
+            if (OutputJsonl || OutputJsonArray)
             {
                 var columns = table.Columns;
                 var rows = new List<Dictionary<string, object?>>();
@@ -128,7 +97,7 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
                     rows.Add(obj);
                 }
 
-                if (GetValue(OutputJsonArray))
+                if (OutputJsonArray)
                     System.Console.WriteLine(JsonSerializer.Serialize(rows));
                 else
                     foreach (var obj in rows)
@@ -149,7 +118,7 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
                 }
             }
 
-            if (GetValue(IncludeStatistics))
+            if (IncludeStatistics)
             {
                 var stats = result.GetStatistics();
                 if (stats != null)
@@ -163,10 +132,10 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
                 }
             }
 
-            var tail = GetValue(Tail);
+            var tail = Tail;
             if (tail != null)
             {
-                var tsColumn = ResolveTimestampColumn(result.Table, GetValue(TailTimestampColumn));
+                var tsColumn = ResolveTimestampColumn(result.Table, TailTimestampColumn);
                 if (tsColumn == null)
                     throw new InvocationException("No suitable timestamp column found. Use --tail-timestamp-column to specify the column.");
 
@@ -179,22 +148,22 @@ public class MonitorLogAnalyticsQueryCommandDef : CommandDef
                 else
                     await Task.Delay(TimeSpan.FromSeconds(tail.Value), ct);
             }
-        } while (GetValue(Tail) != null && !ct.IsCancellationRequested);
+        } while (Tail != null && !ct.IsCancellationRequested);
 
         return 0;
     }
 
     private async Task<LogsQueryResult> ExecuteQuery(LogsQueryClient client, QueryTimeRange timeRange, CancellationToken ct)
     {
-        var queryText = GetValue(Query);
+        var queryText = Query;
         var opts = new LogsQueryOptions
         {
-            IncludeStatistics = GetValue(IncludeStatistics),
-            IncludeVisualization = GetValue(VisualizationOutput) != null,
+            IncludeStatistics = IncludeStatistics,
+            IncludeVisualization = VisualizationOutput != null,
         };
 
-        var workspaceId = GetValue(WorkspaceId);
-        var resourceId = GetValue(ResourceId);
+        var workspaceId = WorkspaceId;
+        var resourceId = ResourceId;
 
         if (workspaceId != null)
             return await client.QueryWorkspaceAsync(workspaceId.ToString(), queryText, timeRange, opts, ct);

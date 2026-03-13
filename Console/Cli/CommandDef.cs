@@ -6,8 +6,17 @@ using System.Reflection;
 
 namespace Console.Cli;
 
-public abstract class CommandDef
+public abstract partial class CommandDef
 {
+    /// <inheritdoc cref="AddGeneratedOptions"/>
+    protected virtual void AddGeneratedOptions(Command cmd) { }
+
+    /// <inheritdoc cref="AddGeneratedChildren"/>
+    protected virtual void AddGeneratedChildren(Command cmd) { }
+
+    /// <summary>True when the generator has wired up child OptionPacks and CommandDefs.</summary>
+    protected virtual bool HasGeneratedChildren => false;
+
     public abstract string Name { get; }
     public virtual string[] Aliases => [];
     public virtual string Description => "";
@@ -36,15 +45,22 @@ public abstract class CommandDef
 
     private void ConfigureCommand(Command cmd)
     {
+        AddGeneratedOptions(cmd);
+        AddGeneratedChildren(cmd);
+
         foreach (var field in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
         {
             var value = field.GetValue(this);
             if (value is null) continue;
 
             if (value is OptionPack pack)
-                pack.AddOptionsTo(cmd);
+            {
+                if (!HasGeneratedChildren) pack.AddOptionsTo(cmd);
+            }
             else if (value is CommandDef subDef)
-                cmd.Add(subDef.Build());
+            {
+                if (!HasGeneratedChildren) cmd.Add(subDef.Build());
+            }
             else if (value is Option opt)
                 cmd.Add(opt);
             else if (value is Argument arg)
@@ -82,13 +98,21 @@ public abstract class CommandDef
     }
 
     private static void InjectParseResult(object obj, ParseResult result)
+        => InjectParseResult(obj, result, new HashSet<object>(ReferenceEqualityComparer.Instance));
+
+    private static void InjectParseResult(object obj, ParseResult result, HashSet<object> visited)
     {
-        foreach (var field in obj.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+        if (!visited.Add(obj)) return;
+        var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        for (var type = obj.GetType(); type != null && type != typeof(object); type = type.BaseType)
         {
-            if (field.GetValue(obj) is OptionPack pack)
+            foreach (var field in type.GetFields(flags | BindingFlags.DeclaredOnly))
             {
-                pack.SetParseResult(result);
-                InjectParseResult(pack, result);
+                if (field.GetValue(obj) is OptionPack pack)
+                {
+                    pack.SetParseResult(result);
+                    InjectParseResult(pack, result, visited);
+                }
             }
         }
     }

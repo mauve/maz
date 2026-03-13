@@ -1,0 +1,528 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
+
+namespace CliGenerator;
+
+[Generator]
+public class CliOptionGenerator : IIncrementalGenerator
+{
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        context.RegisterPostInitializationOutput(static ctx =>
+            ctx.AddSource("CliAttributes.g.cs", SourceText.From(AttributeSources.Source, Encoding.UTF8)));
+
+        var provider = context.SyntaxProvider
+            .ForAttributeWithMetadataName(
+                "Console.Cli.CliOptionAttribute",
+                predicate: static (node, _) => node is PropertyDeclarationSyntax,
+                transform: static (ctx, _) => (IPropertySymbol)ctx.TargetSymbol)
+            .Collect()
+            .SelectMany(static (props, _) =>
+                props
+                    .GroupBy<IPropertySymbol, INamedTypeSymbol>(
+                        p => p.ContainingType,
+                        SymbolEqualityComparer.Default)
+                    .Select(static g => BuildClassModel(g.Key, g)));
+
+        context.RegisterSourceOutput(provider, static (ctx, model) =>
+        {
+            if (model is null) return;
+            var source = Emit(model);
+            ctx.AddSource($"{model.ClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
+        });
+    }
+
+    // ── Model ──────────────────────────────────────────────────────────────
+
+    sealed class ClassModel
+    {
+        public string Namespace = "";
+        public string ClassName = "";
+        public bool IsCommandDef;
+        public bool IsOptionPack;
+        public string? XmlDescription;
+        public List<OptionPropModel> Options = new();
+        public List<ChildModel> Children = new();
+    }
+
+    sealed class OptionPropModel
+    {
+        public string Name = "";
+        public string OptionType = "";       // e.g. "Option<string?>"
+        public string ValueType = "";        // T in Option<T>
+        public string PrimaryAlias = "";
+        public string[] ExtraAliases = Array.Empty<string>();
+        public bool IsGlobal;
+        public bool IsRequired;
+        public string Description = "";
+        public string? DefaultExpression;
+        public string? CustomParserExpr;
+        public bool AllowMultiple;
+        public string? ArityExpr;
+        public bool HasNullableAnnotation;
+    }
+
+    sealed class ChildModel
+    {
+        public string Name = "";
+        public bool IsCommandDef;
+        public bool IsOptionPack;
+        public string TypeName = "";
+    }
+
+    // ── Build model from symbol ─────────────────────────────────────────────
+
+    static ClassModel? BuildClassModel(INamedTypeSymbol cls, IEnumerable<IPropertySymbol> props)
+    {
+        var model = new ClassModel
+        {
+            Namespace = cls.ContainingNamespace.IsGlobalNamespace
+                ? "" : cls.ContainingNamespace.ToDisplayString(),
+            ClassName = cls.Name,
+        };
+
+        // Determine base type
+        for (var b = cls.BaseType; b != null; b = b.BaseType)
+        {
+            var bn = b.ToDisplayString();
+            if (bn == "Console.Cli.CommandDef") { model.IsCommandDef = true; break; }
+            if (bn == "Console.Cli.OptionPack") { model.IsOptionPack = true; break; }
+        }
+
+        // XML doc description on class
+        model.XmlDescription = GetXmlSummary(cls);
+
+        // Options
+        foreach (var prop in props)
+            model.Options.Add(BuildOptionModel(prop));
+
+        // Children: public instance fields of type CommandDef or OptionPack
+        foreach (var member in cls.GetMembers().OfType<IFieldSymbol>())
+        {
+            if (!member.IsStatic && member.DeclaredAccessibility == Accessibility.Public)
+            {
+                var fieldTypeName = member.Type.ToDisplayString();
+                bool isCD = IsCommandDefType(member.Type);
+                bool isOP = IsOptionPackType(member.Type);
+                if (isCD || isOP)
+                {
+                    model.Children.Add(new ChildModel
+                    {
+                        Name = member.Name,
+                        IsCommandDef = isCD,
+                        IsOptionPack = isOP,
+                        TypeName = fieldTypeName,
+                    });
+                }
+            }
+        }
+
+        return model;
+    }
+
+    static OptionPropModel BuildOptionModel(IPropertySymbol prop)
+    {
+        var m = new OptionPropModel { Name = prop.Name };
+
+        // [CliOption] attribute
+        var attr = prop.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Console.Cli.CliOptionAttribute");
+
+        string[] aliases = Array.Empty<string>();
+        if (attr != null)
+        {
+            // constructor arg is params string[] aliases
+            var ctorArg = attr.ConstructorArguments.FirstOrDefault();
+            if (ctorArg.Kind == TypedConstantKind.Array)
+                aliases = ctorArg.Values.Select(v => v.Value?.ToString() ?? "").ToArray();
+            else if (ctorArg.Value != null)
+                aliases = new[] { ctorArg.Value.ToString()! };
+
+            m.IsGlobal = GetNamedBool(attr, "Global");
+            if (GetNamedBool(attr, "Required")) m.IsRequired = true;
+            m.DefaultExpression = GetNamedString(attr, "DefaultExpr");
+        }
+
+        m.PrimaryAlias = aliases.Length > 0 ? aliases[0] : KebabCase(prop.Name);
+        m.ExtraAliases = aliases.Length > 1 ? aliases.Skip(1).ToArray() : Array.Empty<string>();
+
+        // Description from XML doc
+        m.Description = GetXmlSummary(prop) ?? "";
+
+        // Type info
+        var typeSymbol = prop.Type;
+        m.HasNullableAnnotation = prop.NullableAnnotation == NullableAnnotation.Annotated
+            || (typeSymbol is INamedTypeSymbol nt && nt.OriginalDefinition.SpecialType == SpecialType.None
+                && nt.Name == "Nullable");
+
+        // Collection detection
+        var (isCollection, elemType, elemTypeSymbol) = GetCollectionInfo(typeSymbol);
+        bool hasDefault = m.DefaultExpression != null || GetDefaultExpression(prop) != null;
+
+        // Determine value type for Option<T>
+        string valueTypeStr = GetTypeDisplayString(typeSymbol);
+        m.ValueType = valueTypeStr;
+        m.OptionType = $"Option<{valueTypeStr}>";
+
+        if (isCollection && elemType != null)
+        {
+            m.AllowMultiple = true;
+            // [Arity] override?
+            var arityAttr = prop.GetAttributes()
+                .FirstOrDefault(a => a.AttributeClass?.Name == "ArityAttribute");
+            if (arityAttr != null && arityAttr.ConstructorArguments.Length == 2)
+            {
+                var mn = arityAttr.ConstructorArguments[0].Value;
+                var mx = arityAttr.ConstructorArguments[1].Value;
+                m.ArityExpr = $"new ArgumentArity({mn}, {mx})";
+            }
+            else if (!m.HasNullableAnnotation && !hasDefault)
+                m.ArityExpr = "ArgumentArity.OneOrMore";
+            else
+                m.ArityExpr = "ArgumentArity.ZeroOrMore";
+
+            // Custom parser for element type
+            if (elemTypeSymbol != null)
+            {
+                var elemInner = GetParserInnerExpr(elemTypeSymbol, out _);
+                if (elemInner != null)
+                    m.CustomParserExpr = $"r => r.Tokens.Select(t => {string.Format(elemInner, "t.Value")}).ToList()";
+            }
+        }
+        else
+        {
+            // Required inference
+            if (!m.IsRequired)
+            {
+                bool isBool = typeSymbol.SpecialType == SpecialType.System_Boolean;
+                bool isValueType = typeSymbol.IsValueType && !IsNullableValueType(typeSymbol);
+                // Required if: non-nullable reference type with no default OR non-nullable Guid-like with no default
+                if (!m.HasNullableAnnotation && !hasDefault && !isBool)
+                {
+                    if (!isValueType || IsGuidLike(typeSymbol))
+                        m.IsRequired = true;
+                }
+            }
+
+            // Custom parser for non-collection type
+            var parser = GetSingleValueParserExpr(typeSymbol, m.HasNullableAnnotation);
+            if (parser != null)
+                m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
+        }
+
+        // DefaultExpression already set from attribute; also check syntax initializer as fallback
+        if (m.DefaultExpression == null && hasDefault)
+            m.DefaultExpression = GetDefaultExpression(prop);
+
+        return m;
+    }
+
+    // ── Type helpers ───────────────────────────────────────────────────────
+
+    static (bool isCollection, string? elemType, ITypeSymbol? elemTypeSymbol) GetCollectionInfo(ITypeSymbol typeSymbol)
+    {
+        if (typeSymbol is INamedTypeSymbol nt)
+        {
+            // List<T>, IEnumerable<T>, IReadOnlyList<T>
+            var orig = nt.OriginalDefinition.ToDisplayString();
+            if ((orig == "System.Collections.Generic.List<T>"
+                || orig == "System.Collections.Generic.IEnumerable<T>"
+                || orig == "System.Collections.Generic.IReadOnlyList<T>"
+                || orig == "System.Collections.Generic.IReadOnlyCollection<T>")
+                && nt.TypeArguments.Length == 1)
+            {
+                var elem = nt.TypeArguments[0];
+                return (true, GetTypeDisplayString(elem), elem);
+            }
+        }
+        if (typeSymbol is IArrayTypeSymbol arr)
+            return (true, GetTypeDisplayString(arr.ElementType), arr.ElementType);
+        return (false, null, null);
+    }
+
+    static string GetTypeDisplayString(ITypeSymbol sym)
+    {
+        // Use minimal display but preserve nullability annotation
+        var opts = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+                | SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+        return sym.ToDisplayString(opts);
+    }
+
+    static bool IsNullableValueType(ITypeSymbol sym)
+    {
+        return sym is INamedTypeSymbol nt
+            && nt.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
+    }
+
+    static bool IsGuidLike(ITypeSymbol sym)
+    {
+        var name = sym.ToDisplayString();
+        return name == "System.Guid" || name == "Guid";
+    }
+
+    static bool IsCommandDefType(ITypeSymbol sym)
+    {
+        for (var b = sym.BaseType; b != null; b = b.BaseType)
+            if (b.ToDisplayString() == "Console.Cli.CommandDef") return true;
+        return sym.ToDisplayString() == "Console.Cli.CommandDef";
+    }
+
+    static bool IsOptionPackType(ITypeSymbol sym)
+    {
+        for (var b = sym.BaseType; b != null; b = b.BaseType)
+            if (b.ToDisplayString() == "Console.Cli.OptionPack") return true;
+        return sym.ToDisplayString() == "Console.Cli.OptionPack";
+    }
+
+    // Returns a format string template "SomeType.Parse({0})" or "new SomeType({0})"
+    // where {0} will be substituted with the token value expression.
+    // Returns null if System.CommandLine handles the type natively.
+    static string? GetParserInnerExpr(ITypeSymbol sym, out string nonNullTypeName)
+    {
+        // Unwrap nullable value type
+        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt)
+            sym = nnt.TypeArguments[0];
+
+        nonNullTypeName = "";
+
+        // System.CommandLine handles these natively
+        if (IsBuiltinParseable(sym)) return null;
+
+        // Use non-nullable display name for constructor expressions
+        var typeNameFmt = new SymbolDisplayFormat(
+            globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+            miscellaneousOptions: SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
+        var typeName = sym.WithNullableAnnotation(NullableAnnotation.None).ToDisplayString(typeNameFmt);
+        nonNullTypeName = typeName;
+
+        // Check [CliParser] attribute on type
+        var cliParserAttr = sym.GetAttributes()
+            .FirstOrDefault(a => a.AttributeClass?.ToDisplayString() == "Console.Cli.CliParserAttribute");
+        if (cliParserAttr != null)
+        {
+            var converterType = cliParserAttr.ConstructorArguments[0].Value?.ToString();
+            if (converterType != null)
+                return $"({typeName})(new {converterType}().ConvertFromString({{0}}))";
+        }
+
+        // Check for static T Parse(string) method
+        var parseMethod = sym.GetMembers("Parse")
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(m => m.IsStatic
+                && m.Parameters.Length == 1
+                && m.Parameters[0].Type.SpecialType == SpecialType.System_String
+                && !m.ReturnsVoid);
+        if (parseMethod != null)
+            return $"{typeName}.Parse({{0}})";
+
+        // Check for T(string) constructor
+        var stringCtor = sym.GetMembers(".ctor")
+            .OfType<IMethodSymbol>()
+            .FirstOrDefault(m => m.Parameters.Length == 1
+                && m.Parameters[0].Type.SpecialType == SpecialType.System_String);
+        if (stringCtor != null)
+            return $"new {typeName}({{0}})";
+
+        return null;
+    }
+
+    static string? GetSingleValueParserExpr(ITypeSymbol sym, bool isNullable)
+    {
+        var inner = GetParserInnerExpr(sym, out var typeName);
+        if (inner == null) return null;
+        if (isNullable)
+            return $"r => r.Tokens.Count > 0 ? {string.Format(inner, "r.Tokens[0].Value")} : ({typeName}?)null";
+        return $"r => {string.Format(inner, "r.Tokens[0].Value")}";
+    }
+
+    static bool IsBuiltinParseable(ITypeSymbol sym)
+    {
+        switch (sym.SpecialType)
+        {
+            case SpecialType.System_Boolean:
+            case SpecialType.System_Byte:
+            case SpecialType.System_Int16:
+            case SpecialType.System_Int32:
+            case SpecialType.System_Int64:
+            case SpecialType.System_Single:
+            case SpecialType.System_Double:
+            case SpecialType.System_Decimal:
+            case SpecialType.System_String:
+            case SpecialType.System_DateTime:
+                return true;
+        }
+        if (sym.TypeKind == TypeKind.Enum) return true;
+        var name = sym.ToDisplayString();
+        if (name == "System.Guid" || name == "Guid") return true;
+        if (name == "System.DateTimeOffset" || name == "DateTimeOffset") return true;
+        return false;
+    }
+
+    // ── Syntax helpers ─────────────────────────────────────────────────────
+
+    static string? GetDefaultExpression(IPropertySymbol prop)
+    {
+        var syn = prop.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+        if (syn is PropertyDeclarationSyntax pds && pds.Initializer != null)
+            return pds.Initializer.Value.ToFullString().Trim();
+        return null;
+    }
+
+    static string? GetXmlSummary(ISymbol symbol)
+    {
+        var xml = symbol.GetDocumentationCommentXml();
+        if (string.IsNullOrWhiteSpace(xml)) return null;
+        var start = xml!.IndexOf("<summary>", StringComparison.Ordinal);
+        var end = xml.IndexOf("</summary>", StringComparison.Ordinal);
+        if (start < 0 || end < 0) return null;
+        var raw = xml.Substring(start + 9, end - start - 9);
+        // Normalize whitespace
+        var lines = raw.Split('\n');
+        var sb = new StringBuilder();
+        foreach (var line in lines)
+        {
+            var trimmed = line.Trim();
+            if (trimmed.Length > 0) { if (sb.Length > 0) sb.Append(' '); sb.Append(trimmed); }
+        }
+        return sb.Length > 0 ? sb.ToString() : null;
+    }
+
+    static string? GetNamedString(AttributeData attr, string name)
+    {
+        var arg = attr.NamedArguments.FirstOrDefault(a => a.Key == name);
+        return arg.Value.Value?.ToString();
+    }
+
+    static bool GetNamedBool(AttributeData attr, string name)
+    {
+        var arg = attr.NamedArguments.FirstOrDefault(a => a.Key == name);
+        return arg.Value.Value is true;
+    }
+
+    static string KebabCase(string name)
+    {
+        var sb = new StringBuilder("--");
+        for (int i = 0; i < name.Length; i++)
+        {
+            if (char.IsUpper(name[i]) && i > 0) sb.Append('-');
+            sb.Append(char.ToLower(name[i]));
+        }
+        return sb.ToString();
+    }
+
+    // ── Code emission ──────────────────────────────────────────────────────
+
+    static string Emit(ClassModel model)
+    {
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine("#pragma warning disable CS1591");
+        sb.AppendLine("using System.CommandLine;");
+        sb.AppendLine("using System.Linq;");
+        sb.AppendLine();
+
+        bool hasNs = !string.IsNullOrEmpty(model.Namespace);
+        if (hasNs) { sb.AppendLine($"namespace {model.Namespace};").AppendLine(); }
+
+        sb.AppendLine($"partial class {model.ClassName}");
+        sb.AppendLine("{");
+
+        // Private option fields
+        foreach (var opt in model.Options)
+        {
+            sb.Append($"    private readonly {opt.OptionType} _opt_{opt.Name} = new({Quote(opt.PrimaryAlias)}, new string[] {{");
+            sb.Append(string.Join(", ", opt.ExtraAliases.Select(Quote)));
+            sb.Append("})");
+
+            var initParts = new List<string>();
+            if (!string.IsNullOrEmpty(opt.Description)) initParts.Add($"Description = {Quote(opt.Description)}");
+            if (opt.IsRequired) initParts.Add("Required = true");
+            if (opt.AllowMultiple) initParts.Add("AllowMultipleArgumentsPerToken = true");
+            if (opt.ArityExpr != null) initParts.Add($"Arity = {opt.ArityExpr}");
+            if (opt.DefaultExpression != null) initParts.Add($"DefaultValueFactory = _ => {opt.DefaultExpression}");
+            if (opt.CustomParserExpr != null) initParts.Add($"CustomParser = {opt.CustomParserExpr}");
+            if (opt.IsGlobal) initParts.Add("Recursive = true");
+
+            if (initParts.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine("    {");
+                foreach (var p in initParts) sb.AppendLine($"        {p},");
+                sb.Append("    }");
+            }
+            sb.AppendLine(";");
+        }
+
+        sb.AppendLine();
+
+        // Partial property implementations
+        foreach (var opt in model.Options)
+        {
+            string returnType = opt.ValueType;
+            string nullSuppressor = opt.IsRequired ? "!" : "";
+            sb.AppendLine($"    public partial {returnType} {opt.Name} => GetValue(_opt_{opt.Name}){nullSuppressor};");
+        }
+
+        sb.AppendLine();
+
+        // AddGeneratedOptions / AddOptionsTo
+        if (model.IsCommandDef)
+        {
+            sb.AppendLine("    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)");
+            sb.AppendLine("    {");
+            foreach (var opt in model.Options) sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            sb.AppendLine("    }");
+        }
+        else if (model.IsOptionPack)
+        {
+            // OptionPack subclasses override AddGeneratedOptions, called from AddOptionsTo
+            sb.AppendLine("    protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)");
+            sb.AppendLine("    {");
+            foreach (var opt in model.Options) sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+            sb.AppendLine("    }");
+        }
+
+        // AddGeneratedChildren if there are child fields
+        if (model.Children.Count > 0 && model.IsCommandDef)
+        {
+            sb.AppendLine();
+            sb.AppendLine("    protected override bool HasGeneratedChildren => true;");
+            sb.AppendLine();
+            sb.AppendLine("    protected override void AddGeneratedChildren(global::System.CommandLine.Command cmd)");
+            sb.AppendLine("    {");
+            foreach (var child in model.Children)
+            {
+                if (child.IsOptionPack)
+                    sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
+                else if (child.IsCommandDef)
+                    sb.AppendLine($"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());");
+            }
+            sb.AppendLine("    }");
+        }
+
+        // Description override for CommandDef
+        if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlDescription))
+        {
+            sb.AppendLine();
+            sb.AppendLine($"    public override string Description => {Quote(model.XmlDescription!)};");
+        }
+
+        sb.AppendLine("}");
+        return sb.ToString();
+    }
+
+    static string Quote(string s) => $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+}

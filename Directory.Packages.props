@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="1.14.0" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" />
     <PackageVersion Include="Azure.Monitor.Query" Version="1.6.0" />
     <PackageVersion Include="Azure.ResourceManager.Resources" Version="1.9.1" />
     <PackageVersion Include="System.CommandLine" Version="2.0.0-beta5.25277.114" />
