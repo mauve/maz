@@ -495,21 +495,30 @@ public class CliOptionGenerator : IIncrementalGenerator
             sb.AppendLine("    }");
         }
 
-        // AddGeneratedChildren if there are child fields
-        if (model.Children.Count > 0 && model.IsCommandDef)
+        // AddGeneratedChildren (CommandDef) / AddChildPacksTo (OptionPack) for child fields
+        var childPacks = model.Children.Where(c => c.IsOptionPack).ToList();
+        var childCmds = model.Children.Where(c => c.IsCommandDef).ToList();
+
+        if ((childCmds.Count > 0 || childPacks.Count > 0) && model.IsCommandDef)
         {
             sb.AppendLine();
             sb.AppendLine("    protected override bool HasGeneratedChildren => true;");
             sb.AppendLine();
             sb.AppendLine("    protected override void AddGeneratedChildren(global::System.CommandLine.Command cmd)");
             sb.AppendLine("    {");
-            foreach (var child in model.Children)
-            {
-                if (child.IsOptionPack)
-                    sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
-                else if (child.IsCommandDef)
-                    sb.AppendLine($"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());");
-            }
+            foreach (var child in childPacks)
+                sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
+            foreach (var child in childCmds)
+                sb.AppendLine($"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());");
+            sb.AppendLine("    }");
+        }
+        else if (childPacks.Count > 0 && model.IsOptionPack)
+        {
+            sb.AppendLine();
+            sb.AppendLine("    protected override void AddChildPacksTo(global::System.CommandLine.Command cmd)");
+            sb.AppendLine("    {");
+            foreach (var child in childPacks)
+                sb.AppendLine($"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);");
             sb.AppendLine("    }");
         }
 

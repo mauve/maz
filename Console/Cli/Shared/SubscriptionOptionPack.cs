@@ -13,8 +13,7 @@ public partial class SubscriptionOptionPack : OptionPack
     [CliOption("--subscription-id", "-s", "--sub", "--subscription")]
     public partial string? SubscriptionId { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Subscription";
 
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {

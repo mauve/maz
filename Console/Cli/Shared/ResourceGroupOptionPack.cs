@@ -14,11 +14,7 @@ public partial class ResourceGroupOptionPack : OptionPack
     [CliOption("--resource-group", "-g", "--grp")]
     public partial string? ResourceGroupName { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-    {
-        Subscription.AddOptionsTo(cmd);
-        AddGeneratedOptions(cmd);
-    }
+    public override string HelpTitle => "Resource Group";
 
     public string RequireResourceGroupName()
     {

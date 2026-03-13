@@ -13,8 +13,7 @@ public partial class RenderOptionPack : OptionPack
     [CliOption("--output-indented", "-i", "--indent")]
     public partial bool OutputIndented { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Output";
 
     public IRendererFactory GetRendererFactory() =>
         OutputFormat switch

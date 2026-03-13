@@ -19,8 +19,7 @@ public partial class TagOptionPack : OptionPack
     [CliOption("--tags")]
     public partial List<Tag> Tags { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Tags";
 
     public void AppendTagsTo(IDictionary<string, string> tags)
     {
