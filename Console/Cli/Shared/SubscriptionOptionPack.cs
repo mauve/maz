@@ -1,5 +1,6 @@
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
+using System.CommandLine.Completions;
 
 namespace Console.Cli.Shared;
 
@@ -15,7 +16,8 @@ public partial class SubscriptionOptionPack : OptionPack
         "-s",
         "--sub",
         "--subscription",
-        EnvVar = "AZURE_SUBSCRIPTION_ID"
+        EnvVar = "AZURE_SUBSCRIPTION_ID",
+        CompletionProviderType = typeof(SubscriptionIdCompletionProvider)
     )]
     public partial string? SubscriptionId { get; }
 
@@ -46,5 +48,33 @@ public partial class SubscriptionOptionPack : OptionPack
         }
 
         throw new InvocationException($"Subscription with display name '{requested}' not found.");
+    }
+}
+
+internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
+{
+    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CompletionContext context)
+    {
+        var armClient = new ArmClient(new Azure.Identity.DefaultAzureCredential());
+        var word = context.WordToComplete ?? "";
+        var suggestions = new List<string>();
+
+        await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())
+        {
+            var id = sub.Data.SubscriptionId;
+            if (string.IsNullOrWhiteSpace(id))
+                continue;
+
+            if (
+                word.Length > 0
+                && !id.StartsWith(word, StringComparison.OrdinalIgnoreCase)
+                && !(sub.Data.DisplayName?.Contains(word, StringComparison.OrdinalIgnoreCase) ?? false)
+            )
+                continue;
+
+            suggestions.Add(id);
+        }
+
+        return suggestions;
     }
 }

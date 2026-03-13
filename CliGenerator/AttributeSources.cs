@@ -19,6 +19,7 @@ internal static class AttributeSources
                 public bool Advanced { get; set; }
                 public string? EnvVar { get; set; }
                 public Type? ConverterType { get; set; }
+                public Type? CompletionProviderType { get; set; }
                 public CliOptionAttribute(params string[] aliases) { Aliases = aliases; }
             }
 
