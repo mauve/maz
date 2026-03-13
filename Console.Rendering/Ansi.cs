@@ -1,10 +1,10 @@
 using System.Text.RegularExpressions;
 
-namespace Console.Cli;
+namespace Console.Rendering;
 
-internal static partial class Ansi
+public static partial class Ansi
 {
-    internal static readonly bool IsEnabled =
+    public static readonly bool IsEnabled =
         !System.Console.IsOutputRedirected
         && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"))
         && Environment.GetEnvironmentVariable("TERM") != "dumb";
@@ -12,24 +12,24 @@ internal static partial class Ansi
     // Keep backward-compat alias
     private static bool Enabled => IsEnabled;
 
-    internal static string Header(string text) => Enabled ? $"\x1b[1;4m{text}\x1b[0m" : text;
+    public static string Header(string text) => Enabled ? $"\x1b[1;4m{text}\x1b[0m" : text;
 
-    internal static string Dim(string text) => Enabled ? $"\x1b[2m{text}\x1b[0m" : text;
+    public static string Dim(string text) => Enabled ? $"\x1b[2m{text}\x1b[0m" : text;
 
-    internal static string Green(string text) => Enabled ? $"\x1b[32m{text}\x1b[0m" : text;
+    public static string Green(string text) => Enabled ? $"\x1b[32m{text}\x1b[0m" : text;
 
-    internal static string Red(string text) => Enabled ? $"\x1b[31m{text}\x1b[0m" : text;
+    public static string Red(string text) => Enabled ? $"\x1b[31m{text}\x1b[0m" : text;
 
-    internal static string Yellow(string text) => Enabled ? $"\x1b[33m{text}\x1b[0m" : text;
+    public static string Yellow(string text) => Enabled ? $"\x1b[33m{text}\x1b[0m" : text;
 
-    internal static string Magenta(string text) => Enabled ? $"\x1b[35m{text}\x1b[0m" : text;
+    public static string Magenta(string text) => Enabled ? $"\x1b[35m{text}\x1b[0m" : text;
 
-    internal static string Bold(string text) => Enabled ? $"\x1b[1m{text}\x1b[0m" : text;
+    public static string Bold(string text) => Enabled ? $"\x1b[1m{text}\x1b[0m" : text;
 
-    internal static string Color(string text, string ansiCode) =>
+    public static string Color(string text, string ansiCode) =>
         Enabled ? $"{ansiCode}{text}\x1b[0m" : text;
 
-    internal static string StyleOptionDescription(string text)
+    public static string StyleOptionDescription(string text)
     {
         if (!Enabled)
             return text;
