@@ -38,7 +38,8 @@ internal static class GroupedHelpLayout
         {
             using var capture = new StringWriter();
             var inner = new HelpContext(ctx.HelpBuilder, ctx.Command, capture, ctx.ParseResult);
-            if (!section(inner)) return false;
+            if (!section(inner))
+                return false;
 
             using var reader = new StringReader(capture.ToString());
             bool headerStyled = false;

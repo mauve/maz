@@ -1,6 +1,6 @@
+using System.CommandLine.Completions;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
-using System.CommandLine.Completions;
 
 namespace Console.Cli.Shared;
 
@@ -68,7 +68,10 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
             if (
                 word.Length > 0
                 && !id.StartsWith(word, StringComparison.OrdinalIgnoreCase)
-                && !(sub.Data.DisplayName?.Contains(word, StringComparison.OrdinalIgnoreCase) ?? false)
+                && !(
+                    sub.Data.DisplayName?.Contains(word, StringComparison.OrdinalIgnoreCase)
+                    ?? false
+                )
             )
                 continue;
 

@@ -80,7 +80,8 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
         await renderer.RenderAllAsync(
             System.Console.Out,
             subscription.GetResourceGroups().GetAllAsync(cancellationToken: ct).ToAsyncObjects(ct),
-            ct);
+            ct
+        );
 
         return 0;
     }

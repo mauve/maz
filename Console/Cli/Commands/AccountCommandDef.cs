@@ -38,14 +38,16 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
         await renderer.RenderAllAsync(
             System.Console.Out,
             FilterSubscriptions(armClient.GetSubscriptions().GetAllAsync(ct), ct),
-            ct);
+            ct
+        );
 
         return 0;
     }
 
     private async IAsyncEnumerable<object> FilterSubscriptions(
         IAsyncEnumerable<SubscriptionResource> source,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct
+    )
     {
         await foreach (var sub in source.WithCancellation(ct))
         {
@@ -78,7 +80,8 @@ public partial class AccountListLocationsCommandDef(AuthOptionPack auth) : Comma
         await renderer.RenderAllAsync(
             System.Console.Out,
             subscription.GetLocations(cancellationToken: ct).ToAsyncEnumerableObjects(ct),
-            ct);
+            ct
+        );
 
         return 0;
     }

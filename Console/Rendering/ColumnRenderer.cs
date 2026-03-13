@@ -10,7 +10,8 @@ public class ColumnRendererFactory(ValueFormatterOptions formatterOptions) : IRe
 {
     public IRenderer CreateRendererForType(Type type) =>
         throw new NotSupportedException(
-            "ColumnRendererFactory does not support per-item rendering. Use CreateCollectionRenderer<T>().");
+            "ColumnRendererFactory does not support per-item rendering. Use CreateCollectionRenderer<T>()."
+        );
 
     ICollectionRenderer IRendererFactory.CreateCollectionRenderer<T>() =>
         new ColumnRenderer<T>(new ColumnRendererOptions(formatterOptions));
@@ -27,7 +28,8 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
     public async Task RenderAllAsync(
         TextWriter output,
         IAsyncEnumerable<object> items,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         using var throbber = new Throbber("Fetching…");
 
@@ -58,7 +60,13 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
         var headers = columns.Select(c => c.DisplayName).ToList();
         var rows = collected.Select(item => GetRow(item, columns, formatterOptions)).ToList();
         var naturalWidths = columns
-            .Select((c, i) => Math.Max(headers[i].Length, rows.Select(r => r[i].Text.Length).DefaultIfEmpty(0).Max()))
+            .Select(
+                (c, i) =>
+                    Math.Max(
+                        headers[i].Length,
+                        rows.Select(r => r[i].Text.Length).DefaultIfEmpty(0).Max()
+                    )
+            )
             .ToArray();
 
         // Fit to console
@@ -66,33 +74,45 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
         var widths = FitWidths(naturalWidths, consoleWidth);
 
         // Render header
-        RenderRow(output, headers.Select((h, i) => (Ansi.Bold(h.PadRight(widths[i])), widths[i])).ToList(), isHeader: true);
+        RenderRow(
+            output,
+            headers.Select((h, i) => (Ansi.Bold(h.PadRight(widths[i])), widths[i])).ToList(),
+            isHeader: true
+        );
         RenderSeparator(output, widths);
 
         // Render data rows
         foreach (var row in rows)
         {
-            var cells = row.Select((cell, i) =>
-            {
-                var truncated = ValueFormatter.Truncate(cell.Text, widths[i]);
-                var padded = cell.Alignment switch
-                {
-                    TextAlignment.Right => truncated.PadLeft(widths[i]),
-                    TextAlignment.Center => truncated.PadLeft((widths[i] + truncated.Length) / 2).PadRight(widths[i]),
-                    _ => truncated.PadRight(widths[i]),
-                };
-                var colored = cell.AnsiCode != null
-                    ? Ansi.Color(padded, cell.AnsiCode)
-                    : padded;
-                return (colored, widths[i]);
-            }).ToList();
+            var cells = row.Select(
+                    (cell, i) =>
+                    {
+                        var truncated = ValueFormatter.Truncate(cell.Text, widths[i]);
+                        var padded = cell.Alignment switch
+                        {
+                            TextAlignment.Right => truncated.PadLeft(widths[i]),
+                            TextAlignment.Center => truncated
+                                .PadLeft((widths[i] + truncated.Length) / 2)
+                                .PadRight(widths[i]),
+                            _ => truncated.PadRight(widths[i]),
+                        };
+                        var colored =
+                            cell.AnsiCode != null ? Ansi.Color(padded, cell.AnsiCode) : padded;
+                        return (colored, widths[i]);
+                    }
+                )
+                .ToList();
             RenderRow(output, cells, isHeader: false);
         }
 
         output.Flush();
     }
 
-    private static void RenderRow(TextWriter output, List<(string Text, int Width)> cells, bool isHeader)
+    private static void RenderRow(
+        TextWriter output,
+        List<(string Text, int Width)> cells,
+        bool isHeader
+    )
     {
         output.WriteLine(string.Join("  ", cells.Select(c => c.Text)));
     }
@@ -104,8 +124,14 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
 
     private static int GetConsoleWidth()
     {
-        try { return System.Console.WindowWidth; }
-        catch { return 120; }
+        try
+        {
+            return System.Console.WindowWidth;
+        }
+        catch
+        {
+            return 120;
+        }
     }
 
     private static int[] FitWidths(int[] natural, int available)
@@ -121,7 +147,8 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
         while (TotalWidth() > available)
         {
             var maxWidth = widths.Max();
-            if (maxWidth <= minWidth) break;
+            if (maxWidth <= minWidth)
+                break;
             var idx = Array.IndexOf(widths, maxWidth);
             widths[idx] = Math.Max(minWidth, maxWidth - 1);
         }
@@ -160,38 +187,66 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
 
             var getter = dataGetter;
             var p = prop;
-            columns.Add(new ColumnDef(
-                p.Name,
-                ToDisplayName(p.Name),
-                o =>
-                {
-                    var data = getter(o);
-                    return data == null ? null : p.GetValue(data);
-                }
-            ));
+            columns.Add(
+                new ColumnDef(
+                    p.Name,
+                    ToDisplayName(p.Name),
+                    o =>
+                    {
+                        var data = getter(o);
+                        return data == null ? null : p.GetValue(data);
+                    }
+                )
+            );
         }
         return columns;
     }
 
     private static bool IsFormattableType(Type t)
     {
-        if (t == typeof(string)) return true;
-        if (t == typeof(bool) || t == typeof(bool?)) return true;
-        if (t == typeof(int) || t == typeof(long) || t == typeof(decimal) || t == typeof(double)
-            || t == typeof(float) || t == typeof(short) || t == typeof(byte)
-            || t == typeof(uint) || t == typeof(ulong)
-            || t == typeof(int?) || t == typeof(long?) || t == typeof(decimal?) || t == typeof(double?)
-            || t == typeof(float?) || t == typeof(short?) || t == typeof(byte?)) return true;
-        if (t == typeof(DateTime) || t == typeof(DateTime?)
-            || t == typeof(DateTimeOffset) || t == typeof(DateTimeOffset?)) return true;
-        if (t == typeof(Guid) || t == typeof(Guid?)) return true;
-        if (t.IsEnum) return true;
+        if (t == typeof(string))
+            return true;
+        if (t == typeof(bool) || t == typeof(bool?))
+            return true;
+        if (
+            t == typeof(int)
+            || t == typeof(long)
+            || t == typeof(decimal)
+            || t == typeof(double)
+            || t == typeof(float)
+            || t == typeof(short)
+            || t == typeof(byte)
+            || t == typeof(uint)
+            || t == typeof(ulong)
+            || t == typeof(int?)
+            || t == typeof(long?)
+            || t == typeof(decimal?)
+            || t == typeof(double?)
+            || t == typeof(float?)
+            || t == typeof(short?)
+            || t == typeof(byte?)
+        )
+            return true;
+        if (
+            t == typeof(DateTime)
+            || t == typeof(DateTime?)
+            || t == typeof(DateTimeOffset)
+            || t == typeof(DateTimeOffset?)
+        )
+            return true;
+        if (t == typeof(Guid) || t == typeof(Guid?))
+            return true;
+        if (t.IsEnum)
+            return true;
         // IDictionary / IEnumerable (but not plain object or nested complex types)
-        if (typeof(System.Collections.IDictionary).IsAssignableFrom(t)) return true;
-        if (t != typeof(object) && typeof(System.Collections.IEnumerable).IsAssignableFrom(t)) return true;
+        if (typeof(System.Collections.IDictionary).IsAssignableFrom(t))
+            return true;
+        if (t != typeof(object) && typeof(System.Collections.IEnumerable).IsAssignableFrom(t))
+            return true;
         // Check nullable underlying
         var underlying = Nullable.GetUnderlyingType(t);
-        if (underlying != null) return IsFormattableType(underlying);
+        if (underlying != null)
+            return IsFormattableType(underlying);
         return false;
     }
 
@@ -207,7 +262,11 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
         return result.ToUpperInvariant();
     }
 
-    private static List<FormattedValue> GetRow(T item, List<ColumnDef> columns, ValueFormatterOptions opts)
+    private static List<FormattedValue> GetRow(
+        T item,
+        List<ColumnDef> columns,
+        ValueFormatterOptions opts
+    )
     {
         return columns.Select(c => ValueFormatter.Format(c.Getter(item!), opts)).ToList();
     }

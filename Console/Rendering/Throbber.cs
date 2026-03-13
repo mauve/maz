@@ -13,7 +13,8 @@ internal sealed class Throbber : IDisposable
     public Throbber(string message)
     {
         _message = message;
-        _active = !System.Console.IsErrorRedirected
+        _active =
+            !System.Console.IsErrorRedirected
             && string.IsNullOrEmpty(Environment.GetEnvironmentVariable("NO_COLOR"))
             && Environment.GetEnvironmentVariable("TERM") != "dumb";
 
@@ -23,7 +24,8 @@ internal sealed class Throbber : IDisposable
 
     private void Tick(object? state)
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         var frame = Frames[_frame % Frames.Length];
         _frame++;
         System.Console.Error.Write($"\r{frame} {_message}");
@@ -31,7 +33,8 @@ internal sealed class Throbber : IDisposable
 
     public void Dispose()
     {
-        if (_disposed) return;
+        if (_disposed)
+            return;
         _disposed = true;
         _timer?.Dispose();
 
