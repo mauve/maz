@@ -9,8 +9,7 @@ public partial class ConfirmationOptionPack : OptionPack
     [CliOption("--yes", "-y", "--confirm")]
     public partial bool Confirm { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Confirmation";
 
     public void RequireConfirmation(bool interactive)
     {

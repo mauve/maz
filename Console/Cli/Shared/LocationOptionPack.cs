@@ -11,8 +11,7 @@ public partial class LocationOptionPack : OptionPack
     [CliOption("--location", "-l")]
     public partial AzureLocation Location { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Location";
 
     public AzureLocation GetLocation() => Location;
 }

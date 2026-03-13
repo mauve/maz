@@ -46,8 +46,7 @@ public partial class AuthOptionPack : OptionPack
     [CliOption("--token-file-path", Global = true)]
     public partial string? TokenFilePath { get; }
 
-    internal override void AddOptionsTo(System.CommandLine.Command cmd)
-        => AddGeneratedOptions(cmd);
+    public override string HelpTitle => "Authentication";
 
     public bool GetInteractive() => Interactive;
 
