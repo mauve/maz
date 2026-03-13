@@ -1,6 +1,5 @@
 using System.Reflection;
 using Azure.ResourceManager;
-using Console.Cli;
 
 namespace Console.Rendering;
 

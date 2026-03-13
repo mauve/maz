@@ -1,5 +1,6 @@
 using System.CommandLine;
 using System.CommandLine.Help;
+using Console.Rendering;
 
 namespace Console.Cli;
 

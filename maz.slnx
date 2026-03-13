@@ -5,6 +5,8 @@
     <Platform Name="x86" />
   </Configurations>
   <Project Path="Console/Console.csproj" />
+  <Project Path="Console.Rendering/Console.Rendering.csproj" />
+  <Project Path="Console.Rendering.Tests/Console.Rendering.Tests.csproj" />
   <Project Path="CliGenerator/CliGenerator.csproj" />
   <Project Path="CliGenerator.Tests/CliGenerator.Tests.csproj" />
 </Solution>
