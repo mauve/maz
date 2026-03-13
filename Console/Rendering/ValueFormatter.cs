@@ -3,7 +3,12 @@ using System.Text.RegularExpressions;
 
 namespace Console.Rendering;
 
-public enum TextAlignment { Left, Right, Center }
+public enum TextAlignment
+{
+    Left,
+    Right,
+    Center,
+}
 
 public record FormattedValue(string Text, TextAlignment Alignment, string? AnsiCode);
 
@@ -12,13 +17,24 @@ public record ValueFormatterOptions(string DateFormat = "yyyy-MM-ddTHH:mm:ssZ");
 public static partial class ValueFormatter
 {
     private static readonly HashSet<string> SucceededStates = new(StringComparer.OrdinalIgnoreCase)
-        { "Succeeded" };
+    {
+        "Succeeded",
+    };
     private static readonly HashSet<string> FailedStates = new(StringComparer.OrdinalIgnoreCase)
-        { "Failed", "Canceled" };
+    {
+        "Failed",
+        "Canceled",
+    };
     private static readonly HashSet<string> RunningStates = new(StringComparer.OrdinalIgnoreCase)
-        { "Running", "Creating", "Updating" };
+    {
+        "Running",
+        "Creating",
+        "Updating",
+    };
     private static readonly HashSet<string> DeletingStates = new(StringComparer.OrdinalIgnoreCase)
-        { "Deleting" };
+    {
+        "Deleting",
+    };
 
     // Match /subscriptions/{guid}
     [GeneratedRegex(@"^/subscriptions/[0-9a-fA-F\-]{36}", RegexOptions.Compiled)]
@@ -35,7 +51,7 @@ public static partial class ValueFormatter
 
         if (value is bool b)
             return b
-                ? new FormattedValue("✓", TextAlignment.Center, "\x1b[32m")  // green
+                ? new FormattedValue("✓", TextAlignment.Center, "\x1b[32m") // green
                 : new FormattedValue("✗", TextAlignment.Center, "\x1b[31m"); // red
 
         if (value is int or long or decimal or double or float or short or byte or uint or ulong)
@@ -121,10 +137,14 @@ public static partial class ValueFormatter
     /// <summary>Mid-truncates a string to fit within maxWidth, using '…' as the ellipsis.</summary>
     public static string Truncate(string text, int maxWidth)
     {
-        if (maxWidth <= 0) return "";
-        if (text.Length <= maxWidth) return text;
-        if (maxWidth <= 1) return "…";
-        if (maxWidth == 2) return text[0] + "…";
+        if (maxWidth <= 0)
+            return "";
+        if (text.Length <= maxWidth)
+            return text;
+        if (maxWidth <= 1)
+            return "…";
+        if (maxWidth == 2)
+            return text[0] + "…";
 
         var half = (maxWidth - 1) / 2;
         var end = maxWidth - half - 1;

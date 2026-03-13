@@ -264,7 +264,11 @@ public class CliOptionGenerator : IIncrementalGenerator
             if (enumDescs != null)
             {
                 var typeName = GetNonNullableTypeName(typeSymbol);
-                m.CustomParserExpr = BuildEnumSwitchParser(typeName, enumDescs, m.HasNullableAnnotation);
+                m.CustomParserExpr = BuildEnumSwitchParser(
+                    typeName,
+                    enumDescs,
+                    m.HasNullableAnnotation
+                );
                 AppendAllowedValues(ref m.Description, enumDescs);
             }
             else
@@ -454,16 +458,20 @@ public class CliOptionGenerator : IIncrementalGenerator
     // at least one [Description] attribute on its members; otherwise null.
     static (string memberName, string descValue)[]? GetEnumDescriptions(ITypeSymbol sym)
     {
-        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt) sym = nnt.TypeArguments[0];
-        if (sym.TypeKind != TypeKind.Enum) return null;
+        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt)
+            sym = nnt.TypeArguments[0];
+        if (sym.TypeKind != TypeKind.Enum)
+            return null;
 
         var pairs = sym.GetMembers()
             .OfType<IFieldSymbol>()
             .Where(f => f.IsConst)
-            .Select(f => {
+            .Select(f =>
+            {
                 var desc = f.GetAttributes()
                     .FirstOrDefault(a => a.AttributeClass?.Name == "DescriptionAttribute")
-                    ?.ConstructorArguments.FirstOrDefault().Value?.ToString();
+                    ?.ConstructorArguments.FirstOrDefault()
+                    .Value?.ToString();
                 return (f.Name, desc);
             })
             .Where(x => x.desc != null)
@@ -476,9 +484,9 @@ public class CliOptionGenerator : IIncrementalGenerator
     static string BuildEnumSwitchParser(string typeName, (string, string)[] descs, bool isNullable)
     {
         var allowedList = string.Join(", ", descs.Select(d => d.Item2));
-        var cases = string.Join(" ", descs.Select(d =>
-            $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
-        var throwExpr = $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
+        var cases = string.Join(" ", descs.Select(d => $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
+        var throwExpr =
+            $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
         var switchExpr = $"r.Tokens[0].Value switch {{ {cases} {throwExpr} }}";
 
         if (isNullable)
@@ -489,9 +497,9 @@ public class CliOptionGenerator : IIncrementalGenerator
     static string BuildEnumCollectionSwitchParser(string typeName, (string, string)[] descs)
     {
         var allowedList = string.Join(", ", descs.Select(d => d.Item2));
-        var cases = string.Join(" ", descs.Select(d =>
-            $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
-        var throwExpr = $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
+        var cases = string.Join(" ", descs.Select(d => $"\"{d.Item2}\" => {typeName}.{d.Item1},"));
+        var throwExpr =
+            $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
         return $"r => r.Tokens.Select(t => t.Value switch {{ {cases} {throwExpr} }}).ToList()";
     }
 
@@ -504,7 +512,8 @@ public class CliOptionGenerator : IIncrementalGenerator
 
     static string GetNonNullableTypeName(ITypeSymbol sym)
     {
-        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt) sym = nnt.TypeArguments[0];
+        if (IsNullableValueType(sym) && sym is INamedTypeSymbol nnt)
+            sym = nnt.TypeArguments[0];
         var fmt = new SymbolDisplayFormat(
             globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
@@ -593,13 +602,16 @@ public class CliOptionGenerator : IIncrementalGenerator
         int minIndent = int.MaxValue;
         foreach (var line in lines)
         {
-            if (line.Trim().Length == 0) continue;
+            if (line.Trim().Length == 0)
+                continue;
             int indent = 0;
             while (indent < line.Length && (line[indent] == ' ' || line[indent] == '\t'))
                 indent++;
-            if (indent < minIndent) minIndent = indent;
+            if (indent < minIndent)
+                minIndent = indent;
         }
-        if (minIndent == int.MaxValue) minIndent = 0;
+        if (minIndent == int.MaxValue)
+            minIndent = 0;
 
         var result = new List<string>();
         foreach (var line in lines)
@@ -609,10 +621,13 @@ public class CliOptionGenerator : IIncrementalGenerator
         }
 
         // Remove leading and trailing blank lines
-        while (result.Count > 0 && result[0].Trim().Length == 0) result.RemoveAt(0);
-        while (result.Count > 0 && result[result.Count - 1].Trim().Length == 0) result.RemoveAt(result.Count - 1);
+        while (result.Count > 0 && result[0].Trim().Length == 0)
+            result.RemoveAt(0);
+        while (result.Count > 0 && result[result.Count - 1].Trim().Length == 0)
+            result.RemoveAt(result.Count - 1);
 
-        if (result.Count == 0) return null;
+        if (result.Count == 0)
+            return null;
         return string.Join("\n", result);
     }
 
@@ -826,9 +841,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlRemarks))
         {
             sb.AppendLine();
-            sb.AppendLine(
-                $"    protected override string? Remarks => {Quote(model.XmlRemarks!)};"
-            );
+            sb.AppendLine($"    protected override string? Remarks => {Quote(model.XmlRemarks!)};");
         }
 
         sb.AppendLine("}");

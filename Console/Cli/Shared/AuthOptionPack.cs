@@ -50,7 +50,8 @@ public partial class AuthOptionPack : OptionPack
 
     /// <summary>Specifies the credential types that will be used for authentication.</summary>
     [CliOption("--auth-allowed-credential-types", Global = true)]
-    public partial List<CredentialType> AllowedCredentialTypes { get; } = [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
+    public partial List<CredentialType> AllowedCredentialTypes { get; } =
+        [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
 
     /// <summary>Path to the workload identity token file.</summary>
     [CliOption("--auth-token-file-path", Global = true, EnvVar = "AZURE_FEDERATED_TOKEN_FILE")]

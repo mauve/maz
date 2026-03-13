@@ -23,7 +23,11 @@ public class JsonRendererFactory(JsonSerializerOptions options) : IRendererFacto
 
 internal class JsonCollectionRenderer<T>(JsonSerializerOptions options) : ICollectionRenderer
 {
-    public async Task RenderAllAsync(TextWriter output, IAsyncEnumerable<object> items, CancellationToken ct)
+    public async Task RenderAllAsync(
+        TextWriter output,
+        IAsyncEnumerable<object> items,
+        CancellationToken ct
+    )
     {
         using var throbber = new Throbber("Fetching…");
         var all = new List<object>();
@@ -33,14 +37,15 @@ internal class JsonCollectionRenderer<T>(JsonSerializerOptions options) : IColle
 
         // Extract .Data if ArmResource
         var dataItems = all.Select(item =>
-        {
-            if (item is ArmResource)
             {
-                var dataProp = item.GetType().GetProperty("Data");
-                return dataProp?.GetValue(item);
-            }
-            return item;
-        }).ToList();
+                if (item is ArmResource)
+                {
+                    var dataProp = item.GetType().GetProperty("Data");
+                    return dataProp?.GetValue(item);
+                }
+                return item;
+            })
+            .ToList();
 
         output.WriteLine(System.Text.Json.JsonSerializer.Serialize(dataItems, options));
     }

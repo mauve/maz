@@ -16,7 +16,11 @@ public interface IRendererFactory
 /// </summary>
 internal class StreamingCollectionRenderer<T>(IRendererFactory factory) : ICollectionRenderer
 {
-    public async Task RenderAllAsync(TextWriter output, IAsyncEnumerable<object> items, CancellationToken ct)
+    public async Task RenderAllAsync(
+        TextWriter output,
+        IAsyncEnumerable<object> items,
+        CancellationToken ct
+    )
     {
         using var throbber = new Throbber("Fetching…");
         var renderer = factory.CreateRendererForType<T>();
