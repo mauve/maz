@@ -18,6 +18,10 @@ public class TableRendererFactory : IRendererFactory
             );
         }
     }
+
+    // table format = detail (key-value) renderer; use streaming wrapper
+    ICollectionRenderer IRendererFactory.CreateCollectionRenderer<T>() =>
+        new StreamingCollectionRenderer<T>(this);
 }
 
 internal class TableArmResourceRenderer : IRenderer

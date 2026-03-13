@@ -1,6 +1,8 @@
 using Azure.ResourceManager;
+using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Resources.Models;
 using Console.Cli.Shared;
+using Console.Rendering;
 
 namespace Console.Cli.Commands;
 
@@ -23,44 +25,61 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
     [CliOption("--all")]
     public partial bool All { get; }
 
+    public readonly RenderOptionPack Render = new();
+
     private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
+        var rendererFactory = Render.GetRendererFactory();
         var armClient = new ArmClient(_auth.GetCredential());
-        await foreach (var sub in armClient.GetSubscriptions().GetAllAsync(ct))
+
+        var renderer = rendererFactory.CreateCollectionRenderer<SubscriptionResource>();
+        await renderer.RenderAllAsync(
+            System.Console.Out,
+            FilterSubscriptions(armClient.GetSubscriptions().GetAllAsync(ct), ct),
+            ct);
+
+        return 0;
+    }
+
+    private async IAsyncEnumerable<object> FilterSubscriptions(
+        IAsyncEnumerable<SubscriptionResource> source,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct)
+    {
+        await foreach (var sub in source.WithCancellation(ct))
         {
             if (!All && !sub.Data.State.Equals(SubscriptionState.Enabled))
                 continue;
-            System.Console.WriteLine(
-                $"{sub.Data.SubscriptionId}: {sub.Data.DisplayName, 30} ({sub.Data.State, 15}) {sub.Data.TenantId}"
-            );
+            yield return sub;
         }
-        return 0;
     }
 }
 
-public class AccountListLocationsCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>Show available locations for a subscription.</summary>
+public partial class AccountListLocationsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-locations";
     public override string[] Aliases => ["locations"];
     public override string Description => "Show available locations for a subscription.";
 
     public readonly SubscriptionOptionPack Subscription = new();
+    public readonly RenderOptionPack Render = new();
 
     private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
+        var rendererFactory = Render.GetRendererFactory();
         var armClient = new ArmClient(_auth.GetCredential());
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
 
-        foreach (var location in subscription.GetLocations(cancellationToken: ct))
-        {
-            System.Console.WriteLine(
-                $"{location.Name, 20}: {location.DisplayName, 30} ({location.LocationType})"
-            );
-        }
+        var renderer = rendererFactory.CreateCollectionRenderer<LocationExpanded>();
+        await renderer.RenderAllAsync(
+            System.Console.Out,
+            subscription.GetLocations(cancellationToken: ct).ToAsyncEnumerableObjects(ct),
+            ct);
+
         return 0;
     }
 }
