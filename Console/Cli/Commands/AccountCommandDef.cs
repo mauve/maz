@@ -1,7 +1,6 @@
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources.Models;
 using Console.Cli.Shared;
-using System.CommandLine;
 
 namespace Console.Cli.Commands;
 
@@ -14,31 +13,24 @@ public class AccountCommandDef(AuthOptionPack auth) : CommandDef
     public readonly AccountListLocationsCommandDef ListLocations = new(auth);
 }
 
-public class AccountListCommandDef : CommandDef
+/// <summary>List all available Azure subscriptions.</summary>
+public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
     public override string[] Aliases => ["ls"];
-    public override string Description => "List all available Azure subscriptions.";
 
-    public readonly Option<bool> All;
+    /// <summary>List all subscriptions from all clouds, including those not enabled.</summary>
+    [CliOption("--all")]
+    public partial bool All { get; }
 
-    private readonly AuthOptionPack _auth;
-
-    public AccountListCommandDef(AuthOptionPack auth)
-    {
-        _auth = auth;
-        All = new Option<bool>("--all", [])
-        {
-            Description = "List all subscriptions from all clouds, including those not enabled."
-        };
-    }
+    private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var armClient = new ArmClient(_auth.GetCredential());
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync(ct))
         {
-            if (!GetValue(All) && !sub.Data.State.Equals(SubscriptionState.Enabled))
+            if (!All && !sub.Data.State.Equals(SubscriptionState.Enabled))
                 continue;
             System.Console.WriteLine(
                 $"{sub.Data.SubscriptionId}: {sub.Data.DisplayName,30} ({sub.Data.State,15}) {sub.Data.TenantId}"

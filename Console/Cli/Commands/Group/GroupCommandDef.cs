@@ -2,7 +2,6 @@ using Azure;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Console.Cli.Shared;
-using System.CommandLine;
 
 namespace Console.Cli.Commands.Group;
 
@@ -18,36 +17,25 @@ public class GroupCommandDef(AuthOptionPack auth) : CommandDef
     public readonly GroupDeleteCommandDef Delete = new(auth);
 }
 
-public class GroupCreateCommandDef : CommandDef
+/// <summary>Create a new resource group.</summary>
+public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
-    public override string Description => "Create a new resource group.";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly LocationOptionPack Location = new();
     public readonly TagOptionPack Tags = new();
     public readonly RenderOptionPack Render = new();
 
-    public readonly Option<string?> ManagedBy;
-    public readonly Option<WaitUntil> WaitUntil;
+    /// <summary>The ID of the resource which manages this resource group.</summary>
+    [CliOption("--managed-by")]
+    public partial string? ManagedBy { get; }
 
-    private readonly AuthOptionPack _auth;
+    /// <summary>Specify whether to wait for operation completion.</summary>
+    [CliOption("--wait-until", DefaultExpr = "Azure.WaitUntil.Completed")]
+    public partial WaitUntil WaitUntil { get; }
 
-    public GroupCreateCommandDef(AuthOptionPack auth)
-    {
-        _auth = auth;
-
-        ManagedBy = new Option<string?>("--managed-by", [])
-        {
-            Description = "The ID of the resource which manages this resource group."
-        };
-
-        WaitUntil = new Option<WaitUntil>("--wait-until", [])
-        {
-            Description = "Specify whether to wait for operation completion.",
-            DefaultValueFactory = _ => Azure.WaitUntil.Completed
-        };
-    }
+    private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
@@ -57,14 +45,14 @@ public class GroupCreateCommandDef : CommandDef
 
         var data = new ResourceGroupData(Location.GetLocation())
         {
-            ManagedBy = GetValue(ManagedBy),
+            ManagedBy = ManagedBy,
         };
         Tags.AppendTagsTo(data.Tags);
 
         var op = await subscription
             .GetResourceGroups()
             .CreateOrUpdateAsync(
-                GetValue(WaitUntil),
+                WaitUntil,
                 ResourceGroup.RequireResourceGroupName(),
                 data,
                 ct
@@ -78,7 +66,8 @@ public class GroupCreateCommandDef : CommandDef
     }
 }
 
-public class GroupListCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>List resource groups.</summary>
+public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
     public override string Description => "List resource groups.";
@@ -102,7 +91,8 @@ public class GroupListCommandDef(AuthOptionPack auth) : CommandDef
     }
 }
 
-public class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>Show details of a resource group.</summary>
+public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
     public override string Description => "Show details of a resource group.";
@@ -126,36 +116,23 @@ public class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
     }
 }
 
-public class GroupDeleteCommandDef : CommandDef
+/// <summary>Delete a resource group.</summary>
+public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
-    public override string Description => "Delete a resource group.";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly ConfirmationOptionPack Confirmation = new();
 
-    public readonly Option<WaitUntil> WaitUntil;
-    public readonly Option<List<string>> ForceDeletionTypes;
+    /// <summary>Specify whether to wait for operation completion.</summary>
+    [CliOption("--wait-until", DefaultExpr = "Azure.WaitUntil.Completed")]
+    public partial WaitUntil WaitUntil { get; }
 
-    private readonly AuthOptionPack _auth;
+    /// <summary>Resource types to force delete. Supported: Microsoft.Compute/virtualMachines, Microsoft.Compute/virtualMachineScaleSets.</summary>
+    [CliOption("--force-deletion-types", "--force-deletion-type")]
+    public partial List<string> ForceDeletionTypes { get; }
 
-    public GroupDeleteCommandDef(AuthOptionPack auth)
-    {
-        _auth = auth;
-
-        WaitUntil = new Option<WaitUntil>("--wait-until", [])
-        {
-            Description = "Specify whether to wait for operation completion.",
-            DefaultValueFactory = _ => Azure.WaitUntil.Completed
-        };
-
-        ForceDeletionTypes = new Option<List<string>>("--force-deletion-types", ["--force-deletion-type"])
-        {
-            Description = "Resource types to force delete. Supported: Microsoft.Compute/virtualMachines, Microsoft.Compute/virtualMachineScaleSets.",
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.ZeroOrMore
-        };
-    }
+    private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
@@ -166,11 +143,11 @@ public class GroupDeleteCommandDef : CommandDef
 
         var rg = await subscription.GetResourceGroupAsync(ResourceGroup.RequireResourceGroupName(), ct);
 
-        var forceDeletionTypes = GetValue(ForceDeletionTypes) is { Count: > 0 } types
+        var forceDeletionTypes = ForceDeletionTypes is { Count: > 0 } types
             ? string.Join(",", types)
             : null;
 
-        await rg.Value.DeleteAsync(GetValue(WaitUntil), forceDeletionTypes, ct);
+        await rg.Value.DeleteAsync(WaitUntil, forceDeletionTypes, ct);
 
         return 0;
     }

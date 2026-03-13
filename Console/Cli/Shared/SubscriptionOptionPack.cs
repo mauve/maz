@@ -1,34 +1,24 @@
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
-using System.CommandLine;
 
 namespace Console.Cli.Shared;
 
-public class SubscriptionOptionPack : OptionPack
+public partial class SubscriptionOptionPack : OptionPack
 {
-    public readonly Option<string?> SubscriptionId;
+    /// <summary>
+    /// The subscription ID. Can be a resource identifier (/subscriptions/{id}),
+    /// a plain GUID, or the display name of a subscription you have access to.
+    /// Defaults to AZURE_SUBSCRIPTION_ID, or the default subscription if unset.
+    /// </summary>
+    [CliOption("--subscription-id", "-s", "--sub", "--subscription")]
+    public partial string? SubscriptionId { get; }
 
-    public SubscriptionOptionPack()
-    {
-        SubscriptionId = new Option<string?>(
-            "--subscription-id",
-            ["-s", "--sub", "--subscription"]
-        )
-        {
-            Description =
-                """
-            The subscription ID. Can be a resource identifier (/subscriptions/{id}),
-            a plain GUID, or the display name of a subscription you have access to.
-            Defaults to AZURE_SUBSCRIPTION_ID, or the default subscription if unset.
-            """
-        };
-    }
-
-    internal override void AddOptionsTo(Command cmd) => cmd.Add(SubscriptionId);
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
+        => AddGeneratedOptions(cmd);
 
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {
-        var requested = GetValue(SubscriptionId) ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        var requested = SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
 
         if (requested is null)
             return await armClient.GetDefaultSubscriptionAsync();

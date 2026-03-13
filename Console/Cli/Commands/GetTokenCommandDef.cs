@@ -1,104 +1,72 @@
 using Azure.Core;
 using Console.Cli.Shared;
-using System.CommandLine;
 
 namespace Console.Cli.Commands;
 
-public class GetTokenCommandDef : CommandDef
+/// <summary>Get an access token for Azure resources.</summary>
+public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-token";
-    public override string Description => "Get an access token for Azure resources.";
 
-    public readonly Option<List<string>> Scopes;
-    public readonly Option<string?> ParentRequestId;
-    public readonly Option<string?> Claims;
-    public readonly Option<string?> TenantId;
-    public readonly Option<bool> IsCaeEnabled;
-    public readonly Option<bool> IsProofOfPossessionEnabled;
-    public readonly Option<string?> ProofOfPossessionNonce;
-    public readonly Option<Uri?> ProofOfPossessionRequestUri;
-    public readonly Option<string?> ProofOfPossessionRequestMethod;
-    public readonly Option<bool> PrintRawToken;
+    /// <summary>The scopes required for the token.</summary>
+    [CliOption("--scopes", "--resource", "--resources", DefaultExpr = "new System.Collections.Generic.List<string> { \"https://management.azure.com/.default\" }")]
+    public partial List<string> Scopes { get; }
 
-    private readonly AuthOptionPack _auth;
+    /// <summary>The parent request ID for the token request.</summary>
+    [CliOption("--parent-request-id")]
+    public partial string? ParentRequestId { get; }
 
-    public GetTokenCommandDef(AuthOptionPack auth)
-    {
-        _auth = auth;
+    /// <summary>Additional claims to be included in the token.</summary>
+    [CliOption("--claims")]
+    public partial string? Claims { get; }
 
-        Scopes = new Option<List<string>>("--scopes", ["--resource", "--resources"])
-        {
-            Description = "The scopes required for the token.",
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.OneOrMore,
-            DefaultValueFactory = _ => ["https://management.azure.com/.default"]
-        };
+    /// <summary>The tenant ID for the token request.</summary>
+    [CliOption("--tenant-id")]
+    public partial string? TenantId { get; }
 
-        ParentRequestId = new Option<string?>("--parent-request-id", [])
-        {
-            Description = "The parent request ID for the token request."
-        };
+    /// <summary>Enable Continuous Access Evaluation (CAE).</summary>
+    [CliOption("--is-cae-enabled")]
+    public partial bool IsCaeEnabled { get; }
 
-        Claims = new Option<string?>("--claims", [])
-        {
-            Description = "Additional claims to be included in the token."
-        };
+    /// <summary>Enable Proof of Possession (PoP).</summary>
+    [CliOption("--is-proof-of-possession-enabled")]
+    public partial bool IsProofOfPossessionEnabled { get; }
 
-        TenantId = new Option<string?>("--tenant-id", [])
-        {
-            Description = "The tenant ID for the token request."
-        };
+    /// <summary>The nonce value required for PoP token requests.</summary>
+    [CliOption("--proof-of-possession-nonce")]
+    public partial string? ProofOfPossessionNonce { get; }
 
-        IsCaeEnabled = new Option<bool>("--is-cae-enabled", [])
-        {
-            Description = "Enable Continuous Access Evaluation (CAE)."
-        };
+    /// <summary>The resource request URI to be authorized with a PoP token.</summary>
+    [CliOption("--proof-of-possession-request-uri")]
+    public partial Uri? ProofOfPossessionRequestUri { get; }
 
-        IsProofOfPossessionEnabled = new Option<bool>("--is-proof-of-possession-enabled", [])
-        {
-            Description = "Enable Proof of Possession (PoP)."
-        };
+    /// <summary>The HTTP method of the resource request (e.g. GET, POST).</summary>
+    [CliOption("--proof-of-possession-request-method")]
+    public partial string? ProofOfPossessionRequestMethod { get; }
 
-        ProofOfPossessionNonce = new Option<string?>("--proof-of-possession-nonce", [])
-        {
-            Description = "The nonce value required for PoP token requests."
-        };
+    /// <summary>Print the raw token.</summary>
+    [CliOption("--print-raw-token", DefaultExpr = "true")]
+    public partial bool PrintRawToken { get; }
 
-        ProofOfPossessionRequestUri = new Option<Uri?>("--proof-of-possession-request-uri", [])
-        {
-            Description = "The resource request URI to be authorized with a PoP token.",
-            CustomParser = r => r.Tokens.Count > 0 ? new Uri(r.Tokens[0].Value) : null
-        };
-
-        ProofOfPossessionRequestMethod = new Option<string?>("--proof-of-possession-request-method", [])
-        {
-            Description = "The HTTP method of the resource request (e.g. GET, POST)."
-        };
-
-        PrintRawToken = new Option<bool>("--print-raw-token", [])
-        {
-            Description = "Print the raw token.",
-            DefaultValueFactory = _ => true
-        };
-    }
+    private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var requestContext = new TokenRequestContext(
-            [.. GetValue(Scopes)],
-            GetValue(ParentRequestId),
-            GetValue(Claims),
-            GetValue(TenantId),
-            GetValue(IsCaeEnabled),
-            GetValue(IsProofOfPossessionEnabled),
-            GetValue(ProofOfPossessionNonce),
-            GetValue(ProofOfPossessionRequestUri),
-            GetValue(ProofOfPossessionRequestMethod)
+            [.. Scopes],
+            ParentRequestId,
+            Claims,
+            TenantId,
+            IsCaeEnabled,
+            IsProofOfPossessionEnabled,
+            ProofOfPossessionNonce,
+            ProofOfPossessionRequestUri,
+            ProofOfPossessionRequestMethod
         );
 
         var result = await _auth.GetCredential().GetTokenAsync(requestContext, ct);
 
-        if (GetValue(PrintRawToken))
+        if (PrintRawToken)
         {
             System.Console.Write(result.Token);
         }

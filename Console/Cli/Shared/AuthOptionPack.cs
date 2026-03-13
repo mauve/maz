@@ -1,87 +1,67 @@
 using Azure.Core;
 using Azure.Identity;
-using System.CommandLine;
 
 namespace Console.Cli.Shared;
 
-public class AuthOptionPack : OptionPack
+/// <summary>Authentication options shared across all commands.</summary>
+public partial class AuthOptionPack : OptionPack
 {
-    public readonly GlobalOption<bool> Interactive;
-    public readonly GlobalOption<List<string>> AdditionallyAllowedTenants;
-    public readonly GlobalOption<Uri?> AuthorityHost;
-    public readonly GlobalOption<string?> ManagedIdentityClientId;
-    public readonly GlobalOption<string?> ManagedIdentityResourceId;
-    public readonly GlobalOption<string?> SharedTokenCacheUsername;
-    public readonly GlobalOption<string?> DefaultTenantId;
-    public readonly GlobalOption<string?> AuthenticationClientId;
-    public readonly GlobalOption<List<string>> AllowedCredentialTypes;
-    public readonly GlobalOption<string?> TokenFilePath;
+    /// <summary>Allow interactive mode</summary>
+    [CliOption("--interactive", Global = true, DefaultExpr = "true")]
+    public partial bool Interactive { get; }
 
-    public AuthOptionPack()
-    {
-        Interactive = new GlobalOption<bool>("--interactive", "Allow interactive mode")
-        {
-            DefaultValueFactory = _ => true
-        };
+    /// <summary>Specifies additional tenants for which the credential may acquire tokens.</summary>
+    [CliOption("--additionally-allowed-tenants", Global = true, DefaultExpr = "new System.Collections.Generic.List<string>()")]
+    public partial List<string> AdditionallyAllowedTenants { get; }
 
-        AdditionallyAllowedTenants = new GlobalOption<List<string>>(
-            "--additionally-allowed-tenants",
-            "Specifies additional tenants for which the credential may acquire tokens."
-        )
-        {
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.ZeroOrMore,
-            DefaultValueFactory = _ => []
-        };
+    /// <summary>The host of the Microsoft Entra authority.</summary>
+    [CliOption("--authority-host", Global = true)]
+    public partial Uri? AuthorityHost { get; }
 
-        AuthorityHost = new GlobalOption<Uri?>("--authority-host", "The host of the Microsoft Entra authority.")
-        {
-            CustomParser = r => r.Tokens.Count > 0 ? new Uri(r.Tokens[0].Value) : null
-        };
+    /// <summary>Client ID of a user-assigned managed identity. Defaults to AZURE_CLIENT_ID.</summary>
+    [CliOption("--managed-identity-client-id", Global = true)]
+    public partial string? ManagedIdentityClientId { get; }
 
-        ManagedIdentityClientId = new GlobalOption<string?>("--managed-identity-client-id", "Client ID of a user-assigned managed identity. Defaults to AZURE_CLIENT_ID.");
-        ManagedIdentityResourceId = new GlobalOption<string?>("--managed-identity-resource-id", "Resource ID of a user-assigned managed identity.");
-        SharedTokenCacheUsername = new GlobalOption<string?>("--shared-token-cache-username", "Preferred account from the shared token cache. Defaults to AZURE_USERNAME.");
-        DefaultTenantId = new GlobalOption<string?>("--default-tenant-id", "The ID of the tenant to which the credential will authenticate by default.");
-        AuthenticationClientId = new GlobalOption<string?>("--authentication-client-id", "Client ID of the identity which will authenticate. Defaults to AZURE_CLIENT_ID.");
+    /// <summary>Resource ID of a user-assigned managed identity.</summary>
+    [CliOption("--managed-identity-resource-id", Global = true)]
+    public partial string? ManagedIdentityResourceId { get; }
 
-        AllowedCredentialTypes = new GlobalOption<List<string>>("--allowed-credential-types", "Specifies the credential types that will be used for authentication.")
-        {
-            AllowMultipleArgumentsPerToken = true,
-            Arity = ArgumentArity.OneOrMore,
-            DefaultValueFactory = _ => ["cli", "devicecode", "env"]
-        };
+    /// <summary>Preferred account from the shared token cache. Defaults to AZURE_USERNAME.</summary>
+    [CliOption("--shared-token-cache-username", Global = true)]
+    public partial string? SharedTokenCacheUsername { get; }
 
-        TokenFilePath = new GlobalOption<string?>("--token-file-path", "Path to the workload identity token file. Defaults to AZURE_FEDERATED_TOKEN_FILE.");
-    }
+    /// <summary>The ID of the tenant to which the credential will authenticate by default.</summary>
+    [CliOption("--default-tenant-id", Global = true)]
+    public partial string? DefaultTenantId { get; }
 
-    internal override void AddOptionsTo(Command cmd)
-    {
-        cmd.Add(Interactive);
-        cmd.Add(AdditionallyAllowedTenants);
-        cmd.Add(AuthorityHost);
-        cmd.Add(ManagedIdentityClientId);
-        cmd.Add(ManagedIdentityResourceId);
-        cmd.Add(SharedTokenCacheUsername);
-        cmd.Add(DefaultTenantId);
-        cmd.Add(AuthenticationClientId);
-        cmd.Add(AllowedCredentialTypes);
-        cmd.Add(TokenFilePath);
-    }
+    /// <summary>Client ID of the identity which will authenticate. Defaults to AZURE_CLIENT_ID.</summary>
+    [CliOption("--authentication-client-id", Global = true)]
+    public partial string? AuthenticationClientId { get; }
 
-    public bool GetInteractive() => GetValue(Interactive);
+    /// <summary>Specifies the credential types that will be used for authentication.</summary>
+    [CliOption("--allowed-credential-types", Global = true, DefaultExpr = "new System.Collections.Generic.List<string> { \"cli\", \"devicecode\", \"env\" }")]
+    public partial List<string> AllowedCredentialTypes { get; }
+
+    /// <summary>Path to the workload identity token file. Defaults to AZURE_FEDERATED_TOKEN_FILE.</summary>
+    [CliOption("--token-file-path", Global = true)]
+    public partial string? TokenFilePath { get; }
+
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
+        => AddGeneratedOptions(cmd);
+
+    public bool GetInteractive() => Interactive;
 
     public TokenCredential GetCredential()
     {
-        var allowedTypes = GetValue(AllowedCredentialTypes) ?? ["cli", "devicecode", "env"];
-        var authorityHost = GetValue(AuthorityHost);
-        var defaultTenantId = GetValue(DefaultTenantId);
-        var additionalTenants = GetValue(AdditionallyAllowedTenants) ?? [];
-        var managedIdentityClientId = GetValue(ManagedIdentityClientId);
-        var managedIdentityResourceId = GetValue(ManagedIdentityResourceId);
-        var authClientId = GetValue(AuthenticationClientId);
-        var tokenFilePath = GetValue(TokenFilePath);
-        var sharedCacheUsername = GetValue(SharedTokenCacheUsername);
+        var allowedTypes = AllowedCredentialTypes ?? ["cli", "devicecode", "env"];
+        var authorityHost = AuthorityHost;
+        var defaultTenantId = DefaultTenantId;
+        var additionalTenants = AdditionallyAllowedTenants ?? [];
+        var managedIdentityClientId = ManagedIdentityClientId;
+        var managedIdentityResourceId = ManagedIdentityResourceId;
+        var authClientId = AuthenticationClientId;
+        var tokenFilePath = TokenFilePath;
+        var sharedCacheUsername = SharedTokenCacheUsername;
 
         List<TokenCredential> credentials = [];
         foreach (var type in allowedTypes)

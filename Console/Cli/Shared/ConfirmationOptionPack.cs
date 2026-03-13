@@ -1,28 +1,20 @@
-using System.CommandLine;
-
 namespace Console.Cli.Shared;
 
-public class ConfirmationOptionPack : OptionPack
+public partial class ConfirmationOptionPack : OptionPack
 {
-    public readonly Option<bool> Confirm;
+    /// <summary>
+    /// Confirms the operation without prompting. Required when running non-interactively.
+    /// If omitted and --interactive is set, a prompt is shown.
+    /// </summary>
+    [CliOption("--yes", "-y", "--confirm")]
+    public partial bool Confirm { get; }
 
-    public ConfirmationOptionPack()
-    {
-        Confirm = new Option<bool>("--yes", ["-y", "--confirm"])
-        {
-            Description =
-                """
-            Confirms the operation without prompting. Required when running non-interactively.
-            If omitted and --interactive is set, a prompt is shown.
-            """
-        };
-    }
-
-    internal override void AddOptionsTo(Command cmd) => cmd.Add(Confirm);
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
+        => AddGeneratedOptions(cmd);
 
     public void RequireConfirmation(bool interactive)
     {
-        if (GetValue(Confirm))
+        if (Confirm)
             return;
 
         if (!interactive || System.Console.IsInputRedirected)

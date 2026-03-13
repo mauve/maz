@@ -24,8 +24,11 @@ public class GlobalOption<T> : Option<T>, IGlobalOption
     }
 }
 
-public abstract class OptionPack
+public abstract partial class OptionPack
 {
+    /// <inheritdoc cref="AddGeneratedOptions"/>
+    protected virtual void AddGeneratedOptions(Command cmd) { }
+
     private ParseResult _result = null!;
 
     internal void SetParseResult(ParseResult r) => _result = r;

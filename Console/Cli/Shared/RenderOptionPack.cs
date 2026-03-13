@@ -1,38 +1,26 @@
-using System.CommandLine;
 using System.Text.Json;
 using Console.Rendering;
 
 namespace Console.Cli.Shared;
 
-public class RenderOptionPack : OptionPack
+public partial class RenderOptionPack : OptionPack
 {
-    public readonly Option<string?> OutputFormat;
-    public readonly Option<bool> OutputIndented;
+    /// <summary>The output format. Defaults to 'table'. Allowed: json, table.</summary>
+    [CliOption("--output-format", "-f", "--format")]
+    public partial string? OutputFormat { get; }
 
-    public RenderOptionPack()
-    {
-        OutputFormat = new Option<string?>("--output-format", ["-f", "--format"])
-        {
-            Description = "The output format. Defaults to 'table'. Allowed: json, table."
-        };
+    /// <summary>Whether to output rendered content in an indented format.</summary>
+    [CliOption("--output-indented", "-i", "--indent")]
+    public partial bool OutputIndented { get; }
 
-        OutputIndented = new Option<bool>("--output-indented", ["-i", "--indent"])
-        {
-            Description = "Whether to output rendered content in an indented format."
-        };
-    }
-
-    internal override void AddOptionsTo(Command cmd)
-    {
-        cmd.Add(OutputFormat);
-        cmd.Add(OutputIndented);
-    }
+    internal override void AddOptionsTo(System.CommandLine.Command cmd)
+        => AddGeneratedOptions(cmd);
 
     public IRendererFactory GetRendererFactory() =>
-        GetValue(OutputFormat) switch
+        OutputFormat switch
         {
             "json" => new JsonRendererFactory(
-                GetValue(OutputIndented) ? new JsonSerializerOptions { WriteIndented = true } : JsonSerializerOptions.Default
+                OutputIndented ? new JsonSerializerOptions { WriteIndented = true } : JsonSerializerOptions.Default
             ),
             "table" or null => new TableRendererFactory(),
             var fmt => throw new InvocationException(
