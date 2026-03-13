@@ -16,6 +16,34 @@ public class JsonRendererFactory(JsonSerializerOptions options) : IRendererFacto
             throw new NotSupportedException($"No JSON renderer available for type {type.FullName}");
         }
     }
+
+    ICollectionRenderer IRendererFactory.CreateCollectionRenderer<T>() =>
+        new JsonCollectionRenderer<T>(options);
+}
+
+internal class JsonCollectionRenderer<T>(JsonSerializerOptions options) : ICollectionRenderer
+{
+    public async Task RenderAllAsync(TextWriter output, IAsyncEnumerable<object> items, CancellationToken ct)
+    {
+        using var throbber = new Throbber("Fetching…");
+        var all = new List<object>();
+        await foreach (var item in items.WithCancellation(ct))
+            all.Add(item);
+        throbber.Dispose();
+
+        // Extract .Data if ArmResource
+        var dataItems = all.Select(item =>
+        {
+            if (item is ArmResource)
+            {
+                var dataProp = item.GetType().GetProperty("Data");
+                return dataProp?.GetValue(item);
+            }
+            return item;
+        }).ToList();
+
+        output.WriteLine(System.Text.Json.JsonSerializer.Serialize(dataItems, options));
+    }
 }
 
 internal class JsonArmResourceRenderer(JsonSerializerOptions options) : IRenderer

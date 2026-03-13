@@ -2,6 +2,7 @@ using Azure;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Console.Cli.Shared;
+using Console.Rendering;
 
 namespace Console.Cli.Commands.Group;
 
@@ -74,12 +75,12 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
         var rendererFactory = Render.GetRendererFactory();
         var armClient = new ArmClient(_auth.GetCredential());
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
-        var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
 
-        await foreach (
-            var rg in subscription.GetResourceGroups().GetAllAsync(cancellationToken: ct)
-        )
-            await renderer.RenderAsync(System.Console.Out, rg, ct);
+        var renderer = rendererFactory.CreateCollectionRenderer<ResourceGroupResource>();
+        await renderer.RenderAllAsync(
+            System.Console.Out,
+            subscription.GetResourceGroups().GetAllAsync(cancellationToken: ct).ToAsyncObjects(ct),
+            ct);
 
         return 0;
     }
