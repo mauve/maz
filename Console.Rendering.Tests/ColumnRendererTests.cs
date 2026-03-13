@@ -14,8 +14,7 @@ public class ColumnRendererTests
         IRendererFactory factory = new ColumnRendererFactory(new ValueFormatterOptions());
         var renderer = factory.CreateCollectionRenderer<Item>();
 
-        var items = new[] { new Item("alpha", 1), new Item("beta", 2) }
-            .ToAsyncEnumerableObjects();
+        var items = new[] { new Item("alpha", 1), new Item("beta", 2) }.ToAsyncEnumerableObjects();
 
         using var writer = new StringWriter();
         await renderer.RenderAllAsync(writer, items, CancellationToken.None);
