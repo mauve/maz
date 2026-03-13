@@ -64,7 +64,8 @@ public class ValueFormatterTests
     [TestMethod]
     public void Format_ResourceId_StripsSubscriptionAndFormatsRg()
     {
-        var id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/foo";
+        var id =
+            "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/myRG/providers/foo";
         var result = ValueFormatter.Format(id, Opts);
         Assert.AreEqual("rg:myRG/providers/foo", result.Text);
     }
