@@ -79,6 +79,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         public string? DefaultExpression;
         public string? EnvVarAccessorSuffix;
         public string? CustomParserExpr;
+        public string? CompletionProviderTypeName;
         public bool AllowMultiple;
         public string? ArityExpr;
         public bool HasNullableAnnotation;
@@ -179,6 +180,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                 m.IsRequired = true;
             m.IsAdvanced = GetNamedBool(attr, "Advanced");
             m.EnvVar = GetNamedString(attr, "EnvVar");
+            m.CompletionProviderTypeName = GetNamedType(attr, "CompletionProviderType");
         }
 
         m.PrimaryAlias = aliases.Length > 0 ? aliases[0] : KebabCase(prop.Name);
@@ -542,6 +544,14 @@ public class CliOptionGenerator : IIncrementalGenerator
         return arg.Value.Value is true;
     }
 
+    static string? GetNamedType(AttributeData attr, string name)
+    {
+        var arg = attr.NamedArguments.FirstOrDefault(a => a.Key == name);
+        if (arg.Value.Kind != TypedConstantKind.Type || arg.Value.Value is not ITypeSymbol sym)
+            return null;
+        return sym.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+    }
+
     static string KebabCase(string name)
     {
         var sb = new StringBuilder("--");
@@ -563,6 +573,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine("#nullable enable");
         sb.AppendLine("#pragma warning disable CS1591");
         sb.AppendLine("using System.CommandLine;");
+        sb.AppendLine("using System.CommandLine.Completions;");
         sb.AppendLine("using System.Linq;");
         sb.AppendLine();
 
@@ -597,6 +608,10 @@ public class CliOptionGenerator : IIncrementalGenerator
                 initParts.Add($"DefaultValueFactory = _ => {opt.DefaultExpression}");
             if (opt.CustomParserExpr != null)
                 initParts.Add($"CustomParser = {opt.CustomParserExpr}");
+            if (opt.CompletionProviderTypeName != null)
+                initParts.Add(
+                    $"CompletionSources = {{ c => global::Console.Cli.CliCompletionProviderBridge.GetCompletions<{opt.CompletionProviderTypeName}>(c) }}"
+                );
             if (opt.IsGlobal)
                 initParts.Add("Recursive = true");
 
