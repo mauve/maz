@@ -36,8 +36,8 @@ public partial class KeyvaultRoledefinitionShowCommandDef(AuthOptionPack auth) :
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{vaultBaseUrl}/{Scope}/providers/Microsoft.Authorization/roleDefinitions/{RoleDefinitionName}";
+        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{keyVaultBaseUrl}/{Scope}/providers/Microsoft.Authorization/roleDefinitions/{RoleDefinitionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "7.5", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

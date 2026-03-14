@@ -15,6 +15,7 @@ public partial class KeyvaultRestoreStartCommandDef(AuthOptionPack auth) : Comma
 {
     public override string Name => "start";
     protected override bool IsDataPlane => true;
+    protected override bool IsDestructive => true;
 
     [CliOption("--vault-url")]
     public partial string? VaultUrl { get; }
@@ -44,8 +45,8 @@ public partial class KeyvaultRestoreStartCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{vaultBaseUrl}/restore";
+        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{keyVaultBaseUrl}/restore";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageObjectreplicationpolicyCreateOrUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create-or-update";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

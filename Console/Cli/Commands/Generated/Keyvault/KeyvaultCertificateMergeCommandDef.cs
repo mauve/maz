@@ -15,6 +15,7 @@ public partial class KeyvaultCertificateMergeCommandDef(AuthOptionPack auth) : C
 {
     public override string Name => "merge";
     protected override bool IsDataPlane => true;
+    protected override bool IsDestructive => true;
 
     [CliOption("--vault-url")]
     public partial string? VaultUrl { get; }
@@ -40,8 +41,8 @@ public partial class KeyvaultCertificateMergeCommandDef(AuthOptionPack auth) : C
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{vaultBaseUrl}/certificates/{CertificateName}/pending/merge";
+        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{keyVaultBaseUrl}/certificates/{CertificateName}/pending/merge";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

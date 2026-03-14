@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountRevokeUserDelegationKeysCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "revoke-user-delegation-keys";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

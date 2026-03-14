@@ -1,3 +1,5 @@
+using SpecGenerator.Config;
+
 namespace SpecGenerator.Modeling;
 
 /// <summary>Represents a top-level Azure service with its resource groups.</summary>
@@ -8,7 +10,8 @@ public record ServiceModel(
     bool IsDataPlane = false,
     string? HostParamName = null,
     string? Description = null,
-    string? DetailedDescription = null
+    string? DetailedDescription = null,
+    DataplaneOptionPackConfig? DataplaneOptionPack = null
 );
 
 /// <summary>Represents a group of operations on the same resource type (e.g. "account").</summary>
