@@ -17,8 +17,7 @@ public class CommandSuggesterTests
         return root;
     }
 
-    private static ParseResult Parse(RootCommand root, params string[] args) =>
-        root.Parse(args);
+    private static ParseResult Parse(RootCommand root, params string[] args) => root.Parse(args);
 
     [TestMethod]
     public void GetUnknownToken_UnmatchedCommand_ReturnsToken()
@@ -124,7 +123,7 @@ public class CommandSuggesterTests
             ["group"],
             interactive: true,
             new StringWriter(stderr),
-            () => "1"  // pick first match
+            () => "1" // pick first match
         );
 
         // Should have re-invoked one of the commands

@@ -8,7 +8,10 @@ public class InteractiveOptionPack : OptionPack
         "--interactive",
         ["--no-interactive"],
         "Allow interactive prompts. Defaults to true; auto-disabled when redirecting or TERM=dumb."
-    ) { DefaultValueFactory = _ => true };
+    )
+    {
+        DefaultValueFactory = _ => true,
+    };
 
     public bool Interactive => GetValue(InteractiveOption);
 
