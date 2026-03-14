@@ -11,5 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CliGenerator\CliGenerator.csproj" />
+    <ProjectReference Include="..\Console\Console.csproj" />
   </ItemGroup>
 </Project>
