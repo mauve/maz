@@ -11,6 +11,7 @@ public partial class RootCommandDef
     public KeyvaultCommandDef Keyvault = null!;
     public IdentityCommandDef Identity = null!;
     public SubscriptionCommandDef Subscription = null!;
+    public AuthorizationCommandDef Authorization = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -18,5 +19,6 @@ public partial class RootCommandDef
         Keyvault = new KeyvaultCommandDef(Auth);
         Identity = new IdentityCommandDef(Auth);
         Subscription = new SubscriptionCommandDef(Auth);
+        Authorization = new AuthorizationCommandDef(Auth);
     }
 }

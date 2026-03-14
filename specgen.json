@@ -318,6 +318,61 @@
           ]
         }
       ]
+    },
+    {
+      "serviceDir": "authorization",
+      "displayName": "authorization",
+      "apiVersion": "2022-04-01",
+      "description": "Manage Azure RBAC role assignments, role definitions, and deny assignments.",
+      "detailedDescription": "Commands in this group interact with the Microsoft.Authorization resource provider to manage role-based access control. Covers role assignments (grant/revoke access), role definitions (built-in and custom), deny assignments (explicit deny rules), and provider operations metadata.",
+      "resourceDescriptions": {
+        "roleassignment": "Manage role assignments that grant principals access to Azure resources.",
+        "roledefinition": "Manage role definitions including built-in and custom roles.",
+        "permission": "List effective permissions on a resource or resource group.",
+        "denyassignment": "View deny assignments that block specific actions on resources.",
+        "provider-operations-metadata": "List available operations for Azure resource providers."
+      },
+      "resourceDetailedDescriptions": {
+        "roleassignment": "Role assignments associate a security principal (user, group, service principal, or managed identity) with a role definition at a specific scope. Requires Microsoft.Authorization/roleAssignments/write permission.",
+        "roledefinition": "Role definitions specify the allowed actions, not-actions, data actions, and assignable scopes. Use custom role definitions to create least-privilege access tailored to your requirements.",
+        "permission": "Lists the effective RBAC permissions for the calling principal on a resource group or specific resource.",
+        "denyassignment": "Deny assignments are system-generated restrictions that block specific principals from performing specific actions, even if a role assignment grants access. These are read-only and cannot be created by users.",
+        "provider-operations-metadata": "Returns the full list of actions and data actions available for each Azure resource provider, useful for constructing custom role definitions."
+      },
+      "specFiles": [
+        "authorization/resource-manager/Microsoft.Authorization/Authorization/stable/2022-04-01/authorization-RoleAssignmentsCalls.json",
+        "authorization/resource-manager/Microsoft.Authorization/Authorization/stable/2022-04-01/authorization-RoleDefinitionsCalls.json",
+        "authorization/resource-manager/Microsoft.Authorization/Authorization/stable/2022-04-01/authorization-DenyAssignmentCalls.json",
+        "authorization/resource-manager/Microsoft.Authorization/Authorization/stable/2022-04-01/authorization-ProviderOperationsCalls.json"
+      ],
+      "exclude": [],
+      "actionRenames": {
+        "RoleAssignments_Get": "show",
+        "RoleAssignments_Create": "create",
+        "RoleAssignments_Delete": "delete",
+        "RoleAssignments_GetById": "show",
+        "RoleAssignments_CreateById": "create",
+        "RoleAssignments_DeleteById": "delete",
+        "RoleDefinitions_Get": "show",
+        "RoleDefinitions_CreateOrUpdate": "create",
+        "RoleDefinitions_Delete": "delete",
+        "DenyAssignments_Get": "show",
+        "DenyAssignments_GetById": "show",
+        "ProviderOperationsMetadata_Get": "show"
+      },
+      "subgroups": [
+        {
+          "resource": "roleassignment",
+          "subgroupCliName": "id",
+          "description": "Manage role assignments by full ARM resource ID.",
+          "detailedDescription": "Create, retrieve, and delete role assignments using their full ARM resource identifier rather than scope + name components.",
+          "operationIds": [
+            "RoleAssignments_GetById",
+            "RoleAssignments_CreateById",
+            "RoleAssignments_DeleteById"
+          ]
+        }
+      ]
     }
   ]
 }
