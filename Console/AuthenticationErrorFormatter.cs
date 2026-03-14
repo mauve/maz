@@ -96,19 +96,25 @@ internal static partial class AuthenticationErrorFormatter
         sb.AppendLine();
 
         // Describe what failed
+        var entries = new List<(string, string)>();
         if (failedCredential is not null && CredentialHints.TryGetValue(failedCredential, out var hint))
-            sb.AppendLine($"  Credential: {Ansi.Bold(hint.Name)}");
-
+            entries.Add(("Credential", Ansi.Bold(hint.Name)));
         if (aadCode is not null)
         {
-            sb.Append($"  Error:      {Ansi.Yellow(aadCode)}");
+            var errorValue = Ansi.Yellow(aadCode);
             if (AadStsDescriptions.TryGetValue(aadCode, out var desc))
-                sb.Append($" — {desc}");
-            sb.AppendLine();
+                errorValue += $" \u2014 {desc}";
+            entries.Add(("Error", errorValue));
         }
-
         if (tenantId is not null)
-            sb.AppendLine($"  Tenant:     {Ansi.Dim(tenantId)}");
+            entries.Add(("Tenant", Ansi.Dim(tenantId)));
+
+        if (entries.Count > 0)
+        {
+            using var block = new StringWriter();
+            DefinitionList.Write(block, entries);
+            sb.Append(block.ToString());
+        }
 
         sb.AppendLine();
 

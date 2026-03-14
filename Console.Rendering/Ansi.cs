@@ -47,4 +47,9 @@ public static partial class Ansi
 
     [GeneratedRegex(@"\[allowed: [^\]]+\]")]
     private static partial Regex AllowedValuesTagRegex();
+
+    public static int VisibleLength(string text) => AnsiEscapeRegex().Replace(text, "").Length;
+
+    [GeneratedRegex(@"\x1b\[[0-9;]*m")]
+    private static partial Regex AnsiEscapeRegex();
 }
