@@ -10,7 +10,38 @@
       "specFiles": [
         "storage/resource-manager/Microsoft.Storage/stable/2024-01-01/storage.json"
       ],
-      "exclude": []
+      "exclude": [],
+      "actionRenames": {
+        "StorageAccounts_GetProperties": "show",
+        "StorageAccounts_GetServiceStats": "show",
+        "StorageAccounts_ListKeys": "list",
+        "StorageAccounts_RegenerateKey": "regenerate"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "StorageAccounts_List",
+          "resourceGroupOperationId": "StorageAccounts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "subgroups": [
+        {
+          "resource": "account",
+          "subgroupCliName": "keys",
+          "operationIds": [
+            "StorageAccounts_ListKeys",
+            "StorageAccounts_RegenerateKey"
+          ]
+        },
+        {
+          "resource": "account",
+          "subgroupCliName": "sas",
+          "operationIds": [
+            "StorageAccounts_ListAccountSAS",
+            "StorageAccounts_ListServiceSAS"
+          ]
+        }
+      ]
     }
   ]
 }

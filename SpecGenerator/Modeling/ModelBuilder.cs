@@ -45,7 +45,9 @@ public sealed class ModelBuilder
     public ServiceModel Build(List<SpecDocument> docs)
     {
         var serviceClassName = NamingEngine.KebabToPascal(_service.DisplayName);
-        var operationsByResource = new Dictionary<string, List<OperationModel>>(StringComparer.OrdinalIgnoreCase);
+
+        // Pass 1: Build raw list, tracking original operationIds
+        var opEntries = new List<(string OperationId, string Resource, OperationModel Model)>();
 
         foreach (var doc in docs)
         {
@@ -63,33 +65,218 @@ public sealed class ModelBuilder
                     continue;
 
                 var resource = ExtractResource(operationId);
-                if (!operationsByResource.TryGetValue(resource, out var list))
-                {
-                    list = [];
-                    operationsByResource[resource] = list;
-                }
-
-                // Deduplicate by CliName within a resource group
-                if (!list.Any(o => o.CliName == model.CliName))
-                    list.Add(model);
+                opEntries.Add((operationId, resource, model));
             }
         }
 
-        var resources = operationsByResource
-            .OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
-            .Select(kv =>
+        // Pass 2: Apply action renames (before grouping, so CliName dedup sees the renamed names)
+        var actionRenames = _service.ActionRenames ?? [];
+        opEntries = opEntries
+            .Select(e =>
             {
-                var (resourceCli, _) = NamingEngine.SplitOperationId(
-                    kv.Key + "_Dummy", _service.DisplayName);
-                var resourceClassName = $"{serviceClassName}{NamingEngine.KebabToPascal(resourceCli)}CommandDef";
-                return new ResourceGroupModel(resourceCli, resourceClassName, kv.Value);
+                if (!actionRenames.TryGetValue(e.OperationId, out var newAction))
+                    return e;
+                var newClassName = NamingEngine.ToClassName(serviceClassName, e.Resource, newAction);
+                return (e.OperationId, e.Resource, e.Model with { CliName = newAction, ClassName = newClassName });
             })
             .ToList();
+
+        // Pass 3: Group by resource. Dedup by opId only (handles multi-file specs loading the
+        // same operation twice). CliName dedup is deferred to BuildResourceGroups so that
+        // ops destined for subgroups don't collide with same-named ops in the parent scope.
+        var operationsByResource = new Dictionary<string, List<(string OpId, OperationModel Model)>>(
+            StringComparer.OrdinalIgnoreCase);
+        var seenOpIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (var (opId, resource, model) in opEntries)
+        {
+            if (!seenOpIds.Add(opId))
+                continue; // same operationId loaded from multiple spec files
+
+            if (!operationsByResource.TryGetValue(resource, out var list))
+            {
+                list = [];
+                operationsByResource[resource] = list;
+            }
+
+            list.Add((opId, model));
+        }
+
+        // Pass 4: Auto-detect subscription/RG list pairs and merge them
+        if (_service.AutoDetectMerges)
+            ApplyAutoDetectMerges(operationsByResource, serviceClassName);
+
+        // Pass 5: Apply explicit merges from config
+        foreach (var merge in _service.Merges ?? [])
+            ApplyMerge(operationsByResource, merge, serviceClassName);
+
+        // Pass 6: Build ResourceGroupModels, applying subgroup config
+        var resources = BuildResourceGroups(operationsByResource, serviceClassName);
 
         return new ServiceModel(
             _service.DisplayName,
             $"{serviceClassName}CommandDef",
             resources);
+    }
+
+    private List<ResourceGroupModel> BuildResourceGroups(
+        Dictionary<string, List<(string OpId, OperationModel Model)>> operationsByResource,
+        string serviceClassName)
+    {
+        // Pre-process subgroups: move matched ops out of parent lists
+        var subgroupsByResource = new Dictionary<string, List<(string SubgroupCli, string SubgroupClassName, List<OperationModel> Ops)>>(
+            StringComparer.OrdinalIgnoreCase);
+
+        foreach (var sgConfig in _service.Subgroups ?? [])
+        {
+            if (!operationsByResource.TryGetValue(sgConfig.Resource, out var parentOps))
+                continue;
+
+            var opIdsSet = new HashSet<string>(sgConfig.OperationIds, StringComparer.OrdinalIgnoreCase);
+            var matched = parentOps.Where(o => opIdsSet.Contains(o.OpId)).ToList();
+
+            foreach (var op in matched)
+                parentOps.Remove(op);
+
+            var subgroupClassName =
+                $"{serviceClassName}{NamingEngine.KebabToPascal(sgConfig.Resource)}{NamingEngine.KebabToPascal(sgConfig.SubgroupCliName)}CommandDef";
+
+            // Prefix subgroup op class names to avoid collisions with same-named parent ops
+            // e.g. StorageAccountListCommandDef → StorageAccountKeysListCommandDef
+            var subgroupOpPrefix = $"{serviceClassName}{NamingEngine.KebabToPascal(sgConfig.Resource)}{NamingEngine.KebabToPascal(sgConfig.SubgroupCliName)}";
+            var renamedOps = matched
+                .Select(o => o.Model with
+                {
+                    ClassName = $"{subgroupOpPrefix}{NamingEngine.KebabToPascal(o.Model.CliName)}CommandDef",
+                })
+                .ToList();
+
+            if (!subgroupsByResource.TryGetValue(sgConfig.Resource, out var sgList))
+            {
+                sgList = [];
+                subgroupsByResource[sgConfig.Resource] = sgList;
+            }
+
+            sgList.Add((sgConfig.SubgroupCliName, subgroupClassName, renamedOps));
+        }
+
+        return operationsByResource
+            .OrderBy(kv => kv.Key, StringComparer.OrdinalIgnoreCase)
+            .Select(kv =>
+            {
+                var resourceCli = kv.Key;
+                var resourceClassName = $"{serviceClassName}{NamingEngine.KebabToPascal(resourceCli)}CommandDef";
+
+                var subgroups = new List<ResourceGroupModel>();
+                if (subgroupsByResource.TryGetValue(resourceCli, out var sgList))
+                {
+                    foreach (var (subgroupCli, subgroupClassName, sgOps) in sgList)
+                    {
+                        // Dedup subgroup ops by CliName
+                        subgroups.Add(new ResourceGroupModel(subgroupCli, subgroupClassName, DeduplicateByCliName(sgOps)));
+                    }
+                }
+
+                // Dedup parent ops by CliName (after subgroup ops have been removed)
+                var parentOps = DeduplicateByCliName(kv.Value.Select(t => t.Model).ToList());
+
+                return new ResourceGroupModel(
+                    resourceCli,
+                    resourceClassName,
+                    parentOps,
+                    subgroups.Count > 0 ? subgroups : null);
+            })
+            .ToList();
+    }
+
+    private static List<OperationModel> DeduplicateByCliName(IEnumerable<OperationModel> ops)
+    {
+        var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        var result = new List<OperationModel>();
+        foreach (var op in ops)
+        {
+            if (seen.Add(op.CliName))
+                result.Add(op);
+        }
+        return result;
+    }
+
+    private static void ApplyAutoDetectMerges(
+        Dictionary<string, List<(string OpId, OperationModel Model)>> opsByResource,
+        string serviceClassName)
+    {
+        foreach (var (resource, ops) in opsByResource)
+        {
+            // Subscription-scope paged ops: subscriptionId in URL, no resourceGroupName
+            var subOps = ops
+                .Where(o =>
+                    o.Model.IsPaged &&
+                    o.Model.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase) &&
+                    !o.Model.UrlTemplate.Contains("{resourceGroupName}", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            foreach (var subOp in subOps)
+            {
+                // Match: same base action + "-by-resource-group" suffix
+                var expectedRgCli = subOp.Model.CliName + "-by-resource-group";
+                var rgMatch = ops.FirstOrDefault(o =>
+                    o.Model.CliName.Equals(expectedRgCli, StringComparison.OrdinalIgnoreCase));
+
+                if (rgMatch == default)
+                    continue;
+
+                // Merge: RG-scope op inherits the subscription URL and is renamed to the base action
+                var mergedModel = rgMatch.Model with
+                {
+                    CliName = subOp.Model.CliName,
+                    ClassName = NamingEngine.ToClassName(serviceClassName, resource, subOp.Model.CliName),
+                    MergedSubscriptionUrlTemplate = subOp.Model.UrlTemplate,
+                };
+
+                var rgIdx = ops.IndexOf(rgMatch);
+                ops[rgIdx] = (rgMatch.OpId, mergedModel);
+                ops.Remove(subOp);
+            }
+        }
+    }
+
+    private static void ApplyMerge(
+        Dictionary<string, List<(string OpId, OperationModel Model)>> opsByResource,
+        MergeConfig merge,
+        string serviceClassName)
+    {
+        (string Resource, (string OpId, OperationModel Model) Entry)? subEntry = null;
+        (string Resource, (string OpId, OperationModel Model) Entry)? rgEntry = null;
+
+        foreach (var (resource, ops) in opsByResource)
+        {
+            foreach (var op in ops)
+            {
+                if (op.OpId.Equals(merge.SubscriptionOperationId, StringComparison.OrdinalIgnoreCase))
+                    subEntry = (resource, op);
+                else if (op.OpId.Equals(merge.ResourceGroupOperationId, StringComparison.OrdinalIgnoreCase))
+                    rgEntry = (resource, op);
+            }
+        }
+
+        if (subEntry is null || rgEntry is null)
+            return;
+
+        var (rgResource, rgOp) = rgEntry.Value;
+        var (subResource, subOp) = subEntry.Value;
+
+        var mergedModel = rgOp.Model with
+        {
+            CliName = merge.CliAction,
+            ClassName = NamingEngine.ToClassName(serviceClassName, rgResource, merge.CliAction),
+            MergedSubscriptionUrlTemplate = subOp.Model.UrlTemplate,
+        };
+
+        var rgList = opsByResource[rgResource];
+        var rgIdx = rgList.IndexOf(rgOp);
+        rgList[rgIdx] = (rgOp.OpId, mergedModel);
+
+        opsByResource[subResource].Remove(subOp);
     }
 
     private string ExtractResource(string operationId)

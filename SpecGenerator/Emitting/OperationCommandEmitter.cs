@@ -33,13 +33,15 @@ public static class OperationCommandEmitter
             w.Line($"public override string Name => \"{op.CliName}\";");
             w.Line();
 
-            // Determine if this operation uses a resource group path param
+            // Determine scope flags
+            var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
             var usesResourceGroup = op.UrlTemplate.Contains(
                 "{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
             var usesSubscription = op.UrlTemplate.Contains(
                 "{subscriptionId}", StringComparison.OrdinalIgnoreCase);
 
-            if (usesResourceGroup)
+            // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
+            if (usesResourceGroup || isMergedList)
                 w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
             else if (usesSubscription)
                 w.Line("public readonly SubscriptionOptionPack Subscription = new();");
@@ -51,9 +53,6 @@ public static class OperationCommandEmitter
             foreach (var param in op.CliParams)
             {
                 var requiredAttr = param.Required ? ", Required = true" : "";
-                var desc = param.Description is { Length: > 0 }
-                    ? $"/// <summary>{EscapeXml(param.Description)}</summary>\n    "
-                    : "";
                 w.Line($"[CliOption(\"{param.CliFlag}\"{requiredAttr})]");
                 w.Line($"public partial string? {param.PropertyName} {{ get; }}");
                 w.Line();
@@ -68,8 +67,7 @@ public static class OperationCommandEmitter
                                    bp.TypeHint == "int" ? "int" :
                                    bp.TypeHint == "double" ? "double" :
                                    "string";
-                    var nullable = typeName == "bool" || typeName == "int" || typeName == "double"
-                        ? $"{typeName}?" : $"{typeName}?";
+                    var nullable = $"{typeName}?";
                     var requiredAttr = bp.Required ? ", Required = true" : "";
 
                     w.Line($"[CliOption(\"{bp.CliFlag}\"{requiredAttr})]");
@@ -105,7 +103,7 @@ public static class OperationCommandEmitter
                 w.Line("var client = new AzureRestClient(_auth.GetCredential());");
 
                 // Build path
-                EmitPathBuilder(w, op, usesResourceGroup, usesSubscription);
+                EmitPathBuilder(w, op, isMergedList, usesResourceGroup, usesSubscription);
                 w.Line();
 
                 if (op.IsPaged)
@@ -135,12 +133,26 @@ public static class OperationCommandEmitter
     private static void EmitPathBuilder(
         CodeWriter w,
         OperationModel op,
+        bool isMergedList,
         bool usesResourceGroup,
         bool usesSubscription)
     {
-        // Build the path expression by replacing URL template parameters with C# expressions
-        var pathExpr = BuildPathExpression(op.UrlTemplate, op, usesResourceGroup, usesSubscription);
-        w.Line($"var path = {pathExpr};");
+        if (isMergedList)
+        {
+            // Conditional path: RG-scope when --resource-group (or env var) is given,
+            // subscription-scope otherwise. Both branches use ResourceGroupOptionPack.
+            var rgPath = BuildPathExpression(op.UrlTemplate, op, usesResourceGroup: true, usesSubscription: true);
+            var subPath = BuildMergedSubscriptionPath(op.MergedSubscriptionUrlTemplate!, op);
+            w.Line("var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable(\"AZURE_RESOURCE_GROUP\");");
+            w.Line($"var path = effectiveRg is not null");
+            w.Line($"    ? {rgPath}");
+            w.Line($"    : {subPath};");
+        }
+        else
+        {
+            var pathExpr = BuildPathExpression(op.UrlTemplate, op, usesResourceGroup, usesSubscription);
+            w.Line($"var path = {pathExpr};");
+        }
     }
 
     private static string BuildPathExpression(
@@ -160,6 +172,27 @@ public static class OperationCommandEmitter
             .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}");
 
         // Replace remaining path parameters with property access
+        foreach (var param in op.CliParams.Where(p => p.ParamIn == "path"))
+        {
+            expr = expr.Replace(
+                $"{{{param.UrlParameterName}}}",
+                $"{{{param.PropertyName}}}",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        return $"$\"{expr}\"";
+    }
+
+    /// <summary>
+    /// Builds the subscription-scope path for a merged list command.
+    /// Always uses ResourceGroup.Subscription for subscriptionId.
+    /// </summary>
+    private static string BuildMergedSubscriptionPath(string urlTemplate, OperationModel op)
+    {
+        var expr = urlTemplate
+            .Replace("{subscriptionId}", "{ResourceGroup.Subscription.RequireSubscriptionId()}",
+                StringComparison.OrdinalIgnoreCase);
+
         foreach (var param in op.CliParams.Where(p => p.ParamIn == "path"))
         {
             expr = expr.Replace(

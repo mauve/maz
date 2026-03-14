@@ -124,7 +124,12 @@ public static partial class NamingEngine
         {
             var c = pascalCase[i];
             if (char.IsUpper(c) && i > 0)
-                sb.Append('-');
+            {
+                var prevIsLower = char.IsLower(pascalCase[i - 1]);
+                var nextIsLower = i + 1 < pascalCase.Length && char.IsLower(pascalCase[i + 1]);
+                if (prevIsLower || nextIsLower)
+                    sb.Append('-');
+            }
             sb.Append(char.ToLowerInvariant(c));
         }
 
