@@ -9,4 +9,5 @@
   <Project Path="Console.Rendering.Tests/Console.Rendering.Tests.csproj" />
   <Project Path="CliGenerator/CliGenerator.csproj" />
   <Project Path="CliGenerator.Tests/CliGenerator.Tests.csproj" />
+  <Project Path="SpecGenerator/SpecGenerator.csproj" />
 </Solution>
