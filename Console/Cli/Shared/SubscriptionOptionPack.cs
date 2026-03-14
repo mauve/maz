@@ -54,8 +54,15 @@ public partial class SubscriptionOptionPack : OptionPack
             return armClient.GetSubscriptionResource(new(hint));
 
         if (hint.StartsWith("/s/", StringComparison.OrdinalIgnoreCase))
+        {
+            // /s/name:guid  → use the guid, ignore the human-readable name prefix
+            // /s/guid       → use as-is
+            var token = hint[3..];
+            var colonIdx = token.IndexOf(':');
+            var id = colonIdx >= 0 ? token[(colonIdx + 1)..] : token;
             return armClient.GetSubscriptionResource(
-                new ResourceIdentifier("/subscriptions/" + hint[3..]));
+                new ResourceIdentifier("/subscriptions/" + id));
+        }
 
         if (Guid.TryParse(hint, out var guid))
             return armClient.GetSubscriptionResource(
@@ -87,17 +94,18 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
             if (string.IsNullOrWhiteSpace(id))
                 continue;
 
+            var name = sub.Data.DisplayName ?? "";
+            var candidate = $"/s/{name}:{id}";
+
             if (
                 word.Length > 0
+                && !candidate.StartsWith(word, StringComparison.OrdinalIgnoreCase)
+                && !name.Contains(word, StringComparison.OrdinalIgnoreCase)
                 && !id.StartsWith(word, StringComparison.OrdinalIgnoreCase)
-                && !(
-                    sub.Data.DisplayName?.Contains(word, StringComparison.OrdinalIgnoreCase)
-                    ?? false
-                )
             )
                 continue;
 
-            suggestions.Add(id);
+            suggestions.Add(candidate);
         }
 
         return suggestions;
