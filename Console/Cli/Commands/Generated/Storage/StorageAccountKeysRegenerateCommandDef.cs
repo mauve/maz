@@ -9,9 +9,9 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Regenerates one of the access keys or Kerberos keys for the specified storage account.</summary>
-public partial class StorageAccountRegenerateKeyCommandDef(AuthOptionPack auth) : CommandDef
+public partial class StorageAccountKeysRegenerateCommandDef(AuthOptionPack auth) : CommandDef
 {
-    public override string Name => "regenerate-key";
+    public override string Name => "regenerate";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();

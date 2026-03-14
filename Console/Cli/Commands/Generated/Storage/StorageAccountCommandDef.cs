@@ -9,16 +9,11 @@ public partial class StorageAccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "account";
     public readonly StorageAccountCheckNameAvailabilityCommandDef CheckNameAvailability = new(auth);
-    public readonly StorageAccountGetPropertiesCommandDef GetProperties = new(auth);
+    public readonly StorageAccountShowCommandDef Show = new(auth);
     public readonly StorageAccountCreateCommandDef Create = new(auth);
     public readonly StorageAccountDeleteCommandDef Delete = new(auth);
     public readonly StorageAccountUpdateCommandDef Update = new(auth);
     public readonly StorageAccountListCommandDef List = new(auth);
-    public readonly StorageAccountListByResourceGroupCommandDef ListByResourceGroup = new(auth);
-    public readonly StorageAccountListKeysCommandDef ListKeys = new(auth);
-    public readonly StorageAccountRegenerateKeyCommandDef RegenerateKey = new(auth);
-    public readonly StorageAccountListAccountSASCommandDef ListAccountSAS = new(auth);
-    public readonly StorageAccountListServiceSASCommandDef ListServiceSAS = new(auth);
     public readonly StorageAccountFailoverCommandDef Failover = new(auth);
     public readonly StorageAccountHierarchicalNamespaceMigrationCommandDef HierarchicalNamespaceMigration = new(auth);
     public readonly StorageAccountAbortHierarchicalNamespaceMigrationCommandDef AbortHierarchicalNamespaceMigration = new(auth);
@@ -26,4 +21,6 @@ public partial class StorageAccountCommandDef(AuthOptionPack auth) : CommandDef
     public readonly StorageAccountGetCustomerInitiatedMigrationCommandDef GetCustomerInitiatedMigration = new(auth);
     public readonly StorageAccountRestoreBlobRangesCommandDef RestoreBlobRanges = new(auth);
     public readonly StorageAccountRevokeUserDelegationKeysCommandDef RevokeUserDelegationKeys = new(auth);
+    public readonly StorageAccountKeysCommandDef Keys = new(auth);
+    public readonly StorageAccountSasCommandDef Sas = new(auth);
 }

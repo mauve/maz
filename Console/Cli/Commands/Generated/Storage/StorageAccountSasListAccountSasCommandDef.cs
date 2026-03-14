@@ -8,10 +8,10 @@ using Console.Rendering;
 
 namespace Console.Cli.Commands.Generated;
 
-/// <summary>List service SAS credentials of a specific resource.</summary>
-public partial class StorageAccountListServiceSASCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>List SAS credentials of a storage account.</summary>
+public partial class StorageAccountSasListAccountSasCommandDef(AuthOptionPack auth) : CommandDef
 {
-    public override string Name => "list-service-s-a-s";
+    public override string Name => "list-account-sas";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
@@ -19,8 +19,17 @@ public partial class StorageAccountListServiceSASCommandDef(AuthOptionPack auth)
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
-    [CliOption("--canonicalized-resource", Required = true)]
-    public partial string? CanonicalizedResource { get; }
+    [CliOption("--signed-services", Required = true)]
+    public partial string? SignedServices { get; }
+
+    [CliOption("--signed-resource-types", Required = true)]
+    public partial string? SignedResourceTypes { get; }
+
+    [CliOption("--signed-permission", Required = true)]
+    public partial string? SignedPermission { get; }
+
+    [CliOption("--signed-expiry", Required = true)]
+    public partial string? SignedExpiry { get; }
 
     /// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>
     [CliOption("--body-json")]
@@ -31,13 +40,16 @@ public partial class StorageAccountListServiceSASCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/ListServiceSas";
+        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/ListAccountSas";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()
             : new JsonObject
             {
-                ["canonicalizedResource"] = JsonValue.Create(CanonicalizedResource),
+                ["signedServices"] = JsonValue.Create(SignedServices),
+                ["signedResourceTypes"] = JsonValue.Create(SignedResourceTypes),
+                ["signedPermission"] = JsonValue.Create(SignedPermission),
+                ["signedExpiry"] = JsonValue.Create(SignedExpiry),
             };
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-01-01", body, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

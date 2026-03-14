@@ -8,12 +8,12 @@ using Console.Rendering;
 
 namespace Console.Cli.Commands.Generated;
 
-/// <summary>Lists all the storage accounts available under the subscription. Note that storage keys are not returned; use the ListKeys operation for this.</summary>
+/// <summary>Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.</summary>
 public partial class StorageAccountListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
 
-    public readonly SubscriptionOptionPack Subscription = new();
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
     private readonly AuthOptionPack _auth = auth;
@@ -21,7 +21,10 @@ public partial class StorageAccountListCommandDef(AuthOptionPack auth) : Command
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.Storage/storageAccounts";
+        var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+        var path = effectiveRg is not null
+            ? $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts"
+            : $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/providers/Microsoft.Storage/storageAccounts";
 
         var allItems = client.GetAllAsync(path, "2024-01-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();
