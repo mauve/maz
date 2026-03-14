@@ -134,6 +134,13 @@ public abstract partial class CommandDef
                             System.Console.Error.WriteLine(ex.ToString());
                         return 1;
                     }
+                    catch (System.Net.Http.HttpRequestException ex)
+                    {
+                        System.Console.Error.WriteLine(HttpRequestErrorFormatter.Format(ex));
+                        if (result.GetValue(Shared.DiagnosticOptionPack.DetailedErrorsOption))
+                            System.Console.Error.WriteLine(ex.ToString());
+                        return 1;
+                    }
                 }
             );
         }
