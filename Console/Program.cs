@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.CommandLine.Completions;
 using System.CommandLine.Help;
 using Console.Cli;
+using Console.Rendering;
 
 var rootDef = new RootCommandDef();
 var rootCmd = rootDef.Build();
@@ -26,7 +27,27 @@ foreach (var cmd in AllCommands(rootCmd))
 
 ((RootCommand)rootCmd).Add(new SuggestDirective());
 var config = new CommandLineConfiguration(rootCmd);
-return rootCmd.Parse(args, config).Invoke();
+var result = rootCmd.Parse(args, config);
+
+if (result.Errors.Count > 0 && result.Action is not HelpAction)
+{
+    var cmd = result.CommandResult.Command;
+    bool showAdvanced = Array.Exists(args, a => a == "--help-more");
+
+    var helpOpt = showAdvanced
+        ? cmd.Options.OfType<HelpOption>().FirstOrDefault(o => o.Aliases.Contains("--help-more"))
+        : cmd.Options.OfType<HelpOption>().FirstOrDefault(o => !o.Aliases.Contains("--help-more"));
+
+    if (helpOpt?.Action is HelpAction helpAction)
+        helpAction.Invoke(result);
+
+    System.Console.Error.WriteLine();
+    foreach (var error in result.Errors)
+        System.Console.Error.WriteLine(Ansi.Red(error.Message));
+    return 1;
+}
+
+return result.Invoke();
 
 static IEnumerable<Command> AllCommands(Command root)
 {
