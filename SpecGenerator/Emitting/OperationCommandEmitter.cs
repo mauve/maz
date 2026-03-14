@@ -7,7 +7,7 @@ namespace SpecGenerator.Emitting;
 /// </summary>
 public static class OperationCommandEmitter
 {
-    public static string Emit(OperationModel op, string serviceClassName, string ns)
+    public static string Emit(OperationModel op, string serviceClassName, string ns, bool isDataPlane = false)
     {
         var w = new CodeWriter();
 
@@ -28,23 +28,35 @@ public static class OperationCommandEmitter
 
         w.Line($"/// <summary>{EscapeXml(summary)}</summary>");
 
+        // Determine scope flags (computed here so both field decls and ExecuteAsync can use them)
+        var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
+        var usesResourceGroup = !isDataPlane && op.UrlTemplate.Contains(
+            "{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
+        var usesSubscription = !isDataPlane && op.UrlTemplate.Contains(
+            "{subscriptionId}", StringComparison.OrdinalIgnoreCase);
+
         w.Block($"public partial class {op.ClassName}(AuthOptionPack auth) : CommandDef", () =>
         {
             w.Line($"public override string Name => \"{op.CliName}\";");
+            if (isDataPlane)
+                w.Line("protected override bool IsDataPlane => true;");
             w.Line();
 
-            // Determine scope flags
-            var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
-            var usesResourceGroup = op.UrlTemplate.Contains(
-                "{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
-            var usesSubscription = op.UrlTemplate.Contains(
-                "{subscriptionId}", StringComparison.OrdinalIgnoreCase);
-
-            // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
-            if (usesResourceGroup || isMergedList)
-                w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
-            else if (usesSubscription)
-                w.Line("public readonly SubscriptionOptionPack Subscription = new();");
+            if (isDataPlane)
+            {
+                // Data-plane: --vault-url replaces subscription/resource-group option packs
+                w.Line("[CliOption(\"--vault-url\", Required = true)]");
+                w.Line("public partial string? VaultUrl { get; }");
+                w.Line();
+            }
+            else
+            {
+                // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
+                if (usesResourceGroup || isMergedList)
+                    w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
+                else if (usesSubscription)
+                    w.Line("public readonly SubscriptionOptionPack Subscription = new();");
+            }
 
             w.Line("public readonly RenderOptionPack Render = new();");
             w.Line();
@@ -100,10 +112,16 @@ public static class OperationCommandEmitter
             // ExecuteAsync
             w.Block("protected override async Task<int> ExecuteAsync(CancellationToken ct)", () =>
             {
-                w.Line("var client = new AzureRestClient(_auth.GetCredential());");
+                if (isDataPlane)
+                    w.Line("var client = new AzureRestClient(_auth.GetCredential(), \"https://vault.azure.net/.default\");");
+                else
+                    w.Line("var client = new AzureRestClient(_auth.GetCredential());");
 
                 // Build path
-                EmitPathBuilder(w, op, isMergedList, usesResourceGroup, usesSubscription);
+                if (isDataPlane)
+                    EmitDataPlanePathBuilder(w, op);
+                else
+                    EmitPathBuilder(w, op, isMergedList, usesResourceGroup, usesSubscription);
                 w.Line();
 
                 if (op.IsPaged)
@@ -128,6 +146,23 @@ public static class OperationCommandEmitter
         });
 
         return w.ToString();
+    }
+
+    private static void EmitDataPlanePathBuilder(CodeWriter w, OperationModel op)
+    {
+        var expr = op.UrlTemplate;
+
+        // Replace path params with property access
+        foreach (var param in op.CliParams.Where(p => p.ParamIn == "path"))
+        {
+            expr = expr.Replace(
+                $"{{{param.UrlParameterName}}}",
+                $"{{{param.PropertyName}}}",
+                StringComparison.OrdinalIgnoreCase);
+        }
+
+        // Emit: var path = $"{VaultUrl}/keys/{KeyName}/...";
+        w.Line($"var path = $\"{{VaultUrl}}{expr}\";");
     }
 
     private static void EmitPathBuilder(

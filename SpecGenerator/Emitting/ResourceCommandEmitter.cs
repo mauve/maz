@@ -8,7 +8,7 @@ namespace SpecGenerator.Emitting;
 /// </summary>
 public static class ResourceCommandEmitter
 {
-    public static string Emit(ResourceGroupModel resource, string ns)
+    public static string Emit(ResourceGroupModel resource, string ns, bool isDataPlane = false)
     {
         var w = new CodeWriter();
 
@@ -23,6 +23,8 @@ public static class ResourceCommandEmitter
         w.Block($"public partial class {resource.ClassName}(AuthOptionPack auth) : CommandDef", () =>
         {
             w.Line($"public override string Name => \"{resource.CliName}\";");
+            if (isDataPlane)
+                w.Line("protected override bool IsDataPlane => true;");
 
             foreach (var op in resource.Operations)
             {

@@ -14,6 +14,7 @@ public record ServiceConfig(
     List<string> SpecFiles,
     List<string> Exclude,
     Dictionary<string, string>? ActionRenames = null,
+    Dictionary<string, string>? ResourceRenames = null,
     List<MergeConfig>? Merges = null,
     List<SubgroupConfig>? Subgroups = null,
     bool AutoDetectMerges = true
