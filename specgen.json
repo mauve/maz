@@ -2222,6 +2222,209 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "dns",
+      "displayName": "dns",
+      "apiVersion": "2018-05-01",
+      "description": "Manage Azure DNS zones, record sets, and resource reference lookups.",
+      "detailedDescription": "Covers DNS zone lifecycle (create, update, delete) and management of all record set types (A, AAAA, CNAME, MX, NS, PTR, SOA, SRV, TXT, CAA). Also supports resolving which DNS zone owns a given Azure resource. Requires Contributor or DNS Zone Contributor roles.",
+      "specFiles": [
+        "dns/resource-manager/Microsoft.Network/Dns/stable/2018-05-01/dns.json"
+      ],
+      "resourceDescriptions": {
+        "recordset": "Manage DNS record sets within an Azure DNS zone.",
+        "resource-reference": "Look up DNS zones that reference a given Azure resource.",
+        "zone": "Manage Azure DNS zones."
+      },
+      "resourceDetailedDescriptions": {
+        "recordset": "Create and manage DNS record sets of any type (A, AAAA, CNAME, MX, NS, PTR, SOA, SRV, TXT, CAA) within a zone.",
+        "resource-reference": "Resolve which DNS zones contain records pointing to a specific Azure resource ID.",
+        "zone": "Full lifecycle of Azure DNS zones: create, update, delete, list records, and export zone data."
+      },
+      "actionRenames": {
+        "RecordSets_Get": "show",
+        "RecordSets_CreateOrUpdate": "create",
+        "Zones_Get": "show",
+        "Zones_CreateOrUpdate": "create",
+        "Zones_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Zones_List",
+          "resourceGroupOperationId": "Zones_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "privatedns",
+      "displayName": "privatedns",
+      "apiVersion": "2024-06-01",
+      "description": "Manage Azure Private DNS zones, record sets, and VNet links.",
+      "detailedDescription": "Covers Private DNS zone lifecycle (create, update, delete) and management of all record set types for private name resolution. Also manages virtual network links to associate VNets with private zones. Requires Contributor or Private DNS Zone Contributor roles.",
+      "specFiles": [
+        "privatedns/resource-manager/Microsoft.Network/PrivateDns/stable/2024-06-01/privatedns.json"
+      ],
+      "resourceDescriptions": {
+        "privatezone": "Manage Azure Private DNS zones.",
+        "recordset": "Manage DNS record sets within an Azure Private DNS zone.",
+        "virtualnetworklink": "Manage virtual network links to associate VNets with a Private DNS zone."
+      },
+      "resourceDetailedDescriptions": {
+        "privatezone": "Full lifecycle of Private DNS zones used for private name resolution within Azure virtual networks.",
+        "recordset": "Create and manage DNS record sets (A, AAAA, CNAME, MX, PTR, SOA, SRV, TXT) within a private DNS zone.",
+        "virtualnetworklink": "Link virtual networks to a private DNS zone to enable automatic DNS registration and private name resolution."
+      },
+      "actionRenames": {
+        "PrivateZones_Get": "show",
+        "PrivateZones_CreateOrUpdate": "create",
+        "PrivateZones_ListByResourceGroup": "list",
+        "RecordSets_Get": "show",
+        "RecordSets_CreateOrUpdate": "create",
+        "VirtualNetworkLinks_Get": "show",
+        "VirtualNetworkLinks_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "PrivateZones_List",
+          "resourceGroupOperationId": "PrivateZones_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "dnsresolver",
+      "displayName": "dnsresolver",
+      "apiVersion": "2025-05-01",
+      "description": "Manage Azure DNS Private Resolver instances, endpoints, and forwarding rule sets.",
+      "detailedDescription": "Covers the full lifecycle of DNS Private Resolvers: create, update, delete. Also manages inbound/outbound endpoints, DNS forwarding rule sets, forwarding rules, virtual network links, DNS security rules, domain lists, and policies. Requires Contributor or DNS Resolver Contributor roles.",
+      "specFiles": [
+        "dnsresolver/resource-manager/Microsoft.Network/DnsResolver/stable/2025-05-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "dnsforwardingruleset": "Manage DNS forwarding rule sets for conditional DNS forwarding.",
+        "dnssecurityrule": "Manage DNS security rules for blocking or allowing DNS queries.",
+        "domainlist": "Manage domain lists used in DNS security policies.",
+        "forwardingrule": "Manage forwarding rules within a DNS forwarding rule set.",
+        "inboundendpoint": "Manage inbound endpoints for a DNS Private Resolver.",
+        "outboundendpoint": "Manage outbound endpoints for a DNS Private Resolver.",
+        "policy": "Manage DNS security policies for a virtual network.",
+        "policyvirtualnetworklink": "Manage virtual network links for DNS security policies.",
+        "resolver": "Manage Azure DNS Private Resolver instances.",
+        "virtualnetworklink": "Manage virtual network links for DNS forwarding rule sets."
+      },
+      "resourceDetailedDescriptions": {
+        "dnsforwardingruleset": "Create and manage sets of DNS forwarding rules that conditionally forward queries for specific domains to target DNS servers.",
+        "dnssecurityrule": "Define allow/block/alert rules based on domain lists to filter DNS queries traversing the resolver.",
+        "domainlist": "Maintain lists of domain names used as match criteria in DNS security rules.",
+        "forwardingrule": "Create conditional forwarding rules that redirect queries for a domain to specified target IP addresses.",
+        "inboundendpoint": "Provision inbound endpoints that receive DNS queries from on-premises or other networks via ExpressRoute/VPN.",
+        "outboundendpoint": "Provision outbound endpoints used to forward DNS queries from Azure VNets to on-premises or external resolvers.",
+        "policy": "Apply DNS security policies to control query filtering for resources within a virtual network.",
+        "policyvirtualnetworklink": "Link virtual networks to a DNS security policy to apply filtering rules.",
+        "resolver": "Full lifecycle of DNS Private Resolver instances: create, update, delete, and manage associations.",
+        "virtualnetworklink": "Associate virtual networks with a forwarding rule set so the VNet can use its forwarding rules."
+      },
+      "resourceRenames": {
+        "DnsResolvers_List": "resolver",
+        "DnsResolvers_ListByResourceGroup": "resolver"
+      },
+      "actionRenames": {
+        "DnsForwardingRulesets_Get": "show",
+        "DnsForwardingRulesets_CreateOrUpdate": "create",
+        "DnsForwardingRulesets_ListByResourceGroup": "list",
+        "DnsResolvers_Get": "show",
+        "DnsResolvers_CreateOrUpdate": "create",
+        "DnsResolvers_ListByResourceGroup": "list",
+        "DnsSecurityRules_Get": "show",
+        "DnsSecurityRules_CreateOrUpdate": "create",
+        "DomainLists_Get": "show",
+        "DomainLists_CreateOrUpdate": "create",
+        "ForwardingRules_Get": "show",
+        "ForwardingRules_CreateOrUpdate": "create",
+        "InboundEndpoints_Get": "show",
+        "InboundEndpoints_CreateOrUpdate": "create",
+        "OutboundEndpoints_Get": "show",
+        "OutboundEndpoints_CreateOrUpdate": "create",
+        "DnsResolverPolicies_Get": "show",
+        "DnsResolverPolicies_CreateOrUpdate": "create",
+        "DnsResolverPolicies_ListByResourceGroup": "list",
+        "DnsResolverPolicyVirtualNetworkLinks_Get": "show",
+        "DnsResolverPolicyVirtualNetworkLinks_CreateOrUpdate": "create",
+        "VirtualNetworkLinks_Get": "show",
+        "VirtualNetworkLinks_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "DnsResolvers_List",
+          "resourceGroupOperationId": "DnsResolvers_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DnsForwardingRulesets_List",
+          "resourceGroupOperationId": "DnsForwardingRulesets_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DnsResolverPolicies_List",
+          "resourceGroupOperationId": "DnsResolverPolicies_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "trafficmanager",
+      "displayName": "trafficmanager",
+      "apiVersion": "2022-04-01",
+      "description": "Manage Azure Traffic Manager profiles, endpoints, and traffic analytics.",
+      "detailedDescription": "Covers the full lifecycle of Traffic Manager profiles and endpoints for global traffic routing (priority, weighted, performance, geographic, subnet, multivalue). Also provides heat map data and user metrics key management. Requires Contributor or Traffic Manager Contributor roles.",
+      "specFiles": [
+        "trafficmanager/resource-manager/Microsoft.Network/TrafficManager/stable/2022-04-01/trafficmanager.json"
+      ],
+      "resourceDescriptions": {
+        "endpoint": "Manage endpoints within a Traffic Manager profile.",
+        "geographichierarchy": "Get the geographic hierarchy used for geographic traffic routing.",
+        "heat-map": "Get Traffic Manager heat map data showing traffic patterns.",
+        "profile": "Manage Azure Traffic Manager profiles.",
+        "usermetricskey": "Manage user metrics keys for client-side Traffic Manager metrics."
+      },
+      "resourceDetailedDescriptions": {
+        "endpoint": "Create and manage Traffic Manager endpoints (Azure, external, nested) with weights, priorities, and geo-location settings.",
+        "geographichierarchy": "Retrieve the complete geographic hierarchy used when configuring geographic routing method endpoints.",
+        "heat-map": "Retrieve traffic heat map data showing source IP locations and latency distributions for a Traffic Manager profile.",
+        "profile": "Full lifecycle of Traffic Manager profiles: create, update, delete, check DNS availability, and list nested endpoints.",
+        "usermetricskey": "Generate and manage keys for client-side JavaScript performance metrics collection."
+      },
+      "actionRenames": {
+        "Endpoints_Get": "show",
+        "Endpoints_CreateOrUpdate": "create",
+        "GeographicHierarchies_GetDefault": "show",
+        "HeatMap_Get": "show",
+        "Profiles_Get": "show",
+        "Profiles_CreateOrUpdate": "create",
+        "Profiles_ListByResourceGroup": "list",
+        "UserMetricsKeys_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Profiles_ListBySubscription",
+          "resourceGroupOperationId": "Profiles_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
