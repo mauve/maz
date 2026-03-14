@@ -14,8 +14,6 @@ public partial class SubscriptionOptionPack : OptionPack
     [CliOption(
         "--subscription-id",
         "-s",
-        "--sub",
-        "--subscription",
         EnvVar = "AZURE_SUBSCRIPTION_ID",
         CompletionProviderType = typeof(SubscriptionIdCompletionProvider)
     )]

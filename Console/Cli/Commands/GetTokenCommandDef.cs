@@ -15,7 +15,7 @@ public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
     public override string Name => "get-token";
 
     /// <summary>The scopes required for the token.</summary>
-    [CliOption("--scopes", "--resource", "--resources")]
+    [CliOption("--scopes")]
     public partial List<string> Scopes { get; } = ["https://management.azure.com/.default"];
 
     /// <summary>The parent request ID for the token request.</summary>
