@@ -17,6 +17,7 @@ internal static partial class GroupedHelpLayout
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: false);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: false);
         yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
+        yield return DescriptionSection;
         yield return RemarksSection;
     }
 
@@ -28,6 +29,7 @@ internal static partial class GroupedHelpLayout
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: true);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: true);
         yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
+        yield return DescriptionSection;
         yield return RemarksSection;
     }
 
@@ -139,21 +141,84 @@ internal static partial class GroupedHelpLayout
             {
                 var row = ctx.HelpBuilder.GetTwoColumnRow(o, ctx);
                 var (main, metadata) = SplitOptionDescriptionAndMetadata(o, row.SecondColumnText);
-                return (row.FirstColumnText, main, metadata);
+                var aliases = SplitAliasesWithValueHint(
+                    row.FirstColumnText,
+                    o is Option<bool>,
+                    o.AllowMultipleArgumentsPerToken
+                );
+                return (aliases, main, metadata);
             })
             .ToList();
 
-        var firstWidth = rows.Count == 0 ? 0 : rows.Max(r => r.FirstColumnText.Length);
-        var metadataIndent = new string(' ', 2 + firstWidth + 4);
-        foreach (var row in rows)
-        {
-            ctx.Output.WriteLine(
-                $"  {row.FirstColumnText.PadRight(firstWidth)}  {Ansi.StyleOptionDescription(row.main)}"
-            );
+        const string descIndent = "          "; // 10 spaces
+        const string metaIndent = "            "; // 12 spaces
 
-            foreach (var meta in row.metadata)
-                ctx.Output.WriteLine($"{metadataIndent}{Ansi.StyleOptionDescription(meta)}");
+        foreach (var (aliases, main, metadata) in rows)
+        {
+            foreach (var alias in aliases)
+                ctx.Output.WriteLine($"  {alias}");
+
+            if (!string.IsNullOrEmpty(main))
+                ctx.Output.WriteLine($"{descIndent}{Ansi.Dim(Ansi.StyleOptionDescription(main))}");
+
+            foreach (var meta in metadata)
+                ctx.Output.WriteLine($"{metaIndent}{Ansi.StyleOptionDescription(meta)}");
         }
+    }
+
+    /// <summary>
+    /// Splits the first-column text into individual alias strings and appends
+    /// the appropriate value indicator to the last alias.
+    /// Bool options: --no-* aliases listed first, main alias last with [true|false].
+    /// Multi-value options: last alias gets [value...].
+    /// Single-value options: last alias gets [value].
+    /// </summary>
+    private static List<string> SplitAliasesWithValueHint(
+        string firstColumnText,
+        bool isBool,
+        bool isMultiValue
+    )
+    {
+        // Strip any type hint that System.CommandLine adds (e.g. <String>, <json|column|...>)
+        var match = TypeHintRegex().Match(firstColumnText);
+        var withoutHint = match.Success ? firstColumnText[..match.Index] : firstColumnText;
+        var rawAliases = withoutHint.Split(", ").ToList();
+
+        if (isBool)
+        {
+            // Reorder: --no-* variants first, main aliases last; add [true|false] to last main alias
+            var noAliases = rawAliases
+                .Where(a => a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
+                .Select(Ansi.White)
+                .ToList();
+            var mainAliases = rawAliases
+                .Where(a => !a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
+                .Select(Ansi.White)
+                .ToList();
+            if (mainAliases.Count > 0)
+                mainAliases[^1] += " " + Ansi.Cyan("[true|false]");
+            return [.. noAliases, .. mainAliases];
+        }
+
+        // Non-bool: always add value indicator regardless of whether S.CommandLine added a hint
+        var aliases = rawAliases.Select(Ansi.White).ToList();
+        if (aliases.Count > 0)
+            aliases[^1] += " " + Ansi.Cyan(isMultiValue ? "[value...]" : "[value]");
+        return aliases;
+    }
+
+    [GeneratedRegex(@"\s*<[^>]+>$")]
+    private static partial Regex TypeHintRegex();
+
+    private static bool DescriptionSection(HelpContext ctx)
+    {
+        var description = ctx.Command.Description;
+        if (string.IsNullOrWhiteSpace(description))
+            return false;
+        ctx.Output.WriteLine();
+        ctx.Output.WriteLine(Ansi.Header("Description:"));
+        ctx.Output.WriteLine($"  {description}");
+        return true;
     }
 
     private static bool RemarksSection(HelpContext ctx)
@@ -237,7 +302,10 @@ internal static partial class GroupedHelpLayout
             var tag = match.Value;
             if (tag.StartsWith("[default:", StringComparison.OrdinalIgnoreCase))
             {
-                metadata.Add(RewriteEnumDefaultTag(option, tag));
+                var rewritten = RewriteEnumDefaultTag(option, tag);
+                if (option.AllowMultipleArgumentsPerToken)
+                    rewritten = NormalizeDefaultTagListSeparators(rewritten);
+                metadata.Add(rewritten);
                 main = main.Replace(tag, "", StringComparison.Ordinal);
                 continue;
             }
@@ -258,6 +326,20 @@ internal static partial class GroupedHelpLayout
 
         main = Regex.Replace(main, "\\s{2,}", " ").Trim();
         return (main, metadata);
+    }
+
+    private static string NormalizeDefaultTagListSeparators(string tag)
+    {
+        const string prefix = "[default:";
+        if (!tag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return tag;
+
+        var inner = tag[prefix.Length..].TrimStart();
+        if (inner.EndsWith(']'))
+            inner = inner[..^1].TrimEnd();
+
+        var parts = inner.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length <= 1 ? tag : $"[default: {string.Join(", ", parts)}]";
     }
 
     private static string RewriteEnumDefaultTag(Option option, string defaultTag)
