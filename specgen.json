@@ -2982,6 +2982,242 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "keyvault",
+      "displayName": "keyvaultmanagement",
+      "apiVersion": "2026-02-01",
+      "description": "Manage Azure Key Vault and Managed HSM instances, access policies, keys, and secrets",
+      "detailedDescription": "Covers the control-plane lifecycle of Key Vault vaults and Managed HSM clusters: creation, deletion, soft-delete/purge, access policy management, private endpoint connections, and RM-managed keys and secrets. For data-plane operations (encrypt, sign, certificate management), use the `keyvault` command group instead.",
+      "specFiles": [
+        "keyvault/resource-manager/Microsoft.KeyVault/KeyVault/stable/2026-02-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "vault": "An Azure Key Vault instance storing secrets, keys, and certificates.",
+        "key": "An RM-managed cryptographic key stored in a Key Vault.",
+        "secret": "An RM-managed secret stored in a Key Vault.",
+        "managedhsm": "An Azure Managed HSM cluster providing FIPS 140-2 Level 3 validated key management.",
+        "managedhsmkey": "An RM-managed cryptographic key in a Managed HSM.",
+        "mhsmprivateendpointconnection": "A private endpoint connection to a Managed HSM.",
+        "mhsmprivatelinkresource": "Private link resources available for a Managed HSM.",
+        "mhsmregion": "Replication regions configured for a Managed HSM.",
+        "privateendpointconnection": "A private endpoint connection to a Key Vault.",
+        "privatelinkresource": "Private link resources available for a Key Vault."
+      },
+      "resourceDetailedDescriptions": {
+        "vault": "Key Vaults provide centralized secret, key, and certificate storage with RBAC and access policies. Use `update-access-policy` to add, remove, or replace access policy entries. Soft-delete is enabled by default; use `purge-deleted` to permanently remove a deleted vault.",
+        "key": "RM-managed keys enable key lifecycle management (create, rotate) via Azure Resource Manager without direct Key Vault data-plane access. Use `list-versions` and `get-version` to inspect key rotation history.",
+        "secret": "RM-managed secrets can be created and read via ARM. For full secret management (expiry, content type), use the data-plane `keyvault` command group.",
+        "managedhsm": "Managed HSMs provide dedicated single-tenant HSM capacity for high-security key operations. Supports backup/restore for disaster recovery and multi-region replication.",
+        "managedhsmkey": "Keys in a Managed HSM. Like RM vault keys, these can be created and versioned via ARM.",
+        "mhsmprivateendpointconnection": "Manage private endpoint connections to restrict Managed HSM access to a VNet.",
+        "mhsmprivatelinkresource": "Lists the private link resources (sub-resources) available on a Managed HSM for private endpoint targeting.",
+        "mhsmregion": "Lists and manages the secondary regions for Managed HSM geo-replication.",
+        "privateendpointconnection": "Manage private endpoint connections to restrict Key Vault network access.",
+        "privatelinkresource": "Lists the private link resources available on a Key Vault."
+      },
+      "actionRenames": {
+        "Vaults_Get": "show",
+        "Vaults_CreateOrUpdate": "create",
+        "Vaults_ListBySubscription": "list-by-subscription",
+        "Vaults_ListByResourceGroup": "list",
+        "ManagedHsms_Get": "show",
+        "ManagedHsms_CreateOrUpdate": "create",
+        "ManagedHsms_ListBySubscription": "list-by-subscription",
+        "ManagedHsms_ListByResourceGroup": "list",
+        "Keys_Get": "show",
+        "Keys_CreateIfNotExist": "create",
+        "ManagedHsmKeys_Get": "show",
+        "ManagedHsmKeys_CreateIfNotExist": "create",
+        "Secrets_Get": "show",
+        "Secrets_CreateOrUpdate": "create",
+        "MHSMPrivateEndpointConnections_Get": "show",
+        "MHSMPrivateEndpointConnections_Put": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_Put": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Vaults_ListBySubscription",
+          "resourceGroupOperationId": "Vaults_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ManagedHsms_ListBySubscription",
+          "resourceGroupOperationId": "ManagedHsms_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "codesigning",
+      "displayName": "codesigning",
+      "apiVersion": "2025-10-13",
+      "description": "Manage Azure Trusted Signing (Code Signing) accounts and certificate profiles",
+      "detailedDescription": "Covers the lifecycle of Azure Trusted Signing accounts and certificate profiles. Certificate profiles define the signing certificate type (PublicTrust, PrivateTrust, etc.) and can be used to sign binaries and artifacts. Use `revoke-certificate` to invalidate a previously issued signing certificate.",
+      "specFiles": [
+        "codesigning/resource-manager/Microsoft.CodeSigning/stable/2025-10-13/codeSigningAccount.json"
+      ],
+      "resourceDescriptions": {
+        "account": "An Azure Trusted Signing account managing code-signing certificates.",
+        "certificateprofile": "A certificate profile defining the type and properties of signing certificates issued under a Trusted Signing account."
+      },
+      "resourceDetailedDescriptions": {
+        "account": "Trusted Signing accounts are the top-level resource. Use `check-name-availability` before creating. Requires Trusted Signing Certificate Profile Signer role to sign.",
+        "certificateprofile": "Certificate profiles specify the signing scope (PublicTrust, PrivateTrust, VBSEnclave) and subject name details. Use `revoke-certificate` to invalidate a certificate that was misused or compromised."
+      },
+      "actionRenames": {
+        "CodeSigningAccounts_Get": "show",
+        "CodeSigningAccounts_ListBySubscription": "list-by-subscription",
+        "CodeSigningAccounts_ListByResourceGroup": "list",
+        "CertificateProfiles_Get": "show",
+        "CertificateProfiles_ListByCodeSigningAccount": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "CodeSigningAccounts_ListBySubscription",
+          "resourceGroupOperationId": "CodeSigningAccounts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "hardwaresecuritymodules",
+      "displayName": "hsm",
+      "apiVersion": "2025-03-31",
+      "description": "Manage Azure Dedicated HSM and Cloud HSM Cluster resources",
+      "detailedDescription": "Covers both Azure Dedicated HSM (single-tenant physical HSM devices) and Cloud HSM Clusters (multi-node managed HSM services). Dedicated HSMs are for compliance-requiring workloads that need direct PKCS#11 access. Cloud HSM Clusters provide managed HSM capacity with backup/restore and private endpoint support.",
+      "specFiles": [
+        "hardwaresecuritymodules/resource-manager/Microsoft.HardwareSecurityModules/HardwareSecurityModules/stable/2025-03-31/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "cloudhsmcluster": "A Cloud HSM Cluster providing managed, multi-node HSM capacity.",
+        "cloudhsmclusterbackupstatu": "The status of an ongoing Cloud HSM Cluster backup operation.",
+        "cloudhsmclusterprivateendpointconnection": "A private endpoint connection to a Cloud HSM Cluster.",
+        "cloudhsmclusterprivatelinkresource": "Private link resources available for a Cloud HSM Cluster.",
+        "cloudhsmclusterrestorestatu": "The status of an ongoing Cloud HSM Cluster restore operation.",
+        "dedicated-hsm": "An Azure Dedicated HSM device providing direct PKCS#11 access.",
+        "privateendpointconnection": "A private endpoint connection resource.",
+        "operation": "Available resource provider operations."
+      },
+      "resourceDetailedDescriptions": {
+        "cloudhsmcluster": "Cloud HSM Clusters manage a pool of HSM nodes. Use `backup` and `restore` for disaster recovery. Use `validate-backup-properties` and `validate-restore-properties` to pre-validate before executing.",
+        "cloudhsmclusterbackupstatu": "Poll this resource after initiating a `backup` operation to track completion.",
+        "cloudhsmclusterprivateendpointconnection": "Approve, reject, or delete private endpoint connections to restrict Cloud HSM Cluster network access.",
+        "cloudhsmclusterprivatelinkresource": "Lists sub-resources available for private endpoint targeting on a Cloud HSM Cluster.",
+        "cloudhsmclusterrestorestatu": "Poll this resource after initiating a `restore` operation to track completion.",
+        "dedicated-hsm": "Dedicated HSMs are single-tenant physical devices in Azure data centers. Use `list-outbound-network-dependencies-endpoints` to understand egress requirements.",
+        "privateendpointconnection": "Private endpoint connections for Cloud HSM Clusters.",
+        "operation": "Lists all available operations for the HardwareSecurityModules provider."
+      },
+      "actionRenames": {
+        "CloudHsmClusters_Get": "show",
+        "CloudHsmClusters_CreateOrUpdate": "create",
+        "CloudHsmClusters_ListBySubscription": "list-by-subscription",
+        "CloudHsmClusters_ListByResourceGroup": "list",
+        "DedicatedHsm_Get": "show",
+        "DedicatedHsm_CreateOrUpdate": "create",
+        "DedicatedHsm_ListBySubscription": "list-by-subscription",
+        "DedicatedHsm_ListByResourceGroup": "list",
+        "CloudHsmClusterPrivateEndpointConnections_Get": "show",
+        "CloudHsmClusterPrivateEndpointConnections_Create": "create",
+        "CloudHsmClusterBackupStatus_Get": "show",
+        "CloudHsmClusterRestoreStatus_Get": "show",
+        "PrivateEndpointConnections_ListByCloudHsmCluster": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "CloudHsmClusters_ListBySubscription",
+          "resourceGroupOperationId": "CloudHsmClusters_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DedicatedHsm_ListBySubscription",
+          "resourceGroupOperationId": "DedicatedHsm_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "attestation",
+      "displayName": "attestation",
+      "apiVersion": "2021-06-01",
+      "description": "Manage Azure Attestation providers for trusted hardware attestation",
+      "detailedDescription": "Covers the lifecycle of Azure Attestation providers which validate trusted execution environments (TEEs) such as SGX enclaves, AMD SEV-SNP, and TPMs. Use `list-default` to discover Microsoft-managed shared providers, or create a custom provider for customizable attestation policies.",
+      "specFiles": [
+        "attestation/resource-manager/Microsoft.Attestation/Attestation/stable/2021-06-01/attestation.json"
+      ],
+      "resourceDescriptions": {
+        "provider": "An Azure Attestation provider validating trusted execution environments.",
+        "privateendpointconnection": "A private endpoint connection to an attestation provider.",
+        "privatelinkresource": "Private link resources available for an attestation provider."
+      },
+      "resourceDetailedDescriptions": {
+        "provider": "Attestation providers issue JWT tokens asserting that code is running in a genuine TEE. Use `list-default` to find shared Microsoft-managed providers, or `create` to deploy a custom provider with your own policy.",
+        "privateendpointconnection": "Manage private endpoint connections to restrict attestation provider access to a VNet.",
+        "privatelinkresource": "Lists sub-resources available for private endpoint targeting."
+      },
+      "actionRenames": {
+        "AttestationProviders_Get": "show",
+        "AttestationProviders_List": "list-by-subscription",
+        "AttestationProviders_ListByResourceGroup": "list",
+        "AttestationProviders_ListDefault": "list-default",
+        "AttestationProviders_GetDefaultByLocation": "get-default",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateLinkResources_ListByProvider": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "AttestationProviders_List",
+          "resourceGroupOperationId": "AttestationProviders_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "confidentialledger",
+      "displayName": "confidentialledger",
+      "apiVersion": "2026-02-23",
+      "description": "Manage Azure Confidential Ledger instances for tamper-proof append-only record keeping",
+      "detailedDescription": "Covers the lifecycle of Azure Confidential Ledger instances, which provide blockchain-backed, tamper-proof append-only storage for audit logs and compliance records. Entries are protected by Trusted Execution Environments (TEEs). Use `files-export` to export ledger data.",
+      "specFiles": [
+        "confidentialledger/resource-manager/Microsoft.ConfidentialLedger/ConfidentialLedger/stable/2026-02-23/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "ledger": "An Azure Confidential Ledger instance providing tamper-proof append-only storage.",
+        "check-name-availability": "Check if a ledger name is available in a region."
+      },
+      "resourceDetailedDescriptions": {
+        "ledger": "Confidential Ledgers use SGX-backed TEEs and a distributed ledger to ensure immutability. Data is verified with cryptographic receipts. Use `files-export` to extract ledger entries for offline analysis.",
+        "check-name-availability": "Validates that a proposed ledger name is available before provisioning."
+      },
+      "actionRenames": {
+        "Ledger_Get": "show",
+        "Ledger_ListBySubscription": "list-by-subscription",
+        "Ledger_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Ledger_ListBySubscription",
+          "resourceGroupOperationId": "Ledger_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
