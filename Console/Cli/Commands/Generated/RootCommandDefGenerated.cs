@@ -79,6 +79,15 @@ public partial class RootCommandDef
     public RsbackupCommandDef Rsbackup = null!;
     public DataprotectionCommandDef Dataprotection = null!;
     public DatareplicationCommandDef Datareplication = null!;
+    public ImagebuilderCommandDef Imagebuilder = null!;
+    public AzurefleetCommandDef Azurefleet = null!;
+    public StandbypoolCommandDef Standbypool = null!;
+    public ComputescheduleCommandDef Computeschedule = null!;
+    public AvdCommandDef Avd = null!;
+    public HybridcomputeCommandDef Hybridcompute = null!;
+    public HybridconnectivityCommandDef Hybridconnectivity = null!;
+    public ConnectedvmwareCommandDef Connectedvmware = null!;
+    public ScvmmCommandDef Scvmm = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -154,5 +163,14 @@ public partial class RootCommandDef
         Rsbackup = new RsbackupCommandDef(Auth);
         Dataprotection = new DataprotectionCommandDef(Auth);
         Datareplication = new DatareplicationCommandDef(Auth);
+        Imagebuilder = new ImagebuilderCommandDef(Auth);
+        Azurefleet = new AzurefleetCommandDef(Auth);
+        Standbypool = new StandbypoolCommandDef(Auth);
+        Computeschedule = new ComputescheduleCommandDef(Auth);
+        Avd = new AvdCommandDef(Auth);
+        Hybridcompute = new HybridcomputeCommandDef(Auth);
+        Hybridconnectivity = new HybridconnectivityCommandDef(Auth);
+        Connectedvmware = new ConnectedvmwareCommandDef(Auth);
+        Scvmm = new ScvmmCommandDef(Auth);
     }
 }

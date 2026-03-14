@@ -6185,6 +6185,762 @@
         "CheckNameAvailability_Post",
         "DeploymentPreflight_Post"
       ]
+    },
+    {
+      "serviceDir": "imagebuilder",
+      "displayName": "imagebuilder",
+      "apiVersion": "2024-02-01",
+      "description": "Manage Azure Image Builder image templates and automated VM image builds.",
+      "detailedDescription": "Create and manage image templates that define a source image, customization steps, and a distribution target. Trigger image builds, monitor run outputs, and manage build triggers. Requires Contributor role and a managed identity with permissions to distribute images.",
+      "specFiles": [
+        "imagebuilder/resource-manager/Microsoft.VirtualMachineImages/ImageBuilder/stable/2024-02-01/imagebuilder.json"
+      ],
+      "resourceDescriptions": {
+        "virtualmachineimagetemplate": "Image templates defining source, customization steps, and distribution targets",
+        "trigger": "Triggers that automatically initiate image builds on a schedule or source update"
+      },
+      "resourceDetailedDescriptions": {
+        "virtualmachineimagetemplate": "Create, update, and delete image templates. Run or cancel image builds, and retrieve run outputs including the built image location.",
+        "trigger": "Create and manage triggers that automatically start image template builds on a schedule or when a source image is updated."
+      },
+      "actionRenames": {
+        "VirtualMachineImageTemplates_ListByResourceGroup": "list",
+        "VirtualMachineImageTemplates_Get": "show",
+        "VirtualMachineImageTemplates_CreateOrUpdate": "create",
+        "VirtualMachineImageTemplates_Delete": "delete",
+        "VirtualMachineImageTemplates_Update": "update",
+        "VirtualMachineImageTemplates_Run": "run",
+        "VirtualMachineImageTemplates_Cancel": "cancel",
+        "VirtualMachineImageTemplates_ListRunOutputs": "list-outputs",
+        "VirtualMachineImageTemplates_GetRunOutput": "show-output",
+        "Triggers_ListByImageTemplate": "list",
+        "Triggers_Get": "show",
+        "Triggers_CreateOrUpdate": "create",
+        "Triggers_Delete": "delete"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "VirtualMachineImageTemplates_List",
+          "resourceGroupOperationId": "VirtualMachineImageTemplates_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "azurefleet",
+      "displayName": "azurefleet",
+      "apiVersion": "2024-11-01",
+      "description": "Manage Azure Fleet resources for managing multiple VM scale sets as a single unit.",
+      "detailedDescription": "Azure Fleet lets you create and manage a group of Virtual Machine Scale Sets across different VM types and Spot/On-Demand configurations. Useful for large-scale workloads that need to spread across VM SKUs to maximize capacity and cost efficiency.",
+      "specFiles": [
+        "azurefleet/resource-manager/Microsoft.AzureFleet/AzureFleet/stable/2024-11-01/azurefleet.json"
+      ],
+      "resourceDescriptions": {
+        "fleet": "Azure Fleet resources grouping multiple VM scale sets"
+      },
+      "resourceDetailedDescriptions": {
+        "fleet": "Create, update, and delete Azure Fleet resources. List virtual machine scale sets belonging to a fleet, and manage fleet configuration including spot and on-demand VM type preferences."
+      },
+      "actionRenames": {
+        "Fleets_Get": "show",
+        "Fleets_CreateOrUpdate": "create",
+        "Fleets_Delete": "delete",
+        "Fleets_Update": "update",
+        "Fleets_ListVirtualMachineScaleSets": "list-vmss"
+      },
+      "resourceRenames": {
+        "Fleets_ListBySubscription": "fleet",
+        "Fleets_ListByResourceGroup": "fleet",
+        "Fleets_Get": "fleet",
+        "Fleets_CreateOrUpdate": "fleet",
+        "Fleets_Delete": "fleet",
+        "Fleets_Update": "fleet",
+        "Fleets_ListVirtualMachineScaleSets": "fleet"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Fleets_ListBySubscription",
+          "resourceGroupOperationId": "Fleets_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "standbypool",
+      "displayName": "standbypool",
+      "apiVersion": "2025-10-01",
+      "description": "Manage Standby Pools for pre-provisioned VMs and container groups to reduce scale-out latency.",
+      "detailedDescription": "Standby Pool maintains a pool of pre-provisioned virtual machines or container groups in standby state so that scale-out operations can be serviced immediately. Covers pool lifecycle, runtime views for monitoring standby capacity, and individual standby VM management.",
+      "specFiles": [
+        "standbypool/resource-manager/Microsoft.StandbyPool/stable/2025-10-01/standbypool.json"
+      ],
+      "resourceDescriptions": {
+        "virtualmachinepool": "Standby pools of pre-provisioned virtual machines",
+        "virtualmachine": "Individual standby virtual machines within a pool",
+        "virtualmachinepoolruntimeview": "Runtime view showing current standby VM counts and state",
+        "containergrouppool": "Standby pools of pre-provisioned container groups",
+        "containergrouppoolruntimeview": "Runtime view showing current standby container group counts and state"
+      },
+      "resourceDetailedDescriptions": {
+        "virtualmachinepool": "Create, update, and delete standby VM pools. Configure the maximum ready capacity and the VM profile used for standby instances.",
+        "virtualmachine": "List and retrieve individual standby virtual machines within a standby VM pool.",
+        "virtualmachinepoolruntimeview": "View real-time runtime statistics for a standby VM pool including current instance counts by state.",
+        "containergrouppool": "Create, update, and delete standby container group pools for ACI workloads that require rapid scale-out.",
+        "containergrouppoolruntimeview": "View real-time runtime statistics for a standby container group pool."
+      },
+      "actionRenames": {
+        "StandbyVirtualMachinePools_Get": "show",
+        "StandbyVirtualMachinePools_CreateOrUpdate": "create",
+        "StandbyVirtualMachinePools_Delete": "delete",
+        "StandbyVirtualMachinePools_Update": "update",
+        "StandbyVirtualMachines_ListByStandbyVirtualMachinePoolResource": "list",
+        "StandbyVirtualMachines_Get": "show",
+        "StandbyVirtualMachinePoolRuntimeViews_ListByStandbyPool": "list",
+        "StandbyVirtualMachinePoolRuntimeViews_Get": "show",
+        "StandbyContainerGroupPools_Get": "show",
+        "StandbyContainerGroupPools_CreateOrUpdate": "create",
+        "StandbyContainerGroupPools_Delete": "delete",
+        "StandbyContainerGroupPools_Update": "update",
+        "StandbyContainerGroupPoolRuntimeViews_ListByStandbyPool": "list",
+        "StandbyContainerGroupPoolRuntimeViews_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "StandbyVirtualMachinePools_ListBySubscription",
+          "resourceGroupOperationId": "StandbyVirtualMachinePools_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "StandbyContainerGroupPools_ListBySubscription",
+          "resourceGroupOperationId": "StandbyContainerGroupPools_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "computeschedule",
+      "displayName": "computeschedule",
+      "apiVersion": "2025-05-01",
+      "description": "Schedule and submit compute operations (start/stop/deallocate) for Azure VMs.",
+      "detailedDescription": "Azure Compute Schedule lets you submit and execute scheduled compute operations on virtual machines including start, deallocate, hibernate, and delete. Operations can be submitted for future execution or executed immediately. Track operation status and errors by operation ID.",
+      "specFiles": [
+        "computeschedule/resource-manager/Microsoft.ComputeSchedule/stable/2025-05-01/computeschedule.json"
+      ],
+      "resourceDescriptions": {
+        "scheduled-action": "Scheduled and immediate compute operations (start/stop/deallocate/hibernate) on virtual machines"
+      },
+      "resourceDetailedDescriptions": {
+        "scheduled-action": "Submit VMs for future scheduled operations or execute operations immediately. Supported operations include start, deallocate, hibernate, and delete. Cancel pending operations or query status and error details by operation ID."
+      },
+      "actionRenames": {
+        "ScheduledActions_VirtualMachinesCancelOperations": "cancel",
+        "ScheduledActions_VirtualMachinesExecuteCreate": "execute-create",
+        "ScheduledActions_VirtualMachinesExecuteDeallocate": "execute-deallocate",
+        "ScheduledActions_VirtualMachinesExecuteDelete": "execute-delete",
+        "ScheduledActions_VirtualMachinesExecuteHibernate": "execute-hibernate",
+        "ScheduledActions_VirtualMachinesExecuteStart": "execute-start",
+        "ScheduledActions_VirtualMachinesGetOperationErrors": "get-errors",
+        "ScheduledActions_VirtualMachinesGetOperationStatus": "get-status",
+        "ScheduledActions_VirtualMachinesSubmitDeallocate": "submit-deallocate",
+        "ScheduledActions_VirtualMachinesSubmitHibernate": "submit-hibernate",
+        "ScheduledActions_VirtualMachinesSubmitStart": "submit-start"
+      },
+      "resourceRenames": {
+        "ScheduledActions_VirtualMachinesCancelOperations": "scheduled-action",
+        "ScheduledActions_VirtualMachinesExecuteCreate": "scheduled-action",
+        "ScheduledActions_VirtualMachinesExecuteDeallocate": "scheduled-action",
+        "ScheduledActions_VirtualMachinesExecuteDelete": "scheduled-action",
+        "ScheduledActions_VirtualMachinesExecuteHibernate": "scheduled-action",
+        "ScheduledActions_VirtualMachinesExecuteStart": "scheduled-action",
+        "ScheduledActions_VirtualMachinesGetOperationErrors": "scheduled-action",
+        "ScheduledActions_VirtualMachinesGetOperationStatus": "scheduled-action",
+        "ScheduledActions_VirtualMachinesSubmitDeallocate": "scheduled-action",
+        "ScheduledActions_VirtualMachinesSubmitHibernate": "scheduled-action",
+        "ScheduledActions_VirtualMachinesSubmitStart": "scheduled-action"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "desktopvirtualization",
+      "displayName": "avd",
+      "apiVersion": "2024-04-03",
+      "description": "Manage Azure Virtual Desktop host pools, application groups, and workspaces.",
+      "detailedDescription": "Azure Virtual Desktop (AVD) for deploying and managing virtual desktop infrastructure. Covers host pool lifecycle, application groups and applications, workspaces, session hosts, user sessions, MSIX app attach packages, and scaling plans with personal and pooled schedules. Requires Desktop Virtualization Contributor or Owner role.",
+      "specFiles": [
+        "desktopvirtualization/resource-manager/Microsoft.DesktopVirtualization/DesktopVirtualization/stable/2024-04-03/desktopvirtualization.json"
+      ],
+      "resourceDescriptions": {
+        "hostpool": "Host pools grouping session hosts for load balancing and access management",
+        "applicationgroup": "Application groups publishing remote desktops or applications from a host pool",
+        "application": "RemoteApp applications published within an application group",
+        "workspace": "Workspaces aggregating application groups for user access",
+        "sessionhost": "Virtual machine session hosts registered in a host pool",
+        "usersession": "Active and disconnected user sessions on session hosts",
+        "scalingplan": "Scaling plans defining automated scaling schedules for host pools",
+        "scalingplanpooledschedule": "Scheduled scaling rules for pooled host pools",
+        "scalingplanpersonalschedule": "Scheduled scaling rules for personal host pools",
+        "appattachpackage": "MSIX app attach packages for application delivery",
+        "privateendpointconnection": "Private endpoint connections to host pools and workspaces",
+        "desktop": "Remote desktop resources published within a desktop application group"
+      },
+      "resourceDetailedDescriptions": {
+        "hostpool": "Create, update, and delete host pools. Retrieve registration tokens for joining session hosts, manage host pool settings including load balancing type, RDP properties, and validation environment.",
+        "applicationgroup": "Create and manage application groups of type Desktop or RemoteApp. Control which host pool the group is associated with and assign users via role assignments.",
+        "application": "Publish and manage RemoteApp applications within an application group. Configure application display name, file path, command line settings, and icons.",
+        "workspace": "Create and manage workspaces that aggregate application groups for user-facing portal access.",
+        "sessionhost": "List, update, and delete session hosts in a host pool. View session host health, agent version, and availability for new sessions.",
+        "usersession": "List, disconnect, and log off user sessions on session hosts. Send messages to active users.",
+        "scalingplan": "Create scaling plans that automatically adjust session host availability based on time-of-day schedules.",
+        "scalingplanpooledschedule": "Define scaling schedules for pooled desktop host pools including ramp-up, peak, ramp-down, and off-peak phases.",
+        "scalingplanpersonalschedule": "Define scaling schedules for personal host pools controlling when session hosts are deallocated.",
+        "appattachpackage": "Import and manage MSIX app attach packages for deploying applications without installing them on session hosts.",
+        "privateendpointconnection": "Approve, reject, or delete private endpoint connections to AVD host pools and workspaces.",
+        "desktop": "Retrieve and update friendly names and descriptions for desktops published in a desktop application group."
+      },
+      "actionRenames": {
+        "HostPools_Get": "show",
+        "HostPools_CreateOrUpdate": "create",
+        "HostPools_Delete": "delete",
+        "HostPools_Update": "update",
+        "HostPools_RetrieveRegistrationToken": "get-token",
+        "HostPools_ListRegistrationTokens": "list-tokens",
+        "ApplicationGroups_Get": "show",
+        "ApplicationGroups_CreateOrUpdate": "create",
+        "ApplicationGroups_Delete": "delete",
+        "ApplicationGroups_Update": "update",
+        "Applications_Get": "show",
+        "Applications_CreateOrUpdate": "create",
+        "Applications_Delete": "delete",
+        "Applications_Update": "update",
+        "Applications_List": "list",
+        "Workspaces_Get": "show",
+        "Workspaces_CreateOrUpdate": "create",
+        "Workspaces_Delete": "delete",
+        "Workspaces_Update": "update",
+        "SessionHosts_Get": "show",
+        "SessionHosts_Delete": "delete",
+        "SessionHosts_Update": "update",
+        "SessionHosts_List": "list",
+        "UserSessions_ListByHostPool": "list-by-hostpool",
+        "UserSessions_Get": "show",
+        "UserSessions_Delete": "delete",
+        "UserSessions_List": "list",
+        "UserSessions_Disconnect": "disconnect",
+        "UserSessions_SendMessage": "send-message",
+        "ScalingPlans_Get": "show",
+        "ScalingPlans_Create": "create",
+        "ScalingPlans_Delete": "delete",
+        "ScalingPlans_Update": "update",
+        "ScalingPlans_ListByHostPool": "list-by-hostpool",
+        "ScalingPlanPooledSchedules_Get": "show",
+        "ScalingPlanPooledSchedules_Create": "create",
+        "ScalingPlanPooledSchedules_Delete": "delete",
+        "ScalingPlanPooledSchedules_Update": "update",
+        "ScalingPlanPooledSchedules_List": "list",
+        "ScalingPlanPersonalSchedules_Get": "show",
+        "ScalingPlanPersonalSchedules_Create": "create",
+        "ScalingPlanPersonalSchedules_Delete": "delete",
+        "ScalingPlanPersonalSchedules_Update": "update",
+        "ScalingPlanPersonalSchedules_List": "list",
+        "AppAttachPackage_Get": "show",
+        "AppAttachPackage_CreateOrUpdate": "create",
+        "AppAttachPackage_Delete": "delete",
+        "AppAttachPackage_Update": "update",
+        "AppAttachPackageInfo_Import": "import",
+        "Desktops_Get": "show",
+        "Desktops_Update": "update",
+        "Desktops_List": "list",
+        "PrivateEndpointConnections_ListByWorkspace": "list-by-workspace",
+        "PrivateEndpointConnections_GetByWorkspace": "show-by-workspace",
+        "PrivateEndpointConnections_UpdateByWorkspace": "update-by-workspace",
+        "PrivateEndpointConnections_DeleteByWorkspace": "delete-by-workspace",
+        "PrivateEndpointConnections_ListByHostPool": "list-by-hostpool",
+        "PrivateEndpointConnections_GetByHostPool": "show-by-hostpool",
+        "PrivateEndpointConnections_UpdateByHostPool": "update-by-hostpool",
+        "PrivateEndpointConnections_DeleteByHostPool": "delete-by-hostpool",
+        "MSIXPackages_Get": "show",
+        "MSIXPackages_CreateOrUpdate": "create",
+        "MSIXPackages_Delete": "delete",
+        "MSIXPackages_Update": "update",
+        "MSIXPackages_List": "list",
+        "MSIXImages_Expand": "expand",
+        "StartMenuItems_List": "list"
+      },
+      "resourceRenames": {
+        "Desktops_Get": "desktop",
+        "Desktops_Update": "desktop",
+        "Desktops_List": "desktop",
+        "AppAttachPackage_Get": "app-attach-package",
+        "AppAttachPackage_CreateOrUpdate": "app-attach-package",
+        "AppAttachPackage_Delete": "app-attach-package",
+        "AppAttachPackage_Update": "app-attach-package",
+        "AppAttachPackage_ListByResourceGroup": "app-attach-package",
+        "AppAttachPackage_ListBySubscription": "app-attach-package",
+        "AppAttachPackageInfo_Import": "app-attach-package"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "HostPools_List",
+          "resourceGroupOperationId": "HostPools_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ApplicationGroups_ListBySubscription",
+          "resourceGroupOperationId": "ApplicationGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Workspaces_ListBySubscription",
+          "resourceGroupOperationId": "Workspaces_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ScalingPlans_ListBySubscription",
+          "resourceGroupOperationId": "ScalingPlans_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "AppAttachPackage_ListBySubscription",
+          "resourceGroupOperationId": "AppAttachPackage_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "PrivateLinkResources_ListByWorkspace",
+        "PrivateLinkResources_ListByHostPool"
+      ]
+    },
+    {
+      "serviceDir": "hybridcompute",
+      "displayName": "hybridcompute",
+      "apiVersion": "2025-01-13",
+      "description": "Manage Azure Arc-enabled servers and hybrid compute machines.",
+      "detailedDescription": "Azure Arc for servers: onboard and manage Windows and Linux machines outside Azure as Arc-enabled servers. Covers machine lifecycle, extensions, run commands, licensing, network profiles, and gateway connectivity. Requires Azure Connected Machine Contributor or Owner role.",
+      "specFiles": [
+        "hybridcompute/resource-manager/Microsoft.HybridCompute/HybridCompute/stable/2025-01-13/HybridCompute.json"
+      ],
+      "resourceDescriptions": {
+        "machine": "Arc-enabled server (hybrid compute machine) lifecycle and patch operations",
+        "machineextension": "VM extensions installed on Arc-enabled servers",
+        "machineruncommand": "Run commands executed on Arc-enabled servers",
+        "license": "Azure Hybrid Benefit licenses assigned to Arc-enabled servers",
+        "licenseprofile": "License profile settings on an Arc-enabled machine",
+        "gateway": "Arc gateways for connecting Arc-enabled servers through a gateway proxy",
+        "setting": "Hybrid compute settings at the subscription scope",
+        "agentversion": "Available Arc agent versions for Arc-enabled servers",
+        "networkprofile": "Network profile showing interfaces on an Arc-enabled server"
+      },
+      "resourceDetailedDescriptions": {
+        "machine": "List, update, and delete Arc-enabled server resources. Trigger on-demand patch assessment and install patches on Arc-connected machines.",
+        "machineextension": "Install, update, and remove VM extensions on Arc-enabled servers. Extensions include MMA, AMA, and custom script extensions.",
+        "machineruncommand": "Create and manage run commands that execute scripts on Arc-enabled servers for remote management tasks.",
+        "license": "Create and assign Windows Server Azure Hybrid Benefit licenses to Arc-enabled servers to reduce licensing costs.",
+        "licenseprofile": "Manage the license profile on an Arc-enabled machine including ESU enrollment and product type.",
+        "gateway": "Create Arc gateways that allow Arc-enabled servers in restricted networks to connect to Azure through a centralized proxy endpoint.",
+        "setting": "View and update subscription-level settings for the Hybrid Compute resource provider.",
+        "agentversion": "List available Arc agent versions to understand upgrade paths for Arc-enabled servers.",
+        "networkprofile": "Retrieve network interface details for an Arc-enabled server including IP configurations."
+      },
+      "actionRenames": {
+        "Machines_Get": "show",
+        "Machines_CreateOrUpdate": "create",
+        "Machines_Delete": "delete",
+        "Machines_Update": "update",
+        "Machines_AssessPatches": "assess-patches",
+        "Machines_InstallPatches": "install-patches",
+        "Machines_ListByResourceGroup": "list",
+        "Machines_ListBySubscription": "list-by-subscription",
+        "MachineExtensions_Get": "show",
+        "MachineExtensions_CreateOrUpdate": "create",
+        "MachineExtensions_Delete": "delete",
+        "MachineExtensions_Update": "update",
+        "MachineExtensions_List": "list",
+        "MachineRunCommands_Get": "show",
+        "MachineRunCommands_CreateOrUpdate": "create",
+        "MachineRunCommands_Delete": "delete",
+        "MachineRunCommands_Update": "update",
+        "MachineRunCommands_List": "list",
+        "Licenses_Get": "show",
+        "Licenses_CreateOrUpdate": "create",
+        "Licenses_Delete": "delete",
+        "Licenses_Update": "update",
+        "Licenses_ValidateLicense": "validate",
+        "Licenses_ListByResourceGroup": "list",
+        "Licenses_ListBySubscription": "list-by-subscription",
+        "LicenseProfiles_Get": "show",
+        "LicenseProfiles_CreateOrUpdate": "create",
+        "LicenseProfiles_Delete": "delete",
+        "LicenseProfiles_Update": "update",
+        "LicenseProfiles_List": "list",
+        "Gateways_Get": "show",
+        "Gateways_CreateOrUpdate": "create",
+        "Gateways_Delete": "delete",
+        "Gateways_Update": "update",
+        "Gateways_ListByResourceGroup": "list",
+        "Gateways_ListBySubscription": "list-by-subscription",
+        "Settings_Get": "show",
+        "Settings_Update": "update",
+        "Settings_Patch": "patch",
+        "AgentVersions_List": "list",
+        "AgentVersions_Get": "show",
+        "NetworkProfiles_Get": "show",
+        "HybridIdentityMetadata_Get": "show",
+        "HybridIdentityMetadata_ListByMachines": "list"
+      },
+      "resourceRenames": {
+        "Licenses_ValidateLicense": "license",
+        "Licenses_Get": "license",
+        "Licenses_CreateOrUpdate": "license",
+        "Licenses_Delete": "license",
+        "Licenses_Update": "license",
+        "Licenses_ListByResourceGroup": "license",
+        "Licenses_ListBySubscription": "license",
+        "NetworkProfiles_Get": "networkprofile",
+        "HybridIdentityMetadata_Get": "hybrididentitymetadata",
+        "HybridIdentityMetadata_ListByMachines": "hybrididentitymetadata"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Machines_ListBySubscription",
+          "resourceGroupOperationId": "Machines_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Licenses_ListBySubscription",
+          "resourceGroupOperationId": "Licenses_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Gateways_ListBySubscription",
+          "resourceGroupOperationId": "Gateways_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "SetupExtension_Get",
+        "UpgradeExtensions_Upgrade",
+        "ExtensionMetadataV2_Get",
+        "ExtensionMetadataV2_List",
+        "ExtensionPublishers_List",
+        "ExtensionTypes_ListByPublisher"
+      ]
+    },
+    {
+      "serviceDir": "hybridconnectivity",
+      "displayName": "hybridconnectivity",
+      "apiVersion": "2024-12-01",
+      "description": "Manage Azure Hybrid Connectivity endpoints and solution configurations for Arc-enabled resources.",
+      "detailedDescription": "Azure Hybrid Connectivity enables remote access and management of Arc-enabled resources (servers, Kubernetes clusters) through relay endpoints. Covers endpoints, service configurations (SSH, RDP), public cloud connectors (AWS/GCP), solution configurations, and solution types.",
+      "specFiles": [
+        "hybridconnectivity/resource-manager/Microsoft.HybridConnectivity/stable/2024-12-01/hybridconnectivity.json"
+      ],
+      "resourceDescriptions": {
+        "endpoint": "Connectivity endpoints on Arc-enabled resources for SSH, RDP, and relay access",
+        "serviceconfiguration": "Service configurations defining allowed protocols on an endpoint",
+        "publiccloudconnector": "Public cloud connectors for AWS and GCP integration with Azure Arc",
+        "solutionconfiguration": "Solution configurations for hybrid connectivity scenarios",
+        "solutiontype": "Available solution types for hybrid connectivity",
+        "inventory": "Inventory of resources managed through a solution configuration"
+      },
+      "resourceDetailedDescriptions": {
+        "endpoint": "Create and manage connectivity endpoints on Arc-enabled resources. List credentials and ingress gateway credentials for establishing SSH or RDP sessions through the Arc relay.",
+        "serviceconfiguration": "Configure which services (SSH port 22, RDP port 3389) are allowed through a hybrid connectivity endpoint.",
+        "publiccloudconnector": "Create connectors that link AWS or GCP accounts to Azure for multi-cloud inventory and management.",
+        "solutionconfiguration": "Create and manage solution configurations that define how Arc-enabled resources participate in hybrid connectivity scenarios.",
+        "solutiontype": "Enumerate available hybrid connectivity solution types supported by the platform.",
+        "inventory": "List resources discovered and managed through a solution configuration."
+      },
+      "actionRenames": {
+        "Endpoints_List": "list",
+        "Endpoints_Get": "show",
+        "Endpoints_CreateOrUpdate": "create",
+        "Endpoints_Delete": "delete",
+        "Endpoints_Update": "update",
+        "Endpoints_ListCredentials": "list-credentials",
+        "Endpoints_ListIngressGatewayCredentials": "list-gateway-credentials",
+        "Endpoints_ListManagedProxyDetails": "list-proxy-details",
+        "ServiceConfigurations_ListByEndpointResource": "list",
+        "ServiceConfigurations_Get": "show",
+        "ServiceConfigurations_CreateOrupdate": "create",
+        "ServiceConfigurations_Delete": "delete",
+        "ServiceConfigurations_Update": "update",
+        "PublicCloudConnectors_ListBySubscription": "list-by-subscription",
+        "PublicCloudConnectors_ListByResourceGroup": "list",
+        "PublicCloudConnectors_Get": "show",
+        "PublicCloudConnectors_CreateOrUpdate": "create",
+        "PublicCloudConnectors_Delete": "delete",
+        "PublicCloudConnectors_Update": "update",
+        "PublicCloudConnectors_TestPermissions": "test-permissions",
+        "SolutionConfigurations_List": "list",
+        "SolutionConfigurations_Get": "show",
+        "SolutionConfigurations_CreateOrUpdate": "create",
+        "SolutionConfigurations_Delete": "delete",
+        "SolutionConfigurations_Update": "update",
+        "SolutionConfigurations_SyncNow": "sync",
+        "SolutionTypes_ListBySubscription": "list-by-subscription",
+        "SolutionTypes_ListByResourceGroup": "list",
+        "SolutionTypes_Get": "show",
+        "Inventory_ListBySolutionConfiguration": "list",
+        "Inventory_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "PublicCloudConnectors_ListBySubscription",
+          "resourceGroupOperationId": "PublicCloudConnectors_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SolutionTypes_ListBySubscription",
+          "resourceGroupOperationId": "SolutionTypes_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "GenerateAwsTemplate_Post"
+      ]
+    },
+    {
+      "serviceDir": "connectedvmware",
+      "displayName": "connectedvmware",
+      "apiVersion": "2023-12-01",
+      "description": "Manage Azure Arc-enabled VMware vSphere resources and virtual machines.",
+      "detailedDescription": "Azure Arc for VMware vSphere: connect vCenter servers to Azure and manage VMs, templates, networks, and compute through the Azure control plane. Covers vCenter onboarding, VM lifecycle (start/stop/restart), VMSS guest agents, and resource inventory synchronization.",
+      "specFiles": [
+        "connectedvmware/resource-manager/Microsoft.ConnectedVMwarevSphere/stable/2023-12-01/connectedvmware.json"
+      ],
+      "resourceDescriptions": {
+        "vcenter": "vCenter Server connections linked to Azure Arc",
+        "virtualmachineinstance": "Arc-enabled VMware virtual machine instances with start/stop/restart operations",
+        "virtualmachinetemplate": "VM templates from vCenter available for deployment",
+        "virtualnetwork": "VMware virtual networks exposed through Arc",
+        "cluster": "VMware clusters available as compute resources",
+        "host": "VMware hosts available as compute resources",
+        "datastore": "VMware datastores available for VM storage",
+        "resourcepool": "VMware resource pools for compute allocation",
+        "inventoryitem": "Discovered vCenter inventory items not yet projected to Azure",
+        "vminstanceguestagent": "Guest agents installed on Arc-enabled VMware VMs",
+        "hybrididentitymetadata": "Hybrid identity metadata for Arc-enabled VMware VMs"
+      },
+      "resourceDetailedDescriptions": {
+        "vcenter": "Onboard vCenter Servers to Azure Arc and manage the connection. Creates a bridge between the vCenter inventory and Azure resource management.",
+        "virtualmachineinstance": "Manage VMware VMs through Azure: create, update, delete, start, stop, and restart VMs. The VM instance is a child resource of a Kubernetes connected cluster Arc resource.",
+        "virtualmachinetemplate": "Project VM templates from vCenter to Azure for use in VM deployments.",
+        "virtualnetwork": "Project VMware virtual networks to Azure for network segment management.",
+        "cluster": "Project VMware clusters to Azure for use as compute placement targets.",
+        "host": "Project VMware ESXi hosts to Azure for direct placement of VMs.",
+        "datastore": "Project VMware datastores to Azure for storage management and placement.",
+        "resourcepool": "Project VMware resource pools to Azure for compute quota management.",
+        "inventoryitem": "Manage vCenter inventory items that have been discovered but not yet projected to Azure as Arc resources.",
+        "vminstanceguestagent": "Manage guest agents on Arc-enabled VMware VMs for extension and patch management.",
+        "hybrididentitymetadata": "View hybrid identity metadata for Arc-enabled VMware VMs including the public key used for authentication."
+      },
+      "actionRenames": {
+        "VCenters_Get": "show",
+        "VCenters_Create": "create",
+        "VCenters_Delete": "delete",
+        "VCenters_Update": "update",
+        "VirtualMachineInstances_Get": "show",
+        "VirtualMachineInstances_CreateOrUpdate": "create",
+        "VirtualMachineInstances_Delete": "delete",
+        "VirtualMachineInstances_Update": "update",
+        "VirtualMachineInstances_List": "list",
+        "VirtualMachineInstances_Stop": "stop",
+        "VirtualMachineInstances_Start": "start",
+        "VirtualMachineInstances_Restart": "restart",
+        "VirtualMachineTemplates_Get": "show",
+        "VirtualMachineTemplates_Create": "create",
+        "VirtualMachineTemplates_Delete": "delete",
+        "VirtualMachineTemplates_Update": "update",
+        "VirtualNetworks_Get": "show",
+        "VirtualNetworks_Create": "create",
+        "VirtualNetworks_Delete": "delete",
+        "VirtualNetworks_Update": "update",
+        "Clusters_Get": "show",
+        "Clusters_Create": "create",
+        "Clusters_Delete": "delete",
+        "Clusters_Update": "update",
+        "Hosts_Get": "show",
+        "Hosts_Create": "create",
+        "Hosts_Delete": "delete",
+        "Hosts_Update": "update",
+        "Datastores_Get": "show",
+        "Datastores_Create": "create",
+        "Datastores_Delete": "delete",
+        "Datastores_Update": "update",
+        "ResourcePools_Get": "show",
+        "ResourcePools_Create": "create",
+        "ResourcePools_Delete": "delete",
+        "ResourcePools_Update": "update",
+        "InventoryItems_Get": "show",
+        "InventoryItems_Create": "create",
+        "InventoryItems_Delete": "delete",
+        "InventoryItems_ListByVCenter": "list",
+        "VMInstanceGuestAgents_Get": "show",
+        "VMInstanceGuestAgents_Create": "create",
+        "VMInstanceGuestAgents_Delete": "delete",
+        "VMInstanceGuestAgents_List": "list",
+        "VMInstanceHybridIdentityMetadata_Get": "show",
+        "VMInstanceHybridIdentityMetadata_List": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "VCenters_List",
+          "resourceGroupOperationId": "VCenters_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "VirtualMachineTemplates_List",
+          "resourceGroupOperationId": "VirtualMachineTemplates_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "VirtualNetworks_List",
+          "resourceGroupOperationId": "VirtualNetworks_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Clusters_List",
+          "resourceGroupOperationId": "Clusters_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Hosts_List",
+          "resourceGroupOperationId": "Hosts_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Datastores_List",
+          "resourceGroupOperationId": "Datastores_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ResourcePools_List",
+          "resourceGroupOperationId": "ResourcePools_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "scvmm",
+      "displayName": "scvmm",
+      "apiVersion": "2025-03-13",
+      "description": "Manage Azure Arc-enabled System Center Virtual Machine Manager (SCVMM) resources.",
+      "detailedDescription": "Azure Arc for SCVMM: connect VMM servers to Azure and manage Hyper-V VMs, templates, virtual networks, clouds, and availability sets through the Azure control plane. Covers VMM server onboarding, VM lifecycle with checkpoints, and inventory management.",
+      "specFiles": [
+        "scvmm/resource-manager/Microsoft.ScVmm/stable/2025-03-13/scvmm.json"
+      ],
+      "resourceDescriptions": {
+        "vmmserver": "VMM Server connections linked to Azure Arc",
+        "virtualmachineinstance": "Arc-enabled SCVMM virtual machine instances with start/stop/checkpoint operations",
+        "virtualmachinetemplate": "VM templates from VMM available for deployment",
+        "virtualnetwork": "VMM virtual networks exposed through Arc",
+        "cloud": "VMM clouds representing capacity pools for VM placement",
+        "availabilityset": "VMM availability sets for high-availability VM placement",
+        "inventoryitem": "Discovered VMM inventory items not yet projected to Azure",
+        "guestagent": "Guest agents on Arc-enabled SCVMM VMs",
+        "vminstancehybrididentitymetadata": "Hybrid identity metadata for Arc-enabled SCVMM VMs"
+      },
+      "resourceDetailedDescriptions": {
+        "vmmserver": "Onboard SCVMM servers to Azure Arc and manage the VMM connection. Enables Azure-based management of the full VMM-managed infrastructure.",
+        "virtualmachineinstance": "Manage SCVMM-hosted Hyper-V VMs through Azure: create, update, delete, start, stop, restart. Create, restore, and delete VM checkpoints for point-in-time recovery.",
+        "virtualmachinetemplate": "Project SCVMM VM templates to Azure for use in VM deployments.",
+        "virtualnetwork": "Project SCVMM virtual networks to Azure for network management.",
+        "cloud": "Project SCVMM clouds (capacity pools) to Azure for placement and quota management.",
+        "availabilityset": "Project SCVMM availability sets to Azure for high-availability VM placement.",
+        "inventoryitem": "Manage VMM inventory items that have been discovered but not yet projected to Azure.",
+        "guestagent": "Manage guest agents on Arc-enabled SCVMM VMs for extension and patch management.",
+        "vminstancehybrididentitymetadata": "View hybrid identity metadata for Arc-enabled SCVMM VMs."
+      },
+      "actionRenames": {
+        "VmmServers_Get": "show",
+        "VmmServers_CreateOrUpdate": "create",
+        "VmmServers_Delete": "delete",
+        "VmmServers_Update": "update",
+        "VirtualMachineInstances_Get": "show",
+        "VirtualMachineInstances_CreateOrUpdate": "create",
+        "VirtualMachineInstances_Delete": "delete",
+        "VirtualMachineInstances_Update": "update",
+        "VirtualMachineInstances_List": "list",
+        "VirtualMachineInstances_CreateCheckpoint": "create-checkpoint",
+        "VirtualMachineInstances_DeleteCheckpoint": "delete-checkpoint",
+        "VirtualMachineInstances_RestoreCheckpoint": "restore-checkpoint",
+        "VirtualMachineInstances_Start": "start",
+        "VirtualMachineInstances_Stop": "stop",
+        "VirtualMachineInstances_Restart": "restart",
+        "VirtualMachineTemplates_Get": "show",
+        "VirtualMachineTemplates_CreateOrUpdate": "create",
+        "VirtualMachineTemplates_Delete": "delete",
+        "VirtualMachineTemplates_Update": "update",
+        "VirtualNetworks_Get": "show",
+        "VirtualNetworks_CreateOrUpdate": "create",
+        "VirtualNetworks_Delete": "delete",
+        "VirtualNetworks_Update": "update",
+        "Clouds_Get": "show",
+        "Clouds_CreateOrUpdate": "create",
+        "Clouds_Delete": "delete",
+        "Clouds_Update": "update",
+        "AvailabilitySets_Get": "show",
+        "AvailabilitySets_CreateOrUpdate": "create",
+        "AvailabilitySets_Delete": "delete",
+        "AvailabilitySets_Update": "update",
+        "InventoryItems_Get": "show",
+        "InventoryItems_Create": "create",
+        "InventoryItems_Delete": "delete",
+        "InventoryItems_ListByVmmServer": "list",
+        "GuestAgents_Get": "show",
+        "GuestAgents_Create": "create",
+        "GuestAgents_Delete": "delete",
+        "GuestAgents_ListByVirtualMachineInstance": "list",
+        "VmInstanceHybridIdentityMetadata_Get": "show",
+        "VmInstanceHybridIdentityMetadata_ListByVirtualMachineInstance": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "VmmServers_ListBySubscription",
+          "resourceGroupOperationId": "VmmServers_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "VirtualMachineTemplates_ListBySubscription",
+          "resourceGroupOperationId": "VirtualMachineTemplates_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "VirtualNetworks_ListBySubscription",
+          "resourceGroupOperationId": "VirtualNetworks_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Clouds_ListBySubscription",
+          "resourceGroupOperationId": "Clouds_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "AvailabilitySets_ListBySubscription",
+          "resourceGroupOperationId": "AvailabilitySets_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
