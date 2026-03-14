@@ -1,5 +1,4 @@
 using System.Net.Http;
-using System.Net.Sockets;
 using System.Text;
 using Console.Rendering;
 
@@ -13,13 +12,12 @@ internal static class HttpRequestErrorFormatter
         sb.AppendLine(Ansi.Red(Ansi.Bold("Network request failed")));
         sb.AppendLine();
 
-        var socketEx = FindSocketException(ex);
         var entries = new List<(string, string)>();
         var fixHints = new List<string>();
 
-        if (socketEx is not null && IsNameResolutionFailure(socketEx))
+        if (ex.HttpRequestError == HttpRequestError.NameResolutionError)
         {
-            var host = ExtractHost(socketEx.Message);
+            var host = ExtractHostFromChain(ex);
             if (host is not null)
                 entries.Add(("Host", Ansi.Yellow(host)));
             entries.Add(("Reason", "Could not resolve host"));
@@ -56,21 +54,16 @@ internal static class HttpRequestErrorFormatter
         return sb.ToString().TrimEnd();
     }
 
-    private static SocketException? FindSocketException(Exception? ex)
+    private static string? ExtractHostFromChain(Exception? ex)
     {
         while (ex is not null)
         {
-            if (ex is SocketException s)
-                return s;
+            var host = ExtractHost(ex.Message);
+            if (host is not null) return host;
             ex = ex.InnerException;
         }
         return null;
     }
-
-    private static bool IsNameResolutionFailure(SocketException ex) =>
-        ex.SocketErrorCode is SocketError.HostNotFound or SocketError.NoData
-            || ex.Message.Contains("Name or service not known", StringComparison.OrdinalIgnoreCase)
-            || ex.Message.Contains("No such host", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Extracts the host from messages like "Name or service not known (host:port)".</summary>
     private static string? ExtractHost(string message)
