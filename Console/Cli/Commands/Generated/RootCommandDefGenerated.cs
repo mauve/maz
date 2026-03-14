@@ -12,6 +12,7 @@ public partial class RootCommandDef
     public IdentityCommandDef Identity = null!;
     public SubscriptionCommandDef Subscription = null!;
     public AuthorizationCommandDef Authorization = null!;
+    public ResourcesCommandDef Resources = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -20,5 +21,6 @@ public partial class RootCommandDef
         Identity = new IdentityCommandDef(Auth);
         Subscription = new SubscriptionCommandDef(Auth);
         Authorization = new AuthorizationCommandDef(Auth);
+        Resources = new ResourcesCommandDef(Auth);
     }
 }
