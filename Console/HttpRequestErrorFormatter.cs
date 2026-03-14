@@ -14,28 +14,43 @@ internal static class HttpRequestErrorFormatter
         sb.AppendLine();
 
         var socketEx = FindSocketException(ex);
+        var entries = new List<(string, string)>();
+        var fixHints = new List<string>();
 
         if (socketEx is not null && IsNameResolutionFailure(socketEx))
         {
             var host = ExtractHost(socketEx.Message);
-            sb.Append("  Could not resolve host");
             if (host is not null)
-                sb.Append($": {Ansi.Yellow(host)}");
-            sb.AppendLine();
+                entries.Add(("Host", Ansi.Yellow(host)));
+            entries.Add(("Reason", "Could not resolve host"));
 
             if (host is not null && IsMangledAzureHost(host))
             {
-                sb.AppendLine();
-                sb.AppendLine(
-                    Ansi.Dim("  (The URL appears to be missing the https:// scheme prefix.)")
-                );
+                fixHints.Add("The URL appears to be missing the https:// scheme prefix.");
+            }
+            else
+            {
+                fixHints.Add("Check that the URL is correct and the host is reachable.");
+                fixHints.Add("Verify your network connection and DNS settings.");
             }
         }
         else
         {
-            sb.AppendLine($"  {ex.Message}");
+            entries.Add(("Reason", ex.Message));
             if (ex.InnerException is { } inner && inner.Message != ex.Message)
-                sb.AppendLine($"  {inner.Message}");
+                entries.Add(("Detail", inner.Message));
+        }
+
+        using var block = new StringWriter();
+        DefinitionList.Write(block, entries);
+        sb.Append(block.ToString());
+
+        if (fixHints.Count > 0)
+        {
+            sb.AppendLine();
+            sb.AppendLine(Ansi.Bold("  To fix:"));
+            foreach (var hint in fixHints)
+                sb.AppendLine($"    {hint}");
         }
 
         return sb.ToString().TrimEnd();
