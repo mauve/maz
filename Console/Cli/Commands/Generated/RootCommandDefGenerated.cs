@@ -14,6 +14,7 @@ public partial class RootCommandDef
     public AuthorizationCommandDef Authorization = null!;
     public ResourcesCommandDef Resources = null!;
     public ComputeCommandDef Compute = null!;
+    public NetworkCommandDef Network = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -24,5 +25,6 @@ public partial class RootCommandDef
         Authorization = new AuthorizationCommandDef(Auth);
         Resources = new ResourcesCommandDef(Auth);
         Compute = new ComputeCommandDef(Auth);
+        Network = new NetworkCommandDef(Auth);
     }
 }
