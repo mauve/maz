@@ -3218,6 +3218,188 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "monitor",
+      "displayName": "monitor",
+      "apiVersion": "2026-03-01",
+      "description": "Manage Azure Monitor scheduled query rules, data collection, autoscale, action groups, and alerts",
+      "detailedDescription": "Covers key Azure Monitor resource management: scheduled query alert rules (log-based alerts), data collection rules and endpoints (agent-based data ingestion), autoscale settings for VM scale sets and App Service plans, action groups for alert notifications, and activity log alerts. For metric queries and log queries, use Azure CLI or SDK directly.",
+      "specFiles": [
+        "monitor/resource-manager/Microsoft.Insights/stable/2026-03-01/scheduledQueryRule_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2024-03-11/dataCollectionRules_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2024-03-11/dataCollectionEndpoints_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2024-03-11/dataCollectionRuleAssociations_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2022-10-01/autoscale_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2023-01-01/actionGroups_API.json",
+        "monitor/resource-manager/Microsoft.Insights/stable/2026-01-01/activityLogAlerts_API.json"
+      ],
+      "resourceDescriptions": {
+        "scheduledqueryrule": "A scheduled query alert rule evaluating KQL or Metric queries on a schedule.",
+        "datacollectionrule": "A data collection rule (DCR) defining what data to collect and where to send it.",
+        "datacollectionendpoint": "A data collection endpoint (DCE) providing the ingestion URL for DCR-based data flows.",
+        "datacollectionruleassociation": "An association linking a DCR to a monitored resource.",
+        "autoscalesetting": "An autoscale setting defining scale-out/in rules for VM scale sets or App Service plans.",
+        "predictive-metric": "Predicted metric values used for predictive autoscale in VM scale sets.",
+        "actiongroup": "An action group defining notification channels (email, SMS, webhook, ITSM) for alerts.",
+        "activitylogalert": "An activity log alert firing on Azure control-plane events."
+      },
+      "resourceDetailedDescriptions": {
+        "scheduledqueryrule": "Scheduled query rules run KQL queries against Log Analytics workspaces or metric queries on a configurable schedule, firing alerts when conditions are met. Supports multi-resource queries and dynamic thresholds.",
+        "datacollectionrule": "Data collection rules configure the Azure Monitor Agent (AMA) and the Log Ingestion API to collect performance counters, event logs, syslog, and custom logs, routing them to Log Analytics workspaces or Azure Monitor metrics.",
+        "datacollectionendpoint": "Data collection endpoints provide stable HTTPS ingestion URLs for custom log pipelines. Associate DCRs with DCEs to route data through private links.",
+        "datacollectionruleassociation": "Associations link DCRs to Azure VMs, VM scale sets, or Arc-enabled servers, applying the data collection configuration to those resources.",
+        "autoscalesetting": "Autoscale settings define scale-in/out rules based on metrics (CPU, memory, queue depth), schedules, or predictive capacity models. Apply to VM scale sets, App Service plans, and other scalable resources.",
+        "predictive-metric": "Use `get` to retrieve predicted metric values for a VM scale set to inform predictive autoscale planning.",
+        "actiongroup": "Action groups are reusable notification configurations attached to alert rules. Supports email, SMS, Azure Functions, Logic Apps, ITSM connectors, and runbooks.",
+        "activitylogalert": "Activity log alerts fire on Azure Resource Manager events (resource creation, policy assignments, service health events). Scoped to subscription, resource group, or resource."
+      },
+      "actionRenames": {
+        "ScheduledQueryRules_Get": "show",
+        "ScheduledQueryRules_CreateOrUpdate": "create",
+        "ScheduledQueryRules_ListBySubscription": "list-by-subscription",
+        "ScheduledQueryRules_ListByResourceGroup": "list",
+        "DataCollectionRules_Get": "show",
+        "DataCollectionRules_ListBySubscription": "list-by-subscription",
+        "DataCollectionRules_ListByResourceGroup": "list",
+        "DataCollectionEndpoints_Get": "show",
+        "DataCollectionEndpoints_ListBySubscription": "list-by-subscription",
+        "DataCollectionEndpoints_ListByResourceGroup": "list",
+        "DataCollectionRuleAssociations_Get": "show",
+        "AutoscaleSettings_Get": "show",
+        "AutoscaleSettings_CreateOrUpdate": "create",
+        "AutoscaleSettings_ListBySubscription": "list-by-subscription",
+        "AutoscaleSettings_ListByResourceGroup": "list",
+        "PredictiveMetric_Get": "show",
+        "ActionGroups_Get": "show",
+        "ActionGroups_CreateOrUpdate": "create",
+        "ActionGroups_ListBySubscriptionId": "list-by-subscription",
+        "ActionGroups_ListByResourceGroup": "list",
+        "ActivityLogAlerts_Get": "show",
+        "ActivityLogAlerts_CreateOrUpdate": "create",
+        "ActivityLogAlerts_ListBySubscriptionId": "list-by-subscription",
+        "ActivityLogAlerts_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "ScheduledQueryRules_ListBySubscription",
+          "resourceGroupOperationId": "ScheduledQueryRules_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DataCollectionRules_ListBySubscription",
+          "resourceGroupOperationId": "DataCollectionRules_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DataCollectionEndpoints_ListBySubscription",
+          "resourceGroupOperationId": "DataCollectionEndpoints_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "AutoscaleSettings_ListBySubscription",
+          "resourceGroupOperationId": "AutoscaleSettings_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ActionGroups_ListBySubscriptionId",
+          "resourceGroupOperationId": "ActionGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ActivityLogAlerts_ListBySubscriptionId",
+          "resourceGroupOperationId": "ActivityLogAlerts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": []
+    },
+    {
+      "serviceDir": "operationalinsights",
+      "displayName": "loganalytics",
+      "apiVersion": "2025-07-01",
+      "description": "Manage Azure Log Analytics workspaces, clusters, tables, and query packs",
+      "detailedDescription": "Covers the full lifecycle of Log Analytics workspaces (creation, deletion, key management, purge), dedicated clusters, workspace tables (schema, retention, search jobs), saved searches, data exports to Storage/Event Hub, linked services, and query packs for reusable KQL queries. Requires Log Analytics Contributor or Reader roles.",
+      "specFiles": [
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/Workspaces.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/Clusters.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/Tables.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/SavedSearches.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/DataExports.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/LinkedServices.json",
+        "operationalinsights/resource-manager/Microsoft.OperationalInsights/OperationalInsights/stable/2025-07-01/QueryPacks.json"
+      ],
+      "resourceDescriptions": {
+        "workspace": "A Log Analytics workspace storing and querying log and metric data.",
+        "deletedworkspace": "A soft-deleted Log Analytics workspace pending permanent deletion.",
+        "cluster": "A Log Analytics dedicated cluster providing capacity commitment pricing and customer-managed keys.",
+        "table": "A Log Analytics workspace table with configurable schema, retention, and access mode.",
+        "savedsearch": "A saved KQL query in a Log Analytics workspace.",
+        "dataexport": "A continuous data export rule routing workspace data to a Storage Account or Event Hub.",
+        "linkedservice": "A linked service connecting a Log Analytics workspace to another Azure resource (e.g., Automation account).",
+        "querypack": "A collection of reusable KQL query definitions that can be shared across workspaces."
+      },
+      "resourceDetailedDescriptions": {
+        "workspace": "Log Analytics workspaces are the central data store for Azure Monitor logs. Configure retention, daily cap, networking (private link), and customer-managed keys via workspace settings. Use `delete` with 14-day soft-delete for recovery.",
+        "deletedworkspace": "Lists soft-deleted workspaces that can be recovered by re-creating with the same name and resource group within 14 days.",
+        "cluster": "Dedicated clusters are for organizations ingesting 500+ GB/day needing capacity commitments, CMK, or cross-workspace querying. Link workspaces to clusters via `linkedservice`.",
+        "table": "Tables define the schema, retention period, and access tier (Analytics, Basic, Auxiliary) for log data. Use `create-or-update` to configure custom retention or define search jobs.",
+        "savedsearch": "Saved searches store frequently-used KQL queries in a workspace for reuse across dashboards and alert rules.",
+        "dataexport": "Data export continuously sends workspace table data to a Storage Account or Event Hub for long-term archival or external processing.",
+        "linkedservice": "Links external services like Azure Automation to a workspace, enabling runbook-based alerting and other integrations.",
+        "querypack": "Query packs store a set of KQL queries as reusable artifacts. Use `create-or-update` and the log analytics portal to manage shared query libraries."
+      },
+      "actionRenames": {
+        "Workspaces_Get": "show",
+        "Workspaces_CreateOrUpdate": "create",
+        "Workspaces_ListByResourceGroup": "list",
+        "Clusters_Get": "show",
+        "Clusters_CreateOrUpdate": "create",
+        "Tables_Get": "show",
+        "Tables_CreateOrUpdate": "create",
+        "Tables_ListByWorkspace": "list",
+        "SavedSearches_Get": "show",
+        "SavedSearches_CreateOrUpdate": "create",
+        "SavedSearches_ListByWorkspace": "list",
+        "DataExports_Get": "show",
+        "DataExports_CreateOrUpdate": "create",
+        "DataExports_ListByWorkspace": "list",
+        "LinkedServices_Get": "show",
+        "LinkedServices_CreateOrUpdate": "create",
+        "LinkedServices_ListByWorkspace": "list",
+        "QueryPacks_Get": "show",
+        "QueryPacks_CreateOrUpdate": "create",
+        "QueryPacks_ListByResourceGroup": "list",
+        "QueryPacks_UpdateTags": "update-tags",
+        "QueryPacks_CreateOrUpdateWithoutName": "create-without-name",
+        "DeletedWorkspaces_List": "list",
+        "DeletedWorkspaces_ListByResourceGroup": "list-by-resource-group"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Workspaces_List",
+          "resourceGroupOperationId": "Workspaces_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Clusters_List",
+          "resourceGroupOperationId": "Clusters_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "QueryPacks_List",
+          "resourceGroupOperationId": "QueryPacks_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DeletedWorkspaces_List",
+          "resourceGroupOperationId": "DeletedWorkspaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }

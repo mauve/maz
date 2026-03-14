@@ -46,6 +46,8 @@ public partial class RootCommandDef
     public HsmCommandDef Hsm = null!;
     public AttestationCommandDef Attestation = null!;
     public ConfidentialledgerCommandDef Confidentialledger = null!;
+    public MonitorCommandDef Monitor = null!;
+    public LoganalyticsCommandDef Loganalytics = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -88,5 +90,7 @@ public partial class RootCommandDef
         Hsm = new HsmCommandDef(Auth);
         Attestation = new AttestationCommandDef(Auth);
         Confidentialledger = new ConfidentialledgerCommandDef(Auth);
+        Monitor = new MonitorCommandDef(Auth);
+        Loganalytics = new LoganalyticsCommandDef(Auth);
     }
 }
