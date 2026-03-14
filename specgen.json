@@ -487,6 +487,173 @@
           ]
         }
       ]
+    },
+    {
+      "serviceDir": "compute",
+      "displayName": "compute",
+      "apiVersion": "2025-04-01",
+      "description": "Manage Azure virtual machines, scale sets, availability sets, and compute resources.",
+      "detailedDescription": "Commands in this group interact with the Microsoft.Compute resource provider to create and manage VMs, VMSS, SSH keys, images, dedicated hosts, capacity reservations, and related resources. Requires Contributor or Virtual Machine Contributor roles.",
+      "resourceDescriptions": {
+        "availabilityset": "Manage availability sets for VM fault tolerance.",
+        "capacityreservation": "Manage capacity reservations within a capacity reservation group.",
+        "capacityreservationgroup": "Manage capacity reservation groups that pre-allocate compute capacity.",
+        "dedicatedhost": "Manage dedicated physical hosts for single-tenant VM isolation.",
+        "dedicatedhostgroup": "Manage dedicated host groups that contain dedicated hosts.",
+        "image": "Manage custom VM images built from generalized VMs or managed disks.",
+        "loganalytic": "Export compute throttling and request-rate analytics.",
+        "operation": "List available operations for the Compute resource provider.",
+        "proximityplacementgroup": "Manage proximity placement groups to co-locate VMs for low latency.",
+        "restorepoint": "Manage VM restore points for point-in-time recovery.",
+        "restorepointcollection": "Manage restore point collections that group VM restore points.",
+        "sshpublickey": "Manage SSH public keys for Linux VM authentication.",
+        "usage": "Show compute resource usage and quotas for a subscription.",
+        "virtual-machine-images-edge-zone": "Browse VM images available in edge zones.",
+        "virtualmachine": "Manage Azure virtual machines.",
+        "virtualmachineextension": "Manage extensions installed on a virtual machine.",
+        "virtualmachineextensionimage": "Browse available VM extension images.",
+        "virtualmachineimage": "Browse available platform VM images.",
+        "vmruncommandresource": "Manage persisted run command resources on virtual machines.",
+        "virtualmachinescaleset": "Manage virtual machine scale sets (VMSS).",
+        "virtualmachinescalesetextension": "Manage extensions on a virtual machine scale set.",
+        "virtualmachinescalesetrollingupgrade": "Manage rolling upgrades for a scale set.",
+        "virtualmachinescalesetvm": "Manage individual VM instances within a scale set.",
+        "virtualmachinescalesetvmextension": "Manage extensions on individual scale set VM instances.",
+        "scalesetvmruncommandresource": "Manage persisted run command resources on scale set VM instances.",
+        "virtualmachinesiz": "List available VM sizes in a region."
+      },
+      "resourceDetailedDescriptions": {
+        "availabilityset": "Availability sets ensure VMs are distributed across fault and update domains to minimize downtime during planned and unplanned events.",
+        "capacityreservation": "Reserve compute capacity within a group to guarantee VM deployments succeed. Billed from reservation creation regardless of VM deployment.",
+        "capacityreservationgroup": "A logical grouping of capacity reservations. Create the group first, then add individual size reservations within it.",
+        "dedicatedhost": "Dedicated hosts provide single-tenant physical servers within Azure. Useful for compliance requirements and bring-your-own-license scenarios.",
+        "dedicatedhostgroup": "A container for dedicated hosts that are located in the same region, availability zone, and fault domain.",
+        "image": "Custom images created from generalized VMs or managed disks. Use for deploying consistent VM configurations at scale.",
+        "loganalytic": "Export throttled request counts and request rate data to a storage account for analysis.",
+        "operation": "Enumerates all available resource provider operations for Azure Compute.",
+        "proximityplacementgroup": "Co-locate VMs, VMSS, and availability sets in the same data center segment to minimize network latency.",
+        "restorepoint": "Application-consistent or crash-consistent snapshots of a VM's disks and configuration for point-in-time recovery.",
+        "restorepointcollection": "A collection of restore points for a VM. Create the collection before creating individual restore points.",
+        "sshpublickey": "Store SSH public keys in Azure for reuse when creating Linux VMs. Keys can be referenced by name at VM creation time.",
+        "usage": "Returns the current usage counts and maximum quotas for compute resources (cores, VMs, etc.) in a specified location.",
+        "virtual-machine-images-edge-zone": "Browse platform images available in Azure extended zones (edge zone deployments).",
+        "virtualmachine": "Full VM lifecycle: create, start, stop, restart, redeploy, deallocate, delete. Also includes run-command, patch management, and diagnostics.",
+        "virtualmachineextension": "VM extensions automate post-deployment configuration (e.g. DSC, custom script, diagnostics agent). Managed per VM.",
+        "virtualmachineextensionimage": "Enumerate available extension publishers, types, and versions for a region.",
+        "virtualmachineimage": "Browse Azure Marketplace platform images by publisher, offer, SKU, and version.",
+        "vmruncommandresource": "Persisted run commands stored as ARM child resources on a VM. Can be re-executed and managed independently of one-time run-command invocations.",
+        "virtualmachinescaleset": "Scale sets manage a group of identical load-balanced VMs. Supports autoscale, rolling upgrades, and orchestration modes.",
+        "virtualmachinescalesetextension": "Manage extensions applied to all instances in a scale set.",
+        "virtualmachinescalesetrollingupgrade": "Coordinate phased OS or extension upgrades across scale set instances to minimize disruption.",
+        "virtualmachinescalesetvm": "Manage individual instances within a scale set — start, stop, reimage, or run commands on specific instances.",
+        "virtualmachinescalesetvmextension": "Manage extensions on a specific VM instance within a scale set.",
+        "scalesetvmruncommandresource": "Persisted run commands stored as ARM child resources on a scale set VM instance.",
+        "virtualmachinesiz": "Lists the VM sizes available in a specific location for capacity planning."
+      },
+      "specFiles": [
+        "compute/resource-manager/Microsoft.Compute/Compute/stable/2025-04-01/ComputeRP.json"
+      ],
+      "exclude": ["Operations_List"],
+      "resourceRenames": {
+        "VirtualMachineRunCommands_List": "vmruncommandresource",
+        "VirtualMachineRunCommands_Get": "vmruncommandresource",
+        "VirtualMachineRunCommands_ListByVirtualMachine": "vmruncommandresource",
+        "VirtualMachineRunCommands_GetByVirtualMachine": "vmruncommandresource",
+        "VirtualMachineRunCommands_CreateOrUpdate": "vmruncommandresource",
+        "VirtualMachineRunCommands_Delete": "vmruncommandresource",
+        "VirtualMachineRunCommands_Update": "vmruncommandresource",
+        "VirtualMachineScaleSetVMRunCommands_List": "scalesetvmruncommandresource",
+        "VirtualMachineScaleSetVMRunCommands_Get": "scalesetvmruncommandresource",
+        "VirtualMachineScaleSetVMRunCommands_CreateOrUpdate": "scalesetvmruncommandresource",
+        "VirtualMachineScaleSetVMRunCommands_Delete": "scalesetvmruncommandresource",
+        "VirtualMachineScaleSetVMRunCommands_Update": "scalesetvmruncommandresource"
+      },
+      "actionRenames": {
+        "AvailabilitySets_Get": "show",
+        "AvailabilitySets_CreateOrUpdate": "create",
+        "CapacityReservations_Get": "show",
+        "CapacityReservations_CreateOrUpdate": "create",
+        "CapacityReservationGroups_Get": "show",
+        "CapacityReservationGroups_CreateOrUpdate": "create",
+        "DedicatedHosts_Get": "show",
+        "DedicatedHosts_CreateOrUpdate": "create",
+        "DedicatedHostGroups_Get": "show",
+        "DedicatedHostGroups_CreateOrUpdate": "create",
+        "Images_Get": "show",
+        "Images_CreateOrUpdate": "create",
+        "ProximityPlacementGroups_Get": "show",
+        "ProximityPlacementGroups_CreateOrUpdate": "create",
+        "RestorePoints_Get": "show",
+        "RestorePointCollections_Get": "show",
+        "RestorePointCollections_CreateOrUpdate": "create",
+        "SshPublicKeys_Get": "show",
+        "SshPublicKeys_Create": "create",
+        "VirtualMachines_Get": "show",
+        "VirtualMachines_CreateOrUpdate": "create",
+        "VirtualMachines_InstanceView": "show-instance-view",
+        "VirtualMachineExtensions_Get": "show",
+        "VirtualMachineExtensions_CreateOrUpdate": "create",
+        "VirtualMachineExtensionImages_Get": "show",
+        "VirtualMachineImages_Get": "show",
+        "VirtualMachineImagesEdgeZone_Get": "show",
+        "VirtualMachineRunCommands_Get": "show",
+        "VirtualMachineRunCommands_CreateOrUpdate": "create",
+        "VirtualMachineRunCommands_GetByVirtualMachine": "show",
+        "VirtualMachineScaleSets_Get": "show",
+        "VirtualMachineScaleSets_CreateOrUpdate": "create",
+        "VirtualMachineScaleSets_GetInstanceView": "show-instance-view",
+        "VirtualMachineScaleSetExtensions_Get": "show",
+        "VirtualMachineScaleSetExtensions_CreateOrUpdate": "create",
+        "VirtualMachineScaleSetRollingUpgrades_GetLatest": "show",
+        "VirtualMachineScaleSetVMs_Get": "show",
+        "VirtualMachineScaleSetVMs_GetInstanceView": "show-instance-view",
+        "VirtualMachineScaleSetVMExtensions_Get": "show",
+        "VirtualMachineScaleSetVMExtensions_CreateOrUpdate": "create",
+        "VirtualMachineScaleSetVMRunCommands_Get": "show",
+        "VirtualMachineScaleSetVMRunCommands_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "VirtualMachines_ListAll",
+          "resourceGroupOperationId": "VirtualMachines_List",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "VirtualMachineScaleSets_ListAll",
+          "resourceGroupOperationId": "VirtualMachineScaleSets_List",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "AvailabilitySets_ListBySubscription",
+          "resourceGroupOperationId": "AvailabilitySets_List",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "CapacityReservationGroups_ListBySubscription",
+          "resourceGroupOperationId": "CapacityReservationGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "DedicatedHostGroups_ListBySubscription",
+          "resourceGroupOperationId": "DedicatedHostGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Images_List",
+          "resourceGroupOperationId": "Images_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ProximityPlacementGroups_ListBySubscription",
+          "resourceGroupOperationId": "ProximityPlacementGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SshPublicKeys_ListBySubscription",
+          "resourceGroupOperationId": "SshPublicKeys_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ]
     }
   ]
 }
