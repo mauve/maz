@@ -87,19 +87,22 @@ public static class ResourceIdentifierParser
             var parts = remaining.Split('/');
             return parts.Length switch
             {
-                1 => new ParsedResourceIdentifier(
-                    subscriptionSegment, null, parts[0]),
+                1 => new ParsedResourceIdentifier(subscriptionSegment, null, parts[0]),
                 _ => new ParsedResourceIdentifier(
                     subscriptionSegment,
                     NormalizeResourceGroupSegment(parts[0]),
-                    string.Join("/", parts[1..]))
+                    string.Join("/", parts[1..])
+                ),
             };
         }
         else
         {
             // No subscription extracted; tokens are [name], [rg, name], or [sub, rg, name, …].
             if (string.IsNullOrEmpty(remaining))
-                throw new ArgumentException("Resource identifier must contain at least a resource name.", nameof(raw));
+                throw new ArgumentException(
+                    "Resource identifier must contain at least a resource name.",
+                    nameof(raw)
+                );
 
             var parts = remaining.Split('/');
             return parts.Length switch
@@ -108,11 +111,13 @@ public static class ResourceIdentifierParser
                 2 => new ParsedResourceIdentifier(
                     null,
                     NormalizeResourceGroupSegment(parts[0]),
-                    parts[1]),
+                    parts[1]
+                ),
                 _ => new ParsedResourceIdentifier(
                     parts[0],
                     NormalizeResourceGroupSegment(parts[1]),
-                    string.Join("/", parts[2..]))
+                    string.Join("/", parts[2..])
+                ),
             };
         }
     }
@@ -123,7 +128,8 @@ public static class ResourceIdentifierParser
     /// </summary>
     public static string? NormalizeSubscriptionSegment(string? segment)
     {
-        if (segment is null) return null;
+        if (segment is null)
+            return null;
         if (segment.StartsWith("/s/", StringComparison.OrdinalIgnoreCase))
             return "/subscriptions/" + segment[3..];
         return segment;
@@ -135,7 +141,8 @@ public static class ResourceIdentifierParser
     /// </summary>
     public static string? NormalizeResourceGroupSegment(string? segment)
     {
-        if (segment is null) return null;
+        if (segment is null)
+            return null;
         if (segment.StartsWith("/rg/", StringComparison.OrdinalIgnoreCase))
             return segment[4..];
         return segment;

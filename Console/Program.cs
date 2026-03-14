@@ -31,7 +31,8 @@ foreach (var cmd in AllCommands(rootCmd))
 
     var helpMore = new HelpOption("--help-more", [])
     {
-        Description = "Show all options including advanced ones, and detailed command descriptions.",
+        Description =
+            "Show all options including advanced ones, and detailed command descriptions.",
         Hidden = !isRoot,
     };
     if (helpMore.Action is HelpAction helpMoreAction)
@@ -40,7 +41,8 @@ foreach (var cmd in AllCommands(rootCmd))
 
     var helpCommands = new Option<string?>("--help-commands", [])
     {
-        Description = "Show the full command tree. Optionally filter by name, alias, or description.",
+        Description =
+            "Show the full command tree. Optionally filter by name, alias, or description.",
         Hidden = !isRoot,
         Arity = ArgumentArity.ZeroOrOne,
     };

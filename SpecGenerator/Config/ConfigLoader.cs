@@ -15,6 +15,8 @@ public static class ConfigLoader
     {
         var json = File.ReadAllText(configPath);
         return JsonSerializer.Deserialize<GeneratorConfig>(json, _options)
-            ?? throw new InvalidOperationException($"Failed to deserialize config at '{configPath}'.");
+            ?? throw new InvalidOperationException(
+                $"Failed to deserialize config at '{configPath}'."
+            );
     }
 }

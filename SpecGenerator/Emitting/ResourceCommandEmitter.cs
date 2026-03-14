@@ -24,24 +24,27 @@ public static class ResourceCommandEmitter
             w.Line($"/// <summary>{EscapeXml(resource.Description)}</summary>");
         if (resource.DetailedDescription is { Length: > 0 })
             w.Line($"/// <remarks>{EscapeXml(resource.DetailedDescription)}</remarks>");
-        w.Block($"public partial class {resource.ClassName}(AuthOptionPack auth) : CommandDef", () =>
-        {
-            w.Line($"public override string Name => \"{resource.CliName}\";");
-            if (isDataPlane)
-                w.Line("protected override bool IsDataPlane => true;");
-
-            foreach (var op in resource.Operations)
+        w.Block(
+            $"public partial class {resource.ClassName}(AuthOptionPack auth) : CommandDef",
+            () =>
             {
-                var fieldName = NamingEngine.KebabToCSharpProperty(op.CliName);
-                w.Line($"public readonly {op.ClassName} {fieldName} = new(auth);");
-            }
+                w.Line($"public override string Name => \"{resource.CliName}\";");
+                if (isDataPlane)
+                    w.Line("protected override bool IsDataPlane => true;");
 
-            foreach (var sub in resource.Subgroups ?? [])
-            {
-                var fieldName = NamingEngine.KebabToCSharpProperty(sub.CliName);
-                w.Line($"public readonly {sub.ClassName} {fieldName} = new(auth);");
+                foreach (var op in resource.Operations)
+                {
+                    var fieldName = NamingEngine.KebabToCSharpProperty(op.CliName);
+                    w.Line($"public readonly {op.ClassName} {fieldName} = new(auth);");
+                }
+
+                foreach (var sub in resource.Subgroups ?? [])
+                {
+                    var fieldName = NamingEngine.KebabToCSharpProperty(sub.CliName);
+                    w.Line($"public readonly {sub.ClassName} {fieldName} = new(auth);");
+                }
             }
-        });
+        );
 
         return w.ToString();
     }

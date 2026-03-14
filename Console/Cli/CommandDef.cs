@@ -1,9 +1,9 @@
 // ParseResult.GetValue is annotated [MaybeNull] but callers handle nullability via option defaults
 #pragma warning disable CS8603
-using Azure.Identity;
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.Reflection;
+using Azure.Identity;
 
 namespace Console.Cli;
 

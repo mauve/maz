@@ -6,7 +6,11 @@ namespace Console.Rendering.Tests;
 [TestClass]
 public class DefinitionListTests
 {
-    private static string Render(IReadOnlyList<(string, string)> entries, int width = 80, int indent = 2)
+    private static string Render(
+        IReadOnlyList<(string, string)> entries,
+        int width = 80,
+        int indent = 2
+    )
     {
         using var writer = new StringWriter();
         DefinitionList.Write(writer, entries, indent: indent, width: width);
@@ -22,8 +26,14 @@ public class DefinitionListTests
 
         Assert.AreEqual(2, lines.Length);
         // Colon immediately follows each label (no padding before colon)
-        Assert.IsTrue(lines[0].Contains("Name: "), $"Colon should follow label directly: {lines[0]}");
-        Assert.IsTrue(lines[1].Contains("Occupation: "), $"Colon should follow label directly: {lines[1]}");
+        Assert.IsTrue(
+            lines[0].Contains("Name: "),
+            $"Colon should follow label directly: {lines[0]}"
+        );
+        Assert.IsTrue(
+            lines[1].Contains("Occupation: "),
+            $"Colon should follow label directly: {lines[1]}"
+        );
         // Values are column-aligned (padding is after ": ", not before ":")
         var valueCol0 = lines[0].IndexOf("Alice");
         var valueCol1 = lines[1].IndexOf("Engineer");
@@ -56,7 +66,11 @@ public class DefinitionListTests
         for (var i = 1; i < lines.Length; i++)
         {
             var leadingSpaces = lines[i].Length - lines[i].TrimStart().Length;
-            Assert.AreEqual(7, leadingSpaces, $"Continuation line {i} should have 7 leading spaces");
+            Assert.AreEqual(
+                7,
+                leadingSpaces,
+                $"Continuation line {i} should have 7 leading spaces"
+            );
         }
     }
 
@@ -70,7 +84,10 @@ public class DefinitionListTests
         var output = Render(entries, width: 20);
         var lines = output.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
 
-        Assert.IsTrue(lines.Length > 1, "Value should wrap when ANSI label length is computed correctly");
+        Assert.IsTrue(
+            lines.Length > 1,
+            "Value should wrap when ANSI label length is computed correctly"
+        );
         // Continuation lines should be indented to valueStart=8
         for (var i = 1; i < lines.Length; i++)
         {

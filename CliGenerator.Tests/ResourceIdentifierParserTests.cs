@@ -97,7 +97,8 @@ public class ResourceIdentifierParserTests
         var guid = "00000000-0000-0000-0000-000000000003";
         Assert.AreEqual(
             $"/subscriptions/{guid}",
-            ResourceIdentifierParser.NormalizeSubscriptionSegment($"/s/{guid}"));
+            ResourceIdentifierParser.NormalizeSubscriptionSegment($"/s/{guid}")
+        );
     }
 
     [TestMethod]
@@ -134,7 +135,10 @@ public class ResourceIdentifierParserTests
     [TestMethod]
     public void NormalizeResourceGroupSegment_RgPrefix_Stripped()
     {
-        Assert.AreEqual("my-rg", ResourceIdentifierParser.NormalizeResourceGroupSegment("/rg/my-rg"));
+        Assert.AreEqual(
+            "my-rg",
+            ResourceIdentifierParser.NormalizeResourceGroupSegment("/rg/my-rg")
+        );
     }
 
     [TestMethod]
@@ -157,8 +161,14 @@ public class ResourceIdentifierParserTests
     public void Parse_EmptyString_Throws()
     {
         bool threw = false;
-        try { ResourceIdentifierParser.Parse(""); }
-        catch (ArgumentException) { threw = true; }
+        try
+        {
+            ResourceIdentifierParser.Parse("");
+        }
+        catch (ArgumentException)
+        {
+            threw = true;
+        }
         Assert.IsTrue(threw, "Expected ArgumentException for empty string");
     }
 

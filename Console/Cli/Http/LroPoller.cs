@@ -13,7 +13,8 @@ public static class LroPoller
         HttpResponseMessage initial,
         AzureRestClient client,
         string apiVersion,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var pollingUrl = GetPollingUrl(initial);
 
@@ -39,23 +40,25 @@ public static class LroPoller
                 pollingUrl,
                 apiVersion,
                 null,
-                ct);
+                ct
+            );
 
             pollResponse.EnsureSuccessStatusCode();
 
             var content = await pollResponse.Content.ReadAsStringAsync(ct);
-            var node = string.IsNullOrWhiteSpace(content)
-                ? null
-                : JsonNode.Parse(content);
+            var node = string.IsNullOrWhiteSpace(content) ? null : JsonNode.Parse(content);
 
-            var status = node?["status"]?.GetValue<string>()
+            var status =
+                node?["status"]?.GetValue<string>()
                 ?? node?["properties"]?["provisioningState"]?.GetValue<string>();
 
             if (string.Equals(status, "Succeeded", StringComparison.OrdinalIgnoreCase))
                 return node!;
 
-            if (string.Equals(status, "Failed", StringComparison.OrdinalIgnoreCase)
-                || string.Equals(status, "Canceled", StringComparison.OrdinalIgnoreCase))
+            if (
+                string.Equals(status, "Failed", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(status, "Canceled", StringComparison.OrdinalIgnoreCase)
+            )
             {
                 var error = node?["error"]?.ToJsonString() ?? status;
                 throw new InvocationException($"LRO operation {status}: {error}");
@@ -83,8 +86,10 @@ public static class LroPoller
 
     private static int GetRetryAfter(HttpResponseMessage response)
     {
-        if (response.Headers.TryGetValues("Retry-After", out var values)
-            && int.TryParse(values.FirstOrDefault(), out var seconds))
+        if (
+            response.Headers.TryGetValues("Retry-After", out var values)
+            && int.TryParse(values.FirstOrDefault(), out var seconds)
+        )
             return seconds;
 
         return 5; // default polling interval

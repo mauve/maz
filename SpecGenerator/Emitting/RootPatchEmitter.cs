@@ -20,25 +20,31 @@ public static class RootPatchEmitter
         w.Line("namespace Console.Cli;");
         w.Line();
 
-        w.Block("public partial class RootCommandDef", () =>
-        {
-            foreach (var service in services)
-            {
-                var fieldName = NamingEngine.KebabToCSharpProperty(service.CliName);
-                // Not readonly: C# does not allow assigning readonly fields in partial methods
-                w.Line($"public {service.ClassName} {fieldName} = null!;");
-            }
-
-            w.Line();
-            w.Block("partial void InitGeneratedCommands()", () =>
+        w.Block(
+            "public partial class RootCommandDef",
+            () =>
             {
                 foreach (var service in services)
                 {
                     var fieldName = NamingEngine.KebabToCSharpProperty(service.CliName);
-                    w.Line($"{fieldName} = new {service.ClassName}(Auth);");
+                    // Not readonly: C# does not allow assigning readonly fields in partial methods
+                    w.Line($"public {service.ClassName} {fieldName} = null!;");
                 }
-            });
-        });
+
+                w.Line();
+                w.Block(
+                    "partial void InitGeneratedCommands()",
+                    () =>
+                    {
+                        foreach (var service in services)
+                        {
+                            var fieldName = NamingEngine.KebabToCSharpProperty(service.CliName);
+                            w.Line($"{fieldName} = new {service.ClassName}(Auth);");
+                        }
+                    }
+                );
+            }
+        );
 
         return w.ToString();
     }

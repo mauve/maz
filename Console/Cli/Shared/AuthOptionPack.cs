@@ -54,7 +54,12 @@ public partial class AuthOptionPack : OptionPack
         [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
 
     /// <summary>Path to the workload identity token file.</summary>
-    [CliOption("--auth-token-file-path", Global = true, Advanced = true, EnvVar = "AZURE_FEDERATED_TOKEN_FILE")]
+    [CliOption(
+        "--auth-token-file-path",
+        Global = true,
+        Advanced = true,
+        EnvVar = "AZURE_FEDERATED_TOKEN_FILE"
+    )]
     public partial string? TokenFilePath { get; }
 
     public override string HelpTitle => "Authentication";

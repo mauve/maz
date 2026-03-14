@@ -111,7 +111,9 @@ public class CliOptionGeneratorCoreTests
         );
         // Bool option: --no-verbose is appended after the explicit extra aliases
         Assert.IsTrue(
-            text.Contains("new(\"--verbose\", new string[] {\"-v\", \"-vv\", \"--very-verbose\", \"--no-verbose\"})"),
+            text.Contains(
+                "new(\"--verbose\", new string[] {\"-v\", \"-vv\", \"--very-verbose\", \"--no-verbose\"})"
+            ),
             "Bool option gets --no- negation appended after explicit extra aliases"
         );
         Assert.IsTrue(

@@ -39,7 +39,10 @@ public partial class SubscriptionOptionPack : OptionPack
     }
 
     public Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient) =>
-        ResolveAsync(armClient, SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID"));
+        ResolveAsync(
+            armClient,
+            SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID")
+        );
 
     /// <summary>
     /// Resolves a subscription from an arbitrary hint string (or null for the default subscription).
@@ -61,12 +64,14 @@ public partial class SubscriptionOptionPack : OptionPack
             var colonIdx = token.IndexOf(':');
             var id = colonIdx >= 0 ? token[(colonIdx + 1)..] : token;
             return armClient.GetSubscriptionResource(
-                new ResourceIdentifier("/subscriptions/" + id));
+                new ResourceIdentifier("/subscriptions/" + id)
+            );
         }
 
         if (Guid.TryParse(hint, out var guid))
             return armClient.GetSubscriptionResource(
-                SubscriptionResource.CreateResourceIdentifier(guid.ToString()));
+                SubscriptionResource.CreateResourceIdentifier(guid.ToString())
+            );
 
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())
         {

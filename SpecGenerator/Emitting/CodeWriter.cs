@@ -10,6 +10,7 @@ public sealed class CodeWriter
     private const string IndentUnit = "    ";
 
     public void Indent() => _indent++;
+
     public void Outdent() => _indent = Math.Max(0, _indent - 1);
 
     public void Line() => _sb.AppendLine();

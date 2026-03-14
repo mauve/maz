@@ -48,9 +48,13 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
     /// Key Vault name, or combined format: [sub/]rg/vault-name (see section description).
     /// </summary>
     [CliOption(
-        "--keyvault", "--kv",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<KeyVaultOptionPack, KeyVaultResource>),
-        CompletionOptionPacks  = [typeof(AuthOptionPack)]
+        "--keyvault",
+        "--kv",
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            KeyVaultOptionPack,
+            KeyVaultResource
+        >),
+        CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? VaultName { get; }
 
@@ -72,7 +76,8 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
         string? resolvedSub,
         string? resolvedRg,
         string name,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
 
@@ -95,9 +100,14 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
             0 => throw new InvocationException($"Key Vault '{name}' not found in subscription."),
             1 => matches[0],
             _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} vaults:\n" +
-                string.Join("\n", matches.Select(m =>
-                    $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})")))
+                $"'{name}' is ambiguous — matched {matches.Count} vaults:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
         };
     }
 
@@ -110,7 +120,8 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
         string? subHint,
         string? rgHint,
         string prefix,
-        CancellationToken ct = default)
+        CancellationToken ct = default
+    )
     {
         var sub = await ResolveSubscriptionAsync(armClient, subHint);
         var results = new List<string>();

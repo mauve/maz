@@ -1,6 +1,6 @@
+using System.Text.RegularExpressions;
 using Console.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Text.RegularExpressions;
 
 namespace Console.Rendering.Tests;
 
@@ -8,8 +8,7 @@ namespace Console.Rendering.Tests;
 public class JsonSyntaxHighlighterTests
 {
     // Strip ANSI escape sequences so we can compare content
-    private static string StripAnsi(string s) =>
-        Regex.Replace(s, @"\x1b\[[0-9;]*m", "");
+    private static string StripAnsi(string s) => Regex.Replace(s, @"\x1b\[[0-9;]*m", "");
 
     [TestMethod]
     public void Colorize_PreservesJsonContent_Object()
@@ -23,7 +22,8 @@ public class JsonSyntaxHighlighterTests
     [TestMethod]
     public void Colorize_PreservesJsonContent_Indented()
     {
-        var json = "{\n  \"name\": \"hello\",\n  \"active\": true,\n  \"score\": 3.14,\n  \"nothing\": null\n}";
+        var json =
+            "{\n  \"name\": \"hello\",\n  \"active\": true,\n  \"score\": 3.14,\n  \"nothing\": null\n}";
         var colorized = JsonSyntaxHighlighter.Colorize(json);
         var stripped = StripAnsi(colorized);
         Assert.AreEqual(json, stripped, "Colorizer must not alter the JSON content");

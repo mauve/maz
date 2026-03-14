@@ -15,7 +15,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task Render_HidesUriFieldByHeuristic()
     {
-        var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: false,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = factory.CreateRendererForType(typeof(PlainItem));
 
         var item = new PlainItem("alpha", 42, new Uri("https://example.com"));
@@ -35,7 +39,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task Render_HidesNullValuesByDefault()
     {
-        var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: false,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = factory.CreateRendererForType(typeof(AnnotatedItem));
 
         var item = new AnnotatedItem("alpha");
@@ -52,7 +60,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task Render_ShowAll_IncludesAllFields()
     {
-        var factory = new TextRendererFactory(showAll: true, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: true,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = factory.CreateRendererForType(typeof(PlainItem));
 
         var item = new PlainItem("beta", 7, null);
@@ -68,7 +80,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task Render_ShowAll_IncludesNullValues()
     {
-        var factory = new TextRendererFactory(showAll: true, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: true,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = factory.CreateRendererForType(typeof(AnnotatedItem));
 
         var item = new AnnotatedItem("gamma");
@@ -90,7 +106,11 @@ public class TextRendererTests
 
         try
         {
-            var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+            var factory = new TextRendererFactory(
+                showAll: false,
+                showEnvelope: false,
+                new ValueFormatterOptions()
+            );
             var renderer = factory.CreateRendererForType(typeof(MultiItem));
 
             var item = new MultiItem("delta", 99, "urgent");
@@ -121,7 +141,11 @@ public class TextRendererTests
 
         try
         {
-            var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+            var factory = new TextRendererFactory(
+                showAll: false,
+                showEnvelope: false,
+                new ValueFormatterOptions()
+            );
             var renderer = factory.CreateRendererForType(typeof(TaggedItem));
 
             var item = new TaggedItem("epsilon", "secret", 1);
@@ -144,7 +168,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task Render_ShowEnvelope_NonArmResource_WritesWarningToStderr()
     {
-        var factory = new TextRendererFactory(showAll: false, showEnvelope: true, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: false,
+            showEnvelope: true,
+            new ValueFormatterOptions()
+        );
         var renderer = factory.CreateRendererForType(typeof(PlainItem));
 
         var originalError = System.Console.Error;
@@ -172,10 +200,18 @@ public class TextRendererTests
     [TestMethod]
     public async Task RenderCollection_OutputsEntryPerItem()
     {
-        var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: false,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = ((IRendererFactory)factory).CreateCollectionRenderer<PlainItem>();
 
-        var items = new[] { new PlainItem("a", 1), new PlainItem("b", 2) }.ToAsyncEnumerableObjects();
+        var items = new[]
+        {
+            new PlainItem("a", 1),
+            new PlainItem("b", 2),
+        }.ToAsyncEnumerableObjects();
         using var writer = new StringWriter();
         await renderer.RenderAllAsync(writer, items, CancellationToken.None);
 
@@ -187,7 +223,11 @@ public class TextRendererTests
     [TestMethod]
     public async Task RenderCollection_EmptyCollection_OutputsNoResults()
     {
-        var factory = new TextRendererFactory(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+        var factory = new TextRendererFactory(
+            showAll: false,
+            showEnvelope: false,
+            new ValueFormatterOptions()
+        );
         var renderer = ((IRendererFactory)factory).CreateCollectionRenderer<PlainItem>();
 
         var items = Array.Empty<PlainItem>().ToAsyncEnumerableObjects();

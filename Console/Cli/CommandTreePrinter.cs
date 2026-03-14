@@ -40,7 +40,8 @@ internal static class CommandTreePrinter
             var continuationConnector = isLast
                 ? new string(' ', Ansi.VisibleLength(connector))
                 : "│" + new string(' ', Ansi.VisibleLength(connector) - 1);
-            var continuation = prefix + continuationConnector + new string(' ', Ansi.VisibleLength(name) + 2);
+            var continuation =
+                prefix + continuationConnector + new string(' ', Ansi.VisibleLength(name) + 2);
 
             if (string.IsNullOrWhiteSpace(child.Description))
             {
@@ -70,8 +71,10 @@ internal static class CommandTreePrinter
 
     private static bool Matches(Command cmd, string filter) =>
         cmd.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
-        || (!string.IsNullOrWhiteSpace(cmd.Description)
-            && cmd.Description.Contains(filter, StringComparison.OrdinalIgnoreCase))
+        || (
+            !string.IsNullOrWhiteSpace(cmd.Description)
+            && cmd.Description.Contains(filter, StringComparison.OrdinalIgnoreCase)
+        )
         || cmd.Aliases.Any(a => a.Contains(filter, StringComparison.OrdinalIgnoreCase));
 
     private static bool HasMatch(Command cmd, string filter) =>
@@ -83,8 +86,8 @@ internal static class CommandTreePrinter
         if (idx < 0)
             return Ansi.White(text);
         return Ansi.White(text[..idx])
-             + Ansi.Yellow(text.Substring(idx, filter.Length))
-             + Ansi.White(text[(idx + filter.Length)..]);
+            + Ansi.Yellow(text.Substring(idx, filter.Length))
+            + Ansi.White(text[(idx + filter.Length)..]);
     }
 
     private static string HighlightDesc(string text, string filter)
@@ -93,12 +96,13 @@ internal static class CommandTreePrinter
         if (idx < 0)
             return Ansi.Dim(text);
         return Ansi.Dim(text[..idx])
-             + Ansi.Yellow(text.Substring(idx, filter.Length))
-             + Ansi.Dim(text[(idx + filter.Length)..]);
+            + Ansi.Yellow(text.Substring(idx, filter.Length))
+            + Ansi.Dim(text[(idx + filter.Length)..]);
     }
 }
 
-internal sealed class CommandTreeAction(Command root, Option<string?> option) : SynchronousCommandLineAction
+internal sealed class CommandTreeAction(Command root, Option<string?> option)
+    : SynchronousCommandLineAction
 {
     public override int Invoke(ParseResult parseResult)
     {

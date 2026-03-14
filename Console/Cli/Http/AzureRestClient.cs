@@ -31,7 +31,8 @@ public sealed class AzureRestClient
         string path,
         string apiVersion,
         JsonNode? body,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var response = await SendRawAsync(method, path, apiVersion, body, ct);
         response.EnsureSuccessStatusCode();
@@ -50,11 +51,10 @@ public sealed class AzureRestClient
         string path,
         string apiVersion,
         JsonNode? body,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
-        var token = await _credential.GetTokenAsync(
-            new TokenRequestContext([_scope]),
-            ct);
+        var token = await _credential.GetTokenAsync(new TokenRequestContext([_scope]), ct);
 
         var url = path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
             ? $"{path}{(path.Contains('?') ? '&' : '?')}api-version={apiVersion}"
@@ -68,7 +68,8 @@ public sealed class AzureRestClient
             request.Content = new StringContent(
                 body.ToJsonString(),
                 Encoding.UTF8,
-                "application/json");
+                "application/json"
+            );
         }
 
         return await _http.SendAsync(request, ct);
