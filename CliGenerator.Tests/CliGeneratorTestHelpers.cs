@@ -19,9 +19,10 @@ internal static class CliGeneratorTestHelpers
                 public static void Register<T>(Option<T> _) { }
             }
 
-            public static class CliCompletionProviderBridge
+            public static class CliCompletionProviderRegistry
             {
-                public static IEnumerable<CompletionItem> GetCompletions<T>(CompletionContext _) => Array.Empty<CompletionItem>();
+                public static void Register(string[] aliases, System.Type providerType) { }
+                public static void Register(string[] aliases, string[] values) { }
             }
 
             public abstract partial class CommandDef

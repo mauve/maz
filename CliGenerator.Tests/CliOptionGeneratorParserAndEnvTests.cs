@@ -106,15 +106,12 @@ public class CliOptionGeneratorParserAndEnvTests
     }
 
     [TestMethod]
-    public void CompletionProviderType_EmitsBridgeCall()
+    public void CompletionProviderType_EmitsRegistryCall()
     {
         var text = GenerateFor(
             InTestApp(
                 """
-                public sealed class NameCompletions : ICompletionProvider
-                {
-                    public IEnumerable<CompletionItem> GetCompletions(CompletionContext context) => [];
-                }
+                public sealed class NameCompletions { }
 
                 public partial class CompletionCommand : CommandDef
                 {
@@ -122,15 +119,15 @@ public class CliOptionGeneratorParserAndEnvTests
                     public partial string? Name { get; }
                 }
                 """,
-                "using System.Collections.Generic;\nusing System.CommandLine.Completions;"
+                ""
             ),
             "CompletionCommand.g.cs"
         );
         Assert.IsTrue(
             text.Contains(
-                "CliCompletionProviderBridge.GetCompletions<global::TestApp.NameCompletions>(c)"
+                "CliCompletionProviderRegistry.Register(new[] { \"--name\" }, typeof(global::TestApp.NameCompletions));"
             ),
-            "Completion provider bridge call should be emitted"
+            "Completion provider registry call should be emitted"
         );
     }
 

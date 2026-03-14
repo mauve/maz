@@ -6,12 +6,16 @@ namespace Console.Cli.Shared;
 public partial class RenderOptionPack : OptionPack
 {
     /// <summary>The output format. Defaults to 'column'.</summary>
-    [CliOption("--output-format", "-f", "--format")]
+    [CliOption("-f", "--format")]
     public partial OutputFormat? Format { get; }
 
-    /// <summary>Whether to output rendered content in an indented format.</summary>
-    [CliOption("--output-indented", "-i", "--indent")]
-    public partial bool OutputIndented { get; }
+    /// <summary>Show all fields, including those hidden by default.</summary>
+    [CliOption("--show-all")]
+    public partial bool ShowAll { get; }
+
+    /// <summary>Show ArmResource envelope fields (Id, Type, SystemData) before the data block.</summary>
+    [CliOption("--show-envelope")]
+    public partial bool ShowEnvelope { get; }
 
     /// <summary>Date format string for date/time values. [default: yyyy-MM-ddTHH:mm:ssZ]</summary>
     [CliOption("--date-format")]
@@ -22,13 +26,11 @@ public partial class RenderOptionPack : OptionPack
     public IRendererFactory GetRendererFactory() =>
         Format switch
         {
-            OutputFormat.Json => new JsonRendererFactory(
-                OutputIndented
-                    ? new JsonSerializerOptions { WriteIndented = true }
-                    : JsonSerializerOptions.Default
-            ),
-            OutputFormat.Table => new TableRendererFactory(),
-            OutputFormat.Column or null => new ColumnRendererFactory(GetValueFormatterOptions()),
+            OutputFormat.Json => new JsonRendererFactory(JsonSerializerOptions.Default),
+            OutputFormat.JsonL => new JsonLRendererFactory(),
+            OutputFormat.JsonPretty => new JsonPrettyRendererFactory(),
+            OutputFormat.Text => new TextRendererFactory(ShowAll, ShowEnvelope, GetValueFormatterOptions()),
+            OutputFormat.Column or null => new ColumnRendererFactory(GetValueFormatterOptions(), ShowEnvelope),
             var fmt => throw new InvocationException($"Unsupported output format '{fmt}'."),
         };
 

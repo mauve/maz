@@ -28,6 +28,10 @@ public static partial class Ansi
 
     public static string Bold(string text) => Enabled ? $"\x1b[1m{text}\x1b[0m" : text;
 
+    public static string Cyan(string text) => Enabled ? $"\x1b[96m{text}\x1b[0m" : text;
+
+    public static string White(string text) => Enabled ? $"\x1b[97m{text}\x1b[0m" : text;
+
     public static string Color(string text, string ansiCode) =>
         Enabled ? $"{ansiCode}{text}\x1b[0m" : text;
 

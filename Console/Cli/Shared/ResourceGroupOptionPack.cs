@@ -11,7 +11,7 @@ public partial class ResourceGroupOptionPack : OptionPack
     /// The name of the resource group.
     /// Defaults to AZURE_RESOURCE_GROUP.
     /// </summary>
-    [CliOption("--resource-group", "-g", "--grp")]
+    [CliOption("--resource-group", "-g")]
     public partial string? ResourceGroupName { get; }
 
     public override string HelpTitle => "Resource Group";

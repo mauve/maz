@@ -18,6 +18,13 @@ public abstract partial class CommandDef
     /// <summary>True when the generator has wired up child OptionPacks and CommandDefs.</summary>
     protected virtual bool HasGeneratedChildren => false;
 
+    /// <summary>
+    /// True when this command operates against a data-plane endpoint
+    /// (e.g. Key Vault data API) rather than ARM.
+    /// Overridden to <c>true</c> by generated commands for data-plane services.
+    /// </summary>
+    protected virtual bool IsDataPlane => false;
+
     public abstract string Name { get; }
     public virtual string[] Aliases => [];
     public virtual string Description => "";
@@ -55,6 +62,8 @@ public abstract partial class CommandDef
         ConfigureCommand(cmd);
         if (DetailedDescription is { } r)
             RemarksRegistry.Register(cmd, r);
+        if (IsDataPlane)
+            DataPlaneRegistry.Register(cmd);
         return cmd;
     }
 
@@ -121,6 +130,13 @@ public abstract partial class CommandDef
                         System.Console.Error.WriteLine(
                             AuthenticationErrorFormatter.Format(ex, configured)
                         );
+                        if (result.GetValue(Shared.DiagnosticOptionPack.DetailedErrorsOption))
+                            System.Console.Error.WriteLine(ex.ToString());
+                        return 1;
+                    }
+                    catch (System.Net.Http.HttpRequestException ex)
+                    {
+                        System.Console.Error.WriteLine(HttpRequestErrorFormatter.Format(ex));
                         if (result.GetValue(Shared.DiagnosticOptionPack.DetailedErrorsOption))
                             System.Console.Error.WriteLine(ex.ToString());
                         return 1;
