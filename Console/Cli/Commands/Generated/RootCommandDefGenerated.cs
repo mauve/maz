@@ -8,9 +8,11 @@ namespace Console.Cli;
 public partial class RootCommandDef
 {
     public StorageCommandDef Storage = null!;
+    public KeyvaultCommandDef Keyvault = null!;
 
     partial void InitGeneratedCommands()
     {
         Storage = new StorageCommandDef(Auth);
+        Keyvault = new KeyvaultCommandDef(Auth);
     }
 }
