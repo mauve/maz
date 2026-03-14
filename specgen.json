@@ -230,6 +230,46 @@
           "detailedDescription": "View, set, and delete the list of email addresses that receive certificate lifecycle notifications.",
           "operationIds": ["SetCertificateContacts","GetCertificateContacts","DeleteCertificateContacts"] }
       ]
+    },
+    {
+      "serviceDir": "msi",
+      "displayName": "identity",
+      "apiVersion": "2024-11-30",
+      "description": "Manage Azure Managed Identities (user-assigned and system-assigned).",
+      "detailedDescription": "Commands in this group interact with the Microsoft.ManagedIdentity resource provider to create, update, delete, and inspect user-assigned managed identities and their federated identity credentials. System-assigned identities are managed through the resource they are attached to.",
+      "resourceDescriptions": {
+        "federatedidentitycredential": "Manage federated identity credentials for a user-assigned managed identity.",
+        "operation": "List available operations for Azure Managed Identity.",
+        "systemassignedidentity": "Retrieve the system-assigned identity attached to a resource.",
+        "userassignedidentity": "Manage user-assigned managed identities."
+      },
+      "resourceDetailedDescriptions": {
+        "federatedidentitycredential": "Federated identity credentials allow a user-assigned identity to trust tokens from an external identity provider (e.g. GitHub Actions, Kubernetes) without managing secrets.",
+        "operation": "Enumerates all available resource provider operations for Azure Managed Identity.",
+        "systemassignedidentity": "Retrieves the system-assigned managed identity associated with a given resource scope.",
+        "userassignedidentity": "Create, update, delete, and inspect user-assigned managed identities that can be attached to any Azure resource to grant it an identity in Azure AD."
+      },
+      "specFiles": [
+        "msi/resource-manager/Microsoft.ManagedIdentity/ManagedIdentity/stable/2024-11-30/ManagedIdentity.json"
+      ],
+      "exclude": [],
+      "actionRenames": {
+        "UserAssignedIdentities_Get": "show",
+        "UserAssignedIdentities_CreateOrUpdate": "create",
+        "UserAssignedIdentities_Update": "update",
+        "UserAssignedIdentities_Delete": "delete",
+        "FederatedIdentityCredentials_Get": "show",
+        "FederatedIdentityCredentials_CreateOrUpdate": "create",
+        "FederatedIdentityCredentials_Delete": "delete",
+        "SystemAssignedIdentities_GetByScope": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "UserAssignedIdentities_ListBySubscription",
+          "resourceGroupOperationId": "UserAssignedIdentities_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ]
     }
   ]
 }

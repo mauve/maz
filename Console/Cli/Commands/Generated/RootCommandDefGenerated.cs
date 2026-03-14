@@ -9,10 +9,12 @@ public partial class RootCommandDef
 {
     public StorageCommandDef Storage = null!;
     public KeyvaultCommandDef Keyvault = null!;
+    public IdentityCommandDef Identity = null!;
 
     partial void InitGeneratedCommands()
     {
         Storage = new StorageCommandDef(Auth);
         Keyvault = new KeyvaultCommandDef(Auth);
+        Identity = new IdentityCommandDef(Auth);
     }
 }
