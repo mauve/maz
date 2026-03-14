@@ -29,6 +29,12 @@ public static class ResourceCommandEmitter
                 var fieldName = NamingEngine.KebabToCSharpProperty(op.CliName);
                 w.Line($"public readonly {op.ClassName} {fieldName} = new(auth);");
             }
+
+            foreach (var sub in resource.Subgroups ?? [])
+            {
+                var fieldName = NamingEngine.KebabToCSharpProperty(sub.CliName);
+                w.Line($"public readonly {sub.ClassName} {fieldName} = new(auth);");
+            }
         });
 
         return w.ToString();

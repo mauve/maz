@@ -11,7 +11,8 @@ public record ServiceModel(
 public record ResourceGroupModel(
     string CliName,
     string ClassName,
-    List<OperationModel> Operations
+    List<OperationModel> Operations,
+    List<ResourceGroupModel>? Subgroups = null
 );
 
 /// <summary>Represents a single CLI leaf command derived from one OpenAPI operation.</summary>
@@ -27,7 +28,10 @@ public record OperationModel(
     bool IsPaged,
     string? NextLinkPropertyName,
     string? ItemsPropertyName,
-    string? Description
+    string? Description,
+    // When non-null, this is a merged list command. The primary URL (UrlTemplate) is the
+    // RG-scope URL; this field holds the subscription-scope fallback URL.
+    string? MergedSubscriptionUrlTemplate = null
 );
 
 /// <summary>A path or query parameter exposed as a CLI option.</summary>
