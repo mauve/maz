@@ -1215,6 +1215,64 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "redis",
+      "displayName": "redis",
+      "apiVersion": "2024-11-01",
+      "description": "Manage Azure Cache for Redis instances, firewall rules, and access policies.",
+      "detailedDescription": "Covers the full lifecycle of Redis cache instances: create, update, delete, flush, force-reboot, import/export data, and manage access keys. Also manages firewall rules, patch schedules, linked servers for geo-replication, access policies, private endpoints, and upgrade notifications. Requires Contributor or Redis Cache Contributor roles.",
+      "specFiles": [
+        "redis/resource-manager/Microsoft.Cache/Redis/stable/2024-11-01/redis.json"
+      ],
+      "resourceDescriptions": {
+        "access-policy": "Manage access policies for an Azure Cache for Redis instance.",
+        "access-policy-assignment": "Manage access policy assignments for an Azure Cache for Redis instance.",
+        "asyncoperationstatu": "Get the status of an asynchronous operation for Azure Cache for Redis.",
+        "firewallrule": "Manage firewall rules for an Azure Cache for Redis instance.",
+        "linked-server": "Manage linked servers for geo-replication of an Azure Cache for Redis instance.",
+        "patchschedule": "Manage patch schedules for an Azure Cache for Redis instance.",
+        "privateendpointconnection": "Manage private endpoint connections for an Azure Cache for Redis instance.",
+        "privatelinkresource": "List private link resources available for an Azure Cache for Redis instance.",
+        "redi": "Manage Azure Cache for Redis instances."
+      },
+      "resourceDetailedDescriptions": {
+        "access-policy": "Create and manage fine-grained Redis access control policies (ACL) for role-based access to cache operations.",
+        "access-policy-assignment": "Assign access policies to Microsoft Entra identities for granular control over Redis cache operations.",
+        "asyncoperationstatu": "Poll the status of long-running asynchronous operations such as cache creation or scaling.",
+        "firewallrule": "Configure IP-based firewall rules to restrict access to the Redis cache endpoint.",
+        "linked-server": "Link secondary Redis caches in different regions for active geo-replication and cross-region failover.",
+        "patchschedule": "Configure maintenance windows to control when Redis applies patches and updates.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to isolate cache access within a VNet.",
+        "privatelinkresource": "Enumerate the private link group IDs available for creating private endpoints to a Redis cache.",
+        "redi": "Full lifecycle management of Azure Cache for Redis: provision, configure, flush, reboot, import/export data, and manage access keys."
+      },
+      "actionRenames": {
+        "AccessPolicy_Get": "show",
+        "AccessPolicy_CreateUpdate": "create",
+        "AccessPolicyAssignment_Get": "show",
+        "AccessPolicyAssignment_CreateUpdate": "create",
+        "AsyncOperationStatus_Get": "show",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "LinkedServer_Get": "show",
+        "PatchSchedules_Get": "show",
+        "PatchSchedules_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_Put": "create",
+        "Redis_Get": "show",
+        "Redis_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Redis_ListBySubscription",
+          "resourceGroupOperationId": "Redis_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }

@@ -18,6 +18,7 @@ public partial class RootCommandDef
     public PostgresqlCommandDef Postgresql = null!;
     public MysqlCommandDef Mysql = null!;
     public CosmosdbCommandDef Cosmosdb = null!;
+    public RedisCommandDef Redis = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -32,5 +33,6 @@ public partial class RootCommandDef
         Postgresql = new PostgresqlCommandDef(Auth);
         Mysql = new MysqlCommandDef(Auth);
         Cosmosdb = new CosmosdbCommandDef(Auth);
+        Redis = new RedisCommandDef(Auth);
     }
 }
