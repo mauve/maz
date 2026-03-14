@@ -14,12 +14,8 @@ public partial class StorageAccountHierarchicalNamespaceMigrationCommandDef(Auth
 {
     public override string Name => "hierarchical-namespace-migration";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>Required. Hierarchical namespace migration type can either be a hierarchical namespace validation request 'HnsOnValidationRequest' or a hydration request 'HnsOnHydrationRequest'. The validation request will validate the migration whereas the hydration request will migrate the account.</summary>
     [CliOption("--request-type", Required = true)]
@@ -34,7 +30,7 @@ public partial class StorageAccountHierarchicalNamespaceMigrationCommandDef(Auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/hnsonmigration";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourcegroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/hnsonmigration";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-01-01", null, ct);
         if (!NoWait)

@@ -14,12 +14,8 @@ public partial class StorageAccountAbortHierarchicalNamespaceMigrationCommandDef
 {
     public override string Name => "abort-hierarchical-namespace-migration";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>Do not wait for the long-running operation to complete.</summary>
     [CliOption("--no-wait")]
@@ -30,7 +26,7 @@ public partial class StorageAccountAbortHierarchicalNamespaceMigrationCommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/aborthnsonmigration";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourcegroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/aborthnsonmigration";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-01-01", null, ct);
         if (!NoWait)
