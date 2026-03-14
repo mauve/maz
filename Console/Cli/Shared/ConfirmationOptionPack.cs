@@ -6,7 +6,7 @@ public partial class ConfirmationOptionPack : OptionPack
     /// Confirms the operation without prompting. Required when running non-interactively.
     /// If omitted and --interactive is set, a prompt is shown.
     /// </summary>
-    [CliOption("--yes", "-y", "--confirm")]
+    [CliOption("--yes", "-y")]
     public partial bool Confirm { get; }
 
     public override string HelpTitle => "Confirmation";
