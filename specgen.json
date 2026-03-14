@@ -1273,6 +1273,182 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "redisenterprise",
+      "displayName": "redisenterprise",
+      "apiVersion": "2025-07-01",
+      "description": "Manage Azure Cache for Redis Enterprise clusters, databases, and access policies.",
+      "detailedDescription": "Covers the full lifecycle of Redis Enterprise clusters and their databases: create, update, delete, import/export, flush, force-unlink, and manage access keys. Also manages access policy assignments, private endpoints, and replication group linking. Requires Contributor or Redis Enterprise-specific RBAC roles.",
+      "specFiles": [
+        "redisenterprise/resource-manager/Microsoft.Cache/RedisEnterprise/stable/2025-07-01/redisenterprise.json"
+      ],
+      "resourceDescriptions": {
+        "access-policy-assignment": "Manage access policy assignments for a Redis Enterprise database.",
+        "database": "Manage databases within an Azure Cache for Redis Enterprise cluster.",
+        "operationsstatu": "Get the status of an asynchronous operation for Redis Enterprise.",
+        "privateendpointconnection": "Manage private endpoint connections for a Redis Enterprise cluster.",
+        "privatelinkresource": "List private link resources available for a Redis Enterprise cluster.",
+        "redis-enterprise": "Manage Azure Cache for Redis Enterprise clusters."
+      },
+      "resourceDetailedDescriptions": {
+        "access-policy-assignment": "Assign access control policies to Microsoft Entra identities for fine-grained access to Redis Enterprise database operations.",
+        "database": "Manage Redis Enterprise databases: create, update, delete, import/export data, flush, manage access keys, and control replication group membership.",
+        "operationsstatu": "Poll the status of long-running asynchronous operations on Redis Enterprise resources.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to isolate Redis Enterprise cluster access within a VNet.",
+        "privatelinkresource": "Enumerate the private link group IDs available for creating private endpoints to a Redis Enterprise cluster.",
+        "redis-enterprise": "Full lifecycle management of Redis Enterprise clusters: provision, scale, update, and delete high-performance Redis clusters."
+      },
+      "actionRenames": {
+        "AccessPolicyAssignment_Get": "show",
+        "AccessPolicyAssignment_CreateUpdate": "create",
+        "Databases_Get": "show",
+        "OperationsStatus_Get": "show",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_Put": "create",
+        "RedisEnterprise_Get": "show",
+        "RedisEnterprise_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "RedisEnterprise_List",
+          "resourceGroupOperationId": "RedisEnterprise_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "mariadb",
+      "displayName": "mariadb",
+      "apiVersion": "2018-06-01",
+      "description": "Manage Azure Database for MariaDB servers, databases, and configurations.",
+      "detailedDescription": "Covers MariaDB server lifecycle: create, update, delete, restart. Also manages databases, firewall rules, configurations, virtual network rules, server security alert policies, performance recommendations, and private endpoints. Note: Azure Database for MariaDB is on a retirement path; new workloads should use Azure Database for MySQL or PostgreSQL.",
+      "specFiles": [
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/mariadb.json",
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/PerformanceRecommendations.json",
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/QueryPerformanceInsights.json",
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/PrivateEndpointConnections.json",
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/PrivateLinkResources.json",
+        "mariadb/resource-manager/Microsoft.DBforMariaDB/stable/2018-06-01/ServerSecurityAlertPolicies.json"
+      ],
+      "resourceDescriptions": {
+        "check-name-availability": "Check name availability for Azure Database for MariaDB resources.",
+        "configuration": "Manage server configuration parameters for an Azure Database for MariaDB server.",
+        "database": "Manage databases within an Azure Database for MariaDB server.",
+        "firewallrule": "Manage firewall rules for an Azure Database for MariaDB server.",
+        "location-based-performance-tier": "List performance tiers available for Azure Database for MariaDB in a specific location.",
+        "logfile": "List log files for an Azure Database for MariaDB server.",
+        "recoverableserver": "Get recoverable server information for point-in-time restore.",
+        "replica": "List read replicas for an Azure Database for MariaDB server.",
+        "server": "Manage Azure Database for MariaDB servers.",
+        "server-based-performance-tier": "List performance tiers available for an existing Azure Database for MariaDB server.",
+        "serverparameter": "Manage server parameters for an Azure Database for MariaDB server.",
+        "virtualnetworkrule": "Manage virtual network rules for an Azure Database for MariaDB server.",
+        "privateendpointconnection": "Manage private endpoint connections for an Azure Database for MariaDB server.",
+        "privatelinkresource": "List private link resources available for an Azure Database for MariaDB server."
+      },
+      "resourceDetailedDescriptions": {
+        "check-name-availability": "Verify whether a proposed server name is available before provisioning.",
+        "configuration": "View and update MariaDB server parameters such as max_connections and query_cache_size.",
+        "database": "Create, list, and delete databases hosted within a MariaDB server instance.",
+        "firewallrule": "Configure IP-based firewall rules to control client access to a MariaDB server.",
+        "location-based-performance-tier": "Query available compute and storage tiers for MariaDB servers in a specific Azure region.",
+        "logfile": "Retrieve a list of server logs available for download from a MariaDB server.",
+        "recoverableserver": "Retrieve the earliest restore point and other recovery metadata for point-in-time restore scenarios.",
+        "replica": "List read replicas associated with a primary MariaDB server.",
+        "server": "Full lifecycle management of Azure Database for MariaDB servers: provision, configure, restart, and delete.",
+        "server-based-performance-tier": "Query performance tiers applicable to an existing MariaDB server for scaling decisions.",
+        "serverparameter": "Bulk-view and update server configuration parameters for a MariaDB server.",
+        "virtualnetworkrule": "Configure virtual network service endpoints to restrict MariaDB server access to specific VNet subnets.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to a MariaDB server.",
+        "privatelinkresource": "List the group IDs available for private link connections to a MariaDB server."
+      },
+      "actionRenames": {
+        "Configurations_Get": "show",
+        "Configurations_CreateOrUpdate": "create",
+        "Databases_Get": "show",
+        "Databases_CreateOrUpdate": "create",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "Replicas_ListByServer": "list",
+        "Servers_Get": "show",
+        "Servers_CreateOrUpdate": "create",
+        "VirtualNetworkRules_Get": "show",
+        "VirtualNetworkRules_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "PrivateLinkResources_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Servers_List",
+          "resourceGroupOperationId": "Servers_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "mongocluster",
+      "displayName": "mongocluster",
+      "apiVersion": "2025-09-01",
+      "description": "Manage Azure Cosmos DB for MongoDB (vCore) clusters and databases.",
+      "detailedDescription": "Covers the full lifecycle of MongoDB vCore clusters: create, update, delete, promote replicas, and list connection strings. Also manages firewall rules, private endpoints, users, and read replicas. Requires Contributor roles on the target subscription or resource group.",
+      "specFiles": [
+        "mongocluster/resource-manager/Microsoft.DocumentDB/MongoCluster/stable/2025-09-01/mongoCluster.json"
+      ],
+      "resourceDescriptions": {
+        "cluster": "Manage Azure Cosmos DB for MongoDB (vCore) clusters.",
+        "firewallrule": "Manage firewall rules for a MongoDB vCore cluster.",
+        "privateendpointconnection": "Manage private endpoint connections for a MongoDB vCore cluster.",
+        "privatelink": "List private link resources available for a MongoDB vCore cluster.",
+        "replica": "List read replicas for a MongoDB vCore cluster.",
+        "user": "Manage database users for a MongoDB vCore cluster."
+      },
+      "resourceDetailedDescriptions": {
+        "cluster": "Full lifecycle management of MongoDB vCore clusters: provision, update, delete, promote geo-replicas, and retrieve connection strings.",
+        "firewallrule": "Configure IP-based firewall rules to control client access to a MongoDB vCore cluster.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to isolate cluster access within a VNet.",
+        "privatelink": "Enumerate the private link group IDs available for creating private endpoints to a MongoDB vCore cluster.",
+        "replica": "List geo-replica clusters associated with a primary MongoDB vCore cluster.",
+        "user": "Create, update, delete, and list database users and their roles on a MongoDB vCore cluster."
+      },
+      "resourceRenames": {
+        "MongoClusters_CheckNameAvailability": "cluster",
+        "MongoClusters_List": "cluster",
+        "MongoClusters_ListByResourceGroup": "cluster",
+        "MongoClusters_Get": "cluster",
+        "MongoClusters_CreateOrUpdate": "cluster",
+        "MongoClusters_Delete": "cluster",
+        "MongoClusters_Update": "cluster",
+        "MongoClusters_ListConnectionStrings": "cluster",
+        "MongoClusters_Promote": "cluster"
+      },
+      "actionRenames": {
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "MongoClusters_Get": "show",
+        "MongoClusters_CreateOrUpdate": "create",
+        "MongoClusters_ListByResourceGroup": "list",
+        "PrivateEndpointConnections_Get": "show",
+        "Users_Get": "show",
+        "Users_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "MongoClusters_List",
+          "resourceGroupOperationId": "MongoClusters_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
