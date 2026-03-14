@@ -24,6 +24,8 @@ public partial class RootCommandDef : CommandDef
     public readonly MonitorCommandDef Monitor;
     public readonly CompletionCommandDef Completion;
 
+    partial void InitGeneratedCommands();
+
     public RootCommandDef()
     {
         Auth = new AuthOptionPack();
@@ -33,6 +35,7 @@ public partial class RootCommandDef : CommandDef
         Group = new GroupCommandDef(Auth);
         Monitor = new MonitorCommandDef(Auth);
         Completion = new CompletionCommandDef();
+        InitGeneratedCommands();
     }
 
     protected override Command CreateCommand() => new RootCommand(Description);
