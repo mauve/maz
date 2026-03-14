@@ -1,69 +1,75 @@
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.ComponentModel;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using Console.Rendering;
 
 namespace Console.Cli;
 
-internal static partial class GroupedHelpLayout
+internal static class GroupedHelpLayout
 {
     public static IEnumerable<Func<HelpContext, bool>> Create(HelpContext _)
     {
-        yield return WithStyledHeader(HelpBuilder.Default.SynopsisSection());
-        yield return WithStyledHeader(HelpBuilder.Default.CommandUsageSection());
-        yield return WithStyledHeader(HelpBuilder.Default.CommandArgumentsSection());
+        yield return WriteUsageSection;
+        yield return WriteArgumentsSection;
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: false);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: false);
-        yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
         yield return DescriptionSection;
         yield return RemarksSection;
     }
 
     public static IEnumerable<Func<HelpContext, bool>> CreateWithAdvanced(HelpContext _)
     {
-        yield return WithStyledHeader(HelpBuilder.Default.SynopsisSection());
-        yield return WithStyledHeader(HelpBuilder.Default.CommandUsageSection());
-        yield return WithStyledHeader(HelpBuilder.Default.CommandArgumentsSection());
+        yield return WriteUsageSection;
+        yield return WriteArgumentsSection;
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: true);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: true);
-        yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
         yield return DescriptionSection;
         yield return RemarksSection;
     }
 
-    /// <summary>
-    /// Wraps a default S.CL section so its first non-empty line (the header) is styled with
-    /// <see cref="Ansi.Header"/>. Captures the section's output via a temporary HelpContext,
-    /// then replays it with the header styled.
-    /// </summary>
-    private static Func<HelpContext, bool> WithStyledHeader(Func<HelpContext, bool> section)
+    private static bool WriteUsageSection(HelpContext ctx)
     {
-        return ctx =>
-        {
-            using var capture = new StringWriter();
-            var inner = new HelpContext(ctx.HelpBuilder, ctx.Command, capture, ctx.ParseResult);
-            if (!section(inner))
-                return false;
+        var cmd = ctx.Command;
+        var ancestors = Ancestors(cmd).ToList();
+        ancestors.Reverse();
+        var baseLine = string.Join(" ", ancestors.Select(a => a.Name).Append(cmd.Name));
 
-            using var reader = new StringReader(capture.ToString());
-            bool headerStyled = false;
-            string? line;
-            while ((line = reader.ReadLine()) != null)
-            {
-                if (!headerStyled && line.Length > 0)
-                {
-                    ctx.Output.WriteLine(Ansi.Header(line));
-                    headerStyled = true;
-                }
-                else
-                {
-                    ctx.Output.WriteLine(line);
-                }
-            }
-            return true;
-        };
+        bool hasOptions = AllOptions(cmd).Any(o => !o.Hidden);
+        bool hasSubcommands = cmd.Subcommands.Any(c => !c.Hidden);
+
+        ctx.Output.WriteLine();
+        ctx.Output.WriteLine(Ansi.Header("Usage:"));
+
+        if (hasOptions)
+            ctx.Output.WriteLine($"  {baseLine} [options]");
+        if (hasSubcommands)
+            ctx.Output.WriteLine($"  {baseLine} [command]");
+        if (!hasOptions && !hasSubcommands)
+            ctx.Output.WriteLine($"  {baseLine}");
+
+        return true;
+    }
+
+    private static bool WriteArgumentsSection(HelpContext ctx)
+    {
+        var args = ctx.Command.Arguments.Where(a => !a.Hidden && !string.IsNullOrEmpty(a.Name)).ToList();
+        if (args.Count == 0)
+            return false;
+
+        ctx.Output.WriteLine();
+        ctx.Output.WriteLine(Ansi.Header("Arguments:"));
+
+        var nameWidth = args.Max(a => a.Name.Length + 2); // +2 for < >
+        foreach (var arg in args)
+        {
+            var label = $"<{arg.Name}>";
+            var padded = label.PadRight(nameWidth);
+            var desc = arg.Description ?? "";
+            ctx.Output.WriteLine(string.IsNullOrEmpty(desc)
+                ? $"  {Ansi.White(label)}"
+                : $"  {Ansi.White(padded)}  {Ansi.Dim(desc)}");
+        }
+
+        return true;
     }
 
     private static bool WriteGroupedOptions(HelpContext ctx, bool showAdvanced)
@@ -139,13 +145,15 @@ internal static partial class GroupedHelpLayout
         var rows = options
             .Select(o =>
             {
-                var row = ctx.HelpBuilder.GetTwoColumnRow(o, ctx);
-                var (main, metadata) = SplitOptionDescriptionAndMetadata(o, row.SecondColumnText);
-                var aliases = SplitAliasesWithValueHint(
-                    row.FirstColumnText,
-                    o is Option<bool>,
-                    o.AllowMultipleArgumentsPerToken
-                );
+                var rawAliases = Enumerable.Concat([o.Name], o.Aliases).ToList();
+                var aliases = SplitAliasesWithValueHint(rawAliases, o is Option<bool>, o.AllowMultipleArgumentsPerToken);
+                var meta = OptionMetadataRegistry.Get(o);
+                var metadata = new List<string>();
+                if (o.Required) metadata.Add("[required]");
+                if (meta?.DefaultText is { } d) metadata.Add($"[default: {d}]");
+                if (meta?.EnvVar is { } e) metadata.Add($"[env: {e}]");
+                if (meta?.AllowedValues is { } a) metadata.Add($"[allowed: {a}]");
+                var main = o.Description ?? "";
                 return (aliases, main, metadata);
             })
             .ToList();
@@ -167,24 +175,17 @@ internal static partial class GroupedHelpLayout
     }
 
     /// <summary>
-    /// Splits the first-column text into individual alias strings and appends
-    /// the appropriate value indicator to the last alias.
+    /// Formats a list of raw aliases and appends the appropriate value indicator to the last alias.
     /// Bool options: --foo + --no-foo compacted to --[no-]foo [true|false].
     /// Multi-value options: last alias gets [value...].
     /// Single-value options: last alias gets [value].
     /// </summary>
     private static List<string> SplitAliasesWithValueHint(
-        string firstColumnText,
+        List<string> rawAliases,
         bool isBool,
         bool isMultiValue
     )
     {
-        // Strip any type hint and (REQUIRED) suffix that System.CommandLine adds
-        var match = TypeHintRegex().Match(firstColumnText);
-        var withoutHint = match.Success ? firstColumnText[..match.Index] : firstColumnText;
-        withoutHint = RequiredSuffixRegex().Replace(withoutHint, "");
-        var rawAliases = withoutHint.Split(", ").ToList();
-
         if (isBool)
         {
             // Compact: --foo + --no-foo → --[no-]foo [true|false]
@@ -209,18 +210,12 @@ internal static partial class GroupedHelpLayout
             return result;
         }
 
-        // Non-bool: always add value indicator regardless of whether S.CommandLine added a hint
+        // Non-bool: always add value indicator
         var aliases = rawAliases.Select(Ansi.White).ToList();
         if (aliases.Count > 0)
             aliases[^1] += " " + Ansi.Cyan(isMultiValue ? "[value...]" : "[value]");
         return aliases;
     }
-
-    [GeneratedRegex(@"\s*<[^>]+>$")]
-    private static partial Regex TypeHintRegex();
-
-    [GeneratedRegex(@"\s*\(REQUIRED\)", RegexOptions.IgnoreCase)]
-    private static partial Regex RequiredSuffixRegex();
 
     private static bool DescriptionSection(HelpContext ctx)
     {
@@ -258,11 +253,12 @@ internal static partial class GroupedHelpLayout
         var rows = commands
             .Select(command =>
             {
-                var row = ctx.HelpBuilder.GetTwoColumnRow(command, ctx);
+                var name = Ansi.White(command.Name);
                 var displayName = DataPlaneRegistry.IsDataPlane(command)
-                    ? row.FirstColumnText + Ansi.LightRed("*")
-                    : row.FirstColumnText;
-                return (command, displayName, row.SecondColumnText);
+                    ? name + Ansi.LightRed("*")
+                    : name;
+                var desc = command.Description ?? "";
+                return (command, displayName, desc);
             })
             .ToList();
 
@@ -272,7 +268,7 @@ internal static partial class GroupedHelpLayout
         {
             var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.displayName));
             ctx.Output.WriteLine(
-                $"  {row.displayName}{padding}  {row.SecondColumnText}"
+                $"  {row.displayName}{padding}  {row.desc}"
             );
 
             var detail = RemarksRegistry.Get(row.command);
@@ -304,149 +300,6 @@ internal static partial class GroupedHelpLayout
 
         return true;
     }
-
-    private static (string main, List<string> metadata) SplitOptionDescriptionAndMetadata(
-        Option option,
-        string secondColumnText
-    )
-    {
-        var metadata = new List<string>();
-        var main = secondColumnText;
-
-        foreach (Match match in MetadataTagRegex().Matches(secondColumnText))
-        {
-            var tag = match.Value;
-            if (tag.StartsWith("[default:", StringComparison.OrdinalIgnoreCase))
-            {
-                var rewritten = RewriteEnumDefaultTag(option, tag);
-                if (option.AllowMultipleArgumentsPerToken)
-                    rewritten = NormalizeDefaultTagListSeparators(rewritten);
-                metadata.Add(rewritten);
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-                continue;
-            }
-
-            if (tag.StartsWith("[env:", StringComparison.OrdinalIgnoreCase))
-            {
-                metadata.Add(tag);
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-                continue;
-            }
-
-            if (tag.StartsWith("[allowed:", StringComparison.OrdinalIgnoreCase))
-            {
-                metadata.Add(tag);
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-            }
-        }
-
-        main = Regex.Replace(main, "\\s{2,}", " ").Trim();
-        if (option.Required)
-            metadata.Insert(0, "[required]");
-        return (main, metadata);
-    }
-
-    private static string NormalizeDefaultTagListSeparators(string tag)
-    {
-        const string prefix = "[default:";
-        if (!tag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return tag;
-
-        var inner = tag[prefix.Length..].TrimStart();
-        if (inner.EndsWith(']'))
-            inner = inner[..^1].TrimEnd();
-
-        var parts = inner.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-        return parts.Length <= 1 ? tag : $"[default: {string.Join(", ", parts)}]";
-    }
-
-    private static string RewriteEnumDefaultTag(Option option, string defaultTag)
-    {
-        var enumType = GetOptionEnumType(option);
-        if (enumType is null)
-            return defaultTag;
-
-        const string prefix = "[default:";
-        if (!defaultTag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return defaultTag;
-
-        var value = defaultTag.Substring(prefix.Length).Trim();
-        value = value.EndsWith(']') ? value[..^1].TrimEnd() : value;
-
-        var converted = value
-            .Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Select(v => MapEnumTokenToDescription(enumType, v))
-            .ToArray();
-
-        if (converted.Any(c => c is null))
-            return defaultTag;
-
-        return $"[default: {string.Join("|", converted!)}]";
-    }
-
-    private static Type? GetOptionEnumType(Option option)
-    {
-        for (Type? t = option.GetType(); t is not null; t = t.BaseType)
-        {
-            if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Option<>))
-                continue;
-
-            var arg = t.GetGenericArguments()[0];
-            var underlying = Nullable.GetUnderlyingType(arg);
-            var candidate = underlying ?? arg;
-            if (candidate.IsEnum)
-                return candidate;
-
-            if (candidate.IsArray)
-            {
-                var element = candidate.GetElementType();
-                if (element is not null)
-                {
-                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
-                    if (unwrappedElement.IsEnum)
-                        return unwrappedElement;
-                }
-            }
-
-            if (candidate.IsGenericType)
-            {
-                var def = candidate.GetGenericTypeDefinition();
-                if (
-                    def == typeof(List<>)
-                    || def == typeof(IReadOnlyList<>)
-                    || def == typeof(IReadOnlyCollection<>)
-                    || def == typeof(IEnumerable<>)
-                )
-                {
-                    var element = candidate.GetGenericArguments()[0];
-                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
-                    if (unwrappedElement.IsEnum)
-                        return unwrappedElement;
-                }
-            }
-
-            return null;
-        }
-
-        return null;
-    }
-
-    private static string? MapEnumTokenToDescription(Type enumType, string token)
-    {
-        if (!Enum.TryParse(enumType, token, ignoreCase: true, out var parsed) || parsed is null)
-            return null;
-
-        var memberName = Enum.GetName(enumType, parsed);
-        if (memberName is null)
-            return null;
-
-        var field = enumType.GetField(memberName, BindingFlags.Public | BindingFlags.Static);
-        var desc = field?.GetCustomAttribute<DescriptionAttribute>()?.Description;
-        return string.IsNullOrWhiteSpace(desc) ? token : desc;
-    }
-
-    [GeneratedRegex(@"\[(default|env|allowed): [^\]]+\]", RegexOptions.IgnoreCase)]
-    private static partial Regex MetadataTagRegex();
 
     private static IEnumerable<Option> AllOptions(Command cmd)
     {
