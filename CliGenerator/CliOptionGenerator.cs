@@ -269,10 +269,11 @@ public class CliOptionGenerator : IIncrementalGenerator
         }
         else
         {
+            bool isBool = typeSymbol.SpecialType == SpecialType.System_Boolean;
+
             // Required inference
             if (!m.IsRequired)
             {
-                bool isBool = typeSymbol.SpecialType == SpecialType.System_Boolean;
                 bool isValueType = typeSymbol.IsValueType && !IsNullableValueType(typeSymbol);
                 // Required if: non-nullable reference type with no default OR non-nullable Guid-like with no default
                 if (!m.HasNullableAnnotation && !hasDefault && !isBool)
@@ -299,6 +300,21 @@ public class CliOptionGenerator : IIncrementalGenerator
                 var parser = GetSingleValueParserExpr(typeSymbol, m.HasNullableAnnotation);
                 if (parser != null)
                     m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
+            }
+
+            // Non-nullable bool: add --no-{longAlias} negation alias and a toggle parser
+            if (isBool)
+            {
+                var firstLongAlias = new[] { m.PrimaryAlias }
+                    .Concat(m.ExtraAliases)
+                    .FirstOrDefault(a => a.StartsWith("--", StringComparison.Ordinal));
+                if (firstLongAlias != null)
+                {
+                    var negation = "--no-" + firstLongAlias.Substring(2);
+                    m.ExtraAliases = m.ExtraAliases.Append(negation).ToArray();
+                    m.CustomParserExpr =
+                        @"r => r.Tokens.Count > 0 ? bool.Parse(r.Tokens[0].Value) : !(r.Parent is global::System.CommandLine.Parsing.OptionResult __or && (__or.IdentifierToken?.Value ?? """").StartsWith(""--no-"", global::System.StringComparison.OrdinalIgnoreCase))";
+                }
             }
         }
 
