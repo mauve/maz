@@ -25,6 +25,13 @@ public abstract partial class CommandDef
     /// </summary>
     protected virtual bool IsDataPlane => false;
 
+    /// <summary>
+    /// True when this command performs a destructive operation (HTTP DELETE, PUT, or POST).
+    /// Overridden to <c>true</c> by generated commands for such operations and manually-written
+    /// destructive commands. Used to attach the global <c>--require-confirmation</c> guard.
+    /// </summary>
+    protected virtual bool IsDestructive => false;
+
     public abstract string Name { get; }
     public virtual string[] Aliases => [];
     public virtual string Description => "";
@@ -64,6 +71,8 @@ public abstract partial class CommandDef
             RemarksRegistry.Register(cmd, r);
         if (IsDataPlane)
             DataPlaneRegistry.Register(cmd);
+        if (IsDestructive)
+            DestructiveCommandRegistry.Register(cmd);
         return cmd;
     }
 

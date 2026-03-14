@@ -62,6 +62,8 @@ public static class OperationCommandEmitter
                 w.Line($"public override string Name => \"{op.CliName}\";");
                 if (isDataPlane)
                     w.Line("protected override bool IsDataPlane => true;");
+                if (op.HttpMethod is "DELETE" or "PUT" or "POST")
+                    w.Line("protected override bool IsDestructive => true;");
                 w.Line();
 
                 if (isDataPlane)

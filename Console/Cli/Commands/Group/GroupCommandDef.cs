@@ -30,6 +30,7 @@ public partial class GroupCommandDef(AuthOptionPack auth) : CommandDef
 public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
+    protected override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly LocationOptionPack Location = new();
@@ -137,6 +138,7 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
 public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
+    protected override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly ConfirmationOptionPack Confirmation = new();

@@ -1,13 +1,22 @@
 using System.CommandLine;
 using System.CommandLine.Help;
+using System.CommandLine.Invocation;
+using System.Linq.Expressions;
+using System.Reflection;
 using Azure.Core;
+using Console;
 using Console.Cli;
 using Console.Cli.Shared;
+using Console.Config;
 using Console.Rendering;
 
 // Register per-type field visibility for the text renderer.
 // Only the token value is shown by default; use --show-all for full metadata.
 TextFieldRegistry.RegisterVisibleFields<AccessToken>("Token");
+
+// Load user config and inject [global] defaults as env vars (before command tree is built).
+MazConfig.Initialize();
+MazConfig.Current.InjectEnvironmentDefaults();
 
 if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith(']'))
 {
@@ -19,6 +28,12 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
 
 var rootDef = new RootCommandDef();
 var rootCmd = rootDef.Build();
+
+// Apply [global] option defaults (for non-string types like enums) and [cmd.X] per-command defaults.
+ApplyCommandDefaults(rootCmd, MazConfig.Current);
+
+// Wrap destructive commands with the global --require-confirmation guard.
+ApplyRequireConfirmationGuard(rootCmd);
 
 // Apply grouped layout to every HelpAction in the tree and add --help-more to each command.
 foreach (var cmd in AllCommands(rootCmd))
@@ -103,4 +118,153 @@ static IEnumerable<Command> AllCommands(Command root)
     foreach (var sub in root.Subcommands)
     foreach (var cmd in AllCommands(sub))
         yield return cmd;
+}
+
+static void ApplyCommandDefaults(Command root, MazConfig mazConfig)
+{
+    // Apply [global] defaults to all commands for option types not handled by env-var injection
+    // (e.g. enum options like --format which the source generator can't fall back via ??)
+    if (mazConfig.GlobalDefaults.Count > 0)
+    {
+        foreach (var cmd in AllCommands(root))
+        {
+            foreach (var (key, value) in mazConfig.GlobalDefaults)
+            {
+                var opt = cmd.Options.FirstOrDefault(o =>
+                    o.Name.TrimStart('-').Equals(key, StringComparison.OrdinalIgnoreCase)
+                );
+                if (opt is not null)
+                    TrySetDefault(opt, value);
+            }
+        }
+    }
+
+    // Apply [cmd.X] per-command overrides (take precedence over global defaults)
+    if (mazConfig.CommandDefaults.Count > 0)
+    {
+        foreach (var sub in root.Subcommands)
+            ApplyDefaultsRecursive(sub, "", mazConfig);
+    }
+}
+
+static void ApplyDefaultsRecursive(Command cmd, string parentPath, MazConfig mazConfig)
+{
+    var path = parentPath.Length > 0 ? $"{parentPath} {cmd.Name}" : cmd.Name;
+
+    if (mazConfig.CommandDefaults.TryGetValue(path, out var defaults))
+    {
+        foreach (var (key, value) in defaults)
+        {
+            var opt = cmd.Options.FirstOrDefault(o =>
+                o.Name.TrimStart('-').Equals(key, StringComparison.OrdinalIgnoreCase)
+            );
+            if (opt is not null)
+                TrySetDefault(opt, value);
+        }
+    }
+
+    foreach (var sub in cmd.Subcommands)
+        ApplyDefaultsRecursive(sub, path, mazConfig);
+}
+
+static void TrySetDefault(Option opt, string value)
+{
+    var genericArg = opt.GetType().GetGenericArguments().FirstOrDefault();
+    if (genericArg is null)
+        return;
+
+    // Parse the string value to the target option type
+    object? parsed;
+
+    if (genericArg == typeof(string))
+    {
+        parsed = value;
+    }
+    else if (genericArg == typeof(bool))
+    {
+        if (!bool.TryParse(value, out var bv))
+            return;
+        parsed = bv;
+    }
+    else if (genericArg.IsEnum)
+    {
+        if (!Enum.TryParse(genericArg, value, ignoreCase: true, out parsed))
+            return;
+    }
+    else if (
+        Nullable.GetUnderlyingType(genericArg) is { } underlying
+        && underlying.IsEnum
+    )
+    {
+        if (!Enum.TryParse(underlying, value, ignoreCase: true, out var ev))
+            return;
+        parsed = ev;
+    }
+    else
+    {
+        return;
+    }
+
+    // Set DefaultValueFactory via reflection (Option<T>.DefaultValueFactory = Func<ArgumentResult, T>)
+    var dfProp = opt.GetType().GetProperty("DefaultValueFactory");
+    if (dfProp is null)
+        return;
+
+    // Build a Func<ArgumentResult, T> that returns the parsed value, using expression trees
+    // so we don't need to reference ArgumentResult directly.
+    var argResultType = dfProp.PropertyType.GetGenericArguments()[0];
+    var paramExpr = Expression.Parameter(argResultType, "_");
+    var valueExpr = Expression.Constant(parsed, genericArg);
+    var funcType = typeof(Func<,>).MakeGenericType(argResultType, genericArg);
+    var factory = Expression.Lambda(funcType, valueExpr, paramExpr).Compile();
+    dfProp.SetValue(opt, factory);
+}
+
+static void ApplyRequireConfirmationGuard(Command rootCmd)
+{
+    foreach (var cmd in AllCommands(rootCmd))
+    {
+        if (!DestructiveCommandRegistry.IsDestructive(cmd))
+            continue;
+
+        var original = cmd.Action;
+        if (original is null)
+            continue;
+
+        cmd.SetAction(async (parseResult, ct) =>
+        {
+            var requireConfirm = parseResult.GetValue(
+                GlobalBehaviorOptionPack.RequireConfirmationOption
+            );
+            if (requireConfirm)
+            {
+                var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
+                    parseResult.GetValue(InteractiveOptionPack.InteractiveOption)
+                );
+                PromptForConfirmation(interactive, cmd.Name);
+            }
+
+            return original switch
+            {
+                AsynchronousCommandLineAction asyncAction =>
+                    await asyncAction.InvokeAsync(parseResult, ct),
+                SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
+                _ => 0,
+            };
+        });
+    }
+}
+
+static void PromptForConfirmation(bool interactive, string commandName)
+{
+    if (!interactive || System.Console.IsInputRedirected)
+        throw new InvocationException(
+            $"Operation '{commandName}' is destructive and --require-confirmation is enabled. "
+                + "Run interactively and confirm, or disable --require-confirmation."
+        );
+
+    System.Console.Write($"Operation '{commandName}' is destructive. Proceed? (y/N): ");
+    var response = System.Console.ReadLine()?.Trim().ToLowerInvariant();
+    if (response is not ("y" or "yes"))
+        throw new InvocationException("Operation cancelled by user.");
 }
