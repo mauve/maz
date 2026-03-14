@@ -3400,6 +3400,121 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "applicationinsights",
+      "displayName": "appinsights",
+      "apiVersion": "2020-02-02",
+      "description": "Manage Azure Application Insights components and availability web tests",
+      "detailedDescription": "Covers the lifecycle of Application Insights components (workspace-based and classic), availability web tests, and data purge operations. Application Insights provides distributed tracing, exception tracking, performance monitoring, and custom telemetry for applications. Requires Application Insights Component Contributor role or equivalent.",
+      "specFiles": [
+        "applicationinsights/resource-manager/Microsoft.Insights/ApplicationInsights/stable/2020-02-02/components_API.json",
+        "applicationinsights/resource-manager/Microsoft.Insights/ApplicationInsights/stable/2022-06-15/webTests_API.json"
+      ],
+      "resourceDescriptions": {
+        "component": "An Application Insights component providing telemetry collection and analysis for an application.",
+        "webtest": "An availability web test that periodically pings a URL to check uptime and response time."
+      },
+      "resourceDetailedDescriptions": {
+        "component": "Application Insights components can be workspace-based (linked to a Log Analytics workspace) or classic. Use `create-or-update` with the WorkspaceResourceId property to create workspace-based components. Use `purge` to permanently delete telemetry data for GDPR compliance.",
+        "webtest": "Availability tests send HTTP requests to a URL at configurable intervals and locations. Failures trigger alerts. Use `list-by-component` to find all tests for a specific Application Insights resource."
+      },
+      "actionRenames": {
+        "Components_Get": "show",
+        "Components_CreateOrUpdate": "create",
+        "Components_List": "list-by-subscription",
+        "Components_ListByResourceGroup": "list",
+        "WebTests_Get": "show",
+        "WebTests_CreateOrUpdate": "create",
+        "WebTests_List": "list-by-subscription",
+        "WebTests_ListByResourceGroup": "list",
+        "WebTests_ListByComponent": "list-by-component"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Components_List",
+          "resourceGroupOperationId": "Components_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "WebTests_List",
+          "resourceGroupOperationId": "WebTests_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "advisor",
+      "displayName": "advisor",
+      "apiVersion": "2025-01-01",
+      "description": "Manage Azure Advisor recommendations, scores, and suppression rules",
+      "detailedDescription": "Provides access to Azure Advisor recommendations for cost, reliability, security, operational excellence, and performance. Use `recommendation generate` to trigger a fresh analysis, `suppression create` to snooze unwanted recommendations, and `score list` to see the Advisor score per category.",
+      "specFiles": [
+        "advisor/resource-manager/Microsoft.Advisor/Advisor/stable/2025-01-01/advisor.json"
+      ],
+      "resourceDescriptions": {
+        "recommendation": "An Azure Advisor recommendation suggesting an action to improve cost, reliability, security, or performance.",
+        "recommendation-metadata": "Metadata describing the types and categories of available Advisor recommendations.",
+        "configuration": "Advisor configuration settings at the subscription or resource group level (e.g., low CPU threshold for downsizing).",
+        "score": "The Advisor score summarizing your adherence to best practices across recommendation categories.",
+        "suppression": "A suppression rule that dismisses or snoozes a specific Advisor recommendation.",
+        "predict": "A predictive recommendation engine query."
+      },
+      "resourceDetailedDescriptions": {
+        "recommendation": "Recommendations include actionable guidance with impact assessments. Use `generate` to force a fresh scan before listing. Each recommendation includes the affected resource and suggested fix.",
+        "recommendation-metadata": "Lists all recommendation types across all categories, useful for building dashboards or automation.",
+        "configuration": "Configurations allow tuning Advisor thresholds (e.g., set CPU downsizing threshold to 5% instead of default). Scoped per subscription or resource group.",
+        "score": "The Advisor score (0-100) measures adoption of best practices. Use `list` for all categories or `get` for a specific category score.",
+        "suppression": "Suppressions let you dismiss recommendations for a period or permanently. Use `delete` to re-activate a suppressed recommendation.",
+        "predict": "Experimental predictive recommendations endpoint."
+      },
+      "actionRenames": {
+        "Recommendations_Get": "show",
+        "Recommendations_List": "list",
+        "RecommendationMetadata_Get": "show",
+        "RecommendationMetadata_List": "list",
+        "Configurations_ListBySubscription": "list-by-subscription",
+        "Configurations_ListByResourceGroup": "list",
+        "AdvisorScores_Get": "show",
+        "AdvisorScores_List": "list",
+        "Suppressions_Get": "show"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "alertsmanagement",
+      "displayName": "alertsmanagement",
+      "apiVersion": "2023-03-01",
+      "description": "Manage Azure Monitor Prometheus rule groups for AKS and Arc-enabled clusters",
+      "detailedDescription": "Covers the lifecycle of Prometheus rule groups, which define recording rules and alerting rules for Azure Monitor managed Prometheus in AKS and Azure Arc-enabled Kubernetes clusters. Requires Monitoring Contributor role on the target resource group.",
+      "specFiles": [
+        "alertsmanagement/resource-manager/Microsoft.AlertsManagement/PrometheusRuleGroups/stable/2023-03-01/PrometheusRuleGroups.json"
+      ],
+      "resourceDescriptions": {
+        "prometheusrulegroup": "A Prometheus rule group defining recording rules and alerting rules for Azure Monitor managed Prometheus."
+      },
+      "resourceDetailedDescriptions": {
+        "prometheusrulegroup": "Prometheus rule groups are evaluated against metrics collected by Azure Monitor managed Prometheus. Use `create-or-update` to define recording rules (pre-aggregated metrics) and alerting rules (conditions that fire Azure Monitor alerts). Scoped to an AKS cluster or Azure Arc-enabled Kubernetes cluster."
+      },
+      "actionRenames": {
+        "PrometheusRuleGroups_Get": "show",
+        "PrometheusRuleGroups_CreateOrUpdate": "create",
+        "PrometheusRuleGroups_ListBySubscription": "list-by-subscription",
+        "PrometheusRuleGroups_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "PrometheusRuleGroups_ListBySubscription",
+          "resourceGroupOperationId": "PrometheusRuleGroups_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": []
     }
   ]
 }
