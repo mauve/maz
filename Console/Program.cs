@@ -1,5 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.Completions;
 using System.CommandLine.Help;
 using Azure.Core;
 using Console.Cli;
@@ -8,6 +7,14 @@ using Console.Rendering;
 // Register per-type field visibility for the text renderer.
 // Only the token value is shown by default; use --show-all for full metadata.
 TextFieldRegistry.RegisterVisibleFields<AccessToken>("Token");
+
+if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith(']'))
+{
+    var pos = int.Parse(first[9..^1]);
+    var line = args.Length >= 2 ? args[1] : "";
+    await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef());
+    return 0;
+}
 
 var rootDef = new RootCommandDef();
 var rootCmd = rootDef.Build();
@@ -59,7 +66,6 @@ foreach (var cmd in AllCommands(rootCmd))
     }
 }
 
-((RootCommand)rootCmd).Add(new SuggestDirective());
 var config = new CommandLineConfiguration(rootCmd);
 return rootCmd.Parse(args, config).Invoke();
 
