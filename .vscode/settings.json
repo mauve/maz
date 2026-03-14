@@ -3,5 +3,8 @@
         "editor.formatOnType": true,
         "editor.inlineSuggest.suppressSuggestions": false,
         "editor.defaultFormatter": "csharpier.csharpier-vscode"
+    },
+    "chat.tools.terminal.autoApprove": {
+        "artifacts/bin/Console/debug/maz": true
     }
 }
