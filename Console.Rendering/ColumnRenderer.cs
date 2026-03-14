@@ -5,15 +5,24 @@ namespace Console.Rendering;
 
 public record ColumnRendererOptions(ValueFormatterOptions? FormatterOptions = null);
 
-public class ColumnRendererFactory(ValueFormatterOptions formatterOptions) : IRendererFactory
+public class ColumnRendererFactory(ValueFormatterOptions formatterOptions, bool showEnvelope = false)
+    : IRendererFactory
 {
     public IRenderer CreateRendererForType(Type type) =>
-        throw new NotSupportedException(
-            "ColumnRendererFactory does not support per-item rendering. Use CreateCollectionRenderer<T>()."
-        );
+        new TextItemRenderer(type, showAll: false, showEnvelope: false, formatterOptions);
 
-    ICollectionRenderer IRendererFactory.CreateCollectionRenderer<T>() =>
-        new ColumnRenderer<T>(new ColumnRendererOptions(formatterOptions));
+    ICollectionRenderer IRendererFactory.CreateCollectionRenderer<T>()
+    {
+        if (showEnvelope && !typeof(ArmResource).IsAssignableFrom(typeof(T)))
+        {
+            System.Console.Error.WriteLine(
+                Ansi.Yellow(
+                    "warning: --show-envelope is not supported with column format for non-ArmResource types"
+                )
+            );
+        }
+        return new ColumnRenderer<T>(new ColumnRendererOptions(formatterOptions));
+    }
 }
 
 internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRenderer
