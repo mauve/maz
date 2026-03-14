@@ -119,8 +119,7 @@ internal class JsonCollectionRenderer<T>(JsonSerializerOptions options) : IColle
             all.Add(item);
         throbber.Dispose();
 
-        var dataItems = all
-            .Select(item =>
+        var dataItems = all.Select(item =>
             {
                 if (item is ArmResource)
                 {
@@ -152,9 +151,7 @@ internal class JsonLCollectionRenderer<T> : ICollectionRenderer
         foreach (var item in all)
         {
             object? dataItem =
-                item is ArmResource
-                    ? item.GetType().GetProperty("Data")?.GetValue(item)
-                    : item;
+                item is ArmResource ? item.GetType().GetProperty("Data")?.GetValue(item) : item;
             output.WriteLine(JsonSerializer.Serialize(dataItem, JsonSerializerOptions.Default));
         }
     }
@@ -176,8 +173,7 @@ internal class JsonPrettyCollectionRenderer<T> : ICollectionRenderer
             all.Add(item);
         throbber.Dispose();
 
-        var dataItems = all
-            .Select(item =>
+        var dataItems = all.Select(item =>
             {
                 if (item is ArmResource)
                 {

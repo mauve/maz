@@ -29,8 +29,15 @@ public partial class RenderOptionPack : OptionPack
             OutputFormat.Json => new JsonRendererFactory(JsonSerializerOptions.Default),
             OutputFormat.JsonL => new JsonLRendererFactory(),
             OutputFormat.JsonPretty => new JsonPrettyRendererFactory(),
-            OutputFormat.Text => new TextRendererFactory(ShowAll, ShowEnvelope, GetValueFormatterOptions()),
-            OutputFormat.Column or null => new ColumnRendererFactory(GetValueFormatterOptions(), ShowEnvelope),
+            OutputFormat.Text => new TextRendererFactory(
+                ShowAll,
+                ShowEnvelope,
+                GetValueFormatterOptions()
+            ),
+            OutputFormat.Column or null => new ColumnRendererFactory(
+                GetValueFormatterOptions(),
+                ShowEnvelope
+            ),
             var fmt => throw new InvocationException($"Unsupported output format '{fmt}'."),
         };
 

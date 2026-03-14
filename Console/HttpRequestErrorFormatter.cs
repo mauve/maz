@@ -59,7 +59,8 @@ internal static class HttpRequestErrorFormatter
         while (ex is not null)
         {
             var host = ExtractHost(ex.Message);
-            if (host is not null) return host;
+            if (host is not null)
+                return host;
             ex = ex.InnerException;
         }
         return null;

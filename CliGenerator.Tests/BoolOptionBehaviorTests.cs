@@ -27,8 +27,7 @@ public class BoolOptionBehaviorTests
                 r.Tokens.Count > 0
                     ? bool.Parse(r.Tokens[0].Value)
                     : !(
-                        r.Parent
-                            is global::System.CommandLine.Parsing.OptionResult __or
+                        r.Parent is global::System.CommandLine.Parsing.OptionResult __or
                         && __or.IdentifierToken?.Value?.StartsWith(
                             "--no-",
                             global::System.StringComparison.OrdinalIgnoreCase

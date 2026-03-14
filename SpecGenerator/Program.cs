@@ -30,12 +30,14 @@ if (!File.Exists(configPath))
 {
     Console.Error.WriteLine($"Config file not found: {configPath}");
     Console.Error.WriteLine("Usage: specgen [--config <path>] [--verbose]");
-    Console.Error.WriteLine("       specgen analyze --spec-file <path> --display-name <name> --api-version <version>");
+    Console.Error.WriteLine(
+        "       specgen analyze --spec-file <path> --display-name <name> --api-version <version>"
+    );
     return 1;
 }
 
-var repoRoot = Path.GetDirectoryName(Path.GetFullPath(configPath))
-    ?? Directory.GetCurrentDirectory();
+var repoRoot =
+    Path.GetDirectoryName(Path.GetFullPath(configPath)) ?? Directory.GetCurrentDirectory();
 
 Console.WriteLine($"Loading config from {configPath}");
 var config = ConfigLoader.Load(configPath);
@@ -51,7 +53,9 @@ foreach (var service in config.Services)
 
     if (docs.Count == 0)
     {
-        Console.Error.WriteLine($"  Warning: no spec files loaded for service '{service.DisplayName}'");
+        Console.Error.WriteLine(
+            $"  Warning: no spec files loaded for service '{service.DisplayName}'"
+        );
         continue;
     }
 
@@ -107,7 +111,9 @@ static int RunAnalyze(string[] args)
 
     if (specFile is null)
     {
-        Console.Error.WriteLine("Usage: specgen analyze --spec-file <path> --display-name <name> --api-version <version>");
+        Console.Error.WriteLine(
+            "Usage: specgen analyze --spec-file <path> --display-name <name> --api-version <version>"
+        );
         return 1;
     }
 
@@ -139,7 +145,14 @@ static int RunAnalyze(string[] args)
     }
 
     // Collect raw operations for analysis (before any config-driven transforms)
-    var rawOps = new List<(string OperationId, string Resource, string ActionCli, string UrlTemplate, bool IsPaged)>();
+    var rawOps =
+        new List<(
+            string OperationId,
+            string Resource,
+            string ActionCli,
+            string UrlTemplate,
+            bool IsPaged
+        )>();
     var serviceClassName = NamingEngine.KebabToPascal(displayName);
 
     foreach (var doc in docs)
@@ -171,24 +184,33 @@ static int RunAnalyze(string[] args)
     foreach (var (resource, ops) in opsByResource)
     {
         var subOps = ops.Where(o =>
-            o.IsPaged &&
-            o.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase) &&
-            !o.UrlTemplate.Contains("{resourceGroupName}", StringComparison.OrdinalIgnoreCase)).ToList();
+                o.IsPaged
+                && o.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase)
+                && !o.UrlTemplate.Contains(
+                    "{resourceGroupName}",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
+            .ToList();
 
         foreach (var subOp in subOps)
         {
             var expectedRgAction = subOp.ActionCli + "-by-resource-group";
             var rgMatch = ops.FirstOrDefault(o =>
-                o.ActionCli.Equals(expectedRgAction, StringComparison.OrdinalIgnoreCase));
+                o.ActionCli.Equals(expectedRgAction, StringComparison.OrdinalIgnoreCase)
+            );
 
-            if (rgMatch == default) continue;
+            if (rgMatch == default)
+                continue;
 
-            suggestedMerges.Add(new
-            {
-                subscriptionOperationId = subOp.OperationId,
-                resourceGroupOperationId = rgMatch.OperationId,
-                cliAction = subOp.ActionCli,
-            });
+            suggestedMerges.Add(
+                new
+                {
+                    subscriptionOperationId = subOp.OperationId,
+                    resourceGroupOperationId = rgMatch.OperationId,
+                    cliAction = subOp.ActionCli,
+                }
+            );
         }
     }
 
@@ -203,10 +225,23 @@ static int RunAnalyze(string[] args)
     {
         // Extract secondary nouns from action names (last significant word)
         // e.g. "list-keys" → "keys", "regenerate-key" → "key"
-        var nounToOps = new Dictionary<string, List<(string OperationId, string ActionCli)>>(StringComparer.OrdinalIgnoreCase);
+        var nounToOps = new Dictionary<string, List<(string OperationId, string ActionCli)>>(
+            StringComparer.OrdinalIgnoreCase
+        );
         var standardVerbs = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-            { "list", "create", "delete", "update", "get", "show", "check", "restore",
-              "abort", "failover", "migration" };
+        {
+            "list",
+            "create",
+            "delete",
+            "update",
+            "get",
+            "show",
+            "check",
+            "restore",
+            "abort",
+            "failover",
+            "migration",
+        };
 
         foreach (var op in ops)
         {
@@ -214,7 +249,8 @@ static int RunAnalyze(string[] args)
                 continue;
 
             var words = op.ActionCli.Split('-');
-            if (words.Length < 2) continue;
+            if (words.Length < 2)
+                continue;
 
             // Look for a non-verb word in the action (first or last significant word)
             string? noun = null;
@@ -230,7 +266,8 @@ static int RunAnalyze(string[] args)
                     noun = secondLast;
             }
 
-            if (noun is null) continue;
+            if (noun is null)
+                continue;
 
             if (!nounToOps.TryGetValue(noun, out var nounOps))
             {
@@ -242,12 +279,14 @@ static int RunAnalyze(string[] args)
 
         foreach (var (noun, nounOps) in nounToOps.Where(kv => kv.Value.Count >= 2))
         {
-            suggestedSubgroups.Add(new
-            {
-                resource,
-                subgroupCliName = noun,
-                operationIds = nounOps.Select(o => o.OperationId).ToArray(),
-            });
+            suggestedSubgroups.Add(
+                new
+                {
+                    resource,
+                    subgroupCliName = noun,
+                    operationIds = nounOps.Select(o => o.OperationId).ToArray(),
+                }
+            );
         }
     }
 
@@ -265,21 +304,35 @@ static int RunAnalyze(string[] args)
     };
 
 #pragma warning disable CA1869
-    Console.WriteLine(JsonSerializer.Serialize(proposed, new JsonSerializerOptions
-    {
-        WriteIndented = true,
-        DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
-    }));
+    Console.WriteLine(
+        JsonSerializer.Serialize(
+            proposed,
+            new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                DefaultIgnoreCondition = System
+                    .Text
+                    .Json
+                    .Serialization
+                    .JsonIgnoreCondition
+                    .WhenWritingNull,
+            }
+        )
+    );
 #pragma warning restore CA1869
 
     // Also print a summary of detected operations to stderr
-    Console.Error.WriteLine($"\nDetected {rawOps.Count} operations across {opsByResource.Count} resource group(s):");
+    Console.Error.WriteLine(
+        $"\nDetected {rawOps.Count} operations across {opsByResource.Count} resource group(s):"
+    );
     foreach (var (resource, ops) in opsByResource.OrderBy(kv => kv.Key))
     {
         Console.Error.WriteLine($"  {resource}:");
         foreach (var op in ops)
         {
-            var renamed = suggestedRenames.TryGetValue(op.OperationId, out var newName) ? $" → {newName}" : "";
+            var renamed = suggestedRenames.TryGetValue(op.OperationId, out var newName)
+                ? $" → {newName}"
+                : "";
             Console.Error.WriteLine($"    {op.ActionCli}{renamed}  ({op.OperationId})");
         }
     }

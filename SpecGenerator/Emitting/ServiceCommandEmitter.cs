@@ -23,18 +23,21 @@ public static class ServiceCommandEmitter
             w.Line($"/// <summary>{EscapeXml(service.Description)}</summary>");
         if (service.DetailedDescription is { Length: > 0 })
             w.Line($"/// <remarks>{EscapeXml(service.DetailedDescription)}</remarks>");
-        w.Block($"public partial class {service.ClassName}(AuthOptionPack auth) : CommandDef", () =>
-        {
-            w.Line($"public override string Name => \"{service.CliName}\";");
-            if (service.IsDataPlane)
-                w.Line("protected override bool IsDataPlane => true;");
-
-            foreach (var resource in service.Resources)
+        w.Block(
+            $"public partial class {service.ClassName}(AuthOptionPack auth) : CommandDef",
+            () =>
             {
-                var fieldName = NamingEngine.KebabToCSharpProperty(resource.CliName);
-                w.Line($"public readonly {resource.ClassName} {fieldName} = new(auth);");
+                w.Line($"public override string Name => \"{service.CliName}\";");
+                if (service.IsDataPlane)
+                    w.Line("protected override bool IsDataPlane => true;");
+
+                foreach (var resource in service.Resources)
+                {
+                    var fieldName = NamingEngine.KebabToCSharpProperty(resource.CliName);
+                    w.Line($"public readonly {resource.ClassName} {fieldName} = new(auth);");
+                }
             }
-        });
+        );
 
         return w.ToString();
     }

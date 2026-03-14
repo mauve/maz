@@ -10,12 +10,14 @@ internal static partial class AuthenticationErrorFormatter
 {
     private static readonly Dictionary<string, string> AadStsDescriptions = new()
     {
-        ["AADSTS70043"] = "The refresh token has expired due to a Conditional Access sign-in frequency policy.",
+        ["AADSTS70043"] =
+            "The refresh token has expired due to a Conditional Access sign-in frequency policy.",
         ["AADSTS700082"] = "The refresh token has expired.",
         ["AADSTS50076"] = "Multi-factor authentication is required.",
         ["AADSTS50079"] = "Multi-factor authentication enrollment is required.",
         ["AADSTS70011"] = "The requested scope is invalid.",
-        ["AADSTS50173"] = "The token was issued before the password was changed. Please re-authenticate.",
+        ["AADSTS50173"] =
+            "The token was issued before the password was changed. Please re-authenticate.",
         ["AADSTS65001"] = "The application requires consent that has not been granted.",
         ["AADSTS7000215"] = "Invalid client secret.",
         ["AADSTS700016"] = "The application was not found in the directory.",
@@ -26,11 +28,7 @@ internal static partial class AuthenticationErrorFormatter
         {
             ["Azure CLI"] = (
                 "Azure CLI",
-                [
-                    "Re-authenticate the Azure CLI:",
-                    "  az logout",
-                    "  az login",
-                ]
+                ["Re-authenticate the Azure CLI:", "  az logout", "  az login"]
             ),
             ["Azure Developer CLI"] = (
                 "Azure Developer CLI",
@@ -53,7 +51,9 @@ internal static partial class AuthenticationErrorFormatter
             ),
             ["ManagedIdentityCredential"] = (
                 "Managed Identity",
-                ["Verify the managed identity is assigned to this resource and has the required roles."]
+                [
+                    "Verify the managed identity is assigned to this resource and has the required roles.",
+                ]
             ),
             ["InteractiveBrowserCredential"] = (
                 "Interactive Browser",
@@ -61,7 +61,9 @@ internal static partial class AuthenticationErrorFormatter
             ),
             ["VisualStudioCredential"] = (
                 "Visual Studio",
-                ["Re-authenticate in Visual Studio: Tools → Options → Azure Service Authentication."]
+                [
+                    "Re-authenticate in Visual Studio: Tools → Options → Azure Service Authentication.",
+                ]
             ),
             ["SharedTokenCacheCredential"] = (
                 "Shared Token Cache",
@@ -97,7 +99,10 @@ internal static partial class AuthenticationErrorFormatter
 
         // Describe what failed
         var entries = new List<(string, string)>();
-        if (failedCredential is not null && CredentialHints.TryGetValue(failedCredential, out var hint))
+        if (
+            failedCredential is not null
+            && CredentialHints.TryGetValue(failedCredential, out var hint)
+        )
             entries.Add(("Credential", Ansi.Bold(hint.Name)));
         if (aadCode is not null)
         {
@@ -126,7 +131,10 @@ internal static partial class AuthenticationErrorFormatter
                 sb.AppendLine($"    {cmd}");
             sb.AppendLine();
         }
-        else if (failedCredential is not null && CredentialHints.TryGetValue(failedCredential, out var credHint))
+        else if (
+            failedCredential is not null
+            && CredentialHints.TryGetValue(failedCredential, out var credHint)
+        )
         {
             sb.AppendLine(Ansi.Bold("  To fix:"));
             foreach (var line in credHint.FixHints)
@@ -140,9 +148,7 @@ internal static partial class AuthenticationErrorFormatter
             var alternates = SuggestAlternates(configuredTypes, failedCredential);
             if (alternates.Count > 0)
             {
-                sb.AppendLine(
-                    Ansi.Dim("  Alternatively, try a different credential type:")
-                );
+                sb.AppendLine(Ansi.Dim("  Alternatively, try a different credential type:"));
                 foreach (var alt in alternates)
                     sb.AppendLine(Ansi.Dim($"    --auth-allowed-credential-types {alt}"));
                 sb.AppendLine();
@@ -234,10 +240,7 @@ internal static partial class AuthenticationErrorFormatter
             };
 
         var failedType = MatchFailed(failedCredential);
-        return configured
-            .Where(t => t != failedType)
-            .Select(ToCliValue)
-            .ToList();
+        return configured.Where(t => t != failedType).Select(ToCliValue).ToList();
     }
 
     [GeneratedRegex(@"AADSTS\d+")]

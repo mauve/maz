@@ -16,7 +16,8 @@ public static class PagedResponse
         string apiVersion,
         string itemsProperty,
         string nextLinkProperty,
-        [EnumeratorCancellation] CancellationToken ct)
+        [EnumeratorCancellation] CancellationToken ct
+    )
     {
         string? currentUrl = path;
 

@@ -31,11 +31,9 @@ public sealed class SpecDocument
     public string? HostParamName =>
         Root["x-ms-parameterized-host"]?["parameters"]?[0]?["name"]?.GetValue<string>();
 
-    public JsonObject? GetDefinition(string name) =>
-        Root["definitions"]?[name]?.AsObject();
+    public JsonObject? GetDefinition(string name) => Root["definitions"]?[name]?.AsObject();
 
-    public JsonObject? GetTopLevelParameter(string name) =>
-        Root["parameters"]?[name]?.AsObject();
+    public JsonObject? GetTopLevelParameter(string name) => Root["parameters"]?[name]?.AsObject();
 
     public IEnumerable<(string Path, string Method, JsonObject Operation)> GetOperations()
     {

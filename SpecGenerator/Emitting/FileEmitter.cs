@@ -53,18 +53,32 @@ public sealed class FileEmitter
         System.Console.WriteLine($"Generated {services.Count} service(s) → {outputRoot}");
     }
 
-    private void EmitResource(ResourceGroupModel resource, string serviceClassName, string outputDir, bool isDataPlane = false)
+    private void EmitResource(
+        ResourceGroupModel resource,
+        string serviceClassName,
+        string outputDir,
+        bool isDataPlane = false
+    )
     {
         // Leaf operation commands
         foreach (var op in resource.Operations)
         {
-            var content = OperationCommandEmitter.Emit(op, serviceClassName, _config.CommandNamespace, isDataPlane);
+            var content = OperationCommandEmitter.Emit(
+                op,
+                serviceClassName,
+                _config.CommandNamespace,
+                isDataPlane
+            );
             var fileName = Path.Combine(outputDir, $"{op.ClassName}.cs");
             WriteIfChanged(fileName, content);
         }
 
         // Resource group command (includes subgroup fields)
-        var resourceContent = ResourceCommandEmitter.Emit(resource, _config.CommandNamespace, isDataPlane);
+        var resourceContent = ResourceCommandEmitter.Emit(
+            resource,
+            _config.CommandNamespace,
+            isDataPlane
+        );
         var resourceFile = Path.Combine(outputDir, $"{resource.ClassName}.cs");
         WriteIfChanged(resourceFile, resourceContent);
 

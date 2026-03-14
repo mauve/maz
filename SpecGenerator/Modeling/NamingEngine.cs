@@ -9,63 +9,64 @@ namespace SpecGenerator.Modeling;
 public static partial class NamingEngine
 {
     // Irregulars that the simple algorithm would mangle
-    private static readonly Dictionary<string, string> _singularTable =
-        new(StringComparer.OrdinalIgnoreCase)
-        {
-            ["accounts"] = "account",
-            ["addresses"] = "address",
-            ["aliases"] = "alias",
-            ["blobs"] = "blob",
-            ["capacities"] = "capacity",
-            ["certificates"] = "certificate",
-            ["clusters"] = "cluster",
-            ["containers"] = "container",
-            ["databases"] = "database",
-            ["endpoints"] = "endpoint",
-            ["entries"] = "entry",
-            ["environments"] = "environment",
-            ["files"] = "file",
-            ["gateways"] = "gateway",
-            ["groups"] = "group",
-            ["identities"] = "identity",
-            ["instances"] = "instance",
-            ["items"] = "item",
-            ["jobs"] = "job",
-            ["keys"] = "key",
-            ["locations"] = "location",
-            ["logs"] = "log",
-            ["namespaces"] = "namespace",
-            ["networks"] = "network",
-            ["nodes"] = "node",
-            ["objects"] = "object",
-            ["operations"] = "operation",
-            ["policies"] = "policy",
-            ["properties"] = "property",
-            ["queues"] = "queue",
-            ["registries"] = "registry",
-            ["resources"] = "resource",
-            ["results"] = "result",
-            ["roles"] = "role",
-            ["rules"] = "rule",
-            ["secrets"] = "secret",
-            ["services"] = "service",
-            ["shares"] = "share",
-            ["snapshots"] = "snapshot",
-            ["spaces"] = "space",
-            ["storageaccounts"] = "storageaccount",
-            ["subscriptions"] = "subscription",
-            ["tables"] = "table",
-            ["tags"] = "tag",
-            ["tasks"] = "task",
-            ["tenants"] = "tenant",
-            ["topics"] = "topic",
-            ["types"] = "type",
-            ["usages"] = "usage",
-            ["vaults"] = "vault",
-            ["versions"] = "version",
-            ["volumes"] = "volume",
-            ["zones"] = "zone",
-        };
+    private static readonly Dictionary<string, string> _singularTable = new(
+        StringComparer.OrdinalIgnoreCase
+    )
+    {
+        ["accounts"] = "account",
+        ["addresses"] = "address",
+        ["aliases"] = "alias",
+        ["blobs"] = "blob",
+        ["capacities"] = "capacity",
+        ["certificates"] = "certificate",
+        ["clusters"] = "cluster",
+        ["containers"] = "container",
+        ["databases"] = "database",
+        ["endpoints"] = "endpoint",
+        ["entries"] = "entry",
+        ["environments"] = "environment",
+        ["files"] = "file",
+        ["gateways"] = "gateway",
+        ["groups"] = "group",
+        ["identities"] = "identity",
+        ["instances"] = "instance",
+        ["items"] = "item",
+        ["jobs"] = "job",
+        ["keys"] = "key",
+        ["locations"] = "location",
+        ["logs"] = "log",
+        ["namespaces"] = "namespace",
+        ["networks"] = "network",
+        ["nodes"] = "node",
+        ["objects"] = "object",
+        ["operations"] = "operation",
+        ["policies"] = "policy",
+        ["properties"] = "property",
+        ["queues"] = "queue",
+        ["registries"] = "registry",
+        ["resources"] = "resource",
+        ["results"] = "result",
+        ["roles"] = "role",
+        ["rules"] = "rule",
+        ["secrets"] = "secret",
+        ["services"] = "service",
+        ["shares"] = "share",
+        ["snapshots"] = "snapshot",
+        ["spaces"] = "space",
+        ["storageaccounts"] = "storageaccount",
+        ["subscriptions"] = "subscription",
+        ["tables"] = "table",
+        ["tags"] = "tag",
+        ["tasks"] = "task",
+        ["tenants"] = "tenant",
+        ["topics"] = "topic",
+        ["types"] = "type",
+        ["usages"] = "usage",
+        ["vaults"] = "vault",
+        ["versions"] = "version",
+        ["volumes"] = "volume",
+        ["zones"] = "zone",
+    };
 
     /// <summary>
     /// Converts an operationId like "StorageAccounts_Create" for service "storage" into:
@@ -73,10 +74,12 @@ public static partial class NamingEngine
     /// </summary>
     public static (string Resource, string Action) SplitOperationId(
         string operationId,
-        string serviceDisplayName)
+        string serviceDisplayName
+    )
     {
         var underscoreIdx = operationId.IndexOf('_', StringComparison.Ordinal);
-        string prefix, suffix;
+        string prefix,
+            suffix;
 
         if (underscoreIdx < 0)
         {
@@ -143,8 +146,9 @@ public static partial class NamingEngine
             return kebab;
 
         var parts = kebab.Split('-');
-        return string.Concat(parts.Select(p =>
-            p.Length == 0 ? p : char.ToUpperInvariant(p[0]) + p[1..]));
+        return string.Concat(
+            parts.Select(p => p.Length == 0 ? p : char.ToUpperInvariant(p[0]) + p[1..])
+        );
     }
 
     /// <summary>Converts a camelCase or snake_case property name to a kebab CLI flag.</summary>
@@ -199,8 +203,10 @@ public static partial class NamingEngine
 
         foreach (var part in serviceParts)
         {
-            if (prefixLower.StartsWith(part, StringComparison.OrdinalIgnoreCase)
-                && prefix.Length > part.Length)
+            if (
+                prefixLower.StartsWith(part, StringComparison.OrdinalIgnoreCase)
+                && prefix.Length > part.Length
+            )
             {
                 prefix = prefix[part.Length..];
                 prefixLower = prefix.ToLowerInvariant();
@@ -227,11 +233,13 @@ public static partial class NamingEngine
             return PreserveCase(word, lower[..^3] + "y");
         }
 
-        if (lower.EndsWith("ses", StringComparison.Ordinal)
+        if (
+            lower.EndsWith("ses", StringComparison.Ordinal)
             || lower.EndsWith("xes", StringComparison.Ordinal)
             || lower.EndsWith("zes", StringComparison.Ordinal)
             || lower.EndsWith("ches", StringComparison.Ordinal)
-            || lower.EndsWith("shes", StringComparison.Ordinal))
+            || lower.EndsWith("shes", StringComparison.Ordinal)
+        )
         {
             return PreserveCase(word, lower[..^2]); // strip "es"
         }

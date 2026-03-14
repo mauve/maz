@@ -86,8 +86,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         public bool AllowMultiple;
         public string? ArityExpr;
         public bool HasNullableAnnotation;
-        public string? AllowedValuesText;  // joined display string for [allowed:]
-        public string? DefaultText;        // pre-formatted display string for [default:]
+        public string? AllowedValuesText; // joined display string for [allowed:]
+        public string? DefaultText; // pre-formatted display string for [default:]
     }
 
     sealed class ChildModel

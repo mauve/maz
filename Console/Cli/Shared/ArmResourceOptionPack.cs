@@ -54,11 +54,11 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     // -----------------------------------------------------------------------
 
     public override string HelpSectionDescription =>
-        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}} | " +
-        $"{ResourceShortPathPrefix}{{name}}. " +
-        $"{{sub}} can be a GUID, display name, /subscriptions/{{guid}}, or /s/{{guid}}. " +
-        $"Combined form overrides --subscription-id and --resource-group. " +
-        $"Note: subscription display names containing '/' are not supported in the combined format.";
+        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}} | "
+        + $"{ResourceShortPathPrefix}{{name}}. "
+        + $"{{sub}} can be a GUID, display name, /subscriptions/{{guid}}, or /s/{{guid}}. "
+        + $"Combined form overrides --subscription-id and --resource-group. "
+        + $"Note: subscription display names containing '/' are not supported in the combined format.";
 
     // -----------------------------------------------------------------------
     // Resolution
@@ -81,7 +81,8 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         string? subscriptionHint,
         string? resourceGroupHint,
         string namePrefix,
-        CancellationToken ct = default);
+        CancellationToken ct = default
+    );
 
     /// <summary>
     /// Template method: fetch the specific ARM resource. Called with already-resolved
@@ -92,14 +93,17 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         string? resolvedSubscription,
         string? resolvedResourceGroup,
         string resourceName,
-        CancellationToken ct);
+        CancellationToken ct
+    );
 
     /// <summary>
     /// Resolves a subscription using <see cref="SubscriptionOptionPack.ResolveAsync"/>.
     /// Pass <c>null</c> to fall through to the default subscription.
     /// </summary>
-    protected Task<SubscriptionResource> ResolveSubscriptionAsync(ArmClient armClient, string? hint) =>
-        SubscriptionOptionPack.ResolveAsync(armClient, hint);
+    protected Task<SubscriptionResource> ResolveSubscriptionAsync(
+        ArmClient armClient,
+        string? hint
+    ) => SubscriptionOptionPack.ResolveAsync(armClient, hint);
 
     // -----------------------------------------------------------------------
     // Parsing
@@ -107,12 +111,15 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
 
     private (string? sub, string? rg, string name) ParseAndValidateSegments()
     {
-        var rawValue = RawResourceValue ?? throw new InvocationException("Resource name is required.");
+        var rawValue =
+            RawResourceValue ?? throw new InvocationException("Resource name is required.");
 
         // Strip the resource-type short prefix (e.g. /kv/) before parsing.
         var shortPrefix = ResourceShortPathPrefix;
-        if (!string.IsNullOrEmpty(shortPrefix) &&
-            rawValue.StartsWith(shortPrefix, StringComparison.OrdinalIgnoreCase))
+        if (
+            !string.IsNullOrEmpty(shortPrefix)
+            && rawValue.StartsWith(shortPrefix, StringComparison.OrdinalIgnoreCase)
+        )
         {
             rawValue = rawValue[shortPrefix.Length..];
         }
@@ -120,27 +127,30 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         var parsed = ResourceIdentifierParser.Parse(rawValue);
 
         bool combinedHasSub = parsed.SubscriptionSegment is not null;
-        bool combinedHasRg  = parsed.ResourceGroupSegment is not null;
-        bool explicitSub    = SubscriptionPack.SubscriptionId is not null;
-        bool explicitRg     = ResourceGroupPack.ResourceGroupName is not null;
+        bool combinedHasRg = parsed.ResourceGroupSegment is not null;
+        bool explicitSub = SubscriptionPack.SubscriptionId is not null;
+        bool explicitRg = ResourceGroupPack.ResourceGroupName is not null;
 
         if (combinedHasSub && explicitSub)
             throw new InvocationException(
-                "Ambiguous: the combined value contains a subscription segment AND --subscription-id was also specified.");
+                "Ambiguous: the combined value contains a subscription segment AND --subscription-id was also specified."
+            );
         if (combinedHasRg && explicitRg)
             throw new InvocationException(
-                "Ambiguous: the combined value contains a resource-group segment AND --resource-group was also specified.");
+                "Ambiguous: the combined value contains a resource-group segment AND --resource-group was also specified."
+            );
 
         // If the combined form supplied a subscription, normalise it;
         // otherwise fall through to what --subscription-id / env provides (may be null → default).
         var effectiveSub = combinedHasSub
             ? ResourceIdentifierParser.NormalizeSubscriptionSegment(parsed.SubscriptionSegment)
-            : SubscriptionPack.SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+            : SubscriptionPack.SubscriptionId
+                ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
 
         var effectiveRg = combinedHasRg
             ? ResourceIdentifierParser.NormalizeResourceGroupSegment(parsed.ResourceGroupSegment)
             : ResourceGroupPack.ResourceGroupName
-              ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+                ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
 
         return (effectiveSub, effectiveRg, parsed.ResourceNameSegment);
     }
@@ -155,35 +165,38 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
 /// Parses the partial combined-format value that has been typed so far and scopes the
 /// name-prefix search accordingly.
 /// </summary>
-internal sealed class ArmResourceCompletionProvider<TPack, TResource>
-    : ICliCompletionProvider
+internal sealed class ArmResourceCompletionProvider<TPack, TResource> : ICliCompletionProvider
     where TPack : ArmResourceOptionPack<TResource>, new()
 {
     public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
     {
         var auth = context.GetOptionPack<AuthOptionPack>();
         var credential = auth?.GetCredential() ?? new DefaultAzureCredential();
-        var armClient  = new ArmClient(credential);
+        var armClient = new ArmClient(credential);
         var word = context.WordToComplete;
 
-        string? subHint  = null;
-        string? rgHint   = null;
-        string  prefix   = word;
-        string  headPfx  = "";
+        string? subHint = null;
+        string? rgHint = null;
+        string prefix = word;
+        string headPfx = "";
 
         if (word.Contains('/'))
         {
             var lastSlash = word.LastIndexOf('/');
             var head = word[..lastSlash];
-            prefix  = word[(lastSlash + 1)..];
+            prefix = word[(lastSlash + 1)..];
             headPfx = word[..(lastSlash + 1)];
 
             // Parse "head/placeholder" to extract sub/rg from the already-typed segments.
             try
             {
                 var p = ResourceIdentifierParser.Parse(head + "/placeholder");
-                subHint = ResourceIdentifierParser.NormalizeSubscriptionSegment(p.SubscriptionSegment);
-                rgHint  = ResourceIdentifierParser.NormalizeResourceGroupSegment(p.ResourceGroupSegment);
+                subHint = ResourceIdentifierParser.NormalizeSubscriptionSegment(
+                    p.SubscriptionSegment
+                );
+                rgHint = ResourceIdentifierParser.NormalizeResourceGroupSegment(
+                    p.ResourceGroupSegment
+                );
             }
             catch
             {
@@ -193,13 +206,17 @@ internal sealed class ArmResourceCompletionProvider<TPack, TResource>
 
         // Fall back to already-specified option packs (no network call — use raw string values).
         subHint ??= context.GetOptionPack<SubscriptionOptionPack>()?.SubscriptionId;
-        rgHint  ??= context.GetOptionPack<ResourceGroupOptionPack>()?.ResourceGroupName;
+        rgHint ??= context.GetOptionPack<ResourceGroupOptionPack>()?.ResourceGroupName;
 
         try
         {
             var pack = new TPack();
             var candidates = await pack.GetCompletionCandidatesAsync(
-                armClient, subHint, rgHint, prefix);
+                armClient,
+                subHint,
+                rgHint,
+                prefix
+            );
             return candidates.Select(c => headPfx + c);
         }
         catch

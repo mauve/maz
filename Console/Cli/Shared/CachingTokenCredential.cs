@@ -14,10 +14,14 @@ internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCrede
     private readonly Dictionary<string, AccessToken> _cache = [];
     private readonly SemaphoreSlim _lock = new(1, 1);
 
-    public override AccessToken GetToken(TokenRequestContext requestContext, CancellationToken cancellationToken)
+    public override AccessToken GetToken(
+        TokenRequestContext requestContext,
+        CancellationToken cancellationToken
+    )
     {
         var key = CacheKey(requestContext);
-        if (TryGetCached(key, out var cached)) return cached;
+        if (TryGetCached(key, out var cached))
+            return cached;
 
         var token = inner.GetToken(requestContext, cancellationToken);
         Store(key, token);
@@ -26,16 +30,19 @@ internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCrede
 
     public override async ValueTask<AccessToken> GetTokenAsync(
         TokenRequestContext requestContext,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         var key = CacheKey(requestContext);
-        if (TryGetCached(key, out var cached)) return cached;
+        if (TryGetCached(key, out var cached))
+            return cached;
 
         await _lock.WaitAsync(cancellationToken);
         try
         {
             // Double-check after acquiring the lock
-            if (TryGetCached(key, out cached)) return cached;
+            if (TryGetCached(key, out cached))
+                return cached;
 
             var token = await inner.GetTokenAsync(requestContext, cancellationToken);
             Store(key, token);
@@ -49,8 +56,10 @@ internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCrede
 
     private bool TryGetCached(string key, out AccessToken token)
     {
-        if (_cache.TryGetValue(key, out token) &&
-            token.ExpiresOn > DateTimeOffset.UtcNow + ExpiryBuffer)
+        if (
+            _cache.TryGetValue(key, out token)
+            && token.ExpiresOn > DateTimeOffset.UtcNow + ExpiryBuffer
+        )
             return true;
 
         token = default;

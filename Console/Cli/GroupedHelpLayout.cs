@@ -51,7 +51,9 @@ internal static class GroupedHelpLayout
 
     private static bool WriteArgumentsSection(HelpContext ctx)
     {
-        var args = ctx.Command.Arguments.Where(a => !a.Hidden && !string.IsNullOrEmpty(a.Name)).ToList();
+        var args = ctx
+            .Command.Arguments.Where(a => !a.Hidden && !string.IsNullOrEmpty(a.Name))
+            .ToList();
         if (args.Count == 0)
             return false;
 
@@ -64,9 +66,11 @@ internal static class GroupedHelpLayout
             var label = $"<{arg.Name}>";
             var padded = label.PadRight(nameWidth);
             var desc = arg.Description ?? "";
-            ctx.Output.WriteLine(string.IsNullOrEmpty(desc)
-                ? $"  {Ansi.White(label)}"
-                : $"  {Ansi.White(padded)}  {Ansi.Dim(desc)}");
+            ctx.Output.WriteLine(
+                string.IsNullOrEmpty(desc)
+                    ? $"  {Ansi.White(label)}"
+                    : $"  {Ansi.White(padded)}  {Ansi.Dim(desc)}"
+            );
         }
 
         return true;
@@ -146,13 +150,21 @@ internal static class GroupedHelpLayout
             .Select(o =>
             {
                 var rawAliases = Enumerable.Concat([o.Name], o.Aliases).ToList();
-                var aliases = SplitAliasesWithValueHint(rawAliases, o is Option<bool>, o.AllowMultipleArgumentsPerToken);
+                var aliases = SplitAliasesWithValueHint(
+                    rawAliases,
+                    o is Option<bool>,
+                    o.AllowMultipleArgumentsPerToken
+                );
                 var meta = OptionMetadataRegistry.Get(o);
                 var metadata = new List<string>();
-                if (o.Required) metadata.Add("[required]");
-                if (meta?.DefaultText is { } d) metadata.Add($"[default: {d}]");
-                if (meta?.EnvVar is { } e) metadata.Add($"[env: {e}]");
-                if (meta?.AllowedValues is { } a) metadata.Add($"[allowed: {a}]");
+                if (o.Required)
+                    metadata.Add("[required]");
+                if (meta?.DefaultText is { } d)
+                    metadata.Add($"[default: {d}]");
+                if (meta?.EnvVar is { } e)
+                    metadata.Add($"[env: {e}]");
+                if (meta?.AllowedValues is { } a)
+                    metadata.Add($"[allowed: {a}]");
                 var main = o.Description ?? "";
                 return (aliases, main, metadata);
             })
@@ -267,9 +279,7 @@ internal static class GroupedHelpLayout
         foreach (var row in rows)
         {
             var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.displayName));
-            ctx.Output.WriteLine(
-                $"  {row.displayName}{padding}  {row.desc}"
-            );
+            ctx.Output.WriteLine($"  {row.displayName}{padding}  {row.desc}");
 
             var detail = RemarksRegistry.Get(row.command);
             if (string.IsNullOrWhiteSpace(detail))

@@ -7,7 +7,12 @@ namespace SpecGenerator.Emitting;
 /// </summary>
 public static class OperationCommandEmitter
 {
-    public static string Emit(OperationModel op, string serviceClassName, string ns, bool isDataPlane = false)
+    public static string Emit(
+        OperationModel op,
+        string serviceClassName,
+        string ns,
+        bool isDataPlane = false
+    )
     {
         var w = new CodeWriter();
 
@@ -28,128 +33,155 @@ public static class OperationCommandEmitter
 
         w.Line($"/// <summary>{EscapeXml(summary)}</summary>");
         if (op.DetailedDescription is { Length: > 0 })
-            w.Line($"/// <remarks>{EscapeXml(op.DetailedDescription.Replace("\n", " ").Replace("\r", ""))}</remarks>");
+            w.Line(
+                $"/// <remarks>{EscapeXml(op.DetailedDescription.Replace("\n", " ").Replace("\r", ""))}</remarks>"
+            );
 
         // Determine scope flags (computed here so both field decls and ExecuteAsync can use them)
         var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
-        var usesResourceGroup = !isDataPlane && op.UrlTemplate.Contains(
-            "{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
-        var usesSubscription = !isDataPlane && op.UrlTemplate.Contains(
-            "{subscriptionId}", StringComparison.OrdinalIgnoreCase);
+        var usesResourceGroup =
+            !isDataPlane
+            && op.UrlTemplate.Contains("{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
+        var usesSubscription =
+            !isDataPlane
+            && op.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase);
 
-        w.Block($"public partial class {op.ClassName}(AuthOptionPack auth) : CommandDef", () =>
-        {
-            w.Line($"public override string Name => \"{op.CliName}\";");
-            if (isDataPlane)
-                w.Line("protected override bool IsDataPlane => true;");
-            w.Line();
-
-            if (isDataPlane)
+        w.Block(
+            $"public partial class {op.ClassName}(AuthOptionPack auth) : CommandDef",
+            () =>
             {
-                // Data-plane: --vault-url replaces subscription/resource-group option packs
-                w.Line("[CliOption(\"--vault-url\", Required = true)]");
-                w.Line("public partial string? VaultUrl { get; }");
+                w.Line($"public override string Name => \"{op.CliName}\";");
+                if (isDataPlane)
+                    w.Line("protected override bool IsDataPlane => true;");
                 w.Line();
-            }
-            else
-            {
-                // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
-                if (usesResourceGroup || isMergedList)
-                    w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
-                else if (usesSubscription)
-                    w.Line("public readonly SubscriptionOptionPack Subscription = new();");
-            }
 
-            w.Line("public readonly RenderOptionPack Render = new();");
-            w.Line();
-
-            // CLI params (path params other than subscription/rg, plus query params)
-            foreach (var param in op.CliParams)
-            {
-                var requiredAttr = param.Required ? ", Required = true" : "";
-                if (!string.IsNullOrWhiteSpace(param.Description))
-                    w.Line($"/// <summary>{EscapeXml(param.Description.Replace("\n", " ").Replace("\r", ""))}</summary>");
-                w.Line($"[CliOption(\"{param.CliFlag}\"{requiredAttr})]");
-                w.Line($"public partial string? {param.PropertyName} {{ get; }}");
-                w.Line();
-            }
-
-            // Body properties
-            if (op.Body is { FlattenedProperties.Count: > 0 })
-            {
-                foreach (var bp in op.Body.FlattenedProperties)
+                if (isDataPlane)
                 {
-                    var typeName = bp.TypeHint == "bool" ? "bool" :
-                                   bp.TypeHint == "int" ? "int" :
-                                   bp.TypeHint == "double" ? "double" :
-                                   "string";
-                    var nullable = $"{typeName}?";
-                    var requiredAttr = bp.Required ? ", Required = true" : "";
-
-                    if (!string.IsNullOrWhiteSpace(bp.Description))
-                        w.Line($"/// <summary>{EscapeXml(bp.Description.Replace("\n", " ").Replace("\r", ""))}</summary>");
-                    w.Line($"[CliOption(\"{bp.CliFlag}\"{requiredAttr})]");
-                    w.Line($"public partial {nullable} {bp.PropertyName} {{ get; }}");
+                    // Data-plane: --vault-url replaces subscription/resource-group option packs
+                    w.Line("[CliOption(\"--vault-url\", Required = true)]");
+                    w.Line("public partial string? VaultUrl { get; }");
                     w.Line();
                 }
-            }
-
-            // --body-json escape hatch (always present if operation has a body)
-            if (op.Body is not null)
-            {
-                w.Line("/// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>");
-                w.Line("[CliOption(\"--body-json\")]");
-                w.Line("public partial string? BodyJson { get; }");
-                w.Line();
-            }
-
-            // --no-wait for LRO
-            if (op.IsLro)
-            {
-                w.Line("/// <summary>Do not wait for the long-running operation to complete.</summary>");
-                w.Line("[CliOption(\"--no-wait\")]");
-                w.Line("public partial bool NoWait { get; }");
-                w.Line();
-            }
-
-            w.Line("private readonly AuthOptionPack _auth = auth;");
-            w.Line();
-
-            // ExecuteAsync
-            w.Block("protected override async Task<int> ExecuteAsync(CancellationToken ct)", () =>
-            {
-                if (isDataPlane)
-                    w.Line("var client = new AzureRestClient(_auth.GetCredential(), \"https://vault.azure.net/.default\");");
-                else
-                    w.Line("var client = new AzureRestClient(_auth.GetCredential());");
-
-                // Build path
-                if (isDataPlane)
-                    EmitDataPlanePathBuilder(w, op);
-                else
-                    EmitPathBuilder(w, op, isMergedList, usesResourceGroup, usesSubscription);
-                w.Line();
-
-                if (op.IsPaged)
-                {
-                    EmitPagedExecution(w, op);
-                }
-                else if (op.IsLro)
-                {
-                    EmitLroExecution(w, op);
-                }
-                else if (op.Body is not null)
-                {
-                    EmitBodyExecution(w, op);
-                }
                 else
                 {
-                    EmitSimpleExecution(w, op);
+                    // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
+                    if (usesResourceGroup || isMergedList)
+                        w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
+                    else if (usesSubscription)
+                        w.Line("public readonly SubscriptionOptionPack Subscription = new();");
                 }
 
-                w.Line("return 0;");
-            });
-        });
+                w.Line("public readonly RenderOptionPack Render = new();");
+                w.Line();
+
+                // CLI params (path params other than subscription/rg, plus query params)
+                foreach (var param in op.CliParams)
+                {
+                    var requiredAttr = param.Required ? ", Required = true" : "";
+                    if (!string.IsNullOrWhiteSpace(param.Description))
+                        w.Line(
+                            $"/// <summary>{EscapeXml(param.Description.Replace("\n", " ").Replace("\r", ""))}</summary>"
+                        );
+                    w.Line($"[CliOption(\"{param.CliFlag}\"{requiredAttr})]");
+                    w.Line($"public partial string? {param.PropertyName} {{ get; }}");
+                    w.Line();
+                }
+
+                // Body properties
+                if (op.Body is { FlattenedProperties.Count: > 0 })
+                {
+                    foreach (var bp in op.Body.FlattenedProperties)
+                    {
+                        var typeName =
+                            bp.TypeHint == "bool" ? "bool"
+                            : bp.TypeHint == "int" ? "int"
+                            : bp.TypeHint == "double" ? "double"
+                            : "string";
+                        var nullable = $"{typeName}?";
+                        var requiredAttr = bp.Required ? ", Required = true" : "";
+
+                        if (!string.IsNullOrWhiteSpace(bp.Description))
+                            w.Line(
+                                $"/// <summary>{EscapeXml(bp.Description.Replace("\n", " ").Replace("\r", ""))}</summary>"
+                            );
+                        w.Line($"[CliOption(\"{bp.CliFlag}\"{requiredAttr})]");
+                        w.Line($"public partial {nullable} {bp.PropertyName} {{ get; }}");
+                        w.Line();
+                    }
+                }
+
+                // --body-json escape hatch (always present if operation has a body)
+                if (op.Body is not null)
+                {
+                    w.Line(
+                        "/// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>"
+                    );
+                    w.Line("[CliOption(\"--body-json\")]");
+                    w.Line("public partial string? BodyJson { get; }");
+                    w.Line();
+                }
+
+                // --no-wait for LRO
+                if (op.IsLro)
+                {
+                    w.Line(
+                        "/// <summary>Do not wait for the long-running operation to complete.</summary>"
+                    );
+                    w.Line("[CliOption(\"--no-wait\")]");
+                    w.Line("public partial bool NoWait { get; }");
+                    w.Line();
+                }
+
+                w.Line("private readonly AuthOptionPack _auth = auth;");
+                w.Line();
+
+                // ExecuteAsync
+                w.Block(
+                    "protected override async Task<int> ExecuteAsync(CancellationToken ct)",
+                    () =>
+                    {
+                        if (isDataPlane)
+                            w.Line(
+                                "var client = new AzureRestClient(_auth.GetCredential(), \"https://vault.azure.net/.default\");"
+                            );
+                        else
+                            w.Line("var client = new AzureRestClient(_auth.GetCredential());");
+
+                        // Build path
+                        if (isDataPlane)
+                            EmitDataPlanePathBuilder(w, op);
+                        else
+                            EmitPathBuilder(
+                                w,
+                                op,
+                                isMergedList,
+                                usesResourceGroup,
+                                usesSubscription
+                            );
+                        w.Line();
+
+                        if (op.IsPaged)
+                        {
+                            EmitPagedExecution(w, op);
+                        }
+                        else if (op.IsLro)
+                        {
+                            EmitLroExecution(w, op);
+                        }
+                        else if (op.Body is not null)
+                        {
+                            EmitBodyExecution(w, op);
+                        }
+                        else
+                        {
+                            EmitSimpleExecution(w, op);
+                        }
+
+                        w.Line("return 0;");
+                    }
+                );
+            }
+        );
 
         return w.ToString();
     }
@@ -164,7 +196,8 @@ public static class OperationCommandEmitter
             expr = expr.Replace(
                 $"{{{param.UrlParameterName}}}",
                 $"{{{param.PropertyName}}}",
-                StringComparison.OrdinalIgnoreCase);
+                StringComparison.OrdinalIgnoreCase
+            );
         }
 
         // Emit: var path = $"{VaultUrl}/keys/{KeyName}/...";
@@ -176,22 +209,35 @@ public static class OperationCommandEmitter
         OperationModel op,
         bool isMergedList,
         bool usesResourceGroup,
-        bool usesSubscription)
+        bool usesSubscription
+    )
     {
         if (isMergedList)
         {
             // Conditional path: RG-scope when --resource-group (or env var) is given,
             // subscription-scope otherwise. Both branches use ResourceGroupOptionPack.
-            var rgPath = BuildPathExpression(op.UrlTemplate, op, usesResourceGroup: true, usesSubscription: true);
+            var rgPath = BuildPathExpression(
+                op.UrlTemplate,
+                op,
+                usesResourceGroup: true,
+                usesSubscription: true
+            );
             var subPath = BuildMergedSubscriptionPath(op.MergedSubscriptionUrlTemplate!, op);
-            w.Line("var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable(\"AZURE_RESOURCE_GROUP\");");
+            w.Line(
+                "var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable(\"AZURE_RESOURCE_GROUP\");"
+            );
             w.Line($"var path = effectiveRg is not null");
             w.Line($"    ? {rgPath}");
             w.Line($"    : {subPath};");
         }
         else
         {
-            var pathExpr = BuildPathExpression(op.UrlTemplate, op, usesResourceGroup, usesSubscription);
+            var pathExpr = BuildPathExpression(
+                op.UrlTemplate,
+                op,
+                usesResourceGroup,
+                usesSubscription
+            );
             w.Line($"var path = {pathExpr};");
         }
     }
@@ -200,16 +246,17 @@ public static class OperationCommandEmitter
         string urlTemplate,
         OperationModel op,
         bool usesResourceGroup,
-        bool usesSubscription)
+        bool usesSubscription
+    )
     {
         // Replace known absorbed params with option-pack calls
         var expr = urlTemplate
-            .Replace("{subscriptionId}",
-                usesResourceGroup
-                    ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
-                    : usesSubscription
-                        ? "{Subscription.RequireSubscriptionId()}"
-                        : "{subscriptionId}")
+            .Replace(
+                "{subscriptionId}",
+                usesResourceGroup ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
+                    : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
+                    : "{subscriptionId}"
+            )
             .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}");
 
         // Replace remaining path parameters with property access
@@ -218,7 +265,8 @@ public static class OperationCommandEmitter
             expr = expr.Replace(
                 $"{{{param.UrlParameterName}}}",
                 $"{{{param.PropertyName}}}",
-                StringComparison.OrdinalIgnoreCase);
+                StringComparison.OrdinalIgnoreCase
+            );
         }
 
         return $"$\"{expr}\"";
@@ -230,16 +278,19 @@ public static class OperationCommandEmitter
     /// </summary>
     private static string BuildMergedSubscriptionPath(string urlTemplate, OperationModel op)
     {
-        var expr = urlTemplate
-            .Replace("{subscriptionId}", "{ResourceGroup.Subscription.RequireSubscriptionId()}",
-                StringComparison.OrdinalIgnoreCase);
+        var expr = urlTemplate.Replace(
+            "{subscriptionId}",
+            "{ResourceGroup.Subscription.RequireSubscriptionId()}",
+            StringComparison.OrdinalIgnoreCase
+        );
 
         foreach (var param in op.CliParams.Where(p => p.ParamIn == "path"))
         {
             expr = expr.Replace(
                 $"{{{param.UrlParameterName}}}",
                 $"{{{param.PropertyName}}}",
-                StringComparison.OrdinalIgnoreCase);
+                StringComparison.OrdinalIgnoreCase
+            );
         }
 
         return $"$\"{expr}\"";
@@ -250,8 +301,12 @@ public static class OperationCommandEmitter
         var itemsProp = op.ItemsPropertyName ?? "value";
         var nextLinkProp = op.NextLinkPropertyName ?? "nextLink";
 
-        w.Line($"var allItems = client.GetAllAsync(path, \"{op.ApiVersion}\", \"{itemsProp}\", \"{nextLinkProp}\", ct);");
-        w.Line("var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();");
+        w.Line(
+            $"var allItems = client.GetAllAsync(path, \"{op.ApiVersion}\", \"{itemsProp}\", \"{nextLinkProp}\", ct);"
+        );
+        w.Line(
+            "var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();"
+        );
         w.Line("await renderer.RenderAllAsync(System.Console.Out, allItems, ct);");
     }
 
@@ -260,33 +315,52 @@ public static class OperationCommandEmitter
         if (op.Body is not null)
         {
             EmitBodyBuild(w, op);
-            w.Line($"var httpResp = await client.SendRawAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", body, ct);");
+            w.Line(
+                $"var httpResp = await client.SendRawAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", body, ct);"
+            );
         }
         else
         {
-            w.Line($"var httpResp = await client.SendRawAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", null, ct);");
+            w.Line(
+                $"var httpResp = await client.SendRawAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", null, ct);"
+            );
         }
 
-        w.Block("if (!NoWait)", () =>
-        {
-            w.Line($"var result = await LroPoller.PollAsync(httpResp, client, \"{op.ApiVersion}\", ct);");
-            w.Line("await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))");
-            w.Line("    .RenderAsync(System.Console.Out, result, ct);");
-        });
+        w.Block(
+            "if (!NoWait)",
+            () =>
+            {
+                w.Line(
+                    $"var result = await LroPoller.PollAsync(httpResp, client, \"{op.ApiVersion}\", ct);"
+                );
+                w.Line(
+                    "await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))"
+                );
+                w.Line("    .RenderAsync(System.Console.Out, result, ct);");
+            }
+        );
     }
 
     private static void EmitBodyExecution(CodeWriter w, OperationModel op)
     {
         EmitBodyBuild(w, op);
-        w.Line($"var result = await client.SendAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", body, ct);");
-        w.Line("await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))");
+        w.Line(
+            $"var result = await client.SendAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", body, ct);"
+        );
+        w.Line(
+            "await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))"
+        );
         w.Line("    .RenderAsync(System.Console.Out, result, ct);");
     }
 
     private static void EmitSimpleExecution(CodeWriter w, OperationModel op)
     {
-        w.Line($"var result = await client.SendAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", null, ct);");
-        w.Line("await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))");
+        w.Line(
+            $"var result = await client.SendAsync(HttpMethod.{TitleCase(op.HttpMethod)}, path, \"{op.ApiVersion}\", null, ct);"
+        );
+        w.Line(
+            "await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))"
+        );
         w.Line("    .RenderAsync(System.Console.Out, result, ct);");
     }
 
@@ -302,7 +376,9 @@ public static class OperationCommandEmitter
         if (op.Body is { FlattenedProperties.Count: > 0 })
         {
             // Group nested properties by their parent JSON key
-            var topLevelEntries = new Dictionary<string, List<BodyPropertyModel>>(StringComparer.OrdinalIgnoreCase);
+            var topLevelEntries = new Dictionary<string, List<BodyPropertyModel>>(
+                StringComparer.OrdinalIgnoreCase
+            );
 
             foreach (var bp in op.Body.FlattenedProperties)
             {
@@ -339,7 +415,9 @@ public static class OperationCommandEmitter
                     w.Line("{");
                     w.Indent();
                     foreach (var bp in props)
-                        w.Line($"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bp.PropertyName}),");
+                        w.Line(
+                            $"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bp.PropertyName}),"
+                        );
                     w.Outdent();
                     w.Line("},");
                 }
@@ -351,15 +429,16 @@ public static class OperationCommandEmitter
         w.Outdent();
     }
 
-    private static string TitleCase(string method) => method switch
-    {
-        "GET" => "Get",
-        "PUT" => "Put",
-        "POST" => "Post",
-        "DELETE" => "Delete",
-        "PATCH" => "Patch",
-        _ => method,
-    };
+    private static string TitleCase(string method) =>
+        method switch
+        {
+            "GET" => "Get",
+            "PUT" => "Put",
+            "POST" => "Post",
+            "DELETE" => "Delete",
+            "PATCH" => "Patch",
+            _ => method,
+        };
 
     private static string EscapeXml(string text) =>
         text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");

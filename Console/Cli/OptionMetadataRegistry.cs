@@ -5,8 +5,8 @@ namespace Console.Cli;
 
 internal sealed record OptionMetadata(
     string? EnvVar,
-    string? AllowedValues,   // pre-joined: "json, table, column"
-    string? DefaultText      // pre-formatted: "column", "true", "cli|env"
+    string? AllowedValues, // pre-joined: "json, table, column"
+    string? DefaultText // pre-formatted: "column", "true", "cli|env"
 );
 
 internal static class OptionMetadataRegistry

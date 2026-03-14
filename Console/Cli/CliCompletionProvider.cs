@@ -18,23 +18,28 @@ public sealed class CliCompletionContext
     /// Returns the first option pack of type <typeparamref name="T"/> found in the command tree,
     /// pre-populated with values parsed from the current command line.
     /// </summary>
-    public T? GetOptionPack<T>() where T : OptionPack =>
+    public T? GetOptionPack<T>()
+        where T : OptionPack =>
         FindPack<T>(_root, new HashSet<object>(ReferenceEqualityComparer.Instance));
 
-    private static T? FindPack<T>(object obj, HashSet<object> visited) where T : OptionPack
+    private static T? FindPack<T>(object obj, HashSet<object> visited)
+        where T : OptionPack
     {
-        if (!visited.Add(obj)) return null;
+        if (!visited.Add(obj))
+            return null;
         var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         for (var type = obj.GetType(); type != null && type != typeof(object); type = type.BaseType)
         {
             foreach (var field in type.GetFields(flags | BindingFlags.DeclaredOnly))
             {
                 var value = field.GetValue(obj);
-                if (value is T found) return found;
+                if (value is T found)
+                    return found;
                 if (value is OptionPack nested)
                 {
                     var fromPack = FindPack<T>(nested, visited);
-                    if (fromPack != null) return fromPack;
+                    if (fromPack != null)
+                        return fromPack;
                 }
             }
         }
@@ -49,12 +54,16 @@ public interface ICliCompletionProvider
 
 internal static class CliCompletionProviderRegistry
 {
-    private static readonly Dictionary<string, Func<CliCompletionContext, ValueTask<IEnumerable<string>>>> _providers = new();
+    private static readonly Dictionary<
+        string,
+        Func<CliCompletionContext, ValueTask<IEnumerable<string>>>
+    > _providers = new();
 
     internal static void Register(string[] aliases, Type providerType)
     {
         var provider = (ICliCompletionProvider)Activator.CreateInstance(providerType)!;
-        Func<CliCompletionContext, ValueTask<IEnumerable<string>>> fn = ctx => provider.GetCompletionsAsync(ctx);
+        Func<CliCompletionContext, ValueTask<IEnumerable<string>>> fn = ctx =>
+            provider.GetCompletionsAsync(ctx);
         foreach (var alias in aliases)
             _providers[alias] = fn;
     }
@@ -62,22 +71,32 @@ internal static class CliCompletionProviderRegistry
     internal static void Register(string[] aliases, string[] values)
     {
         Func<CliCompletionContext, ValueTask<IEnumerable<string>>> fn = ctx =>
-            ValueTask.FromResult(values.Where(v => v.StartsWith(ctx.WordToComplete, StringComparison.OrdinalIgnoreCase)));
+            ValueTask.FromResult(
+                values.Where(v =>
+                    v.StartsWith(ctx.WordToComplete, StringComparison.OrdinalIgnoreCase)
+                )
+            );
         foreach (var alias in aliases)
             _providers[alias] = fn;
     }
 
-    internal static Func<CliCompletionContext, ValueTask<IEnumerable<string>>>? Resolve(string alias) =>
-        _providers.TryGetValue(alias, out var fn) ? fn : null;
+    internal static Func<CliCompletionContext, ValueTask<IEnumerable<string>>>? Resolve(
+        string alias
+    ) => _providers.TryGetValue(alias, out var fn) ? fn : null;
 }
 
 internal static class CliCompletionHandler
 {
-    internal static async Task HandleAsync(string commandLine, int cursorPosition, RootCommandDef root)
+    internal static async Task HandleAsync(
+        string commandLine,
+        int cursorPosition,
+        RootCommandDef root
+    )
     {
         var rootCmd = root.Build(); // also populates CliCompletionProviderRegistry
 
-        var line = cursorPosition < commandLine.Length ? commandLine[..cursorPosition] : commandLine;
+        var line =
+            cursorPosition < commandLine.Length ? commandLine[..cursorPosition] : commandLine;
         var tokens = Tokenize(line);
         bool trailingSpace = line.EndsWith(' ');
 
@@ -111,7 +130,8 @@ internal static class CliCompletionHandler
         {
             foreach (var opt in activeCmd.Options)
             {
-                if (opt.Hidden) continue;
+                if (opt.Hidden)
+                    continue;
                 foreach (var alias in opt.Aliases)
                     if (alias.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
                         System.Console.WriteLine(alias);
@@ -122,7 +142,8 @@ internal static class CliCompletionHandler
         // Complete a subcommand name
         foreach (var sub in activeCmd.Subcommands)
         {
-            if (sub.Hidden) continue;
+            if (sub.Hidden)
+                continue;
             if (sub.Name.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
                 System.Console.WriteLine(sub.Name);
         }
@@ -135,7 +156,8 @@ internal static class CliCompletionHandler
 
     private static void InjectParseResult(object obj, ParseResult result, HashSet<object> visited)
     {
-        if (!visited.Add(obj)) return;
+        if (!visited.Add(obj))
+            return;
         var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         for (var type = obj.GetType(); type != null && type != typeof(object); type = type.BaseType)
         {
@@ -156,11 +178,15 @@ internal static class CliCompletionHandler
         for (int i = 1; i < tokens.Count; i++)
         {
             var token = tokens[i];
-            if (!trailingSpace && i == tokens.Count - 1) break;
-            if (token.StartsWith('-')) continue;
-            var sub = current.Subcommands.FirstOrDefault(
-                s => s.Name == token || s.Aliases.Contains(token));
-            if (sub is null) continue;
+            if (!trailingSpace && i == tokens.Count - 1)
+                break;
+            if (token.StartsWith('-'))
+                continue;
+            var sub = current.Subcommands.FirstOrDefault(s =>
+                s.Name == token || s.Aliases.Contains(token)
+            );
+            if (sub is null)
+                continue;
             current = sub;
         }
         return current;
@@ -173,15 +199,24 @@ internal static class CliCompletionHandler
         bool inQuotes = false;
         foreach (var c in line)
         {
-            if (c == '"') { inQuotes = !inQuotes; continue; }
+            if (c == '"')
+            {
+                inQuotes = !inQuotes;
+                continue;
+            }
             if (c == ' ' && !inQuotes)
             {
-                if (current.Length > 0) { tokens.Add(current.ToString()); current.Clear(); }
+                if (current.Length > 0)
+                {
+                    tokens.Add(current.ToString());
+                    current.Clear();
+                }
                 continue;
             }
             current.Append(c);
         }
-        if (current.Length > 0) tokens.Add(current.ToString());
+        if (current.Length > 0)
+            tokens.Add(current.ToString());
         return tokens;
     }
 }

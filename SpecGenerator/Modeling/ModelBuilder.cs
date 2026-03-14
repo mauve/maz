@@ -13,13 +13,17 @@ public sealed class ModelBuilder
     private readonly ServiceConfig _service;
 
     // Parameters absorbed by option packs — not emitted as CLI flags
-    private static readonly HashSet<string> _absorbedPathParams = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> _absorbedPathParams = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
         "subscriptionId",
         "resourceGroupName",
     };
 
-    private static readonly HashSet<string> _absorbedQueryParams = new(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> _absorbedQueryParams = new(
+        StringComparer.OrdinalIgnoreCase
+    )
     {
         "api-version",
     };
@@ -27,10 +31,22 @@ public sealed class ModelBuilder
     // C# property names that conflict with CommandDef base members or injected fields
     private static readonly HashSet<string> _reservedPropertyNames = new(StringComparer.Ordinal)
     {
-        "Name", "Aliases", "Description", "DetailedDescription", "Remarks",
-        "ParseResult", "HasParseResult", "GetValue", "Build", "CreateCommand",
-        "ExecuteAsync", "ResourceGroup", "Subscription", "Render",
-        "BodyJson", "NoWait",
+        "Name",
+        "Aliases",
+        "Description",
+        "DetailedDescription",
+        "Remarks",
+        "ParseResult",
+        "HasParseResult",
+        "GetValue",
+        "Build",
+        "CreateCommand",
+        "ExecuteAsync",
+        "ResourceGroup",
+        "Subscription",
+        "Render",
+        "BodyJson",
+        "NoWait",
     };
 
     private static string SafePropertyName(string name) =>
@@ -69,7 +85,15 @@ public sealed class ModelBuilder
                 if (_service.Exclude.Contains(operationId, StringComparer.OrdinalIgnoreCase))
                     continue;
 
-                var model = BuildOperation(doc, path, method, opNode, operationId, serviceClassName, extraAbsorbed);
+                var model = BuildOperation(
+                    doc,
+                    path,
+                    method,
+                    opNode,
+                    operationId,
+                    serviceClassName,
+                    extraAbsorbed
+                );
                 if (model is null)
                     continue;
 
@@ -85,16 +109,30 @@ public sealed class ModelBuilder
             {
                 if (!actionRenames.TryGetValue(e.OperationId, out var newAction))
                     return e;
-                var newClassName = NamingEngine.ToClassName(serviceClassName, e.Resource, newAction);
-                return (e.OperationId, e.Resource, e.Model with { CliName = newAction, ClassName = newClassName });
+                var newClassName = NamingEngine.ToClassName(
+                    serviceClassName,
+                    e.Resource,
+                    newAction
+                );
+                return (
+                    e.OperationId,
+                    e.Resource,
+                    e.Model with
+                    {
+                        CliName = newAction,
+                        ClassName = newClassName,
+                    }
+                );
             })
             .ToList();
 
         // Pass 3: Group by resource. Dedup by opId only (handles multi-file specs loading the
         // same operation twice). CliName dedup is deferred to BuildResourceGroups so that
         // ops destined for subgroups don't collide with same-named ops in the parent scope.
-        var operationsByResource = new Dictionary<string, List<(string OpId, OperationModel Model)>>(
-            StringComparer.OrdinalIgnoreCase);
+        var operationsByResource = new Dictionary<
+            string,
+            List<(string OpId, OperationModel Model)>
+        >(StringComparer.OrdinalIgnoreCase);
         var seenOpIds = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
         foreach (var (opId, resource, model) in opEntries)
@@ -129,23 +167,36 @@ public sealed class ModelBuilder
             isDataPlane,
             hostParamName,
             _service.Description,
-            _service.DetailedDescription);
+            _service.DetailedDescription
+        );
     }
 
     private List<ResourceGroupModel> BuildResourceGroups(
         Dictionary<string, List<(string OpId, OperationModel Model)>> operationsByResource,
-        string serviceClassName)
+        string serviceClassName
+    )
     {
         // Pre-process subgroups: move matched ops out of parent lists
-        var subgroupsByResource = new Dictionary<string, List<(string SubgroupCli, string SubgroupClassName, List<OperationModel> Ops, string? Description, string? DetailedDescription)>>(
-            StringComparer.OrdinalIgnoreCase);
+        var subgroupsByResource = new Dictionary<
+            string,
+            List<(
+                string SubgroupCli,
+                string SubgroupClassName,
+                List<OperationModel> Ops,
+                string? Description,
+                string? DetailedDescription
+            )>
+        >(StringComparer.OrdinalIgnoreCase);
 
         foreach (var sgConfig in _service.Subgroups ?? [])
         {
             if (!operationsByResource.TryGetValue(sgConfig.Resource, out var parentOps))
                 continue;
 
-            var opIdsSet = new HashSet<string>(sgConfig.OperationIds, StringComparer.OrdinalIgnoreCase);
+            var opIdsSet = new HashSet<string>(
+                sgConfig.OperationIds,
+                StringComparer.OrdinalIgnoreCase
+            );
             var matched = parentOps.Where(o => opIdsSet.Contains(o.OpId)).ToList();
 
             foreach (var op in matched)
@@ -156,12 +207,16 @@ public sealed class ModelBuilder
 
             // Prefix subgroup op class names to avoid collisions with same-named parent ops
             // e.g. StorageAccountListCommandDef → StorageAccountKeysListCommandDef
-            var subgroupOpPrefix = $"{serviceClassName}{NamingEngine.KebabToPascal(sgConfig.Resource)}{NamingEngine.KebabToPascal(sgConfig.SubgroupCliName)}";
+            var subgroupOpPrefix =
+                $"{serviceClassName}{NamingEngine.KebabToPascal(sgConfig.Resource)}{NamingEngine.KebabToPascal(sgConfig.SubgroupCliName)}";
             var renamedOps = matched
-                .Select(o => o.Model with
-                {
-                    ClassName = $"{subgroupOpPrefix}{NamingEngine.KebabToPascal(o.Model.CliName)}CommandDef",
-                })
+                .Select(o =>
+                    o.Model with
+                    {
+                        ClassName =
+                            $"{subgroupOpPrefix}{NamingEngine.KebabToPascal(o.Model.CliName)}CommandDef",
+                    }
+                )
                 .ToList();
 
             if (!subgroupsByResource.TryGetValue(sgConfig.Resource, out var sgList))
@@ -170,7 +225,15 @@ public sealed class ModelBuilder
                 subgroupsByResource[sgConfig.Resource] = sgList;
             }
 
-            sgList.Add((sgConfig.SubgroupCliName, subgroupClassName, renamedOps, sgConfig.Description, sgConfig.DetailedDescription));
+            sgList.Add(
+                (
+                    sgConfig.SubgroupCliName,
+                    subgroupClassName,
+                    renamedOps,
+                    sgConfig.Description,
+                    sgConfig.DetailedDescription
+                )
+            );
         }
 
         return operationsByResource
@@ -178,16 +241,32 @@ public sealed class ModelBuilder
             .Select(kv =>
             {
                 var resourceCli = kv.Key;
-                var resourceClassName = $"{serviceClassName}{NamingEngine.KebabToPascal(resourceCli)}CommandDef";
+                var resourceClassName =
+                    $"{serviceClassName}{NamingEngine.KebabToPascal(resourceCli)}CommandDef";
 
                 var subgroups = new List<ResourceGroupModel>();
                 if (subgroupsByResource.TryGetValue(resourceCli, out var sgList))
                 {
-                    foreach (var (subgroupCli, subgroupClassName, sgOps, sgDesc, sgDetailedDesc) in sgList)
+                    foreach (
+                        var (
+                            subgroupCli,
+                            subgroupClassName,
+                            sgOps,
+                            sgDesc,
+                            sgDetailedDesc
+                        ) in sgList
+                    )
                     {
                         // Dedup subgroup ops by CliName
-                        subgroups.Add(new ResourceGroupModel(subgroupCli, subgroupClassName, DeduplicateByCliName(sgOps),
-                            Description: sgDesc, DetailedDescription: sgDetailedDesc));
+                        subgroups.Add(
+                            new ResourceGroupModel(
+                                subgroupCli,
+                                subgroupClassName,
+                                DeduplicateByCliName(sgOps),
+                                Description: sgDesc,
+                                DetailedDescription: sgDetailedDesc
+                            )
+                        );
                     }
                 }
 
@@ -197,7 +276,10 @@ public sealed class ModelBuilder
                 string? resDesc = null;
                 _service.ResourceDescriptions?.TryGetValue(resourceCli, out resDesc);
                 string? resDetailedDesc = null;
-                _service.ResourceDetailedDescriptions?.TryGetValue(resourceCli, out resDetailedDesc);
+                _service.ResourceDetailedDescriptions?.TryGetValue(
+                    resourceCli,
+                    out resDetailedDesc
+                );
 
                 return new ResourceGroupModel(
                     resourceCli,
@@ -205,7 +287,8 @@ public sealed class ModelBuilder
                     parentOps,
                     subgroups.Count > 0 ? subgroups : null,
                     resDesc,
-                    resDetailedDesc);
+                    resDetailedDesc
+                );
             })
             .ToList();
     }
@@ -224,16 +307,23 @@ public sealed class ModelBuilder
 
     private static void ApplyAutoDetectMerges(
         Dictionary<string, List<(string OpId, OperationModel Model)>> opsByResource,
-        string serviceClassName)
+        string serviceClassName
+    )
     {
         foreach (var (resource, ops) in opsByResource)
         {
             // Subscription-scope paged ops: subscriptionId in URL, no resourceGroupName
-            var subOps = ops
-                .Where(o =>
-                    o.Model.IsPaged &&
-                    o.Model.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase) &&
-                    !o.Model.UrlTemplate.Contains("{resourceGroupName}", StringComparison.OrdinalIgnoreCase))
+            var subOps = ops.Where(o =>
+                    o.Model.IsPaged
+                    && o.Model.UrlTemplate.Contains(
+                        "{subscriptionId}",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                    && !o.Model.UrlTemplate.Contains(
+                        "{resourceGroupName}",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
                 .ToList();
 
             foreach (var subOp in subOps)
@@ -241,7 +331,8 @@ public sealed class ModelBuilder
                 // Match: same base action + "-by-resource-group" suffix
                 var expectedRgCli = subOp.Model.CliName + "-by-resource-group";
                 var rgMatch = ops.FirstOrDefault(o =>
-                    o.Model.CliName.Equals(expectedRgCli, StringComparison.OrdinalIgnoreCase));
+                    o.Model.CliName.Equals(expectedRgCli, StringComparison.OrdinalIgnoreCase)
+                );
 
                 if (rgMatch == default)
                     continue;
@@ -250,7 +341,11 @@ public sealed class ModelBuilder
                 var mergedModel = rgMatch.Model with
                 {
                     CliName = subOp.Model.CliName,
-                    ClassName = NamingEngine.ToClassName(serviceClassName, resource, subOp.Model.CliName),
+                    ClassName = NamingEngine.ToClassName(
+                        serviceClassName,
+                        resource,
+                        subOp.Model.CliName
+                    ),
                     MergedSubscriptionUrlTemplate = subOp.Model.UrlTemplate,
                 };
 
@@ -264,7 +359,8 @@ public sealed class ModelBuilder
     private static void ApplyMerge(
         Dictionary<string, List<(string OpId, OperationModel Model)>> opsByResource,
         MergeConfig merge,
-        string serviceClassName)
+        string serviceClassName
+    )
     {
         (string Resource, (string OpId, OperationModel Model) Entry)? subEntry = null;
         (string Resource, (string OpId, OperationModel Model) Entry)? rgEntry = null;
@@ -273,9 +369,19 @@ public sealed class ModelBuilder
         {
             foreach (var op in ops)
             {
-                if (op.OpId.Equals(merge.SubscriptionOperationId, StringComparison.OrdinalIgnoreCase))
+                if (
+                    op.OpId.Equals(
+                        merge.SubscriptionOperationId,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
                     subEntry = (resource, op);
-                else if (op.OpId.Equals(merge.ResourceGroupOperationId, StringComparison.OrdinalIgnoreCase))
+                else if (
+                    op.OpId.Equals(
+                        merge.ResourceGroupOperationId,
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                )
                     rgEntry = (resource, op);
             }
         }
@@ -315,9 +421,13 @@ public sealed class ModelBuilder
         JsonObject opNode,
         string operationId,
         string serviceClassName,
-        HashSet<string>? extraAbsorbedPathParams = null)
+        HashSet<string>? extraAbsorbedPathParams = null
+    )
     {
-        var (resourceCli, actionCli) = NamingEngine.SplitOperationId(operationId, _service.DisplayName);
+        var (resourceCli, actionCli) = NamingEngine.SplitOperationId(
+            operationId,
+            _service.DisplayName
+        );
         var className = NamingEngine.ToClassName(serviceClassName, resourceCli, actionCli);
 
         var summary = opNode["summary"]?.GetValue<string>();
@@ -346,8 +456,13 @@ public sealed class ModelBuilder
             var paramIn = param["in"]?.GetValue<string>() ?? "";
             var paramName = param["name"]?.GetValue<string>() ?? "";
 
-            if (paramIn == "path" && (_absorbedPathParams.Contains(paramName) ||
-                    extraAbsorbedPathParams?.Contains(paramName) == true))
+            if (
+                paramIn == "path"
+                && (
+                    _absorbedPathParams.Contains(paramName)
+                    || extraAbsorbedPathParams?.Contains(paramName) == true
+                )
+            )
                 continue;
 
             if (paramIn == "query" && _absorbedQueryParams.Contains(paramName))
@@ -369,10 +484,10 @@ public sealed class ModelBuilder
             var desc = param["description"]?.GetValue<string>();
             var cliFlag = $"--{NamingEngine.PropertyToKebab(paramName)}";
             var propName = SafePropertyName(
-                NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(paramName)));
+                NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(paramName))
+            );
 
-            cliParams.Add(new CliParamModel(
-                cliFlag, propName, paramName, paramIn, required, desc));
+            cliParams.Add(new CliParamModel(cliFlag, propName, paramName, paramIn, required, desc));
         }
 
         return new OperationModel(
@@ -388,7 +503,8 @@ public sealed class ModelBuilder
             NextLinkPropertyName: nextLinkProp,
             ItemsPropertyName: itemsProp,
             Description: description,
-            DetailedDescription: detailedDescription);
+            DetailedDescription: detailedDescription
+        );
     }
 
     private JsonObject? ResolveParameter(JsonObject? paramNode, SpecDocument doc)
@@ -407,18 +523,17 @@ public sealed class ModelBuilder
     {
         // Resolve $ref if needed
         var refValue = schemaNode["$ref"]?.GetValue<string>();
-        JsonObject? schema = refValue is not null
-            ? _resolver.Resolve(refValue, doc)
-            : schemaNode;
+        JsonObject? schema = refValue is not null ? _resolver.Resolve(refValue, doc) : schemaNode;
 
         if (schema is null)
             return null;
 
-        var required = schema["required"]?.AsArray()
-            .Select(n => n?.GetValue<string>() ?? "")
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToHashSet(StringComparer.OrdinalIgnoreCase)
-            ?? [];
+        var required =
+            schema["required"]
+                ?.AsArray()
+                .Select(n => n?.GetValue<string>() ?? "")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
         var properties = schema["properties"]?.AsObject();
         if (properties is null)
@@ -439,7 +554,8 @@ public sealed class ModelBuilder
 
             var cliFlag = $"--{NamingEngine.PropertyToKebab(propName)}";
             var csPropName = SafePropertyName(
-                NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(propName)));
+                NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(propName))
+            );
 
             // Try to resolve $ref for the property schema
             var propRefValue = propSchema["$ref"]?.GetValue<string>();
@@ -448,23 +564,28 @@ public sealed class ModelBuilder
                 : propSchema;
 
             var propType = resolvedPropSchema?["type"]?.GetValue<string>();
-            var enumValues = resolvedPropSchema?["enum"]?.AsArray()
+            var enumValues = resolvedPropSchema
+                ?["enum"]?.AsArray()
                 .Select(n => n?.GetValue<string>() ?? "")
                 .Where(s => !string.IsNullOrEmpty(s))
                 .ToList();
 
-            if (propType == "object" || (propType is null && resolvedPropSchema?["properties"] is not null))
+            if (
+                propType == "object"
+                || (propType is null && resolvedPropSchema?["properties"] is not null)
+            )
             {
                 // Complex object — try one level of flattening for simple sub-properties
                 var subProps = resolvedPropSchema?["properties"]?.AsObject();
                 if (subProps is null)
                     continue;
 
-                var subRequired = resolvedPropSchema?["required"]?.AsArray()
-                    .Select(n => n?.GetValue<string>() ?? "")
-                    .Where(s => !string.IsNullOrEmpty(s))
-                    .ToHashSet(StringComparer.OrdinalIgnoreCase)
-                    ?? [];
+                var subRequired =
+                    resolvedPropSchema
+                        ?["required"]?.AsArray()
+                        .Select(n => n?.GetValue<string>() ?? "")
+                        .Where(s => !string.IsNullOrEmpty(s))
+                        .ToHashSet(StringComparer.OrdinalIgnoreCase) ?? [];
 
                 // Only flatten if the complex object has ≤ 3 own properties total
                 var subPropCount = subProps.Count;
@@ -492,7 +613,8 @@ public sealed class ModelBuilder
                         : subPropSchema;
 
                     var subType = resolvedSub?["type"]?.GetValue<string>() ?? "string";
-                    var subEnum = resolvedSub?["enum"]?.AsArray()
+                    var subEnum = resolvedSub
+                        ?["enum"]?.AsArray()
                         .Select(n => n?.GetValue<string>() ?? "")
                         .Where(s => !string.IsNullOrEmpty(s))
                         .ToList();
@@ -500,28 +622,47 @@ public sealed class ModelBuilder
                     if (subType == "object")
                         continue; // Too deep
 
-                    var nestedFlag = $"--{NamingEngine.PropertyToKebab(propName)}-{NamingEngine.PropertyToKebab(subPropName)}";
-                    var rawNestedProp = $"{NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(propName))}{NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(subPropName))}";
+                    var nestedFlag =
+                        $"--{NamingEngine.PropertyToKebab(propName)}-{NamingEngine.PropertyToKebab(subPropName)}";
+                    var rawNestedProp =
+                        $"{NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(propName))}{NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(subPropName))}";
                     var nestedProp = SafePropertyName(rawNestedProp);
                     var typeHint = MapSwaggerType(subType);
                     var desc = resolvedSub?["description"]?.GetValue<string>();
 
-                    flattenedProps.Add(new BodyPropertyModel(
-                        nestedFlag, nestedProp, subPropName, typeHint,
-                        true, desc, subEnum?.Count > 0 ? subEnum : null,
-                        ParentJsonKey: propName));
+                    flattenedProps.Add(
+                        new BodyPropertyModel(
+                            nestedFlag,
+                            nestedProp,
+                            subPropName,
+                            typeHint,
+                            true,
+                            desc,
+                            subEnum?.Count > 0 ? subEnum : null,
+                            ParentJsonKey: propName
+                        )
+                    );
                 }
             }
             else
             {
                 // Simple type (string, integer, boolean)
                 var typeHint = MapSwaggerType(propType ?? "string");
-                var desc = resolvedPropSchema?["description"]?.GetValue<string>()
+                var desc =
+                    resolvedPropSchema?["description"]?.GetValue<string>()
                     ?? propSchema["description"]?.GetValue<string>();
 
-                flattenedProps.Add(new BodyPropertyModel(
-                    cliFlag, csPropName, propName, typeHint,
-                    true, desc, enumValues?.Count > 0 ? enumValues : null));
+                flattenedProps.Add(
+                    new BodyPropertyModel(
+                        cliFlag,
+                        csPropName,
+                        propName,
+                        typeHint,
+                        true,
+                        desc,
+                        enumValues?.Count > 0 ? enumValues : null
+                    )
+                );
             }
         }
 
@@ -530,11 +671,12 @@ public sealed class ModelBuilder
             : null;
     }
 
-    private static string MapSwaggerType(string swaggerType) => swaggerType switch
-    {
-        "integer" => "int",
-        "number" => "double",
-        "boolean" => "bool",
-        _ => "string",
-    };
+    private static string MapSwaggerType(string swaggerType) =>
+        swaggerType switch
+        {
+            "integer" => "int",
+            "number" => "double",
+            "boolean" => "bool",
+            _ => "string",
+        };
 }

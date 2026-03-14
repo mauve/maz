@@ -5,8 +5,10 @@ namespace Console.Rendering;
 
 public record ColumnRendererOptions(ValueFormatterOptions? FormatterOptions = null);
 
-public class ColumnRendererFactory(ValueFormatterOptions formatterOptions, bool showEnvelope = false)
-    : IRendererFactory
+public class ColumnRendererFactory(
+    ValueFormatterOptions formatterOptions,
+    bool showEnvelope = false
+) : IRendererFactory
 {
     public IRenderer CreateRendererForType(Type type) =>
         new TextItemRenderer(type, showAll: false, showEnvelope: false, formatterOptions);
