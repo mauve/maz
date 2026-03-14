@@ -53,8 +53,57 @@ public class CliOptionGeneratorStructureTests
         AssertContainsAll(
             text,
             "public override string Description => \"List subscriptions\";",
-            "protected override string? Remarks => \"First line.",
+            "public override string? DetailedDescription => \"First line.",
             "Second line.\";"
+        );
+    }
+
+    [TestMethod]
+    public void ExplicitDescriptionOverride_TakesPrecedenceOverXmlSummary()
+    {
+        var text = GenerateForBody(
+            "ExplicitDescriptionCommand.g.cs",
+            """
+            /// <summary>XML summary description</summary>
+            /// <remarks>XML remarks body.</remarks>
+            public partial class ExplicitDescriptionCommand : CommandDef
+            {
+                public override string Description => "Property description";
+
+                [CliOption("--name")]
+                public partial string? Name { get; }
+            }
+            """
+        );
+
+        Assert.IsFalse(
+            text.Contains("public override string Description => \"XML summary description\";")
+        );
+        Assert.IsTrue(
+            text.Contains("public override string? DetailedDescription => \"XML remarks body.\";")
+        );
+    }
+
+    [TestMethod]
+    public void ExplicitDetailedDescriptionOverride_TakesPrecedenceOverXmlRemarks()
+    {
+        var text = GenerateForBody(
+            "ExplicitDetailedDescriptionCommand.g.cs",
+            """
+            /// <summary>XML summary description</summary>
+            /// <remarks>XML remarks body.</remarks>
+            public partial class ExplicitDetailedDescriptionCommand : CommandDef
+            {
+                public override string? DetailedDescription => "Property detailed description";
+
+                [CliOption("--name")]
+                public partial string? Name { get; }
+            }
+            """
+        );
+
+        Assert.IsFalse(
+            text.Contains("public override string? DetailedDescription => \"XML remarks body.\";")
         );
     }
 

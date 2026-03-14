@@ -32,6 +32,7 @@ internal static class CliGeneratorTestHelpers
                 protected virtual bool HasGeneratedChildren => false;
                 protected virtual void AddGeneratedChildren(Command cmd) { }
                 public virtual string Description => string.Empty;
+                public virtual string? DetailedDescription => Remarks;
                 protected virtual string? Remarks => null;
                 public Command Build() => new("test");
             }
