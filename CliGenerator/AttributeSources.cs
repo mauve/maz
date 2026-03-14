@@ -20,6 +20,7 @@ internal static class AttributeSources
                 public string? EnvVar { get; set; }
                 public Type? ConverterType { get; set; }
                 public Type? CompletionProviderType { get; set; }
+                public Type[] CompletionOptionPacks { get; set; } = Array.Empty<Type>();
                 public CliOptionAttribute(params string[] aliases) { Aliases = aliases; }
             }
 
