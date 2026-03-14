@@ -75,6 +75,10 @@ public partial class RootCommandDef
     public DataboxCommandDef Databox = null!;
     public DataboxedgeCommandDef Databoxedge = null!;
     public StorageactionsCommandDef Storageactions = null!;
+    public RecoveryservicesCommandDef Recoveryservices = null!;
+    public BackupCommandDef Backup = null!;
+    public DataprotectionCommandDef Dataprotection = null!;
+    public DatareplicationCommandDef Datareplication = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -146,5 +150,9 @@ public partial class RootCommandDef
         Databox = new DataboxCommandDef(Auth);
         Databoxedge = new DataboxedgeCommandDef(Auth);
         Storageactions = new StorageactionsCommandDef(Auth);
+        Recoveryservices = new RecoveryservicesCommandDef(Auth);
+        Backup = new BackupCommandDef(Auth);
+        Dataprotection = new DataprotectionCommandDef(Auth);
+        Datareplication = new DatareplicationCommandDef(Auth);
     }
 }
