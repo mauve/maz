@@ -70,11 +70,11 @@ Completions include dynamic suggestions for `--subscription-id`, respecting your
 
 ### Help flags
 
-| Flag | Description |
-|------|-------------|
-| `--help` | Usage for the current command |
-| `--help-more` | All options including advanced ones, with detailed descriptions |
-| `--help-commands [filter]` | Full command tree, optionally filtered |
+| Flag                       | Description                                                     |
+| -------------------------- | --------------------------------------------------------------- |
+| `--help`                   | Usage for the current command                                   |
+| `--help-more`              | All options including advanced ones, with detailed descriptions |
+| `--help-commands [filter]` | Full command tree, optionally filtered                          |
 
 ### Data-plane vs. control-plane commands
 
@@ -84,31 +84,31 @@ Commands marked with `*` in help output operate against **data-plane endpoints**
 
 Set with `--format` / `-f`, or via `[global] format` in the config file, or `MAZ_FORMAT` env var.
 
-| Format | Description |
-|--------|-------------|
-| `column` | Aligned columns (default) |
-| `json` | Compact JSON |
-| `json-pretty` | Indented JSON |
-| `text` | Plain text, one field per line |
+| Format        | Description                    |
+| ------------- | ------------------------------ |
+| `column`      | Aligned columns (default)      |
+| `json`        | Compact JSON                   |
+| `json-pretty` | Indented JSON                  |
+| `text`        | Plain text, one field per line |
 
 Additional output flags:
 
-| Flag | Description |
-|------|-------------|
-| `--show-all` | Show all fields, including those hidden by default |
+| Flag              | Description                                                           |
+| ----------------- | --------------------------------------------------------------------- |
+| `--show-all`      | Show all fields, including those hidden by default                    |
 | `--show-envelope` | Show ARM envelope fields (Id, Type, SystemData) before the data block |
-| `--date-format` | Date/time format string (default: `yyyy-MM-ddTHH:mm:ssZ`) |
+| `--date-format`   | Date/time format string (default: `yyyy-MM-ddTHH:mm:ssZ`)             |
 
 ### Authentication
 
 `maz` uses the Azure SDK `DefaultAzureCredential` chain by default. Override with:
 
-| Option | Description |
-|--------|-------------|
-| `--tenant-id` | Azure AD tenant ID |
-| `--client-id` | Service principal / managed identity client ID |
-| `--client-secret` | Service principal client secret |
-| `--use-device-code` | Authenticate via device code flow |
+| Option              | Description                                    |
+| ------------------- | ---------------------------------------------- |
+| `--tenant-id`       | Azure AD tenant ID                             |
+| `--client-id`       | Service principal / managed identity client ID |
+| `--client-secret`   | Service principal client secret                |
+| `--use-device-code` | Authenticate via device code flow              |
 
 ---
 
@@ -116,10 +116,10 @@ Additional output flags:
 
 ### Location
 
-| Platform | Default path |
-|----------|-------------|
+| Platform      | Default path                                                                        |
+| ------------- | ----------------------------------------------------------------------------------- |
 | Linux / macOS | `$XDG_CONFIG_HOME/.maz/user-config.ini` (default: `~/.config/.maz/user-config.ini`) |
-| Windows | `%APPDATA%\.maz\user-config.ini` |
+| Windows       | `%APPDATA%\.maz\user-config.ini`                                                    |
 
 Override the path: `MAZ_CONFIG_PATH=/path/to/user-config.ini`
 
@@ -161,11 +161,11 @@ subscription-id = /s/StorageSub:guid
 
 Controls what appears in shell completions and dynamic suggestions.
 
-| Key | Description |
-|-----|-------------|
-| `allowed-subscriptions` | Comma-separated; only these subscriptions appear in `--subscription-id` completions. Empty = all. |
-| `allowed-resource-groups` | Comma-separated; only these appear in `--resource-group` completions. Empty = all. |
-| `denied-resource-ids` | Comma-separated; these resource IDs are never returned in any suggestion. |
+| Key                       | Description                                                                                       |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| `allowed-subscriptions`   | Comma-separated; only these subscriptions appear in `--subscription-id` completions. Empty = all. |
+| `allowed-resource-groups` | Comma-separated; only these appear in `--resource-group` completions. Empty = all.                |
+| `denied-resource-ids`     | Comma-separated; these resource IDs are never returned in any suggestion.                         |
 
 Subscription hints can be any of: `/s/name:guid`, `/subscriptions/{guid}`, plain GUID, or display name.
 
@@ -173,21 +173,21 @@ Subscription hints can be any of: `/s/name:guid`, `/subscriptions/{guid}`, plain
 
 Active enforcement — rejected even when explicitly specified on the CLI.
 
-| Key | Description |
-|-----|-------------|
-| `subscriptions` | Comma-separated; these are rejected with an error if targeted. |
+| Key               | Description                                                    |
+| ----------------- | -------------------------------------------------------------- |
+| `subscriptions`   | Comma-separated; these are rejected with an error if targeted. |
 | `resource-groups` | Comma-separated; these are rejected with an error if targeted. |
-| `resource-ids` | Comma-separated; these are rejected with an error if targeted. |
+| `resource-ids`    | Comma-separated; these are rejected with an error if targeted. |
 
 ### `[global]` section
 
 Sets default option values. These are injected as environment variables before the command tree is built, so they behave identically to setting the env var yourself but without overwriting existing env vars.
 
-| Config key | Env var | Option |
-|------------|---------|--------|
-| `subscription-id` | `AZURE_SUBSCRIPTION_ID` | `--subscription-id` |
-| `resource-group` | `AZURE_RESOURCE_GROUP` | `--resource-group` |
-| `format` | `MAZ_FORMAT` | `--format` |
+| Config key             | Env var                    | Option                   |
+| ---------------------- | -------------------------- | ------------------------ |
+| `subscription-id`      | `AZURE_SUBSCRIPTION_ID`    | `--subscription-id`      |
+| `resource-group`       | `AZURE_RESOURCE_GROUP`     | `--resource-group`       |
+| `format`               | `MAZ_FORMAT`               | `--format`               |
 | `require-confirmation` | `MAZ_REQUIRE_CONFIRMATION` | `--require-confirmation` |
 
 ### `[cmd.X]` section
@@ -256,12 +256,12 @@ Configuration written to /home/user/.config/.maz/user-config.ini
 
 These options apply to every command:
 
-| Option | Env var | Description |
-|--------|---------|-------------|
-| `--interactive` / `--no-interactive` | — | Allow interactive prompts. Auto-disabled when stdin/stdout is redirected or `TERM=dumb`. |
-| `--require-confirmation` | `MAZ_REQUIRE_CONFIRMATION` | Require explicit confirmation before any destructive (create/delete/update) operation. |
-| `--detailed-errors` / `--verbose` | — | Show full exception details including stack trace. |
-| `--format` / `-f` | `MAZ_FORMAT` | Output format: `column`, `json`, `json-pretty`, `text`. |
+| Option                               | Env var                    | Description                                                                              |
+| ------------------------------------ | -------------------------- | ---------------------------------------------------------------------------------------- |
+| `--interactive` / `--no-interactive` | —                          | Allow interactive prompts. Auto-disabled when stdin/stdout is redirected or `TERM=dumb`. |
+| `--require-confirmation`             | `MAZ_REQUIRE_CONFIRMATION` | Require explicit confirmation before any destructive (create/delete/update) operation.   |
+| `--detailed-errors` / `--verbose`    | —                          | Show full exception details including stack trace.                                       |
+| `--format` / `-f`                    | `MAZ_FORMAT`               | Output format: `column`, `json`, `json-pretty`, `text`.                                  |
 
 ---
 
