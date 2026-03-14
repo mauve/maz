@@ -21,8 +21,11 @@ public partial class ResourceGroupOptionPack : OptionPack
         var name = ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         if (string.IsNullOrWhiteSpace(name))
             throw new InvocationException("--resource-group is required.");
-        return name;
+        return NormalizeRgName(name);
     }
+
+    private static string NormalizeRgName(string name) =>
+        name.StartsWith("/rg/", StringComparison.OrdinalIgnoreCase) ? name[4..] : name;
 
     public Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient) =>
         Subscription.GetSubscriptionAsync(armClient);
