@@ -37,6 +37,7 @@ public partial class RootCommandDef
     public PrivatednsCommandDef Privatedns = null!;
     public DnsresolverCommandDef Dnsresolver = null!;
     public TrafficmanagerCommandDef Trafficmanager = null!;
+    public CdnCommandDef Cdn = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -70,5 +71,6 @@ public partial class RootCommandDef
         Privatedns = new PrivatednsCommandDef(Auth);
         Dnsresolver = new DnsresolverCommandDef(Auth);
         Trafficmanager = new TrafficmanagerCommandDef(Auth);
+        Cdn = new CdnCommandDef(Auth);
     }
 }
