@@ -41,6 +41,11 @@ public partial class RootCommandDef
     public FrontdoorCommandDef Frontdoor = null!;
     public WebappCommandDef Webapp = null!;
     public LogicCommandDef Logic = null!;
+    public KeyvaultmanagementCommandDef Keyvaultmanagement = null!;
+    public CodesigningCommandDef Codesigning = null!;
+    public HsmCommandDef Hsm = null!;
+    public AttestationCommandDef Attestation = null!;
+    public ConfidentialledgerCommandDef Confidentialledger = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -78,5 +83,10 @@ public partial class RootCommandDef
         Frontdoor = new FrontdoorCommandDef(Auth);
         Webapp = new WebappCommandDef(Auth);
         Logic = new LogicCommandDef(Auth);
+        Keyvaultmanagement = new KeyvaultmanagementCommandDef(Auth);
+        Codesigning = new CodesigningCommandDef(Auth);
+        Hsm = new HsmCommandDef(Auth);
+        Attestation = new AttestationCommandDef(Auth);
+        Confidentialledger = new ConfidentialledgerCommandDef(Auth);
     }
 }
