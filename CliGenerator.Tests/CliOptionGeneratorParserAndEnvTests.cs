@@ -35,7 +35,8 @@ public class CliOptionGeneratorParserAndEnvTests
             "CustomParser = r => r.Tokens[0].Value switch",
             "\"json\" => TestApp.OutputFormat.Json",
             "\"table\" => TestApp.OutputFormat.Table",
-            "[allowed: json, table]"
+            "OptionMetadataRegistry.Register(_opt_Format",
+            "\"json, table\""
         );
     }
 
@@ -55,7 +56,8 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "[env: API_KEY]",
+            "OptionMetadataRegistry.Register(_opt_ApiKey",
+            "\"API_KEY\"",
             "GetValue(_opt_ApiKey) ?? System.Environment.GetEnvironmentVariable(\"API_KEY\")"
         );
     }
@@ -73,7 +75,10 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        Assert.IsTrue(text.Contains("[env: PORT]"));
+        Assert.IsTrue(
+            text.Contains("OptionMetadataRegistry.Register(_opt_Port") && text.Contains("\"PORT\""),
+            "Should emit registry registration with env var"
+        );
         Assert.IsFalse(
             text.Contains("GetEnvironmentVariable(\"PORT\")"),
             "Default should suppress env fallback suffix emission"

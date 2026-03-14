@@ -86,6 +86,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         public bool AllowMultiple;
         public string? ArityExpr;
         public bool HasNullableAnnotation;
+        public string? AllowedValuesText;  // joined display string for [allowed:]
+        public string? DefaultText;        // pre-formatted display string for [default:]
     }
 
     sealed class ChildModel
@@ -231,6 +233,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         m.ValueType = valueTypeStr;
         m.OptionType = $"Option<{valueTypeStr}>";
 
+        (string, string)[]? capturedEnumDescs = null;
+
         if (isCollection && elemType != null)
         {
             m.AllowMultiple = true;
@@ -254,9 +258,10 @@ public class CliOptionGenerator : IIncrementalGenerator
                 var enumDescs = GetEnumDescriptions(elemTypeSymbol);
                 if (enumDescs != null)
                 {
+                    capturedEnumDescs = enumDescs;
                     var elemTypeName = GetNonNullableTypeName(elemTypeSymbol);
                     m.CustomParserExpr = BuildEnumCollectionSwitchParser(elemTypeName, enumDescs);
-                    AppendAllowedValues(ref m.Description, enumDescs);
+                    m.AllowedValuesText = string.Join(", ", enumDescs.Select(d => d.Item2));
                 }
                 else
                 {
@@ -286,13 +291,14 @@ public class CliOptionGenerator : IIncrementalGenerator
             var enumDescs = GetEnumDescriptions(typeSymbol);
             if (enumDescs != null)
             {
+                capturedEnumDescs = enumDescs;
                 var typeName = GetNonNullableTypeName(typeSymbol);
                 m.CustomParserExpr = BuildEnumSwitchParser(
                     typeName,
                     enumDescs,
                     m.HasNullableAnnotation
                 );
-                AppendAllowedValues(ref m.Description, enumDescs);
+                m.AllowedValuesText = string.Join(", ", enumDescs.Select(d => d.Item2));
             }
             else
             {
@@ -305,6 +311,24 @@ public class CliOptionGenerator : IIncrementalGenerator
         // Read default from property initializer (e.g. = true, = ["a", "b"])
         if (m.DefaultExpression == null && hasDefault)
             m.DefaultExpression = GetDefaultExpression(prop);
+
+        // Compute DefaultText for the registry
+        if (m.DefaultExpression != null && m.DefaultExpression != "[]")
+        {
+            if (capturedEnumDescs != null)
+            {
+                // Map enum member name references in the expression to their description strings
+                var mapped = capturedEnumDescs
+                    .Where(d => m.DefaultExpression.Contains("." + d.Item1))
+                    .Select(d => d.Item2)
+                    .ToArray();
+                m.DefaultText = mapped.Length > 0 ? string.Join("|", mapped) : m.DefaultExpression;
+            }
+            else
+            {
+                m.DefaultText = m.DefaultExpression;
+            }
+        }
 
         // EnvVar: build a property-accessor fallback suffix (no DefaultValueFactory, avoids [] in help).
         if (m.EnvVar != null && m.DefaultExpression == null)
@@ -325,11 +349,6 @@ public class CliOptionGenerator : IIncrementalGenerator
                     + $" ? ({nonNullTypeName}?){converted} : ({nonNullTypeName}?)null)";
             }
         }
-
-        if (m.EnvVar != null)
-            m.Description = string.IsNullOrEmpty(m.Description)
-                ? $"[env: {m.EnvVar}]"
-                : $"{m.Description} [env: {m.EnvVar}]";
 
         return m;
     }
@@ -524,13 +543,6 @@ public class CliOptionGenerator : IIncrementalGenerator
         var throwExpr =
             $"var __s => throw new global::System.ArgumentException($\"Unknown value '{{__s}}'. Allowed: {allowedList}.\")";
         return $"r => r.Tokens.Select(t => t.Value switch {{ {cases} {throwExpr} }}).ToList()";
-    }
-
-    static void AppendAllowedValues(ref string description, (string, string)[] descs)
-    {
-        var list = string.Join(", ", descs.Select(d => d.Item2));
-        var tag = $"[allowed: {list}]";
-        description = string.IsNullOrEmpty(description) ? tag : $"{description} {tag}";
     }
 
     static string GetNonNullableTypeName(ITypeSymbol sym)
@@ -793,6 +805,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                         $"        global::Console.Cli.AdvancedOptionRegistry.Register(_opt_{opt.Name});"
                     );
                 sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+                EmitMetadataRegistration(sb, opt);
             }
             sb.AppendLine("    }");
         }
@@ -810,6 +823,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                         $"        global::Console.Cli.AdvancedOptionRegistry.Register(_opt_{opt.Name});"
                     );
                 sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
+                EmitMetadataRegistration(sb, opt);
             }
             sb.AppendLine("    }");
         }
@@ -879,6 +893,21 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         sb.AppendLine("}");
         return sb.ToString();
+    }
+
+    static void EmitMetadataRegistration(StringBuilder sb, OptionPropModel opt)
+    {
+        if (opt.EnvVar is null && opt.AllowedValuesText is null && opt.DefaultText is null)
+            return;
+        var envArg = opt.EnvVar is not null ? Quote(opt.EnvVar) : "null";
+        var allowedArg = opt.AllowedValuesText is not null ? Quote(opt.AllowedValuesText) : "null";
+        var defaultArg = opt.DefaultText is not null ? Quote(opt.DefaultText) : "null";
+        sb.AppendLine(
+            $"        global::Console.Cli.OptionMetadataRegistry.Register(_opt_{opt.Name},"
+        );
+        sb.AppendLine(
+            $"            new global::Console.Cli.OptionMetadata({envArg}, {allowedArg}, {defaultArg}));"
+        );
     }
 
     static string Quote(string s) =>

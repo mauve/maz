@@ -1,13 +1,10 @@
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.ComponentModel;
-using System.Reflection;
-using System.Text.RegularExpressions;
 using Console.Rendering;
 
 namespace Console.Cli;
 
-internal static partial class GroupedHelpLayout
+internal static class GroupedHelpLayout
 {
     public static IEnumerable<Func<HelpContext, bool>> Create(HelpContext _)
     {
@@ -137,9 +134,9 @@ internal static partial class GroupedHelpLayout
         var rows = options
             .Select(o =>
             {
-                var row = ctx.HelpBuilder.GetTwoColumnRow(o, ctx);
-                var (main, metadata) = SplitOptionDescriptionAndMetadata(o, row.SecondColumnText);
-                var firstCol = TransformFirstColumnText(row.FirstColumnText, out bool isRequired);
+                var (main, metadata) = BuildDescriptionAndMetadata(o);
+                var firstCol = BuildFirstColumn(o);
+                bool isRequired = o.Required;
                 if (isRequired)
                     main = (main.Length > 0 ? main + " " : "") + Ansi.LightRed("[required]");
                 return (firstCol, main, metadata);
@@ -228,24 +225,9 @@ internal static partial class GroupedHelpLayout
         return true;
     }
 
-    private static string TransformFirstColumnText(string text, out bool isRequired)
+    private static string BuildFirstColumn(Option option)
     {
-        isRequired = false;
-
-        // Strip " (REQUIRED)" suffix (case-insensitive)
-        var withoutRequired = Regex.Replace(text, @"\s+\(REQUIRED\)\s*$", "", RegexOptions.IgnoreCase);
-        if (withoutRequired.Length != text.Length)
-            isRequired = true;
-        text = withoutRequired;
-
-        // Extract trailing " <placeholder>"
-        var placeholderMatch = Regex.Match(text, @"\s+<[^>]+>$");
-        var placeholder = placeholderMatch.Success ? placeholderMatch.Value : "";
-        if (placeholderMatch.Success)
-            text = text[..placeholderMatch.Index];
-
-        // Split into aliases
-        var aliases = text.Split(", ").ToList();
+        var aliases = option.Aliases.ToList();
 
         // Boolean compaction: --foo + --no-foo → --[no-]foo
         for (int i = aliases.Count - 1; i >= 0; i--)
@@ -286,132 +268,23 @@ internal static partial class GroupedHelpLayout
             }
         }
 
+        var placeholder = string.IsNullOrEmpty(option.HelpName) ? "" : $" <{option.HelpName}>";
         return string.Join(", ", aliases) + placeholder;
     }
 
-    private static (string main, List<string> metadata) SplitOptionDescriptionAndMetadata(
-        Option option,
-        string secondColumnText
-    )
+    private static (string main, List<string> metadata) BuildDescriptionAndMetadata(Option option)
     {
+        var main = option.Description ?? "";
         var metadata = new List<string>();
-        var main = secondColumnText;
-
-        foreach (Match match in MetadataTagRegex().Matches(secondColumnText))
+        var meta = OptionMetadataRegistry.Get(option);
+        if (meta is not null)
         {
-            var tag = match.Value;
-            if (tag.StartsWith("[default:", StringComparison.OrdinalIgnoreCase))
-            {
-                metadata.Add(RewriteEnumDefaultTag(option, tag));
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-                continue;
-            }
-
-            if (tag.StartsWith("[env:", StringComparison.OrdinalIgnoreCase))
-            {
-                metadata.Add(tag);
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-                continue;
-            }
-
-            if (tag.StartsWith("[allowed:", StringComparison.OrdinalIgnoreCase))
-            {
-                metadata.Add(tag);
-                main = main.Replace(tag, "", StringComparison.Ordinal);
-            }
+            if (meta.EnvVar is not null) metadata.Add($"[env: {meta.EnvVar}]");
+            if (meta.AllowedValues is not null) metadata.Add($"[allowed: {meta.AllowedValues}]");
+            if (meta.DefaultText is not null) metadata.Add($"[default: {meta.DefaultText}]");
         }
-
-        main = Regex.Replace(main, "\\s{2,}", " ").Trim();
         return (main, metadata);
     }
-
-    private static string RewriteEnumDefaultTag(Option option, string defaultTag)
-    {
-        var enumType = GetOptionEnumType(option);
-        if (enumType is null)
-            return defaultTag;
-
-        const string prefix = "[default:";
-        if (!defaultTag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return defaultTag;
-
-        var value = defaultTag.Substring(prefix.Length).Trim();
-        value = value.EndsWith(']') ? value[..^1].TrimEnd() : value;
-
-        var converted = value
-            .Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
-            .Select(v => MapEnumTokenToDescription(enumType, v))
-            .ToArray();
-
-        if (converted.Any(c => c is null))
-            return defaultTag;
-
-        return $"[default: {string.Join("|", converted!)}]";
-    }
-
-    private static Type? GetOptionEnumType(Option option)
-    {
-        for (Type? t = option.GetType(); t is not null; t = t.BaseType)
-        {
-            if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Option<>))
-                continue;
-
-            var arg = t.GetGenericArguments()[0];
-            var underlying = Nullable.GetUnderlyingType(arg);
-            var candidate = underlying ?? arg;
-            if (candidate.IsEnum)
-                return candidate;
-
-            if (candidate.IsArray)
-            {
-                var element = candidate.GetElementType();
-                if (element is not null)
-                {
-                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
-                    if (unwrappedElement.IsEnum)
-                        return unwrappedElement;
-                }
-            }
-
-            if (candidate.IsGenericType)
-            {
-                var def = candidate.GetGenericTypeDefinition();
-                if (
-                    def == typeof(List<>)
-                    || def == typeof(IReadOnlyList<>)
-                    || def == typeof(IReadOnlyCollection<>)
-                    || def == typeof(IEnumerable<>)
-                )
-                {
-                    var element = candidate.GetGenericArguments()[0];
-                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
-                    if (unwrappedElement.IsEnum)
-                        return unwrappedElement;
-                }
-            }
-
-            return null;
-        }
-
-        return null;
-    }
-
-    private static string? MapEnumTokenToDescription(Type enumType, string token)
-    {
-        if (!Enum.TryParse(enumType, token, ignoreCase: true, out var parsed) || parsed is null)
-            return null;
-
-        var memberName = Enum.GetName(enumType, parsed);
-        if (memberName is null)
-            return null;
-
-        var field = enumType.GetField(memberName, BindingFlags.Public | BindingFlags.Static);
-        var desc = field?.GetCustomAttribute<DescriptionAttribute>()?.Description;
-        return string.IsNullOrWhiteSpace(desc) ? token : desc;
-    }
-
-    [GeneratedRegex(@"\[(default|env|allowed): [^\]]+\]", RegexOptions.IgnoreCase)]
-    private static partial Regex MetadataTagRegex();
 
     private static IEnumerable<Option> AllOptions(Command cmd)
     {
