@@ -1,5 +1,6 @@
 // ParseResult.GetValue is annotated [MaybeNull] but callers handle nullability via option defaults
 #pragma warning disable CS8603
+using Azure.Identity;
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.Reflection;
@@ -33,6 +34,20 @@ public abstract partial class CommandDef
 
     protected virtual Task<int> ExecuteAsync(CancellationToken cancellationToken) =>
         Task.FromResult(0);
+
+    private Shared.AuthOptionPack? GetAuthOptionPack()
+    {
+        var flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+        for (var type = GetType(); type != null && type != typeof(object); type = type.BaseType)
+        {
+            foreach (var field in type.GetFields(flags | BindingFlags.DeclaredOnly))
+            {
+                if (field.GetValue(this) is Shared.AuthOptionPack pack)
+                    return pack;
+            }
+        }
+        return null;
+    }
 
     internal virtual Command Build()
     {
@@ -98,6 +113,17 @@ public abstract partial class CommandDef
                     {
                         System.Console.Error.WriteLine(ex.Message);
                         return ex.ExitCode;
+                    }
+                    catch (AuthenticationFailedException ex)
+                    {
+                        var authPack = self.GetAuthOptionPack();
+                        var configured = authPack?.AllowedCredentialTypes;
+                        System.Console.Error.WriteLine(
+                            AuthenticationErrorFormatter.Format(ex, configured)
+                        );
+                        if (result.GetValue(Shared.DiagnosticOptionPack.DetailedErrorsOption))
+                            System.Console.Error.WriteLine(ex.ToString());
+                        return 1;
                     }
                 }
             );
