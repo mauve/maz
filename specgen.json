@@ -1021,6 +1021,109 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "mysql",
+      "displayName": "mysql",
+      "apiVersion": "2024-12-30",
+      "description": "Manage Azure Database for MySQL Flexible Server instances, databases, and configurations.",
+      "detailedDescription": "Covers the full lifecycle of MySQL Flexible Servers: create, update, delete, start, stop, restart, and failover. Also manages databases, firewall rules, configurations, backups, replicas, private endpoints, and Azure AD administrators. Requires Contributor or MySQL-specific RBAC roles on the target subscription or resource group.",
+      "specFiles": [
+        "mysql/resource-manager/Microsoft.DBforMySQL/FlexibleServers/stable/2024-12-30/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "advancedthreatprotectionsetting": "Manage Advanced Threat Protection settings for a MySQL Flexible Server.",
+        "azureadadministrator": "Manage Azure Active Directory administrators for a MySQL Flexible Server.",
+        "backup": "Manage backups for a MySQL Flexible Server.",
+        "backup-and-export": "Perform backup and export operations for a MySQL Flexible Server.",
+        "check-name-availability": "Check name availability for MySQL Flexible Server resources in a specific location.",
+        "check-name-availability-without-location": "Check name availability for MySQL Flexible Server resources without specifying a location.",
+        "check-virtual-network-subnet-usage": "Check virtual network subnet usage for MySQL Flexible Server.",
+        "configuration": "Manage server configuration parameters for a MySQL Flexible Server.",
+        "database": "Manage databases within a MySQL Flexible Server.",
+        "firewallrule": "Manage firewall rules for a MySQL Flexible Server.",
+        "get-private-dns-zone-suffix": "Get the private DNS zone suffix for MySQL Flexible Server.",
+        "location-based-capability-set": "List and get capability sets available for MySQL Flexible Server in a specific location.",
+        "locationbasedcapability": "List capabilities available for MySQL Flexible Server in a specific location.",
+        "logfile": "List log files for a MySQL Flexible Server.",
+        "long-running-backup": "Initiate long-running backup operations for a MySQL Flexible Server.",
+        "ltr-backup": "Manage long-running backups for a MySQL Flexible Server.",
+        "maintenance": "Manage scheduled maintenance windows for a MySQL Flexible Server.",
+        "operation-progress": "Get the progress of a long-running operation for MySQL Flexible Server.",
+        "operationresult": "Get the result of a long-running operation for MySQL Flexible Server.",
+        "privateendpointconnection": "Manage private endpoint connections for a MySQL Flexible Server.",
+        "privatelinkresource": "List private link resources available for a MySQL Flexible Server.",
+        "replica": "List read replicas for a MySQL Flexible Server.",
+        "server": "Manage Azure Database for MySQL Flexible Server instances.",
+        "servers-migration": "Manage migration cutover for MySQL Flexible Server."
+      },
+      "resourceDetailedDescriptions": {
+        "advancedthreatprotectionsetting": "Configure Microsoft Defender for Cloud threat detection settings to identify anomalous database access patterns.",
+        "azureadadministrator": "Add, remove, and list Azure Active Directory principals that have administrator access to a MySQL Flexible Server.",
+        "backup": "View and trigger on-demand backups; list automatic backups for point-in-time restore scenarios.",
+        "backup-and-export": "Create backups and export them to Azure Blob Storage for long-term archival or cross-region copies.",
+        "check-name-availability": "Verify whether a proposed server name is available in a specific Azure location before provisioning.",
+        "check-name-availability-without-location": "Verify whether a proposed server name is globally available without specifying an Azure location.",
+        "check-virtual-network-subnet-usage": "Check whether a subnet is available and not already delegated before deploying a flexible server into a VNet.",
+        "configuration": "View and update MySQL server parameters such as max_connections, innodb_buffer_pool_size, and slow_query_log.",
+        "database": "Create, list, and delete databases hosted within a MySQL Flexible Server instance.",
+        "firewallrule": "Create and manage IP-based firewall rules that allow client access to a MySQL Flexible Server.",
+        "get-private-dns-zone-suffix": "Retrieve the DNS zone suffix used for private access mode, needed when configuring custom DNS.",
+        "location-based-capability-set": "Query structured capability sets (SKUs, versions, storage options) for a specific Azure location.",
+        "locationbasedcapability": "Query legacy capability listings for MySQL Flexible Server in a specific location.",
+        "logfile": "Retrieve a list of server log files available for download from a MySQL Flexible Server.",
+        "long-running-backup": "Initiate an asynchronous long-running backup operation that runs independently of the retention window.",
+        "ltr-backup": "List and inspect long-running backups created outside of the standard retention policy.",
+        "maintenance": "Schedule and reschedule planned maintenance windows to minimize disruption to production workloads.",
+        "operation-progress": "Poll the progress of an asynchronous operation such as server create or update.",
+        "operationresult": "Retrieve the final result or error details of a completed asynchronous operation.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to a MySQL Flexible Server.",
+        "privatelinkresource": "List the group IDs available for private link connections to a MySQL Flexible Server.",
+        "replica": "List read replicas associated with a primary MySQL Flexible Server for high-availability and read-scale scenarios.",
+        "server": "Full lifecycle management of MySQL Flexible Server: provision, configure, start/stop/restart/failover, and delete instances.",
+        "servers-migration": "Finalize a migration from Azure Database for MySQL Single Server by executing the cutover to Flexible Server."
+      },
+      "actionRenames": {
+        "AdvancedThreatProtectionSettings_Get": "show",
+        "AdvancedThreatProtectionSettings_UpdatePut": "set",
+        "AzureADAdministrators_Get": "show",
+        "AzureADAdministrators_CreateOrUpdate": "create",
+        "Backups_Get": "show",
+        "Backups_Put": "create",
+        "CheckNameAvailability_Execute": "check",
+        "CheckNameAvailabilityWithoutLocation_Execute": "check",
+        "CheckVirtualNetworkSubnetUsage_Execute": "check",
+        "Configurations_Get": "show",
+        "Configurations_CreateOrUpdate": "create",
+        "Databases_Get": "show",
+        "Databases_CreateOrUpdate": "create",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "GetPrivateDnsZoneSuffix_Execute": "get",
+        "LocationBasedCapabilitySet_Get": "show",
+        "Maintenances_Read": "show",
+        "OperationProgress_Get": "show",
+        "OperationResults_Get": "show",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "PrivateLinkResources_Get": "show",
+        "Servers_Get": "show",
+        "ServersMigration_CutoverMigration": "cutover"
+      },
+      "resourceRenames": {
+        "LongRunningBackups_List": "ltr-backup",
+        "LongRunningBackups_Get": "ltr-backup"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Servers_List",
+          "resourceGroupOperationId": "Servers_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
