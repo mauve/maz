@@ -37,7 +37,7 @@ public sealed class FileEmitter
 
             // Leaf operation commands and resource group commands
             foreach (var resource in service.Resources)
-                EmitResource(resource, serviceName, serviceDir);
+                EmitResource(resource, serviceName, serviceDir, service.IsDataPlane);
 
             // Service command
             var serviceContent = ServiceCommandEmitter.Emit(service, _config.CommandNamespace);
@@ -53,24 +53,24 @@ public sealed class FileEmitter
         System.Console.WriteLine($"Generated {services.Count} service(s) → {outputRoot}");
     }
 
-    private void EmitResource(ResourceGroupModel resource, string serviceClassName, string outputDir)
+    private void EmitResource(ResourceGroupModel resource, string serviceClassName, string outputDir, bool isDataPlane = false)
     {
         // Leaf operation commands
         foreach (var op in resource.Operations)
         {
-            var content = OperationCommandEmitter.Emit(op, serviceClassName, _config.CommandNamespace);
+            var content = OperationCommandEmitter.Emit(op, serviceClassName, _config.CommandNamespace, isDataPlane);
             var fileName = Path.Combine(outputDir, $"{op.ClassName}.cs");
             WriteIfChanged(fileName, content);
         }
 
         // Resource group command (includes subgroup fields)
-        var resourceContent = ResourceCommandEmitter.Emit(resource, _config.CommandNamespace);
+        var resourceContent = ResourceCommandEmitter.Emit(resource, _config.CommandNamespace, isDataPlane);
         var resourceFile = Path.Combine(outputDir, $"{resource.ClassName}.cs");
         WriteIfChanged(resourceFile, resourceContent);
 
         // Recurse into subgroups
         foreach (var sub in resource.Subgroups ?? [])
-            EmitResource(sub, serviceClassName, outputDir);
+            EmitResource(sub, serviceClassName, outputDir, isDataPlane);
     }
 
     private static void WriteIfChanged(string filePath, string content)

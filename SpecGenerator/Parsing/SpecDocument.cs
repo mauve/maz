@@ -17,6 +17,20 @@ public sealed class SpecDocument
         Root = root;
     }
 
+    /// <summary>
+    /// The host template from <c>x-ms-parameterized-host</c>, if present (data-plane specs).
+    /// Example: <c>{vaultBaseUrl}</c>
+    /// </summary>
+    public string? HostTemplate =>
+        Root["x-ms-parameterized-host"]?["hostTemplate"]?.GetValue<string>();
+
+    /// <summary>
+    /// The name of the first host parameter from <c>x-ms-parameterized-host</c>.
+    /// Example: <c>vaultBaseUrl</c>
+    /// </summary>
+    public string? HostParamName =>
+        Root["x-ms-parameterized-host"]?["parameters"]?[0]?["name"]?.GetValue<string>();
+
     public JsonObject? GetDefinition(string name) =>
         Root["definitions"]?[name]?.AsObject();
 

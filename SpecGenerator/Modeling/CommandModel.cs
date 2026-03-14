@@ -4,7 +4,9 @@ namespace SpecGenerator.Modeling;
 public record ServiceModel(
     string CliName,
     string ClassName,
-    List<ResourceGroupModel> Resources
+    List<ResourceGroupModel> Resources,
+    bool IsDataPlane = false,
+    string? HostParamName = null
 );
 
 /// <summary>Represents a group of operations on the same resource type (e.g. "account").</summary>

@@ -22,6 +22,8 @@ public static class ServiceCommandEmitter
         w.Block($"public partial class {service.ClassName}(AuthOptionPack auth) : CommandDef", () =>
         {
             w.Line($"public override string Name => \"{service.CliName}\";");
+            if (service.IsDataPlane)
+                w.Line("protected override bool IsDataPlane => true;");
 
             foreach (var resource in service.Resources)
             {

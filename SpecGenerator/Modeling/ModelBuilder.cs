@@ -46,6 +46,15 @@ public sealed class ModelBuilder
     {
         var serviceClassName = NamingEngine.KebabToPascal(_service.DisplayName);
 
+        // Detect data-plane: presence of x-ms-parameterized-host in any doc
+        var hostParamName = docs.Select(d => d.HostParamName).FirstOrDefault(n => n is not null);
+        var isDataPlane = hostParamName is not null;
+
+        // Extra path params to absorb (e.g. vaultBaseUrl for data-plane KV)
+        var extraAbsorbed = hostParamName is not null
+            ? new HashSet<string>(StringComparer.OrdinalIgnoreCase) { hostParamName }
+            : null;
+
         // Pass 1: Build raw list, tracking original operationIds
         var opEntries = new List<(string OperationId, string Resource, OperationModel Model)>();
 
@@ -60,7 +69,7 @@ public sealed class ModelBuilder
                 if (_service.Exclude.Contains(operationId, StringComparer.OrdinalIgnoreCase))
                     continue;
 
-                var model = BuildOperation(doc, path, method, opNode, operationId, serviceClassName);
+                var model = BuildOperation(doc, path, method, opNode, operationId, serviceClassName, extraAbsorbed);
                 if (model is null)
                     continue;
 
@@ -116,7 +125,9 @@ public sealed class ModelBuilder
         return new ServiceModel(
             _service.DisplayName,
             $"{serviceClassName}CommandDef",
-            resources);
+            resources,
+            isDataPlane,
+            hostParamName);
     }
 
     private List<ResourceGroupModel> BuildResourceGroups(
@@ -281,6 +292,8 @@ public sealed class ModelBuilder
 
     private string ExtractResource(string operationId)
     {
+        if (_service.ResourceRenames?.TryGetValue(operationId, out var renamed) == true)
+            return renamed;
         var (resource, _) = NamingEngine.SplitOperationId(operationId, _service.DisplayName);
         return resource;
     }
@@ -291,7 +304,8 @@ public sealed class ModelBuilder
         string httpMethod,
         JsonObject opNode,
         string operationId,
-        string serviceClassName)
+        string serviceClassName,
+        HashSet<string>? extraAbsorbedPathParams = null)
     {
         var (resourceCli, actionCli) = NamingEngine.SplitOperationId(operationId, _service.DisplayName);
         var className = NamingEngine.ToClassName(serviceClassName, resourceCli, actionCli);
@@ -320,7 +334,8 @@ public sealed class ModelBuilder
             var paramIn = param["in"]?.GetValue<string>() ?? "";
             var paramName = param["name"]?.GetValue<string>() ?? "";
 
-            if (paramIn == "path" && _absorbedPathParams.Contains(paramName))
+            if (paramIn == "path" && (_absorbedPathParams.Contains(paramName) ||
+                    extraAbsorbedPathParams?.Contains(paramName) == true))
                 continue;
 
             if (paramIn == "query" && _absorbedQueryParams.Contains(paramName))
