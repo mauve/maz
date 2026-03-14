@@ -26,9 +26,12 @@ internal static class CommandTreePrinter
             var connector = isLast ? "└── " : "├── ";
             var childPrefix = isLast ? "    " : "│   ";
 
-            var name = filter is null
+            var baseName = filter is null
                 ? Ansi.White(child.Name)
                 : HighlightName(child.Name, filter);
+            var name = DataPlaneRegistry.IsDataPlane(child)
+                ? baseName + Ansi.LightRed("*")
+                : baseName;
 
             var desc = string.IsNullOrWhiteSpace(child.Description)
                 ? ""

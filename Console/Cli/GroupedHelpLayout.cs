@@ -247,16 +247,20 @@ internal static partial class GroupedHelpLayout
             .Select(command =>
             {
                 var row = ctx.HelpBuilder.GetTwoColumnRow(command, ctx);
-                return (command, row.FirstColumnText, row.SecondColumnText);
+                var displayName = DataPlaneRegistry.IsDataPlane(command)
+                    ? row.FirstColumnText + Ansi.LightRed("*")
+                    : row.FirstColumnText;
+                return (command, displayName, row.SecondColumnText);
             })
             .ToList();
 
-        var firstWidth = rows.Max(r => r.FirstColumnText.Length);
+        var firstWidth = rows.Max(r => Ansi.VisibleLength(r.displayName));
 
         foreach (var row in rows)
         {
+            var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.displayName));
             ctx.Output.WriteLine(
-                $"  {row.FirstColumnText.PadRight(firstWidth)}  {row.SecondColumnText}"
+                $"  {row.displayName}{padding}  {row.SecondColumnText}"
             );
 
             var detail = RemarksRegistry.Get(row.command);

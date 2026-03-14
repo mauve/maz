@@ -10,13 +10,17 @@ public sealed class AzureRestClient
 {
     private static readonly HttpClient _http = new();
     private readonly TokenCredential _credential;
+    private readonly string _scope;
     private const string ManagementScope = "https://management.azure.com/.default";
     private const string BaseUrl = "https://management.azure.com";
 
     /// <summary>Initializes a new <see cref="AzureRestClient"/> with the given credential.</summary>
-    public AzureRestClient(TokenCredential credential)
+    /// <param name="credential">The credential to use for authentication.</param>
+    /// <param name="scope">The OAuth scope to request. Defaults to the ARM management scope.</param>
+    public AzureRestClient(TokenCredential credential, string scope = ManagementScope)
     {
         _credential = credential;
+        _scope = scope;
     }
 
     /// <summary>
@@ -49,7 +53,7 @@ public sealed class AzureRestClient
         CancellationToken ct)
     {
         var token = await _credential.GetTokenAsync(
-            new TokenRequestContext([ManagementScope]),
+            new TokenRequestContext([_scope]),
             ct);
 
         var url = path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)

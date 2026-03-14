@@ -20,6 +20,8 @@ public static partial class Ansi
 
     public static string Red(string text) => Enabled ? $"\x1b[31m{text}\x1b[0m" : text;
 
+    public static string LightRed(string text) => Enabled ? $"\x1b[91m{text}\x1b[0m" : text;
+
     public static string Yellow(string text) => Enabled ? $"\x1b[33m{text}\x1b[0m" : text;
 
     public static string Magenta(string text) => Enabled ? $"\x1b[35m{text}\x1b[0m" : text;
