@@ -16,6 +16,7 @@ public partial class DeviceregistryCommandDef(AuthOptionPack auth) : CommandDef
     public readonly DeviceregistryNamespaceCommandDef Namespace = new(auth);
     public readonly DeviceregistryNamespaceassetCommandDef Namespaceasset = new(auth);
     public readonly DeviceregistryNamespacedeviceCommandDef Namespacedevice = new(auth);
+    public readonly DeviceregistryOperationstatuCommandDef Operationstatu = new(auth);
     public readonly DeviceregistrySchemaCommandDef Schema = new(auth);
     public readonly DeviceregistrySchemaregistryCommandDef Schemaregistry = new(auth);
     public readonly DeviceregistrySchemaversionCommandDef Schemaversion = new(auth);
