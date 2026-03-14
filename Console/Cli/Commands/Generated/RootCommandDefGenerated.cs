@@ -22,6 +22,7 @@ public partial class RootCommandDef
     public RedisenterpriseCommandDef Redisenterprise = null!;
     public MariadbCommandDef Mariadb = null!;
     public MongoclusterCommandDef Mongocluster = null!;
+    public SqlCommandDef Sql = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -40,5 +41,6 @@ public partial class RootCommandDef
         Redisenterprise = new RedisenterpriseCommandDef(Auth);
         Mariadb = new MariadbCommandDef(Auth);
         Mongocluster = new MongoclusterCommandDef(Auth);
+        Sql = new SqlCommandDef(Auth);
     }
 }

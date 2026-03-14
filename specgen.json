@@ -1449,6 +1449,73 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "sql",
+      "displayName": "sql",
+      "apiVersion": "2023-08-01",
+      "description": "Manage Azure SQL servers, databases, elastic pools, and managed instances.",
+      "detailedDescription": "Covers Azure SQL logical servers and databases: create, update, delete, export, import, and failover. Also manages elastic pools, firewall rules, failover groups, managed instances, and managed databases. Requires Contributor or SQL Server Contributor roles on the target subscription or resource group.",
+      "specFiles": [
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/Servers.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/Databases.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/ElasticPools.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/FirewallRules.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/ManagedInstances.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/ManagedDatabases.json",
+        "sql/resource-manager/Microsoft.Sql/SQL/stable/2023-08-01/FailoverGroups.json"
+      ],
+      "resourceDescriptions": {
+        "server": "Manage Azure SQL logical servers.",
+        "database": "Manage databases within an Azure SQL logical server.",
+        "elasticpool": "Manage elastic pools for sharing resources across multiple databases.",
+        "firewallrule": "Manage firewall rules for an Azure SQL logical server.",
+        "managedinstance": "Manage Azure SQL Managed Instances.",
+        "manageddatabas": "Manage databases within an Azure SQL Managed Instance.",
+        "failovergroup": "Manage failover groups for Azure SQL server geo-replication."
+      },
+      "resourceDetailedDescriptions": {
+        "server": "Full lifecycle of Azure SQL logical servers: create, update, delete, check name availability, import database, and refresh DNS status.",
+        "database": "Manage SQL databases: create, update, delete, export to BACPAC, and list inaccessible databases.",
+        "elasticpool": "Create and manage elastic pools that provide a shared resource model for groups of databases with variable usage.",
+        "firewallrule": "Configure IP-based firewall rules to control access to an Azure SQL logical server.",
+        "managedinstance": "Full lifecycle of SQL Managed Instances: create, update, delete, list outbound network dependencies, and failover.",
+        "manageddatabas": "Manage databases on a SQL Managed Instance: create, update, delete, and complete or cancel geo-replica moves.",
+        "failovergroup": "Configure and manage failover groups for automatic or manual geo-replication failover between SQL servers."
+      },
+      "actionRenames": {
+        "Servers_Get": "show",
+        "Servers_CreateOrUpdate": "create",
+        "Servers_ListByResourceGroup": "list",
+        "Databases_Get": "show",
+        "Databases_CreateOrUpdate": "create",
+        "ElasticPools_Get": "show",
+        "ElasticPools_CreateOrUpdate": "create",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "ManagedInstances_Get": "show",
+        "ManagedInstances_CreateOrUpdate": "create",
+        "ManagedInstances_ListByResourceGroup": "list",
+        "ManagedDatabases_Get": "show",
+        "ManagedDatabases_CreateOrUpdate": "create",
+        "FailoverGroups_Get": "show",
+        "FailoverGroups_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Servers_List",
+          "resourceGroupOperationId": "Servers_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "ManagedInstances_List",
+          "resourceGroupOperationId": "ManagedInstances_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
