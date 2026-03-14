@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountHierarchicalNamespaceMigrationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "hierarchical-namespace-migration";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

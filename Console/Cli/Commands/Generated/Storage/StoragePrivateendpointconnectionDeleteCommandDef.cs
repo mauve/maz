@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StoragePrivateendpointconnectionDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

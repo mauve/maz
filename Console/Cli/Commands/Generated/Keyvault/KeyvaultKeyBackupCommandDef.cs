@@ -15,6 +15,7 @@ public partial class KeyvaultKeyBackupCommandDef(AuthOptionPack auth) : CommandD
 {
     public override string Name => "backup";
     protected override bool IsDataPlane => true;
+    protected override bool IsDestructive => true;
 
     [CliOption("--vault-url")]
     public partial string? VaultUrl { get; }
@@ -32,8 +33,8 @@ public partial class KeyvaultKeyBackupCommandDef(AuthOptionPack auth) : CommandD
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{vaultBaseUrl}/keys/{KeyName}/backup";
+        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{keyVaultBaseUrl}/keys/{KeyName}/backup";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "7.5", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

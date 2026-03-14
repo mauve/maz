@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountKeysListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountCheckNameAvailabilityCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "check-name-availability";
+    protected override bool IsDestructive => true;
 
     public readonly SubscriptionOptionPack Subscription = new();
     public readonly RenderOptionPack Render = new();

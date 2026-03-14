@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountRestoreBlobRangesCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore-blob-ranges";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StorageAccountSasListServiceSasCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-service-sas";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();

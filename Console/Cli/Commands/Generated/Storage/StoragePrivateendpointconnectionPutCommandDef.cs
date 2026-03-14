@@ -13,6 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class StoragePrivateendpointconnectionPutCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "put";
+    protected override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
