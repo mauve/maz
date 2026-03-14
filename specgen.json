@@ -1,0 +1,16 @@
+{
+  "specsRoot": "/home/mikae/repos/azure-rest-api-specs/specification",
+  "outputDir": "Console/Cli/Commands/Generated",
+  "commandNamespace": "Console.Cli.Commands.Generated",
+  "services": [
+    {
+      "serviceDir": "storage",
+      "displayName": "storage",
+      "apiVersion": "2024-01-01",
+      "specFiles": [
+        "storage/resource-manager/Microsoft.Storage/stable/2024-01-01/storage.json"
+      ],
+      "exclude": []
+    }
+  ]
+}
