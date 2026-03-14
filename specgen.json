@@ -2603,6 +2603,101 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "frontdoor",
+      "displayName": "frontdoor",
+      "apiVersion": "2025-10-01",
+      "description": "Manage Azure Front Door (classic) profiles, routing rules, WAF policies, and network experiment profiles",
+      "detailedDescription": "Covers the full lifecycle of classic Azure Front Door resources: front doors, frontend endpoints, routing rules, backend pools, rules engines, WAF policies, and Network Experiment (Latency Scorecard/Timeseries) resources. For new deployments, prefer Azure Front Door Standard/Premium (CDN-based) via the `cdn` command group. Requires Contributor or Front Door-specific roles on the target subscription or resource group.",
+      "specFiles": [
+        "frontdoor/resource-manager/Microsoft.Network/FrontDoor/stable/2025-10-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "frontdoor": "A classic Azure Front Door profile that provides global load balancing, SSL offload, and WAF.",
+        "frontendendpoint": "A frontend endpoint (custom domain or default azurefd.net hostname) within a Front Door.",
+        "rulesengine": "A rules engine configuration for advanced traffic routing within a Front Door.",
+        "policy": "A WAF policy (Web Application Firewall) for classic Front Door.",
+        "networkexperimentprofile": "A Network Experiment profile for measuring latency and routing scorecards.",
+        "experiment": "A network experiment measuring performance between two endpoints.",
+        "preconfiguredendpoint": "A pre-configured Microsoft endpoint available for use in network experiments.",
+        "report": "Latency scorecard and timeseries reports for network experiments.",
+        "managedruleset": "Managed WAF rule sets available for Front Door WAF policies."
+      },
+      "resourceDetailedDescriptions": {
+        "frontdoor": "Classic Front Door profiles contain frontend endpoints, backend pools, routing rules, health probe settings, and load balancing settings. Use `validate-custom-domain` to check custom domain mapping. For new projects, prefer the Azure Front Door Standard/Premium tier.",
+        "frontendendpoint": "Frontend endpoints define the hostnames that Front Door accepts traffic on. Use `enable-https` / `disable-https` to manage TLS certificates for custom domains.",
+        "rulesengine": "Rules engines apply conditional logic to route requests based on headers, URLs, and other attributes, overriding global routing rules.",
+        "policy": "WAF policies attach managed rule sets and custom rules to Front Door to block malicious traffic. Use `list` to see all policies in a resource group or `list-by-subscription` for subscription-wide view.",
+        "networkexperimentprofile": "Network Experiment profiles group experiments for latency measurement between Azure and external endpoints.",
+        "experiment": "Experiments measure real-user latency between two endpoints (e.g., Azure region vs. on-premises). Results appear in reports.",
+        "preconfiguredendpoint": "Pre-configured Microsoft endpoints (Azure regions, CDN PoPs) for use as experiment targets.",
+        "report": "Use `get-latency-scorecards` and `get-timeseries` to retrieve experiment measurement data for analysis.",
+        "managedruleset": "Lists the Microsoft-managed WAF rule sets (e.g., DefaultRuleSet, BotRuleSet) available for classic Front Door WAF policies."
+      },
+      "resourceRenames": {
+        "FrontDoors_List": "frontdoor",
+        "FrontDoors_ListByResourceGroup": "frontdoor",
+        "FrontDoors_Get": "frontdoor",
+        "FrontDoors_CreateOrUpdate": "frontdoor",
+        "FrontDoors_Delete": "frontdoor",
+        "FrontDoors_ValidateCustomDomain": "frontdoor"
+      },
+      "actionRenames": {
+        "FrontDoors_Get": "show",
+        "FrontDoors_CreateOrUpdate": "create",
+        "FrontDoors_Delete": "delete",
+        "FrontDoors_List": "list",
+        "FrontDoors_ListByResourceGroup": "list",
+        "FrontDoors_ValidateCustomDomain": "validate-custom-domain",
+        "FrontendEndpoints_Get": "show",
+        "FrontendEndpoints_ListByFrontDoor": "list",
+        "FrontendEndpoints_EnableHttps": "enable-https",
+        "FrontendEndpoints_DisableHttps": "disable-https",
+        "RulesEngines_Get": "show",
+        "RulesEngines_CreateOrUpdate": "create",
+        "RulesEngines_Delete": "delete",
+        "RulesEngines_ListByFrontDoor": "list",
+        "Policies_Get": "show",
+        "Policies_CreateOrUpdate": "create",
+        "Policies_Delete": "delete",
+        "Policies_Update": "update",
+        "Policies_List": "list",
+        "Policies_ListBySubscription": "list-by-subscription",
+        "NetworkExperimentProfiles_Get": "show",
+        "NetworkExperimentProfiles_CreateOrUpdate": "create",
+        "NetworkExperimentProfiles_Delete": "delete",
+        "NetworkExperimentProfiles_Update": "update",
+        "NetworkExperimentProfiles_List": "list",
+        "NetworkExperimentProfiles_ListByResourceGroup": "list",
+        "Experiments_Get": "show",
+        "Experiments_CreateOrUpdate": "create",
+        "Experiments_Delete": "delete",
+        "Experiments_Update": "update",
+        "Experiments_ListByProfile": "list",
+        "PreconfiguredEndpoints_List": "list",
+        "Reports_GetLatencyScorecards": "get-latency-scorecards",
+        "Reports_GetTimeseries": "get-timeseries",
+        "ManagedRuleSets_List": "list",
+        "FrontDoorNameAvailability_Check": "check",
+        "FrontDoorNameAvailabilityWithSubscription_Check": "check",
+        "Endpoints_PurgeContent": "purge-content"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "NetworkExperimentProfiles_List",
+          "resourceGroupOperationId": "NetworkExperimentProfiles_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "FrontDoors_List",
+          "resourceGroupOperationId": "FrontDoors_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
