@@ -20,6 +20,10 @@ public static class ResourceCommandEmitter
         w.Line($"namespace {ns};");
         w.Line();
 
+        if (resource.Description is { Length: > 0 })
+            w.Line($"/// <summary>{EscapeXml(resource.Description)}</summary>");
+        if (resource.DetailedDescription is { Length: > 0 })
+            w.Line($"/// <remarks>{EscapeXml(resource.DetailedDescription)}</remarks>");
         w.Block($"public partial class {resource.ClassName}(AuthOptionPack auth) : CommandDef", () =>
         {
             w.Line($"public override string Name => \"{resource.CliName}\";");
@@ -41,4 +45,7 @@ public static class ResourceCommandEmitter
 
         return w.ToString();
     }
+
+    private static string EscapeXml(string text) =>
+        text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 }

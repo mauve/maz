@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Backs up the specified secret.</summary>
+/// <remarks>Requests that a backup of the specified secret be downloaded to the client. All versions of the secret will be downloaded. This operation requires the secrets/backup permission.</remarks>
 public partial class KeyvaultSecretBackupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "backup";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretBackupCommandDef(AuthOptionPack auth) : Comma
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 

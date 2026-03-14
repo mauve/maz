@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.</summary>
+/// <remarks>Lists all the storage accounts available under the given resource group. Note that storage keys are not returned; use the ListKeys operation for this.</remarks>
 public partial class StorageAccountListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Key Vault account settings.</summary>
+/// <remarks>Read and update account-level settings such as role-based access control and soft-delete behaviour.</remarks>
 public partial class KeyvaultSettingCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "setting";

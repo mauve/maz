@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List available storage SKUs in a region.</summary>
+/// <remarks>Lists available storage SKUs and their capabilities for a given subscription.</remarks>
 public partial class StorageSkuCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "sku";

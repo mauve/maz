@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Perform full vault backups.</summary>
+/// <remarks>Initiate and monitor full backup jobs that write the entire vault contents to an Azure Blob Storage container.</remarks>
 public partial class KeyvaultBackupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "backup";

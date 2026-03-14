@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes a custom role definition.</summary>
+/// <remarks>Deletes a custom role definition.</remarks>
 public partial class KeyvaultRoledefinitionDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoledefinitionDeleteCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role definition to delete. Managed HSM only supports '/'.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name (GUID) of the role definition to delete.</summary>
     [CliOption("--role-definition-name", Required = true)]
     public partial string? RoleDefinitionName { get; }
 

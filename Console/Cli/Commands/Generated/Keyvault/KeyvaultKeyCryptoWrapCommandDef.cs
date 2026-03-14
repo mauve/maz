@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Wraps a symmetric key using a specified key.</summary>
+/// <remarks>The WRAP operation supports encryption of a symmetric key using a key encryption key that has previously been stored in an Azure Key Vault. The WRAP operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using the public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/wrapKey permission.</remarks>
 public partial class KeyvaultKeyCryptoWrapCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "wrap";
@@ -19,15 +20,19 @@ public partial class KeyvaultKeyCryptoWrapCommandDef(AuthOptionPack auth) : Comm
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>An algorithm used for encryption and decryption.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The value to operate on.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

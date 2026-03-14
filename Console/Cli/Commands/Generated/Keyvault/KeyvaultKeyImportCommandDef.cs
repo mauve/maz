@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Imports an externally created key, stores it, and returns key parameters and attributes to the client.</summary>
+/// <remarks>The import key operation may be used to import any key type into an Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. This operation requires the keys/import permission.</remarks>
 public partial class KeyvaultKeyImportCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "import";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyImportCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Name for the imported key. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

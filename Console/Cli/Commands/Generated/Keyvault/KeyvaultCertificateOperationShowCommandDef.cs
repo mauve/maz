@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets the creation operation of a certificate.</summary>
+/// <remarks>Gets the creation operation associated with a specified certificate. This operation requires the certificates/get permission.</remarks>
 public partial class KeyvaultCertificateOperationShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateOperationShowCommandDef(AuthOptionPack a
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

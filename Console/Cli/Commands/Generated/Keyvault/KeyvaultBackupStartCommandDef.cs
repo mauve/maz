@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a full backup using a user-provided SAS token to an Azure blob storage container.</summary>
+/// <remarks>Creates a full backup using a user-provided SAS token to an Azure blob storage container.</remarks>
 public partial class KeyvaultBackupStartCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "start";
@@ -19,6 +20,7 @@ public partial class KeyvaultBackupStartCommandDef(AuthOptionPack auth) : Comman
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Azure Blob storage container Uri</summary>
     [CliOption("--storage-resource-uri", Required = true)]
     public partial string? StorageResourceUri { get; }
 

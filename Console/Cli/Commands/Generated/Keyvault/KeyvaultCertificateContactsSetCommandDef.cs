@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Sets the certificate contacts for the specified key vault.</summary>
+/// <remarks>Sets the certificate contacts for the specified key vault. This operation requires the certificates/managecontacts permission.</remarks>
 public partial class KeyvaultCertificateContactsSetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "set";

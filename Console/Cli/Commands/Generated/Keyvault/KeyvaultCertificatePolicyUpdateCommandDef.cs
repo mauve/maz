@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates the policy for a certificate.</summary>
+/// <remarks>Set specified members in the certificate policy. Leave others as null. This operation requires the certificates/update permission.</remarks>
 public partial class KeyvaultCertificatePolicyUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificatePolicyUpdateCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate in the given vault.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List keys in the specified vault.</summary>
+/// <remarks>Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a stored key. The LIST operation is applicable to all key types, however only the base key identifier, attributes, and tags are provided in the response. Individual versions of a key are not listed in the response. This operation requires the keys/list permission.</remarks>
 public partial class KeyvaultKeyListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyListCommandDef(AuthOptionPack auth) : CommandDef
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 

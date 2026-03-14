@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Azure Key Vault keys, secrets, and certificates.</summary>
+/// <remarks>Commands in this group interact with Azure Key Vault data-plane APIs to manage cryptographic keys, secrets, certificates, RBAC assignments, backup/restore, and vault settings.</remarks>
 public partial class KeyvaultCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "keyvault";

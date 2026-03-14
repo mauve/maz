@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Restores a backed up certificate to a vault.</summary>
+/// <remarks>Restores a backed up certificate, and all its versions, to a vault. This operation requires the certificates/restore permission.</remarks>
 public partial class KeyvaultCertificateRestoreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateRestoreCommandDef(AuthOptionPack auth) :
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The backup blob associated with a certificate bundle.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

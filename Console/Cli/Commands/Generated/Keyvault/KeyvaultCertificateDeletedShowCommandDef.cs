@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Retrieves information about the specified deleted certificate.</summary>
+/// <remarks>The GetDeletedCertificate operation retrieves the deleted certificate information plus its attributes, such as retention interval, scheduled permanent deletion and the current deletion recovery level. This operation requires the certificates/get permission.</remarks>
 public partial class KeyvaultCertificateDeletedShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateDeletedShowCommandDef(AuthOptionPack aut
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

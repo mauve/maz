@@ -27,6 +27,8 @@ public static class OperationCommandEmitter
             : $"{NamingEngine.KebabToPascal(op.CliName)} operation.";
 
         w.Line($"/// <summary>{EscapeXml(summary)}</summary>");
+        if (op.DetailedDescription is { Length: > 0 })
+            w.Line($"/// <remarks>{EscapeXml(op.DetailedDescription.Replace("\n", " ").Replace("\r", ""))}</remarks>");
 
         // Determine scope flags (computed here so both field decls and ExecuteAsync can use them)
         var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
@@ -65,6 +67,8 @@ public static class OperationCommandEmitter
             foreach (var param in op.CliParams)
             {
                 var requiredAttr = param.Required ? ", Required = true" : "";
+                if (!string.IsNullOrWhiteSpace(param.Description))
+                    w.Line($"/// <summary>{EscapeXml(param.Description.Replace("\n", " ").Replace("\r", ""))}</summary>");
                 w.Line($"[CliOption(\"{param.CliFlag}\"{requiredAttr})]");
                 w.Line($"public partial string? {param.PropertyName} {{ get; }}");
                 w.Line();
@@ -82,6 +86,8 @@ public static class OperationCommandEmitter
                     var nullable = $"{typeName}?";
                     var requiredAttr = bp.Required ? ", Required = true" : "";
 
+                    if (!string.IsNullOrWhiteSpace(bp.Description))
+                        w.Line($"/// <summary>{EscapeXml(bp.Description.Replace("\n", " ").Replace("\r", ""))}</summary>");
                     w.Line($"[CliOption(\"{bp.CliFlag}\"{requiredAttr})]");
                     w.Line($"public partial {nullable} {bp.PropertyName} {{ get; }}");
                     w.Line();

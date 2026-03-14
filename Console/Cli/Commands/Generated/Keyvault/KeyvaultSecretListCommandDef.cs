@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List secrets in a specified key vault.</summary>
+/// <remarks>The Get Secrets operation is applicable to the entire vault. However, only the base secret identifier and its attributes are provided in the response. Individual secret versions are not listed in the response. This operation requires the secrets/list permission.</remarks>
 public partial class KeyvaultSecretListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretListCommandDef(AuthOptionPack auth) : Command
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 

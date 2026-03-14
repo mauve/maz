@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Permanently deletes the specified key.</summary>
+/// <remarks>The Purge Deleted Key operation is applicable for soft-delete enabled vaults. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/purge permission.</remarks>
 public partial class KeyvaultKeyDeletedPurgeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "purge";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyDeletedPurgeCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

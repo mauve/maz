@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes a role assignment.</summary>
+/// <remarks>Deletes a role assignment.</remarks>
 public partial class KeyvaultRoleassignmentDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoleassignmentDeleteCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role assignment to delete.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name of the role assignment to delete.</summary>
     [CliOption("--role-assignment-name", Required = true)]
     public partial string? RoleAssignmentName { get; }
 

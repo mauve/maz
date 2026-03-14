@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Merges a certificate or a certificate chain with a key pair existing on the server.</summary>
+/// <remarks>The MergeCertificate operation performs the merging of a certificate or certificate chain with a key pair currently available in the service. This operation requires the certificates/create permission.</remarks>
 public partial class KeyvaultCertificateMergeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "merge";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateMergeCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>The certificate or the certificate chain to merge.</summary>
     [CliOption("--x5c", Required = true)]
     public partial string? X5c { get; }
 

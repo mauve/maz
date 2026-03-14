@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Requests that a backup of the specified key be downloaded to the client.</summary>
+/// <remarks>The Key Backup operation exports a key from Azure Key Vault in a protected form. Note that this operation does NOT return key material in a form that can be used outside the Azure Key Vault system, the returned key material is either protected to a Azure Key Vault HSM or to Azure Key Vault itself. The intent of this operation is to allow a client to GENERATE a key in one Azure Key Vault instance, BACKUP the key, and then RESTORE it into another Azure Key Vault instance. The BACKUP operation may be used to export, in protected form, any key type from Azure Key Vault. Individual versions of a key cannot be backed up. BACKUP / RESTORE can be performed within geographical boundaries only; meaning that a BACKUP from one geographical area cannot be restored to another geographical area. For example, a backup from the US geographical area cannot be restored in an EU geographical area. This operation requires the key/backup permission.</remarks>
 public partial class KeyvaultKeyBackupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "backup";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyBackupCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

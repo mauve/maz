@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a new key version, stores it, then returns key parameters, attributes and policy to the client.</summary>
+/// <remarks>The operation will rotate the key based on the key policy. It requires the keys/rotate permission.</remarks>
 public partial class KeyvaultKeyRotateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "rotate";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyRotateCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of key to be rotated. The system will generate a new version in the specified key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

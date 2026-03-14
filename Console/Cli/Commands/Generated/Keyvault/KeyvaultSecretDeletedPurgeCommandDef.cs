@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Permanently deletes the specified secret.</summary>
+/// <remarks>The purge deleted secret operation removes the secret permanently, without the possibility of recovery. This operation can only be enabled on a soft-delete enabled vault. This operation requires the secrets/purge permission.</remarks>
 public partial class KeyvaultSecretDeletedPurgeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "purge";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretDeletedPurgeCommandDef(AuthOptionPack auth) :
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 

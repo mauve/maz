@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates a certificate operation.</summary>
+/// <remarks>Updates a certificate creation operation that is already in progress. This operation requires the certificates/update permission.</remarks>
 public partial class KeyvaultCertificateOperationUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateOperationUpdateCommandDef(AuthOptionPack
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>Indicates if cancellation was requested on the certificate operation.</summary>
     [CliOption("--cancellation-requested", Required = true)]
     public partial bool? CancellationRequested { get; }
 

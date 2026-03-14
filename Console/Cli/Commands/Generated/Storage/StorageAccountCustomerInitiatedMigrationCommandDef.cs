@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Account Migration request can be triggered for a storage account to change its redundancy level. The migration updates the non-zonal redundant storage account to a zonal redundant account or vice-versa in order to have better reliability and availability. Zone-redundant storage (ZRS) replicates your storage account synchronously across three Azure availability zones in the primary region.</summary>
+/// <remarks>Account Migration request can be triggered for a storage account to change its redundancy level. The migration updates the non-zonal redundant storage account to a zonal redundant account or vice-versa in order to have better reliability and availability. Zone-redundant storage (ZRS) replicates your storage account synchronously across three Azure availability zones in the primary region.</remarks>
 public partial class StorageAccountCustomerInitiatedMigrationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "customer-initiated-migration";
@@ -16,6 +17,7 @@ public partial class StorageAccountCustomerInitiatedMigrationCommandDef(AuthOpti
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 

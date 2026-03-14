@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates the specified certificate issuer.</summary>
+/// <remarks>The UpdateCertificateIssuer operation performs an update on the specified certificate issuer entity. This operation requires the certificates/setissuers permission.</remarks>
 public partial class KeyvaultCertificateIssuerUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateIssuerUpdateCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the issuer.</summary>
     [CliOption("--issuer-name", Required = true)]
     public partial string? IssuerName { get; }
 

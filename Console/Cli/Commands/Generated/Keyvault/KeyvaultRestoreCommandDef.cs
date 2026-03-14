@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Restore a vault from a full backup.</summary>
+/// <remarks>Initiate selective or full restore jobs from a previously created backup stored in Azure Blob Storage.</remarks>
 public partial class KeyvaultRestoreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore";

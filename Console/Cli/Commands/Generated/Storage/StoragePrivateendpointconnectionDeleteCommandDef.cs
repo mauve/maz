@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes the specified private endpoint connection associated with the storage account.</summary>
+/// <remarks>Deletes the specified private endpoint connection associated with the storage account.</remarks>
 public partial class StoragePrivateendpointconnectionDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -16,9 +17,11 @@ public partial class StoragePrivateendpointconnectionDeleteCommandDef(AuthOption
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of the private endpoint connection associated with the Azure resource</summary>
     [CliOption("--private-endpoint-connection-name", Required = true)]
     public partial string? PrivateEndpointConnectionName { get; }
 

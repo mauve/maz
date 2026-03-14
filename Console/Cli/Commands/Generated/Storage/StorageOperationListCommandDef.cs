@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists all of the available Storage Rest API operations.</summary>
+/// <remarks>Lists all of the available Storage Rest API operations.</remarks>
 public partial class StorageOperationListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";

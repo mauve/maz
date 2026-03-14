@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Restores a backed up key to a vault.</summary>
+/// <remarks>Imports a previously backed up key into Azure Key Vault, restoring the key, its key identifier, attributes and access control policies. The RESTORE operation may be used to import a previously backed up key. Individual versions of a key cannot be restored. The key is restored in its entirety with the same key name as it had when it was backed up. If the key name is not available in the target Key Vault, the RESTORE operation will be rejected. While the key name is retained during restore, the final key identifier will change if the key is restored to a different vault. Restore will restore all versions and preserve version identifiers. The RESTORE operation is subject to security constraints: The target Key Vault must be owned by the same Microsoft Azure Subscription as the source Key Vault The user must have RESTORE permission in the target Key Vault. This operation requires the keys/restore permission.</remarks>
 public partial class KeyvaultKeyRestoreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyRestoreCommandDef(AuthOptionPack auth) : Command
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The backup blob associated with a key bundle.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

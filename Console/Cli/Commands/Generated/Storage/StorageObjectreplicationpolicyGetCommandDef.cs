@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get the object replication policy of the storage account by policy ID.</summary>
+/// <remarks>Get the object replication policy of the storage account by policy ID.</remarks>
 public partial class StorageObjectreplicationpolicyGetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get";
@@ -16,9 +17,11 @@ public partial class StorageObjectreplicationpolicyGetCommandDef(AuthOptionPack 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>For the destination account, provide the value 'default'. Configure the policy on the destination account first. For the source account, provide the value of the policy ID that is returned when you download the policy that was defined on the destination account. The policy is downloaded as a JSON file.</summary>
     [CliOption("--object-replication-policy-id", Required = true)]
     public partial string? ObjectReplicationPolicyId { get; }
 

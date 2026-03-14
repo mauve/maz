@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes a secret from a specified key vault.</summary>
+/// <remarks>The DELETE operation applies to any secret stored in Azure Key Vault. DELETE cannot be applied to an individual version of a secret. This operation requires the secrets/delete permission.</remarks>
 public partial class KeyvaultSecretDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretDeleteCommandDef(AuthOptionPack auth) : Comma
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 

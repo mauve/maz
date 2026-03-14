@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage access keys for a storage account.</summary>
+/// <remarks>List and regenerate the shared access keys that grant full control over a storage account.</remarks>
 public partial class StorageAccountKeysCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "keys";

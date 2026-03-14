@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage object replication policies between storage accounts.</summary>
+/// <remarks>Object replication asynchronously copies block blobs between a source and a destination storage account.</remarks>
 public partial class StorageObjectreplicationpolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "objectreplicationpolicy";

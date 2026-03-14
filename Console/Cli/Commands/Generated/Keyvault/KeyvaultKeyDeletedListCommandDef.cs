@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the deleted keys in the specified vault.</summary>
+/// <remarks>Retrieves a list of the keys in the Key Vault as JSON Web Key structures that contain the public part of a deleted key. This operation includes deletion-specific information. The Get Deleted Keys operation is applicable for vaults enabled for soft-delete. While the operation can be invoked on any vault, it will return an error if invoked on a non soft-delete enabled vault. This operation requires the keys/list permission.</remarks>
 public partial class KeyvaultKeyDeletedListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyDeletedListCommandDef(AuthOptionPack auth) : Com
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 

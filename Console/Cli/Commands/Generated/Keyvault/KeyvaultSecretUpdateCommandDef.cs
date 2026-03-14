@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates the attributes associated with a specified secret in a given key vault.</summary>
+/// <remarks>The UPDATE operation changes specified attributes of an existing stored secret. Attributes that are not specified in the request are left unchanged. The value of a secret itself cannot be changed. This operation requires the secrets/set permission.</remarks>
 public partial class KeyvaultSecretUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,9 +20,11 @@ public partial class KeyvaultSecretUpdateCommandDef(AuthOptionPack auth) : Comma
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 
+    /// <summary>The version of the secret.</summary>
     [CliOption("--secret-version", Required = true)]
     public partial string? SecretVersion { get; }
 

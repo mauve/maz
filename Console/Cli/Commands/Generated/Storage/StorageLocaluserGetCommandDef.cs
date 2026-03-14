@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get the local user of the storage account by username.</summary>
+/// <remarks>Get the local user of the storage account by username.</remarks>
 public partial class StorageLocaluserGetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get";
@@ -16,9 +17,11 @@ public partial class StorageLocaluserGetCommandDef(AuthOptionPack auth) : Comman
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of local user. The username must contain lowercase letters and numbers only. It must be unique only within the storage account.</summary>
     [CliOption("--username", Required = true)]
     public partial string? Username { get; }
 

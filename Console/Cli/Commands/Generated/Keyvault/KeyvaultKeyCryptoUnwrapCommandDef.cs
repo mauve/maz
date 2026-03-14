@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Unwraps a symmetric key using the specified key that was initially used for wrapping that key.</summary>
+/// <remarks>The UNWRAP operation supports decryption of a symmetric key using the target key encryption key. This operation is the reverse of the WRAP operation. The UNWRAP operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/unwrapKey permission.</remarks>
 public partial class KeyvaultKeyCryptoUnwrapCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "unwrap";
@@ -19,15 +20,19 @@ public partial class KeyvaultKeyCryptoUnwrapCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>An algorithm used for encryption and decryption.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The value to operate on.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

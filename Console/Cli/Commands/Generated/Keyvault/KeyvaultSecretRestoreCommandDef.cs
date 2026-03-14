@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Restores a backed up secret to a vault.</summary>
+/// <remarks>Restores a backed up secret, and all its versions, to a vault. This operation requires the secrets/restore permission.</remarks>
 public partial class KeyvaultSecretRestoreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretRestoreCommandDef(AuthOptionPack auth) : Comm
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The backup blob associated with a secret bundle.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

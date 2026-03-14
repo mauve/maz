@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Returns the status of restore operation</summary>
+/// <remarks>Returns the status of restore operation</remarks>
 public partial class KeyvaultRestoreShowStatusCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show-status";
@@ -19,6 +20,7 @@ public partial class KeyvaultRestoreShowStatusCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The Job Id returned part of the restore operation</summary>
     [CliOption("--job-id", Required = true)]
     public partial string? JobId { get; }
 

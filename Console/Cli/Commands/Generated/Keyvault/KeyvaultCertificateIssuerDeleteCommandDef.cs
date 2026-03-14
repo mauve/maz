@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes the specified certificate issuer.</summary>
+/// <remarks>The DeleteCertificateIssuer operation permanently removes the specified certificate issuer from the vault. This operation requires the certificates/manageissuers/deleteissuers permission.</remarks>
 public partial class KeyvaultCertificateIssuerDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateIssuerDeleteCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the issuer.</summary>
     [CliOption("--issuer-name", Required = true)]
     public partial string? IssuerName { get; }
 

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage lifecycle management policies for a storage account.</summary>
+/// <remarks>Lifecycle management policies automate transitions and deletions of blobs based on conditions you define.</remarks>
 public partial class StorageManagementpolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "managementpolicy";

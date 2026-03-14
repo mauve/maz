@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the deleted certificates in the specified vault currently available for recovery.</summary>
+/// <remarks>The GetDeletedCertificates operation retrieves the certificates in the current vault which are in a deleted state and ready for recovery or purging. This operation includes deletion-specific information. This operation requires the certificates/get/list permission. This operation can only be enabled on soft-delete enabled vaults.</remarks>
 public partial class KeyvaultCertificateDeletedListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateDeletedListCommandDef(AuthOptionPack aut
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 
+    /// <summary>Specifies whether to include certificates which are not completely provisioned.</summary>
     [CliOption("--include-pending")]
     public partial string? IncludePending { get; }
 

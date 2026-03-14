@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Recovers the deleted certificate back to its current version under /certificates.</summary>
+/// <remarks>The RecoverDeletedCertificate operation performs the reversal of the Delete operation. The operation is applicable in vaults enabled for soft-delete, and must be issued during the retention interval (available in the deleted certificate's attributes). This operation requires the certificates/recover permission.</remarks>
 public partial class KeyvaultCertificateDeletedRecoverCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "recover";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateDeletedRecoverCommandDef(AuthOptionPack 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the deleted certificate</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

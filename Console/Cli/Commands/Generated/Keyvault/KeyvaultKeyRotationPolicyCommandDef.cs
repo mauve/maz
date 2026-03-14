@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage the automatic rotation policy for a key.</summary>
+/// <remarks>View and configure the automatic key rotation schedule, including rotation period, expiry time, and notification leads.</remarks>
 public partial class KeyvaultKeyRotationPolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "rotation-policy";

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List private link resources supported by a storage account.</summary>
+/// <remarks>Enumerates the private link resource types available on a storage account.</remarks>
 public partial class StoragePrivatelinkresourceCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "privatelinkresource";

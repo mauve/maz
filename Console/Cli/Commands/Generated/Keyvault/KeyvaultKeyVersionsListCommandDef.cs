@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Retrieves a list of individual key versions with the same key name.</summary>
+/// <remarks>The full key identifier, attributes, and tags are provided in the response. This operation requires the keys/list permission.</remarks>
 public partial class KeyvaultKeyVersionsListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,9 +20,11 @@ public partial class KeyvaultKeyVersionsListCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 

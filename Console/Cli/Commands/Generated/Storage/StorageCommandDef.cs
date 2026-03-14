@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Azure Storage accounts and related resources.</summary>
+/// <remarks>Commands in this group interact with the Azure Storage resource provider to create, configure, and inspect storage accounts, their access keys, and SAS tokens.</remarks>
 public partial class StorageCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "storage";

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Recovers the deleted secret to the latest version.</summary>
+/// <remarks>Recovers the deleted secret in the specified vault. This operation can only be performed on a soft-delete enabled vault. This operation requires the secrets/recover permission.</remarks>
 public partial class KeyvaultSecretDeletedRecoverCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "recover";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretDeletedRecoverCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the deleted secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 

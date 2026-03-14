@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets information about a certificate.</summary>
+/// <remarks>Gets information about a specific certificate. This operation requires the certificates/get permission.</remarks>
 public partial class KeyvaultCertificateShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateShowCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate in the given vault.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>The version of the certificate. This URI fragment is optional. If not specified, the latest version of the certificate is returned.</summary>
     [CliOption("--certificate-version", Required = true)]
     public partial string? CertificateVersion { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Sets a secret in a specified key vault.</summary>
+/// <remarks>The SET operation adds a secret to the Azure Key Vault. If the named secret already exists, Azure Key Vault creates a new version of that secret. This operation requires the secrets/set permission.</remarks>
 public partial class KeyvaultSecretSetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "set";
@@ -19,9 +20,11 @@ public partial class KeyvaultSecretSetCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 
+    /// <summary>The value of the secret.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

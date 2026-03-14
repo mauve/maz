@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Monitor and manage an in-progress certificate operation.</summary>
+/// <remarks>Check status, cancel, or delete a pending certificate creation or renewal operation.</remarks>
 public partial class KeyvaultCertificateOperationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "operation";

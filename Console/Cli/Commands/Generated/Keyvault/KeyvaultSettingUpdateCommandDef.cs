@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates key vault account setting, stores it, then returns the setting name and value to the client.</summary>
+/// <remarks>Description of the pool setting to be updated</remarks>
 public partial class KeyvaultSettingUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,9 +20,11 @@ public partial class KeyvaultSettingUpdateCommandDef(AuthOptionPack auth) : Comm
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the account setting. Must be a valid settings option.</summary>
     [CliOption("--setting-name", Required = true)]
     public partial string? SettingName { get; }
 
+    /// <summary>The value of the pool setting.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

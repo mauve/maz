@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Show storage resource usage for a subscription.</summary>
+/// <remarks>Retrieves current usage count and limits for storage resources in a given location.</remarks>
 public partial class StorageUsageCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "usage";

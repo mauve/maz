@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Generate shared access signature (SAS) tokens for a storage account.</summary>
+/// <remarks>Generate account-level or service-level SAS tokens that grant time-limited, scoped access to storage resources.</remarks>
 public partial class StorageAccountSasCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "sas";

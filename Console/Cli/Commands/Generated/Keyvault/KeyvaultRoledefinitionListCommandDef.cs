@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get all role definitions that are applicable at scope and above.</summary>
+/// <remarks>Get all role definitions that are applicable at scope and above.</remarks>
 public partial class KeyvaultRoledefinitionListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoledefinitionListCommandDef(AuthOptionPack auth) :
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role definition.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The filter to apply on the operation. Use atScopeAndBelow filter to search below the given scope as well.</summary>
     [CliOption("--filter")]
     public partial string? Filter { get; }
 

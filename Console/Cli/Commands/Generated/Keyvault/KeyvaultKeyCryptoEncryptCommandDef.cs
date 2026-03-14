@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Encrypts an arbitrary sequence of bytes using an encryption key that is stored in a key vault.</summary>
+/// <remarks>The ENCRYPT operation encrypts an arbitrary sequence of bytes using an encryption key that is stored in Azure Key Vault. Note that the ENCRYPT operation only supports a single block of data, the size of which is dependent on the target key and the encryption algorithm to be used. The ENCRYPT operation is only strictly necessary for symmetric keys stored in Azure Key Vault since protection with an asymmetric key can be performed using public portion of the key. This operation is supported for asymmetric keys as a convenience for callers that have a key-reference but do not have access to the public key material. This operation requires the keys/encrypt permission.</remarks>
 public partial class KeyvaultKeyCryptoEncryptCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "encrypt";
@@ -19,15 +20,19 @@ public partial class KeyvaultKeyCryptoEncryptCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>An algorithm used for encryption and decryption.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The value to operate on.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

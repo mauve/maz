@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage soft-deleted storage accounts.</summary>
+/// <remarks>View and recover storage accounts that have been soft-deleted and are still within the retention period.</remarks>
 public partial class StorageDeletedaccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deletedaccount";

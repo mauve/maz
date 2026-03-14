@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes the creation operation for a specific certificate.</summary>
+/// <remarks>Deletes the creation operation for a specified certificate that is in the process of being created. The certificate is no longer created. This operation requires the certificates/update permission.</remarks>
 public partial class KeyvaultCertificateOperationDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateOperationDeleteCommandDef(AuthOptionPack
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

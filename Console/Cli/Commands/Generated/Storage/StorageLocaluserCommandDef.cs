@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage local users for SFTP on a storage account.</summary>
+/// <remarks>Local users are used for SSH File Transfer Protocol (SFTP) access to Azure Blob Storage.</remarks>
 public partial class StorageLocaluserCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "localuser";

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Asynchronously creates a new storage account with the specified parameters. If an account is already created and a subsequent create request is issued with different properties, the account properties will be updated. If an account is already created and a subsequent create or update request is issued with the exact same set of properties, the request will succeed.</summary>
+/// <remarks>Asynchronously creates a new storage account with the specified parameters. If an account is already created and a subsequent create request is issued with different properties, the account properties will be updated. If an account is already created and a subsequent create or update request is issued with the exact same set of properties, the request will succeed.</remarks>
 public partial class StorageAccountCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
@@ -16,15 +17,18 @@ public partial class StorageAccountCreateCommandDef(AuthOptionPack auth) : Comma
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
     [CliOption("--sku-name", Required = true)]
     public partial string? SkuName { get; }
 
+    /// <summary>Required. Indicates the type of storage account.</summary>
     [CliOption("--kind", Required = true)]
     public partial string? Kind { get; }
 
+    /// <summary>Required. Gets or sets the location of the resource. This will be one of the supported and registered Azure Geo Regions (e.g. West US, East US, Southeast Asia, etc.). The geo region of a resource cannot be changed once it is created, but if an identical geo region is specified on update, the request will succeed.</summary>
     [CliOption("--location", Required = true)]
     public partial string? Location { get; }
 
