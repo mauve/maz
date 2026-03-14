@@ -373,6 +373,120 @@
           ]
         }
       ]
+    },
+    {
+      "serviceDir": "resources",
+      "displayName": "resources",
+      "apiVersion": "2025-04-01",
+      "description": "Manage Azure resource groups, resources, providers, and tags.",
+      "detailedDescription": "Commands in this group interact with the Microsoft.Resources resource provider to manage resource groups, move and update generic resources, register providers, and apply tags. Foundational for any Azure deployment.",
+      "resourceDescriptions": {
+        "operation": "List available operations for the Resources resource provider.",
+        "provider": "Manage Azure resource provider registrations and metadata.",
+        "providerresourcetype": "List resource types available for a registered provider.",
+        "resource": "Manage generic Azure resources across resource groups.",
+        "resourcegroup": "Manage Azure resource groups.",
+        "tag": "Manage tags on Azure resources and resource groups."
+      },
+      "resourceDetailedDescriptions": {
+        "operation": "Enumerates all operations available from the Microsoft.Resources resource provider.",
+        "provider": "Register, unregister, and inspect Azure resource providers. Provider registration is required before creating resources of a given type.",
+        "providerresourcetype": "Lists all resource types exposed by a specific resource provider, including supported API versions and locations.",
+        "resource": "Create, update, delete, move, and validate generic Azure resources without targeting a specific resource type. Useful for scripting cross-resource operations.",
+        "resourcegroup": "Resource groups are logical containers for Azure resources. Create, update, delete, and export ARM templates for resource groups.",
+        "tag": "Apply, update, and remove tags on resources and resource groups to support cost allocation, governance, and resource organization."
+      },
+      "specFiles": [
+        "resources/resource-manager/Microsoft.Resources/resources/stable/2025-04-01/resources.json"
+      ],
+      "exclude": [],
+      "actionRenames": {
+        "Resources_Get": "show",
+        "Resources_CreateOrUpdate": "create",
+        "Resources_Delete": "delete",
+        "Resources_GetById": "show",
+        "Resources_CreateOrUpdateById": "create",
+        "Resources_DeleteById": "delete",
+        "Resources_UpdateById": "update",
+        "ResourceGroups_Get": "show",
+        "ResourceGroups_CreateOrUpdate": "create",
+        "ResourceGroups_Delete": "delete",
+        "Tags_CreateOrUpdate": "create",
+        "Tags_Delete": "delete",
+        "Tags_GetAtScope": "show",
+        "Tags_CreateOrUpdateAtScope": "create",
+        "Tags_DeleteAtScope": "delete",
+        "Tags_UpdateAtScope": "update",
+        "Tags_CreateOrUpdateValue": "create",
+        "Tags_DeleteValue": "delete",
+        "Providers_Get": "show",
+        "Providers_GetAtTenantScope": "show-at-tenant-scope",
+        "Providers_ProviderPermissions": "show-permissions"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Resources_List",
+          "resourceGroupOperationId": "Resources_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "subgroups": [
+        {
+          "resource": "resource",
+          "subgroupCliName": "id",
+          "description": "Manage resources by full ARM resource ID.",
+          "detailedDescription": "Create, update, delete, and retrieve Azure resources using their full ARM resource ID rather than path components.",
+          "operationIds": [
+            "Resources_GetById",
+            "Resources_CreateOrUpdateById",
+            "Resources_DeleteById",
+            "Resources_UpdateById"
+          ]
+        },
+        {
+          "resource": "resource",
+          "subgroupCliName": "move",
+          "description": "Move or validate moving resources to a different resource group or subscription.",
+          "detailedDescription": "Move resources to another resource group or subscription. Use validate first to confirm the move is supported.",
+          "operationIds": [
+            "Resources_MoveResources",
+            "Resources_ValidateMoveResources"
+          ]
+        },
+        {
+          "resource": "provider",
+          "subgroupCliName": "tenant",
+          "description": "Manage resource providers at tenant scope.",
+          "detailedDescription": "Register providers and list available resource types at the management group or tenant level.",
+          "operationIds": [
+            "Providers_RegisterAtManagementGroupScope",
+            "Providers_ListAtTenantScope",
+            "Providers_GetAtTenantScope"
+          ]
+        },
+        {
+          "resource": "tag",
+          "subgroupCliName": "scope",
+          "description": "Manage tags at an arbitrary resource scope.",
+          "detailedDescription": "Get, create, update, and delete the full set of tags on any resource by its ARM scope URI.",
+          "operationIds": [
+            "Tags_GetAtScope",
+            "Tags_CreateOrUpdateAtScope",
+            "Tags_DeleteAtScope",
+            "Tags_UpdateAtScope"
+          ]
+        },
+        {
+          "resource": "tag",
+          "subgroupCliName": "value",
+          "description": "Manage predefined tag values for a tag name.",
+          "detailedDescription": "Add or remove specific values from a tag name's predefined list at the subscription level.",
+          "operationIds": [
+            "Tags_CreateOrUpdateValue",
+            "Tags_DeleteValue"
+          ]
+        }
+      ]
     }
   ]
 }
