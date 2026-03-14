@@ -19,10 +19,8 @@ public class GlobalBehaviorOptionPack : OptionPack
     )
     {
         DefaultValueFactory = _ =>
-            bool.TryParse(
-                Environment.GetEnvironmentVariable("MAZ_REQUIRE_CONFIRMATION"),
-                out var v
-            ) && v,
+            bool.TryParse(Environment.GetEnvironmentVariable("MAZ_REQUIRE_CONFIRMATION"), out var v)
+            && v,
     };
 
     /// <summary>Whether destructive-operation confirmation is required.</summary>

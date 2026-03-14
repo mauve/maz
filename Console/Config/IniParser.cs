@@ -10,7 +10,9 @@ internal static class IniParser
     /// <summary>Parses INI text and returns section → key → raw value.</summary>
     public static Dictionary<string, Dictionary<string, string>> Parse(string text)
     {
-        var result = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+        var result = new Dictionary<string, Dictionary<string, string>>(
+            StringComparer.OrdinalIgnoreCase
+        );
         var currentSection = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         var currentName = "";
         result[currentName] = currentSection;
@@ -29,7 +31,9 @@ internal static class IniParser
                 currentName = line[1..^1].Trim();
                 if (!result.TryGetValue(currentName, out currentSection!))
                 {
-                    currentSection = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    currentSection = new Dictionary<string, string>(
+                        StringComparer.OrdinalIgnoreCase
+                    );
                     result[currentName] = currentSection;
                 }
                 continue;

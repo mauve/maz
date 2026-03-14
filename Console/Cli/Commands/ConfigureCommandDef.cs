@@ -20,7 +20,9 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(_interactive.Interactive);
+        var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(
+            _interactive.Interactive
+        );
         if (!isInteractive)
         {
             System.Console.Error.WriteLine(
@@ -51,7 +53,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         for (var i = 0; i < allSubs.Count; i++)
         {
             var (name, id) = allSubs[i];
-            System.Console.WriteLine($"  [{i + 1}] {name,-30} (/s/{name}:{id})");
+            System.Console.WriteLine($"  [{i + 1}] {name, -30} (/s/{name}:{id})");
         }
 
         System.Console.Write(
@@ -65,11 +67,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         {
             foreach (var part in allowInput.Split(','))
             {
-                if (
-                    int.TryParse(part.Trim(), out var idx)
-                    && idx >= 1
-                    && idx <= allSubs.Count
-                )
+                if (int.TryParse(part.Trim(), out var idx) && idx >= 1 && idx <= allSubs.Count)
                 {
                     var (name, id) = allSubs[idx - 1];
                     allowedSubs.Add($"/s/{name}:{id}");
@@ -86,21 +84,22 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         // Step 2/5: Default subscription
         System.Console.WriteLine("Step 2/5: Default subscription");
-        var subChoices = allowedSubs.Count > 0
-            ? allowedSubs
-            : allSubs.Select(s => $"/s/{s.Name}:{s.Id}").ToList();
-        var subNames = allowedSubs.Count > 0
-            ? allowedSubNames
-            : allSubs.Select(s => s.Name).ToList();
+        var subChoices =
+            allowedSubs.Count > 0
+                ? allowedSubs
+                : allSubs.Select(s => $"/s/{s.Name}:{s.Id}").ToList();
+        var subNames =
+            allowedSubs.Count > 0 ? allowedSubNames : allSubs.Select(s => s.Name).ToList();
 
         var currentDefaultSub = existing.GlobalDefaults.TryGetValue("subscription-id", out var cds)
             ? cds
             : null;
         for (var i = 0; i < subChoices.Count; i++)
         {
-            var marker = currentDefaultSub is not null && subChoices[i] == currentDefaultSub
-                ? " [current]"
-                : "";
+            var marker =
+                currentDefaultSub is not null && subChoices[i] == currentDefaultSub
+                    ? " [current]"
+                    : "";
             System.Console.WriteLine($"  [{i + 1}] {subNames[i]}{marker}");
         }
         System.Console.Write("Select default (blank = none): ");
@@ -153,7 +152,9 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         // Step 4/5: Default output format
         System.Console.WriteLine("Step 4/5: Default output format");
         var formats = new[] { "column", "json", "json-pretty", "text" };
-        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf) ? cf : "column";
+        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf)
+            ? cf
+            : "column";
         for (var i = 0; i < formats.Length; i++)
         {
             var marker = formats[i] == currentFormat ? " [current]" : "";
@@ -210,7 +211,14 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         }
         System.Console.WriteLine();
 
-        WriteConfigFile(configPath, allowedSubs, defaultSubscription, defaultRg, defaultFormat, requireConfirmation);
+        WriteConfigFile(
+            configPath,
+            allowedSubs,
+            defaultSubscription,
+            defaultRg,
+            defaultFormat,
+            requireConfirmation
+        );
         System.Console.WriteLine($"Configuration written to {configPath}");
 
         return 0;
@@ -265,9 +273,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         else
             w.WriteLine("; resource-group = my-rg");
         w.WriteLine($"format = {defaultFormat}");
-        w.WriteLine(
-            $"require-confirmation = {requireConfirmation.ToString().ToLowerInvariant()}"
-        );
+        w.WriteLine($"require-confirmation = {requireConfirmation.ToString().ToLowerInvariant()}");
         w.WriteLine();
 
         w.WriteLine("; Per-command overrides: [cmd.COMMAND PATH]");

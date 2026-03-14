@@ -188,12 +188,18 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
             // Apply allow-list filter
             if (
                 config.AllowedSubscriptions.Count > 0
-                && !config.AllowedSubscriptions.Any(h => SubscriptionOptionPack.SubscriptionMatchesHint(sub.Data, h))
+                && !config.AllowedSubscriptions.Any(h =>
+                    SubscriptionOptionPack.SubscriptionMatchesHint(sub.Data, h)
+                )
             )
                 continue;
 
             // Apply deny-list filter
-            if (config.DisallowedSubscriptions.Any(h => SubscriptionOptionPack.SubscriptionMatchesHint(sub.Data, h)))
+            if (
+                config.DisallowedSubscriptions.Any(h =>
+                    SubscriptionOptionPack.SubscriptionMatchesHint(sub.Data, h)
+                )
+            )
                 continue;
 
             var name = sub.Data.DisplayName ?? "";

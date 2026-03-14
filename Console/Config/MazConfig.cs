@@ -44,7 +44,10 @@ public sealed class MazConfig
     // [cmd.X] — command path → option name → value
 
     /// <summary>Per-command default values. Key is the full command path (e.g. "storage account list").</summary>
-    public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> CommandDefaults { get; init; } =
+    public IReadOnlyDictionary<
+        string,
+        IReadOnlyDictionary<string, string>
+    > CommandDefaults { get; init; } =
         FrozenDictionary<string, IReadOnlyDictionary<string, string>>.Empty;
 
     /// <summary>
@@ -92,7 +95,10 @@ public sealed class MazConfig
         var xdgConfig = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
         var configBase = !string.IsNullOrWhiteSpace(xdgConfig)
             ? xdgConfig
-            : Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config");
+            : Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                ".config"
+            );
 
         return Path.Combine(configBase, ".maz", "user-config.ini");
     }
@@ -136,11 +142,7 @@ public sealed class MazConfig
                 return [];
             if (!sec.TryGetValue(key, out var val))
                 return [];
-            return val
-                .Split(',')
-                .Select(x => x.Trim())
-                .Where(x => x.Length > 0)
-                .ToList();
+            return val.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
         }
 
         var cmdDefaults = new Dictionary<string, IReadOnlyDictionary<string, string>>(
@@ -155,10 +157,12 @@ public sealed class MazConfig
             cmdDefaults[cmdPath] = sectionData.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
         }
 
-        IReadOnlyDictionary<string, string> globalDefaults =
-            sections.TryGetValue("global", out var globalSec)
-                ? globalSec.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase)
-                : FrozenDictionary<string, string>.Empty;
+        IReadOnlyDictionary<string, string> globalDefaults = sections.TryGetValue(
+            "global",
+            out var globalSec
+        )
+            ? globalSec.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase)
+            : FrozenDictionary<string, string>.Empty;
 
         return new MazConfig
         {

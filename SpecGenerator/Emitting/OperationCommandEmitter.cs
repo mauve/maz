@@ -92,10 +92,15 @@ public static class OperationCommandEmitter
                 // CLI params (path params other than subscription/rg, plus query params)
                 foreach (var param in op.CliParams)
                 {
-                    if (usesStorageAccount
+                    if (
+                        usesStorageAccount
                         && param.ParamIn == "path"
-                        && param.UrlParameterName.Equals("accountName", StringComparison.OrdinalIgnoreCase))
-                        continue;  // absorbed by StorageAccountOptionPack
+                        && param.UrlParameterName.Equals(
+                            "accountName",
+                            StringComparison.OrdinalIgnoreCase
+                        )
+                    )
+                        continue; // absorbed by StorageAccountOptionPack
 
                     var requiredAttr = param.Required ? ", Required = true" : "";
                     if (!string.IsNullOrWhiteSpace(param.Description))
@@ -282,16 +287,26 @@ public static class OperationCommandEmitter
 
         if (usesStorageAccount)
         {
-            expr = expr
-                .Replace("{subscriptionId}", "{StorageAccount.Subscription.RequireSubscriptionId()}", StringComparison.OrdinalIgnoreCase)
-                .Replace("{resourceGroupName}", "{StorageAccount.ResourceGroup.RequireResourceGroupName()}", StringComparison.OrdinalIgnoreCase)
-                .Replace("{accountName}", "{StorageAccount.RequireAccountName()}", StringComparison.OrdinalIgnoreCase);
+            expr = expr.Replace(
+                    "{subscriptionId}",
+                    "{StorageAccount.Subscription.RequireSubscriptionId()}",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                .Replace(
+                    "{resourceGroupName}",
+                    "{StorageAccount.ResourceGroup.RequireResourceGroupName()}",
+                    StringComparison.OrdinalIgnoreCase
+                )
+                .Replace(
+                    "{accountName}",
+                    "{StorageAccount.RequireAccountName()}",
+                    StringComparison.OrdinalIgnoreCase
+                );
         }
         else
         {
             // Replace known absorbed params with option-pack calls
-            expr = expr
-                .Replace(
+            expr = expr.Replace(
                     "{subscriptionId}",
                     usesResourceGroup ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
                         : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
