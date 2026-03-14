@@ -17,6 +17,7 @@ public partial class RootCommandDef
     public NetworkCommandDef Network = null!;
     public PostgresqlCommandDef Postgresql = null!;
     public MysqlCommandDef Mysql = null!;
+    public CosmosdbCommandDef Cosmosdb = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -30,5 +31,6 @@ public partial class RootCommandDef
         Network = new NetworkCommandDef(Auth);
         Postgresql = new PostgresqlCommandDef(Auth);
         Mysql = new MysqlCommandDef(Auth);
+        Cosmosdb = new CosmosdbCommandDef(Auth);
     }
 }

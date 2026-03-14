@@ -1124,6 +1124,97 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "cosmos-db",
+      "displayName": "cosmosdb",
+      "apiVersion": "2025-10-15",
+      "description": "Manage Azure Cosmos DB accounts and multi-model database resources.",
+      "detailedDescription": "Covers Cosmos DB account lifecycle (create, update, delete, failover, region management) and all API-specific resources: SQL containers, MongoDB databases/collections, Cassandra keyspaces/tables, Gremlin databases/graphs, and Table API tables. Also manages throughput, autoscale migration, and account keys. Requires Contributor or Cosmos DB Operator roles.",
+      "specFiles": [
+        "cosmos-db/resource-manager/Microsoft.DocumentDB/DocumentDB/stable/2025-10-15/cosmos-db.json"
+      ],
+      "resourceDescriptions": {
+        "cassandraresource": "Manage Cassandra API keyspaces and tables in an Azure Cosmos DB account.",
+        "collection": "List metrics and usages for a Cosmos DB collection.",
+        "collection-partition": "List partition-level metrics and usages for a Cosmos DB collection.",
+        "collection-partition-region": "List partition-level metrics for a Cosmos DB collection in a specific region.",
+        "collection-region": "List region-level metrics for a Cosmos DB collection.",
+        "database": "List metrics and usages for a Cosmos DB database.",
+        "database-account-region": "List metrics for a Cosmos DB account in a specific region.",
+        "databaseaccount": "Manage Azure Cosmos DB database accounts.",
+        "gremlinresource": "Manage Gremlin API databases and graphs in an Azure Cosmos DB account.",
+        "location": "List and get Azure locations available for Cosmos DB.",
+        "mongodbresource": "Manage MongoDB API databases and collections in an Azure Cosmos DB account.",
+        "partition-key-range-id": "List metrics for a specific partition key range in a Cosmos DB collection.",
+        "partition-key-range-id-region": "List metrics for a specific partition key range in a Cosmos DB collection in a specific region.",
+        "percentile": "List percentile metrics for an Azure Cosmos DB account.",
+        "percentile-source-target": "List percentile metrics between source and target regions for a Cosmos DB account.",
+        "percentile-target": "List percentile metrics for a target region of a Cosmos DB account.",
+        "sqlresource": "Manage SQL API databases, containers, stored procedures, triggers, and user-defined functions.",
+        "tableresource": "Manage Table API tables in an Azure Cosmos DB account."
+      },
+      "resourceDetailedDescriptions": {
+        "cassandraresource": "Manage Cassandra keyspaces and tables including throughput configuration and autoscale/manual throughput migration.",
+        "collection": "Retrieve usage and metric data for a specific database collection for monitoring and capacity planning.",
+        "collection-partition": "Retrieve per-partition metrics and usage data for detailed performance analysis of a Cosmos DB collection.",
+        "collection-partition-region": "Retrieve partition-level metrics scoped to a specific Azure region for geo-distributed collections.",
+        "collection-region": "Retrieve collection-level metrics scoped to a specific Azure region in a geo-distributed Cosmos DB account.",
+        "database": "Retrieve metric and usage data for a Cosmos DB database for monitoring and diagnostics.",
+        "database-account-region": "Retrieve account-level metrics scoped to a specific Azure region for geo-distributed Cosmos DB accounts.",
+        "databaseaccount": "Full lifecycle management of Cosmos DB accounts: create, update, delete, failover, manage regions, list keys and connection strings, and regenerate keys.",
+        "gremlinresource": "Manage Gremlin databases and graphs including throughput configuration and autoscale/manual throughput migration.",
+        "location": "Enumerate Azure regions where Cosmos DB is available and inspect location-specific capabilities.",
+        "mongodbresource": "Manage MongoDB databases and collections including throughput configuration and autoscale/manual throughput migration.",
+        "partition-key-range-id": "Retrieve metrics for a specific partition key range to diagnose hot partitions and data distribution issues.",
+        "partition-key-range-id-region": "Retrieve region-scoped partition key range metrics for geo-distributed Cosmos DB accounts.",
+        "percentile": "Retrieve latency percentile metrics (P50, P75, P95, P99) for a Cosmos DB account.",
+        "percentile-source-target": "Retrieve cross-region replication latency percentiles between source and target regions.",
+        "percentile-target": "Retrieve replication latency percentile metrics for a specific target region.",
+        "sqlresource": "Manage SQL API databases, containers, stored procedures, triggers, and UDFs including throughput and autoscale configuration.",
+        "tableresource": "Manage Table API tables including throughput configuration and autoscale/manual throughput migration."
+      },
+      "actionRenames": {
+        "DatabaseAccounts_Get": "show",
+        "DatabaseAccounts_CreateOrUpdate": "create",
+        "DatabaseAccounts_GetReadOnlyKeys": "show-readonly-keys",
+        "DatabaseAccounts_ListByResourceGroup": "list",
+        "Locations_Get": "show",
+        "CassandraResources_GetCassandraKeyspace": "show-keyspace",
+        "CassandraResources_CreateUpdateCassandraKeyspace": "create-keyspace",
+        "CassandraResources_DeleteCassandraKeyspace": "delete-keyspace",
+        "CassandraResources_GetCassandraKeyspaceThroughput": "show-keyspace-throughput",
+        "CassandraResources_GetCassandraTable": "show-table",
+        "CassandraResources_CreateUpdateCassandraTable": "create-table",
+        "CassandraResources_DeleteCassandraTable": "delete-table",
+        "CassandraResources_GetCassandraTableThroughput": "show-table-throughput",
+        "GremlinResources_GetGremlinDatabase": "show-database",
+        "GremlinResources_CreateUpdateGremlinDatabase": "create-database",
+        "GremlinResources_DeleteGremlinDatabase": "delete-database",
+        "GremlinResources_GetGremlinDatabaseThroughput": "show-database-throughput",
+        "GremlinResources_GetGremlinGraph": "show-graph",
+        "GremlinResources_CreateUpdateGremlinGraph": "create-graph",
+        "GremlinResources_DeleteGremlinGraph": "delete-graph",
+        "GremlinResources_GetGremlinGraphThroughput": "show-graph-throughput",
+        "MongoDBResources_GetMongoDBDatabase": "show-database",
+        "MongoDBResources_CreateUpdateMongoDBDatabase": "create-database",
+        "MongoDBResources_DeleteMongoDBDatabase": "delete-database",
+        "MongoDBResources_GetMongoDBDatabaseThroughput": "show-database-throughput",
+        "MongoDBResources_GetMongoDBCollection": "show-collection",
+        "MongoDBResources_CreateUpdateMongoDBCollection": "create-collection",
+        "MongoDBResources_DeleteMongoDBCollection": "delete-collection",
+        "MongoDBResources_GetMongoDBCollectionThroughput": "show-collection-throughput"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "DatabaseAccounts_List",
+          "resourceGroupOperationId": "DatabaseAccounts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
