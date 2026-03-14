@@ -61,6 +61,12 @@ public partial class RootCommandDef
     public StreamanalyticsCommandDef Streamanalytics = null!;
     public DatalakeanalyticsCommandDef Datalakeanalytics = null!;
     public DatalakestoreCommandDef Datalakestore = null!;
+    public IothubCommandDef Iothub = null!;
+    public IothubdpsCommandDef Iothubdps = null!;
+    public IotcentralCommandDef Iotcentral = null!;
+    public DigitaltwinsCommandDef Digitaltwins = null!;
+    public DeviceupdateCommandDef Deviceupdate = null!;
+    public DeviceregistryCommandDef Deviceregistry = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -118,5 +124,11 @@ public partial class RootCommandDef
         Streamanalytics = new StreamanalyticsCommandDef(Auth);
         Datalakeanalytics = new DatalakeanalyticsCommandDef(Auth);
         Datalakestore = new DatalakestoreCommandDef(Auth);
+        Iothub = new IothubCommandDef(Auth);
+        Iothubdps = new IothubdpsCommandDef(Auth);
+        Iotcentral = new IotcentralCommandDef(Auth);
+        Digitaltwins = new DigitaltwinsCommandDef(Auth);
+        Deviceupdate = new DeviceupdateCommandDef(Auth);
+        Deviceregistry = new DeviceregistryCommandDef(Auth);
     }
 }

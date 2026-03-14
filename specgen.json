@@ -4592,6 +4592,394 @@
         "Locations_GetCapability",
         "Locations_GetUsage"
       ]
+    },
+    {
+      "serviceDir": "iothub",
+      "displayName": "iothub",
+      "apiVersion": "2023-06-30",
+      "description": "Manage Azure IoT Hub instances, certificates, consumer groups, and routing",
+      "detailedDescription": "Covers IoT Hub lifecycle management, X.509 certificate management, Event Hub consumer groups, device import/export jobs, routing configuration tests, quota metrics, and endpoint health monitoring. Requires IoT Hub Contributor or Owner role.",
+      "specFiles": [
+        "iothub/resource-manager/Microsoft.Devices/IoTHub/stable/2023-06-30/iothub.json"
+      ],
+      "resourceDescriptions": {
+        "resource": "IoT Hub instances",
+        "certificate": "X.509 certificates for device authentication",
+        "iot-hub": "IoT Hub failover and management operations",
+        "privateendpointconnection": "Private endpoint connections",
+        "privatelinkresource": "Available private link resources"
+      },
+      "resourceDetailedDescriptions": {
+        "resource": "The main IoT Hub resource. Use create-or-update to provision with SKU (F1, S1, S2, S3), capacity units, and feature settings.",
+        "certificate": "X.509 CA certificates for device enrollment. Use generate-verification-code and verify to complete proof-of-possession.",
+        "iot-hub": "Supports manual failover to the paired region for disaster recovery testing.",
+        "privateendpointconnection": "Approve or reject private endpoint connections to secure IoT Hub access.",
+        "privatelinkresource": "Lists the private link subresources available for this IoT Hub."
+      },
+      "actionRenames": {
+        "IotHubResource_Get": "show",
+        "IotHubResource_CreateOrUpdate": "create",
+        "IotHubResource_Update": "update",
+        "IotHubResource_Delete": "delete",
+        "IotHubResource_ListBySubscription": "list",
+        "IotHubResource_ListByResourceGroup": "list",
+        "IotHubResource_GetStats": "get-stats",
+        "IotHubResource_GetValidSkus": "list-skus",
+        "IotHubResource_ListEventHubConsumerGroups": "list-consumer-groups",
+        "IotHubResource_GetEventHubConsumerGroup": "get-consumer-group",
+        "IotHubResource_CreateEventHubConsumerGroup": "create-consumer-group",
+        "IotHubResource_DeleteEventHubConsumerGroup": "delete-consumer-group",
+        "IotHubResource_ListJobs": "list-jobs",
+        "IotHubResource_GetJob": "get-job",
+        "IotHubResource_GetQuotaMetrics": "list-quota-metrics",
+        "IotHubResource_GetEndpointHealth": "list-endpoint-health",
+        "IotHubResource_CheckNameAvailability": "check-name",
+        "IotHubResource_TestAllRoutes": "test-all-routes",
+        "IotHubResource_TestRoute": "test-route",
+        "IotHubResource_ListKeys": "list-keys",
+        "IotHubResource_GetKeysForKeyName": "get-key",
+        "IotHubResource_ExportDevices": "export-devices",
+        "IotHubResource_ImportDevices": "import-devices",
+        "Certificates_ListByIotHub": "list",
+        "Certificates_Get": "show",
+        "Certificates_CreateOrUpdate": "create",
+        "Certificates_Delete": "delete",
+        "Certificates_GenerateVerificationCode": "generate-verification-code",
+        "Certificates_Verify": "verify",
+        "IotHub_ManualFailover": "failover",
+        "PrivateEndpointConnections_List": "list",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_Update": "update",
+        "PrivateEndpointConnections_Delete": "delete"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "IotHubResource_ListBySubscription",
+          "resourceGroupOperationId": "IotHubResource_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "PrivateLinkResources_List",
+        "PrivateLinkResources_Get",
+        "ResourceProviderCommon_GetSubscriptionQuota"
+      ]
+    },
+    {
+      "serviceDir": "deviceprovisioningservices",
+      "displayName": "iothubdps",
+      "apiVersion": "2022-12-12",
+      "description": "Manage Azure IoT Hub Device Provisioning Service instances and certificates",
+      "detailedDescription": "Covers IoT Hub DPS lifecycle management, X.509 certificate management with proof-of-possession, shared access key management, and private endpoint connectivity. Requires IoT Hub Contributor or Owner role.",
+      "specFiles": [
+        "deviceprovisioningservices/resource-manager/Microsoft.Devices/DeviceProvisioningServices/stable/2022-12-12/iotdps.json"
+      ],
+      "resourceDescriptions": {
+        "iot-dps-resource": "Device Provisioning Service instances",
+        "dps-certificate": "X.509 CA certificates for device provisioning"
+      },
+      "resourceDetailedDescriptions": {
+        "iot-dps-resource": "The top-level DPS resource. Use create-or-update to provision with SKU (S1), capacity units, and linked IoT Hubs.",
+        "dps-certificate": "X.509 CA certificates used to auto-enroll devices. Use generate-verification-code and verify to complete proof-of-possession."
+      },
+      "actionRenames": {
+        "IotDpsResource_Get": "show",
+        "IotDpsResource_CreateOrUpdate": "create",
+        "IotDpsResource_Update": "update",
+        "IotDpsResource_Delete": "delete",
+        "IotDpsResource_ListBySubscription": "list",
+        "IotDpsResource_ListByResourceGroup": "list",
+        "IotDpsResource_GetOperationResult": "get-operation-status",
+        "IotDpsResource_ListValidSkus": "list-skus",
+        "IotDpsResource_CheckProvisioningServiceNameAvailability": "check-name",
+        "IotDpsResource_ListKeys": "list-keys",
+        "IotDpsResource_ListKeysForKeyName": "get-key",
+        "DpsCertificate_Get": "show",
+        "DpsCertificate_CreateOrUpdate": "create",
+        "DpsCertificate_Delete": "delete",
+        "DpsCertificate_List": "list",
+        "DpsCertificate_GenerateVerificationCode": "generate-verification-code",
+        "DpsCertificate_VerifyCertificate": "verify"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "IotDpsResource_ListBySubscription",
+          "resourceGroupOperationId": "IotDpsResource_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "DpsCertificate_VerifyCertificate",
+        "IotDpsResource_ListPrivateLinkResources",
+        "IotDpsResource_GetPrivateLinkResources",
+        "IotDpsResource_ListPrivateEndpointConnections",
+        "IotDpsResource_GetPrivateEndpointConnection",
+        "IotDpsResource_CreateOrUpdatePrivateEndpointConnection",
+        "IotDpsResource_DeletePrivateEndpointConnection"
+      ]
+    },
+    {
+      "serviceDir": "iotcentral",
+      "displayName": "iotcentral",
+      "apiVersion": "2021-06-01",
+      "description": "Manage Azure IoT Central application instances",
+      "detailedDescription": "Covers IoT Central SaaS application lifecycle management including subdomain and name availability checks and application template listing. For device management and data export within an application, use the IoT Central REST API.",
+      "specFiles": [
+        "iotcentral/resource-manager/Microsoft.IoTCentral/IoTCentral/stable/2021-06-01/iotcentral.json"
+      ],
+      "resourceDescriptions": {
+        "app": "IoT Central application instances"
+      },
+      "resourceDetailedDescriptions": {
+        "app": "An IoT Central application with its own subdomain. Use create-or-update to provision from a template with display name, SKU (ST0, ST1, ST2), and subdomain."
+      },
+      "actionRenames": {
+        "Apps_Get": "show",
+        "Apps_CreateOrUpdate": "create",
+        "Apps_Update": "update",
+        "Apps_Delete": "delete",
+        "Apps_ListBySubscription": "list",
+        "Apps_ListByResourceGroup": "list",
+        "Apps_CheckNameAvailability": "check-name",
+        "Apps_CheckSubdomainAvailability": "check-subdomain",
+        "Apps_ListTemplates": "list-templates"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Apps_ListBySubscription",
+          "resourceGroupOperationId": "Apps_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "digitaltwins",
+      "displayName": "digitaltwins",
+      "apiVersion": "2023-01-31",
+      "description": "Manage Azure Digital Twins instances, endpoints, and time series database connections",
+      "detailedDescription": "Covers Digital Twins instance lifecycle management, event routing endpoint configuration (Event Hub, Service Bus, Event Grid), time series database (Azure Data Explorer) connections, and private endpoint connectivity.",
+      "specFiles": [
+        "digitaltwins/resource-manager/Microsoft.DigitalTwins/DigitalTwins/stable/2023-01-31/digitaltwins.json"
+      ],
+      "resourceDescriptions": {
+        "digitaltwin": "Azure Digital Twins instances",
+        "endpoint": "Event routing endpoints for Digital Twins",
+        "timeseriesdatabaseconnection": "Time series database connections (Azure Data Explorer)",
+        "privateendpointconnection": "Private endpoint connections"
+      },
+      "resourceDetailedDescriptions": {
+        "digitaltwin": "The top-level Digital Twins resource. Use create-or-update to provision in a region with identity settings.",
+        "endpoint": "Routes Digital Twins events to external services — Event Hub, Service Bus topic, or Event Grid Topic.",
+        "timeseriesdatabaseconnection": "Connects a Digital Twins instance to an Azure Data Explorer cluster for time series data storage and query.",
+        "privateendpointconnection": "Manage private endpoint connections for secure Digital Twins API access."
+      },
+      "actionRenames": {
+        "DigitalTwins_Get": "show",
+        "DigitalTwins_CreateOrUpdate": "create",
+        "DigitalTwins_Update": "update",
+        "DigitalTwins_Delete": "delete",
+        "DigitalTwins_List": "list",
+        "DigitalTwins_ListByResourceGroup": "list",
+        "DigitalTwins_CheckNameAvailability": "check-name",
+        "DigitalTwinsEndpoint_List": "list",
+        "DigitalTwinsEndpoint_Get": "show",
+        "DigitalTwinsEndpoint_CreateOrUpdate": "create",
+        "DigitalTwinsEndpoint_Delete": "delete",
+        "TimeSeriesDatabaseConnections_List": "list",
+        "TimeSeriesDatabaseConnections_Get": "show",
+        "TimeSeriesDatabaseConnections_CreateOrUpdate": "create",
+        "TimeSeriesDatabaseConnections_Delete": "delete",
+        "PrivateEndpointConnections_List": "list",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Delete": "delete"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "DigitalTwins_List",
+          "resourceGroupOperationId": "DigitalTwins_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "PrivateLinkResources_List",
+        "PrivateLinkResources_Get"
+      ]
+    },
+    {
+      "serviceDir": "deviceupdate",
+      "displayName": "deviceupdate",
+      "apiVersion": "2023-07-01",
+      "description": "Manage Azure Device Update for IoT Hub accounts and instances",
+      "detailedDescription": "Covers Device Update account and instance lifecycle management for over-the-air (OTA) firmware updates to IoT devices. Requires Device Update Administrator role.",
+      "specFiles": [
+        "deviceupdate/resource-manager/Microsoft.DeviceUpdate/stable/2023-07-01/deviceupdate.json"
+      ],
+      "resourceDescriptions": {
+        "account": "Device Update account instances",
+        "instance": "Device Update instances within an account"
+      },
+      "resourceDetailedDescriptions": {
+        "account": "Top-level Device Update resource. Use create to provision an account in a region; accounts can contain multiple instances.",
+        "instance": "A deployment environment within a Device Update account, linked to specific IoT Hubs for OTA update targeting."
+      },
+      "actionRenames": {
+        "Accounts_ListBySubscription": "list",
+        "Accounts_ListByResourceGroup": "list",
+        "Accounts_Get": "show",
+        "Accounts_Create": "create",
+        "Accounts_Delete": "delete",
+        "Accounts_Update": "update",
+        "Instances_ListByAccount": "list",
+        "Instances_Get": "show",
+        "Instances_Create": "create",
+        "Instances_Delete": "delete",
+        "Instances_Update": "update"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Accounts_ListBySubscription",
+          "resourceGroupOperationId": "Accounts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "CheckNameAvailability_CheckNameAvailability",
+        "PrivateEndpointConnections_ListByAccount",
+        "PrivateEndpointConnections_Get",
+        "PrivateEndpointConnections_CreateOrUpdate",
+        "PrivateEndpointConnections_Delete",
+        "PrivateEndpointConnectionProxies_ListByAccount",
+        "PrivateEndpointConnectionProxies_Validate",
+        "PrivateEndpointConnectionProxies_UpdatePrivateEndpointProperties",
+        "PrivateEndpointConnectionProxies_Get",
+        "PrivateEndpointConnectionProxies_CreateOrUpdate",
+        "PrivateEndpointConnectionProxies_Delete",
+        "PrivateLinkResources_ListByAccount",
+        "PrivateLinkResources_Get"
+      ]
+    },
+    {
+      "serviceDir": "deviceregistry",
+      "displayName": "deviceregistry",
+      "apiVersion": "2025-10-01",
+      "description": "Manage Azure Device Registry assets, asset endpoint profiles, and schema registries",
+      "detailedDescription": "Covers the Azure Device Registry resource hierarchy for industrial IoT: assets (OPC UA, MQTT devices), asset endpoint profiles (connectivity), schema registries for data modeling, and namespace-scoped resources for device and discovered asset management.",
+      "specFiles": [
+        "deviceregistry/resource-manager/Microsoft.DeviceRegistry/stable/2025-10-01/deviceregistry.json"
+      ],
+      "resourceDescriptions": {
+        "asset": "IoT assets representing physical devices or OPC UA nodes",
+        "assetendpointprofile": "Connectivity profiles for asset endpoint communication",
+        "schemaregistry": "Schema registries for data model definitions",
+        "schema": "Data schemas within a schema registry",
+        "schemaversion": "Versioned schema definitions",
+        "namespace": "Device Registry namespaces for organizing assets and devices",
+        "namespaceasset": "Assets scoped to a namespace",
+        "namespacedevice": "Devices scoped to a namespace",
+        "billingcontainer": "Billing containers for usage tracking"
+      },
+      "resourceDetailedDescriptions": {
+        "asset": "Represents an OPC UA server, MQTT topic, or other industrial device. Contains data points, events, and connectivity settings.",
+        "assetendpointprofile": "Defines the transport protocol and authentication for connecting to an asset endpoint (OPC UA, MQTT, etc.).",
+        "schemaregistry": "A container for data schemas used to define the structure of telemetry and events from assets.",
+        "schema": "A named schema within a registry, grouping multiple versions.",
+        "schemaversion": "An immutable version of a schema with the actual schema content (JSON Schema, Delta schema, etc.).",
+        "namespace": "An organizational scope for grouping assets and devices within a resource group. Use migrate to upgrade namespace version.",
+        "namespaceasset": "An asset resource scoped within a specific namespace.",
+        "namespacedevice": "A device resource scoped within a specific namespace.",
+        "billingcontainer": "Tracks resource usage and billing information for Device Registry."
+      },
+      "actionRenames": {
+        "Assets_ListBySubscription": "list",
+        "Assets_ListByResourceGroup": "list",
+        "Assets_Get": "show",
+        "Assets_CreateOrReplace": "create",
+        "Assets_Delete": "delete",
+        "Assets_Update": "update",
+        "AssetEndpointProfiles_ListBySubscription": "list",
+        "AssetEndpointProfiles_ListByResourceGroup": "list",
+        "AssetEndpointProfiles_Get": "show",
+        "AssetEndpointProfiles_CreateOrReplace": "create",
+        "AssetEndpointProfiles_Delete": "delete",
+        "AssetEndpointProfiles_Update": "update",
+        "SchemaRegistries_ListBySubscription": "list",
+        "SchemaRegistries_ListByResourceGroup": "list",
+        "SchemaRegistries_Get": "show",
+        "SchemaRegistries_CreateOrReplace": "create",
+        "SchemaRegistries_Delete": "delete",
+        "SchemaRegistries_Update": "update",
+        "Schemas_ListBySchemaRegistry": "list",
+        "Schemas_Get": "show",
+        "Schemas_CreateOrReplace": "create",
+        "Schemas_Delete": "delete",
+        "SchemaVersions_ListBySchema": "list",
+        "SchemaVersions_Get": "show",
+        "SchemaVersions_CreateOrReplace": "create",
+        "SchemaVersions_Delete": "delete",
+        "Namespaces_ListBySubscription": "list",
+        "Namespaces_ListByResourceGroup": "list",
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrReplace": "create",
+        "Namespaces_Delete": "delete",
+        "Namespaces_Update": "update",
+        "Namespaces_Migrate": "migrate",
+        "NamespaceAssets_ListByResourceGroup": "list",
+        "NamespaceAssets_Get": "show",
+        "NamespaceAssets_CreateOrReplace": "create",
+        "NamespaceAssets_Delete": "delete",
+        "NamespaceAssets_Update": "update",
+        "NamespaceDevices_ListByResourceGroup": "list",
+        "NamespaceDevices_Get": "show",
+        "NamespaceDevices_CreateOrReplace": "create",
+        "NamespaceDevices_Delete": "delete",
+        "NamespaceDevices_Update": "update",
+        "BillingContainers_ListBySubscription": "list",
+        "BillingContainers_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Assets_ListBySubscription",
+          "resourceGroupOperationId": "Assets_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "AssetEndpointProfiles_ListBySubscription",
+          "resourceGroupOperationId": "AssetEndpointProfiles_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SchemaRegistries_ListBySubscription",
+          "resourceGroupOperationId": "SchemaRegistries_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Namespaces_ListBySubscription",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "OperationStatus_Get",
+        "NamespaceDiscoveredAssets_ListByResourceGroup",
+        "NamespaceDiscoveredAssets_Get",
+        "NamespaceDiscoveredAssets_CreateOrReplace",
+        "NamespaceDiscoveredAssets_Delete",
+        "NamespaceDiscoveredAssets_Update",
+        "NamespaceDiscoveredDevices_ListByResourceGroup",
+        "NamespaceDiscoveredDevices_Get",
+        "NamespaceDiscoveredDevices_CreateOrReplace",
+        "NamespaceDiscoveredDevices_Delete",
+        "NamespaceDiscoveredDevices_Update"
+      ]
     }
   ]
 }
