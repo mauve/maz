@@ -270,6 +270,54 @@
           "cliAction": "list"
         }
       ]
+    },
+    {
+      "serviceDir": "subscription",
+      "displayName": "subscription",
+      "apiVersion": "2021-10-01",
+      "description": "Manage Azure subscriptions, aliases, and tenant policies.",
+      "detailedDescription": "Commands in this group interact with the Microsoft.Subscription resource provider to cancel, rename, enable, and create subscription aliases. Also includes management of subscription policies for tenant-level governance.",
+      "resourceDescriptions": {
+        "alia": "Manage subscription aliases for programmatic subscription creation.",
+        "billing-account": "Retrieve billing account policies applicable to a subscription.",
+        "operation": "List available operations for the Subscription resource provider.",
+        "policy": "Manage subscription policies at the tenant level.",
+        "subscription": "Manage the lifecycle of Azure subscriptions (cancel, rename, enable, accept ownership)."
+      },
+      "resourceDetailedDescriptions": {
+        "alia": "Subscription aliases allow creation of additional subscriptions under a billing scope without requiring portal access.",
+        "billing-account": "Retrieves the subscription policy configuration set at the billing account level.",
+        "operation": "Enumerates all available resource provider operations for Azure Subscription management.",
+        "policy": "Tenant-level policies control how subscriptions are created and managed within an Azure AD tenant.",
+        "subscription": "Cancel, rename, enable, or accept ownership transfer of an Azure subscription. Requires Owner or contributor role on the subscription."
+      },
+      "specFiles": [
+        "subscription/resource-manager/Microsoft.Subscription/Subscription/stable/2021-10-01/subscriptions.json"
+      ],
+      "exclude": ["Operations_List"],
+      "actionRenames": {
+        "Alias_Get": "show",
+        "Alias_Create": "create",
+        "Alias_Delete": "delete",
+        "BillingAccount_GetPolicy": "show-policy",
+        "SubscriptionOperation_Get": "show",
+        "SubscriptionPolicy_GetPolicyForTenant": "show",
+        "SubscriptionPolicy_AddUpdatePolicyForTenant": "update",
+        "SubscriptionPolicy_ListPolicyForTenant": "list"
+      },
+      "subgroups": [
+        {
+          "resource": "policy",
+          "subgroupCliName": "tenant",
+          "description": "Manage subscription policies at the tenant level.",
+          "detailedDescription": "View, create, and update subscription policies that control subscription creation and management within an Azure AD tenant.",
+          "operationIds": [
+            "SubscriptionPolicy_GetPolicyForTenant",
+            "SubscriptionPolicy_AddUpdatePolicyForTenant",
+            "SubscriptionPolicy_ListPolicyForTenant"
+          ]
+        }
+      ]
     }
   ]
 }

@@ -10,11 +10,13 @@ public partial class RootCommandDef
     public StorageCommandDef Storage = null!;
     public KeyvaultCommandDef Keyvault = null!;
     public IdentityCommandDef Identity = null!;
+    public SubscriptionCommandDef Subscription = null!;
 
     partial void InitGeneratedCommands()
     {
         Storage = new StorageCommandDef(Auth);
         Keyvault = new KeyvaultCommandDef(Auth);
         Identity = new IdentityCommandDef(Auth);
+        Subscription = new SubscriptionCommandDef(Auth);
     }
 }
