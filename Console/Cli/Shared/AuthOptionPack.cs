@@ -61,7 +61,12 @@ public partial class AuthOptionPack : OptionPack
 
     public bool GetInteractive() => Interactive;
 
-    public TokenCredential GetCredential()
+    private TokenCredential? _credential;
+
+    public TokenCredential GetCredential() =>
+        _credential ??= new CachingTokenCredential(BuildCredentialChain());
+
+    private ChainedTokenCredential BuildCredentialChain()
     {
         var allowedTypes = AllowedCredentialTypes;
         var authorityHost = AuthorityHost;
