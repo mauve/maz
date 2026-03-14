@@ -39,6 +39,8 @@ public partial class RootCommandDef
     public TrafficmanagerCommandDef Trafficmanager = null!;
     public CdnCommandDef Cdn = null!;
     public FrontdoorCommandDef Frontdoor = null!;
+    public WebappCommandDef Webapp = null!;
+    public LogicCommandDef Logic = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -74,5 +76,7 @@ public partial class RootCommandDef
         Trafficmanager = new TrafficmanagerCommandDef(Auth);
         Cdn = new CdnCommandDef(Auth);
         Frontdoor = new FrontdoorCommandDef(Auth);
+        Webapp = new WebappCommandDef(Auth);
+        Logic = new LogicCommandDef(Auth);
     }
 }
