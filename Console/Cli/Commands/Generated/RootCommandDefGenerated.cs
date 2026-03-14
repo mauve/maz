@@ -33,6 +33,10 @@ public partial class RootCommandDef
     public RelayCommandDef Relay = null!;
     public SignalrCommandDef Signalr = null!;
     public WebpubsubCommandDef Webpubsub = null!;
+    public DnsCommandDef Dns = null!;
+    public PrivatednsCommandDef Privatedns = null!;
+    public DnsresolverCommandDef Dnsresolver = null!;
+    public TrafficmanagerCommandDef Trafficmanager = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -62,5 +66,9 @@ public partial class RootCommandDef
         Relay = new RelayCommandDef(Auth);
         Signalr = new SignalrCommandDef(Auth);
         Webpubsub = new WebpubsubCommandDef(Auth);
+        Dns = new DnsCommandDef(Auth);
+        Privatedns = new PrivatednsCommandDef(Auth);
+        Dnsresolver = new DnsresolverCommandDef(Auth);
+        Trafficmanager = new TrafficmanagerCommandDef(Auth);
     }
 }
