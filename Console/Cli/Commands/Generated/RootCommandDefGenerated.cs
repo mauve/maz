@@ -51,6 +51,16 @@ public partial class RootCommandDef
     public AppinsightsCommandDef Appinsights = null!;
     public AdvisorCommandDef Advisor = null!;
     public AlertsmanagementCommandDef Alertsmanagement = null!;
+    public DatafactoryCommandDef Datafactory = null!;
+    public SynapseCommandDef Synapse = null!;
+    public CognitiveservicesCommandDef Cognitiveservices = null!;
+    public MachinelearningCommandDef Machinelearning = null!;
+    public SearchCommandDef Search = null!;
+    public DatabricksCommandDef Databricks = null!;
+    public HdinsightCommandDef Hdinsight = null!;
+    public StreamanalyticsCommandDef Streamanalytics = null!;
+    public DatalakeanalyticsCommandDef Datalakeanalytics = null!;
+    public DatalakestoreCommandDef Datalakestore = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -98,5 +108,15 @@ public partial class RootCommandDef
         Appinsights = new AppinsightsCommandDef(Auth);
         Advisor = new AdvisorCommandDef(Auth);
         Alertsmanagement = new AlertsmanagementCommandDef(Auth);
+        Datafactory = new DatafactoryCommandDef(Auth);
+        Synapse = new SynapseCommandDef(Auth);
+        Cognitiveservices = new CognitiveservicesCommandDef(Auth);
+        Machinelearning = new MachinelearningCommandDef(Auth);
+        Search = new SearchCommandDef(Auth);
+        Databricks = new DatabricksCommandDef(Auth);
+        Hdinsight = new HdinsightCommandDef(Auth);
+        Streamanalytics = new StreamanalyticsCommandDef(Auth);
+        Datalakeanalytics = new DatalakeanalyticsCommandDef(Auth);
+        Datalakestore = new DatalakestoreCommandDef(Auth);
     }
 }
