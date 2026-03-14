@@ -42,6 +42,7 @@ public static partial class Ansi
         text = DefaultValueRegex().Replace(text, m => $"\x1b[33m{m.Value}\x1b[0m");
         text = EnvVarTagRegex().Replace(text, m => $"\x1b[36m{m.Value}\x1b[0m");
         text = AllowedValuesTagRegex().Replace(text, m => $"\x1b[32m{m.Value}\x1b[0m");
+        text = RequiredTagRegex().Replace(text, m => $"\x1b[91m{m.Value}\x1b[0m");
         return text;
     }
 
@@ -53,6 +54,9 @@ public static partial class Ansi
 
     [GeneratedRegex(@"\[allowed: [^\]]+\]")]
     private static partial Regex AllowedValuesTagRegex();
+
+    [GeneratedRegex(@"\[required\]")]
+    private static partial Regex RequiredTagRegex();
 
     public static int VisibleLength(string text) => AnsiEscapeRegex().Replace(text, "").Length;
 
