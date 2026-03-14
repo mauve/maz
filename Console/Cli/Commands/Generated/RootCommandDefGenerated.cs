@@ -67,6 +67,14 @@ public partial class RootCommandDef
     public DigitaltwinsCommandDef Digitaltwins = null!;
     public DeviceupdateCommandDef Deviceupdate = null!;
     public DeviceregistryCommandDef Deviceregistry = null!;
+    public StoragesyncCommandDef Storagesync = null!;
+    public StoragemoverCommandDef Storagemover = null!;
+    public StoragecacheCommandDef Storagecache = null!;
+    public ElasticsanCommandDef Elasticsan = null!;
+    public NetappCommandDef Netapp = null!;
+    public DataboxCommandDef Databox = null!;
+    public DataboxedgeCommandDef Databoxedge = null!;
+    public StorageactionsCommandDef Storageactions = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -130,5 +138,13 @@ public partial class RootCommandDef
         Digitaltwins = new DigitaltwinsCommandDef(Auth);
         Deviceupdate = new DeviceupdateCommandDef(Auth);
         Deviceregistry = new DeviceregistryCommandDef(Auth);
+        Storagesync = new StoragesyncCommandDef(Auth);
+        Storagemover = new StoragemoverCommandDef(Auth);
+        Storagecache = new StoragecacheCommandDef(Auth);
+        Elasticsan = new ElasticsanCommandDef(Auth);
+        Netapp = new NetappCommandDef(Auth);
+        Databox = new DataboxCommandDef(Auth);
+        Databoxedge = new DataboxedgeCommandDef(Auth);
+        Storageactions = new StorageactionsCommandDef(Auth);
     }
 }
