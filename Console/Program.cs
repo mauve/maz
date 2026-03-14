@@ -191,10 +191,7 @@ static void TrySetDefault(Option opt, string value)
         if (!Enum.TryParse(genericArg, value, ignoreCase: true, out parsed))
             return;
     }
-    else if (
-        Nullable.GetUnderlyingType(genericArg) is { } underlying
-        && underlying.IsEnum
-    )
+    else if (Nullable.GetUnderlyingType(genericArg) is { } underlying && underlying.IsEnum)
     {
         if (!Enum.TryParse(underlying, value, ignoreCase: true, out var ev))
             return;
@@ -231,27 +228,31 @@ static void ApplyRequireConfirmationGuard(Command rootCmd)
         if (original is null)
             continue;
 
-        cmd.SetAction(async (parseResult, ct) =>
-        {
-            var requireConfirm = parseResult.GetValue(
-                GlobalBehaviorOptionPack.RequireConfirmationOption
-            );
-            if (requireConfirm)
+        cmd.SetAction(
+            async (parseResult, ct) =>
             {
-                var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
-                    parseResult.GetValue(InteractiveOptionPack.InteractiveOption)
+                var requireConfirm = parseResult.GetValue(
+                    GlobalBehaviorOptionPack.RequireConfirmationOption
                 );
-                PromptForConfirmation(interactive, cmd.Name);
-            }
+                if (requireConfirm)
+                {
+                    var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
+                        parseResult.GetValue(InteractiveOptionPack.InteractiveOption)
+                    );
+                    PromptForConfirmation(interactive, cmd.Name);
+                }
 
-            return original switch
-            {
-                AsynchronousCommandLineAction asyncAction =>
-                    await asyncAction.InvokeAsync(parseResult, ct),
-                SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
-                _ => 0,
-            };
-        });
+                return original switch
+                {
+                    AsynchronousCommandLineAction asyncAction => await asyncAction.InvokeAsync(
+                        parseResult,
+                        ct
+                    ),
+                    SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
+                    _ => 0,
+                };
+            }
+        );
     }
 }
 

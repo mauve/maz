@@ -4,7 +4,11 @@
     <AssemblyName>maz</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CliGenerator\CliGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="..\CliGenerator\CliGenerator.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false"
+    />
     <ProjectReference Include="..\Console.Rendering\Console.Rendering.csproj" />
   </ItemGroup>
   <ItemGroup>

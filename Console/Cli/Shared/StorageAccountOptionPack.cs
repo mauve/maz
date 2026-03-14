@@ -34,7 +34,10 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
     [CliOption(
         "--storage-account",
         "--sa",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<StorageAccountOptionPack, StorageAccountResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            StorageAccountOptionPack,
+            StorageAccountResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? StorageAccountName { get; }
@@ -44,8 +47,8 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
     /// <summary>Returns the account name segment without resolving ARM.</summary>
     public string RequireAccountName()
     {
-        var raw = StorageAccountName
-            ?? throw new InvocationException("--storage-account is required.");
+        var raw =
+            StorageAccountName ?? throw new InvocationException("--storage-account is required.");
         if (raw.StartsWith(ShortPathPrefix, StringComparison.OrdinalIgnoreCase))
             raw = raw[ShortPathPrefix.Length..];
         return ResourceIdentifierParser.Parse(raw).ResourceNameSegment;
@@ -77,7 +80,9 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Storage account '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Storage account '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
@@ -105,7 +110,9 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var sa in rg.Value.GetStorageAccounts().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var sa in rg.Value.GetStorageAccounts().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (sa.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(sa.Data.Name);
