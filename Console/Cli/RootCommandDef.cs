@@ -6,10 +6,14 @@ using Console.Cli.Shared;
 
 namespace Console.Cli;
 
-public class RootCommandDef : CommandDef
+/// <summary>Root command for the maz CLI.</summary>
+/// <remarks>
+/// The root command defines the entry point and wires all top-level command groups.
+/// It also initializes shared authentication options used across subcommands.
+/// </remarks>
+public partial class RootCommandDef : CommandDef
 {
     public override string Name => "maz";
-    public override string Description => "A smaller az-cli tool";
 
     public readonly AuthOptionPack Auth;
 

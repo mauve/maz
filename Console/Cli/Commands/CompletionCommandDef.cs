@@ -3,10 +3,13 @@ using System.CommandLine;
 namespace Console.Cli.Commands;
 
 /// <summary>Generate shell completion scripts.</summary>
-public class CompletionCommandDef : CommandDef
+/// <remarks>
+/// Use this command to emit completion scripts for supported shells.
+/// Add the generated command snippet to your shell profile to enable tab completion.
+/// </remarks>
+public partial class CompletionCommandDef : CommandDef
 {
     public override string Name => "completion";
-    public override string Description => "Generate shell completion scripts.";
 
     internal override Command Build()
     {
@@ -15,7 +18,7 @@ public class CompletionCommandDef : CommandDef
         return cmd;
     }
 
-    protected override string? Remarks =>
+    public override string? DetailedDescription =>
         """
             To enable completions, add one of the following to your shell profile:
 

@@ -2,11 +2,15 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Monitor;
 
-public class MonitorCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>Manage Azure Monitor operations.</summary>
+/// <remarks>
+/// This group contains commands for querying monitoring data sources.
+/// Use it to drill into Log Analytics workspaces and Azure resource logs.
+/// </remarks>
+public partial class MonitorCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "monitor";
     public override string[] Aliases => ["mon"];
-    public override string Description => "Command group for Azure Monitor.";
 
     public readonly MonitorLogAnalyticsCommandDef LogAnalytics = new(auth);
 }

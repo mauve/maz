@@ -6,16 +6,24 @@ using Console.Rendering;
 
 namespace Console.Cli.Commands;
 
-public class AccountCommandDef(AuthOptionPack auth) : CommandDef
+/// <summary>Manage Azure subscription information.</summary>
+/// <remarks>
+/// Use this command group to inspect subscriptions available to the current identity.
+/// Commands in this group can list accessible subscriptions and show supported regions.
+/// </remarks>
+public partial class AccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "account";
-    public override string Description => "Manage Azure subscription information.";
 
     public readonly AccountListCommandDef List = new(auth);
     public readonly AccountListLocationsCommandDef ListLocations = new(auth);
 }
 
 /// <summary>List all available Azure subscriptions.</summary>
+/// <remarks>
+/// By default, only enabled subscriptions are returned.
+/// Use --all to include subscriptions in other states.
+/// </remarks>
 public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -59,11 +67,14 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
 }
 
 /// <summary>Show available locations for a subscription.</summary>
+/// <remarks>
+/// This command resolves the target subscription and prints available Azure regions.
+/// The output can be rendered in different formats through shared output options.
+/// </remarks>
 public partial class AccountListLocationsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-locations";
     public override string[] Aliases => ["locations"];
-    public override string Description => "Show available locations for a subscription.";
 
     public readonly SubscriptionOptionPack Subscription = new();
     public readonly RenderOptionPack Render = new();

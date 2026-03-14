@@ -6,6 +6,10 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Monitor;
 
 /// <summary>Query Azure Monitor Log Analytics workspaces or Azure resource logs.</summary>
+/// <remarks>
+/// Provide either --workspace-id or --resource-id to select the query target.
+/// The command supports streaming tail mode, JSON output options, and optional query statistics.
+/// </remarks>
 public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "query";

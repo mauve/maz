@@ -20,6 +20,7 @@ public abstract partial class CommandDef
     public abstract string Name { get; }
     public virtual string[] Aliases => [];
     public virtual string Description => "";
+    public virtual string? DetailedDescription => Remarks;
 
     protected virtual string? Remarks => null;
 
@@ -37,7 +38,7 @@ public abstract partial class CommandDef
     {
         var cmd = CreateCommand();
         ConfigureCommand(cmd);
-        if (Remarks is { } r)
+        if (DetailedDescription is { } r)
             RemarksRegistry.Register(cmd, r);
         return cmd;
     }
