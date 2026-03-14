@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -15,8 +16,10 @@ public partial class KeyvaultCertificateVersionsListCommandDef(AuthOptionPack au
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--vault-url", Required = true)]
+    [CliOption("--vault-url")]
     public partial string? VaultUrl { get; }
+
+    public readonly KeyVaultOptionPack KeyVault = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -33,7 +36,8 @@ public partial class KeyvaultCertificateVersionsListCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var path = $"{VaultUrl}/certificates/{CertificateName}/versions";
+        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{vaultBaseUrl}/certificates/{CertificateName}/versions";
 
         var allItems = client.GetAllAsync(path, "7.5", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

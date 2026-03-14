@@ -23,6 +23,8 @@ public static class OperationCommandEmitter
         w.Line("using Console.Cli.Http;");
         w.Line("using Console.Cli.Shared;");
         w.Line("using Console.Rendering;");
+        if (isDataPlane)
+            w.Line("using Azure.ResourceManager;");
         w.Line();
         w.Line($"namespace {ns};");
         w.Line();
@@ -58,8 +60,10 @@ public static class OperationCommandEmitter
                 if (isDataPlane)
                 {
                     // Data-plane: --vault-url replaces subscription/resource-group option packs
-                    w.Line("[CliOption(\"--vault-url\", Required = true)]");
+                    w.Line("[CliOption(\"--vault-url\")]");
                     w.Line("public partial string? VaultUrl { get; }");
+                    w.Line();
+                    w.Line("public readonly KeyVaultOptionPack KeyVault = new();");
                     w.Line();
                 }
                 else
@@ -147,6 +151,11 @@ public static class OperationCommandEmitter
                         else
                             w.Line("var client = new AzureRestClient(_auth.GetCredential());");
 
+                        if (isDataPlane)
+                            w.Line(
+                                "var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');"
+                            );
+
                         // Build path
                         if (isDataPlane)
                             EmitDataPlanePathBuilder(w, op);
@@ -200,8 +209,8 @@ public static class OperationCommandEmitter
             );
         }
 
-        // Emit: var path = $"{VaultUrl}/keys/{KeyName}/...";
-        w.Line($"var path = $\"{{VaultUrl}}{expr}\";");
+        // Emit: var path = $"{vaultBaseUrl}/keys/{KeyName}/...";
+        w.Line($"var path = $\"{{vaultBaseUrl}}{expr}\";");
     }
 
     private static void EmitPathBuilder(
