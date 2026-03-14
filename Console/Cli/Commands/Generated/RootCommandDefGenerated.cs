@@ -16,6 +16,7 @@ public partial class RootCommandDef
     public ComputeCommandDef Compute = null!;
     public NetworkCommandDef Network = null!;
     public PostgresqlCommandDef Postgresql = null!;
+    public MysqlCommandDef Mysql = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -28,5 +29,6 @@ public partial class RootCommandDef
         Compute = new ComputeCommandDef(Auth);
         Network = new NetworkCommandDef(Auth);
         Postgresql = new PostgresqlCommandDef(Auth);
+        Mysql = new MysqlCommandDef(Auth);
     }
 }
