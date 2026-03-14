@@ -18,12 +18,14 @@ public partial class RootCommandDef : CommandDef
     public readonly AuthOptionPack Auth;
     public readonly DiagnosticOptionPack Diagnostics;
     public readonly InteractiveOptionPack Interactive;
+    public readonly GlobalBehaviorOptionPack GlobalBehavior;
 
     public readonly AccountCommandDef Account;
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
     public readonly MonitorCommandDef Monitor;
     public readonly CompletionCommandDef Completion;
+    public readonly ConfigureCommandDef Configure;
 
     partial void InitGeneratedCommands();
 
@@ -32,11 +34,13 @@ public partial class RootCommandDef : CommandDef
         Auth = new AuthOptionPack();
         Diagnostics = new DiagnosticOptionPack();
         Interactive = new InteractiveOptionPack();
+        GlobalBehavior = new GlobalBehaviorOptionPack();
         Account = new AccountCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
         Monitor = new MonitorCommandDef(Auth);
         Completion = new CompletionCommandDef();
+        Configure = new ConfigureCommandDef(Auth, Interactive);
         InitGeneratedCommands();
     }
 
