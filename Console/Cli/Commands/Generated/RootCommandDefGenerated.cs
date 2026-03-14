@@ -88,6 +88,12 @@ public partial class RootCommandDef
     public HybridconnectivityCommandDef Hybridconnectivity = null!;
     public ConnectedvmwareCommandDef Connectedvmware = null!;
     public ScvmmCommandDef Scvmm = null!;
+    public BillingCommandDef Billing = null!;
+    public ConsumptionCommandDef Consumption = null!;
+    public CostmanagementCommandDef Costmanagement = null!;
+    public ReservationsCommandDef Reservations = null!;
+    public ManagementgroupsCommandDef Managementgroups = null!;
+    public ManagedservicesCommandDef Managedservices = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -172,5 +178,11 @@ public partial class RootCommandDef
         Hybridconnectivity = new HybridconnectivityCommandDef(Auth);
         Connectedvmware = new ConnectedvmwareCommandDef(Auth);
         Scvmm = new ScvmmCommandDef(Auth);
+        Billing = new BillingCommandDef(Auth);
+        Consumption = new ConsumptionCommandDef(Auth);
+        Costmanagement = new CostmanagementCommandDef(Auth);
+        Reservations = new ReservationsCommandDef(Auth);
+        Managementgroups = new ManagementgroupsCommandDef(Auth);
+        Managedservices = new ManagedservicesCommandDef(Auth);
     }
 }
