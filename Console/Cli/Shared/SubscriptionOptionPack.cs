@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
@@ -37,31 +38,36 @@ public partial class SubscriptionOptionPack : OptionPack
         return id;
     }
 
-    public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
-    {
-        var requested =
-            SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+    public Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient) =>
+        ResolveAsync(armClient, SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID"));
 
-        if (requested is null)
+    /// <summary>
+    /// Resolves a subscription from an arbitrary hint string (or null for the default subscription).
+    /// Accepts: null → default, "/subscriptions/{guid}", "/s/{x}", plain GUID, or display name.
+    /// </summary>
+    internal static async Task<SubscriptionResource> ResolveAsync(ArmClient armClient, string? hint)
+    {
+        if (hint is null)
             return await armClient.GetDefaultSubscriptionAsync();
 
-        if (requested.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
-            return armClient.GetSubscriptionResource(new(requested));
+        if (hint.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
+            return armClient.GetSubscriptionResource(new(hint));
 
-        if (Guid.TryParse(requested, out var guid))
+        if (hint.StartsWith("/s/", StringComparison.OrdinalIgnoreCase))
             return armClient.GetSubscriptionResource(
-                Azure.ResourceManager.Resources.SubscriptionResource.CreateResourceIdentifier(
-                    guid.ToString()
-                )
-            );
+                new ResourceIdentifier("/subscriptions/" + hint[3..]));
+
+        if (Guid.TryParse(hint, out var guid))
+            return armClient.GetSubscriptionResource(
+                SubscriptionResource.CreateResourceIdentifier(guid.ToString()));
 
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())
         {
-            if (sub.Data.DisplayName.Equals(requested, StringComparison.OrdinalIgnoreCase))
+            if (sub.Data.DisplayName.Equals(hint, StringComparison.OrdinalIgnoreCase))
                 return sub;
         }
 
-        throw new InvocationException($"Subscription with display name '{requested}' not found.");
+        throw new InvocationException($"Subscription with display name '{hint}' not found.");
     }
 }
 
