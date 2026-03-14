@@ -48,6 +48,9 @@ public partial class RootCommandDef
     public ConfidentialledgerCommandDef Confidentialledger = null!;
     public MonitorCommandDef Monitor = null!;
     public LoganalyticsCommandDef Loganalytics = null!;
+    public AppinsightsCommandDef Appinsights = null!;
+    public AdvisorCommandDef Advisor = null!;
+    public AlertsmanagementCommandDef Alertsmanagement = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -92,5 +95,8 @@ public partial class RootCommandDef
         Confidentialledger = new ConfidentialledgerCommandDef(Auth);
         Monitor = new MonitorCommandDef(Auth);
         Loganalytics = new LoganalyticsCommandDef(Auth);
+        Appinsights = new AppinsightsCommandDef(Auth);
+        Advisor = new AdvisorCommandDef(Auth);
+        Alertsmanagement = new AlertsmanagementCommandDef(Auth);
     }
 }
