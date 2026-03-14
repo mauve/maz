@@ -1,7 +1,14 @@
 using System.CommandLine;
-using System.CommandLine.Completions;
 using System.CommandLine.Help;
 using Console.Cli;
+
+if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith(']'))
+{
+    var pos = int.Parse(first[9..^1]);
+    var line = args.Length >= 2 ? args[1] : "";
+    await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef());
+    return 0;
+}
 
 var rootDef = new RootCommandDef();
 var rootCmd = rootDef.Build();
@@ -24,7 +31,6 @@ foreach (var cmd in AllCommands(rootCmd))
     cmd.Add(helpMore);
 }
 
-((RootCommand)rootCmd).Add(new SuggestDirective());
 var config = new CommandLineConfiguration(rootCmd);
 return rootCmd.Parse(args, config).Invoke();
 

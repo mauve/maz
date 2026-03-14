@@ -1,4 +1,3 @@
-using System.CommandLine.Completions;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 
@@ -53,10 +52,10 @@ public partial class SubscriptionOptionPack : OptionPack
 
 internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
 {
-    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CompletionContext context)
+    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(string wordToComplete)
     {
         var armClient = new ArmClient(new Azure.Identity.DefaultAzureCredential());
-        var word = context.WordToComplete ?? "";
+        var word = wordToComplete;
         var suggestions = new List<string>();
 
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())

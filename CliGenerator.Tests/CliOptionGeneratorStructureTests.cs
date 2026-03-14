@@ -154,7 +154,6 @@ public class CliOptionGeneratorStructureTests
             "#nullable enable",
             "#pragma warning disable CS1591",
             "using System.CommandLine;",
-            "using System.CommandLine.Completions;",
             "using System.Linq;",
             "namespace TestApp;",
             "partial class HeaderCommand"
