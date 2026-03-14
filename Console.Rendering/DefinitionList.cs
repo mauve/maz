@@ -32,7 +32,7 @@ public static class DefinitionList
         }
     }
 
-    private static int GetConsoleWidth()
+    public static int GetConsoleWidth()
     {
         try { return System.Console.WindowWidth; }
         catch { return FallbackWidth; }
@@ -40,7 +40,7 @@ public static class DefinitionList
 
     // Splits text into lines ≤ maxWidth visible chars, breaking only at spaces.
     // ANSI codes don't count toward width. A single word wider than maxWidth overflows intact.
-    private static List<string> WordWrap(string text, int maxWidth)
+    public static List<string> WordWrap(string text, int maxWidth)
     {
         if (string.IsNullOrEmpty(text)) return [text ?? ""];
 
