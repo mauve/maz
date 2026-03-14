@@ -274,10 +274,11 @@ public class CliOptionGenerator : IIncrementalGenerator
         }
         else
         {
+            bool isBool = typeSymbol.SpecialType == SpecialType.System_Boolean;
+
             // Required inference
             if (!m.IsRequired)
             {
-                bool isBool = typeSymbol.SpecialType == SpecialType.System_Boolean;
                 bool isValueType = typeSymbol.IsValueType && !IsNullableValueType(typeSymbol);
                 // Required if: non-nullable reference type with no default OR non-nullable Guid-like with no default
                 if (!m.HasNullableAnnotation && !hasDefault && !isBool)
@@ -305,6 +306,21 @@ public class CliOptionGenerator : IIncrementalGenerator
                 var parser = GetSingleValueParserExpr(typeSymbol, m.HasNullableAnnotation);
                 if (parser != null)
                     m.CustomParserExpr = string.Format(parser, "r.Tokens[0].Value");
+            }
+
+            // Non-nullable bool: add --no-{longAlias} negation alias and a toggle parser
+            if (isBool)
+            {
+                var firstLongAlias = new[] { m.PrimaryAlias }
+                    .Concat(m.ExtraAliases)
+                    .FirstOrDefault(a => a.StartsWith("--", StringComparison.Ordinal));
+                if (firstLongAlias != null)
+                {
+                    var negation = "--no-" + firstLongAlias.Substring(2);
+                    m.ExtraAliases = m.ExtraAliases.Append(negation).ToArray();
+                    m.CustomParserExpr =
+                        @"r => r.Tokens.Count > 0 ? bool.Parse(r.Tokens[0].Value) : !(r.Parent is global::System.CommandLine.Parsing.OptionResult __or && (__or.IdentifierToken?.Value ?? """").StartsWith(""--no-"", global::System.StringComparison.OrdinalIgnoreCase))";
+                }
             }
         }
 
@@ -707,7 +723,6 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine("#nullable enable");
         sb.AppendLine("#pragma warning disable CS1591");
         sb.AppendLine("using System.CommandLine;");
-        sb.AppendLine("using System.CommandLine.Completions;");
         sb.AppendLine("using System.Linq;");
         sb.AppendLine();
 
@@ -742,10 +757,6 @@ public class CliOptionGenerator : IIncrementalGenerator
                 initParts.Add($"DefaultValueFactory = _ => {opt.DefaultExpression}");
             if (opt.CustomParserExpr != null)
                 initParts.Add($"CustomParser = {opt.CustomParserExpr}");
-            if (opt.CompletionProviderTypeName != null)
-                initParts.Add(
-                    $"CompletionSources = {{ c => global::Console.Cli.CliCompletionProviderBridge.GetCompletions<{opt.CompletionProviderTypeName}>(c) }}"
-                );
             if (opt.IsGlobal)
                 initParts.Add("Recursive = true");
 
@@ -806,6 +817,14 @@ public class CliOptionGenerator : IIncrementalGenerator
                     );
                 sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
                 EmitMetadataRegistration(sb, opt);
+                if (opt.CompletionProviderTypeName != null)
+                {
+                    var allAliases = new[] { opt.PrimaryAlias }.Concat(opt.ExtraAliases);
+                    var aliasArgs = string.Join(", ", allAliases.Select(Quote));
+                    sb.AppendLine(
+                        $"        global::Console.Cli.CliCompletionProviderRegistry.Register(new[] {{ {aliasArgs} }}, typeof({opt.CompletionProviderTypeName}));"
+                    );
+                }
             }
             sb.AppendLine("    }");
         }
@@ -824,6 +843,14 @@ public class CliOptionGenerator : IIncrementalGenerator
                     );
                 sb.AppendLine($"        cmd.Add(_opt_{opt.Name});");
                 EmitMetadataRegistration(sb, opt);
+                if (opt.CompletionProviderTypeName != null)
+                {
+                    var allAliases = new[] { opt.PrimaryAlias }.Concat(opt.ExtraAliases);
+                    var aliasArgs = string.Join(", ", allAliases.Select(Quote));
+                    sb.AppendLine(
+                        $"        global::Console.Cli.CliCompletionProviderRegistry.Register(new[] {{ {aliasArgs} }}, typeof({opt.CompletionProviderTypeName}));"
+                    );
+                }
             }
             sb.AppendLine("    }");
         }

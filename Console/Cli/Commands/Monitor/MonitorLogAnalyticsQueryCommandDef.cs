@@ -39,11 +39,11 @@ public partial class MonitorLogAnalyticsQueryCommandDef(AuthOptionPack auth) : C
     public partial List<string> AdditionalWorkspaces { get; } = [];
 
     /// <summary>Output results as JSON Lines (one JSON object per row).</summary>
-    [CliOption("--output-jsonl", "--jsonl")]
+    [CliOption("--jsonl")]
     public partial bool OutputJsonl { get; }
 
     /// <summary>Output results as a JSON array.</summary>
-    [CliOption("--output-json-array", "--jsonarray")]
+    [CliOption("--jsonarray")]
     public partial bool OutputJsonArray { get; }
 
     /// <summary>Continuously poll for new results at the specified interval in seconds.</summary>

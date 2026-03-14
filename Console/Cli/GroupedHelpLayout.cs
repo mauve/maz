@@ -1,10 +1,13 @@
 using System.CommandLine;
 using System.CommandLine.Help;
+using System.ComponentModel;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using Console.Rendering;
 
 namespace Console.Cli;
 
-internal static class GroupedHelpLayout
+internal static partial class GroupedHelpLayout
 {
     public static IEnumerable<Func<HelpContext, bool>> Create(HelpContext _)
     {
@@ -14,6 +17,7 @@ internal static class GroupedHelpLayout
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: false);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: false);
         yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
+        yield return DescriptionSection;
         yield return RemarksSection;
     }
 
@@ -25,6 +29,7 @@ internal static class GroupedHelpLayout
         yield return ctx => WriteGroupedOptions(ctx, showAdvanced: true);
         yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: true);
         yield return WithStyledHeader(HelpBuilder.Default.AdditionalArgumentsSection());
+        yield return DescriptionSection;
         yield return RemarksSection;
     }
 
@@ -134,27 +139,86 @@ internal static class GroupedHelpLayout
         var rows = options
             .Select(o =>
             {
-                var (main, metadata) = BuildDescriptionAndMetadata(o);
-                var firstCol = BuildFirstColumn(o);
-                bool isRequired = o.Required;
-                if (isRequired)
-                    main = (main.Length > 0 ? main + " " : "") + Ansi.LightRed("[required]");
-                return (firstCol, main, metadata);
+                var row = ctx.HelpBuilder.GetTwoColumnRow(o, ctx);
+                var (main, metadata) = SplitOptionDescriptionAndMetadata(o, row.SecondColumnText);
+                var aliases = SplitAliasesWithValueHint(
+                    row.FirstColumnText,
+                    o is Option<bool>,
+                    o.AllowMultipleArgumentsPerToken
+                );
+                return (aliases, main, metadata);
             })
             .ToList();
 
-        var firstWidth = rows.Count == 0 ? 0 : rows.Max(r => Ansi.VisibleLength(r.firstCol));
-        var metadataIndent = new string(' ', 2 + firstWidth + 4);
-        foreach (var row in rows)
-        {
-            var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.firstCol));
-            ctx.Output.WriteLine(
-                $"  {row.firstCol}{padding}  {Ansi.StyleOptionDescription(row.main)}"
-            );
+        const string descIndent = "          "; // 10 spaces
+        const string metaIndent = "            "; // 12 spaces
 
-            foreach (var meta in row.metadata)
-                ctx.Output.WriteLine($"{metadataIndent}{Ansi.StyleOptionDescription(meta)}");
+        foreach (var (aliases, main, metadata) in rows)
+        {
+            foreach (var alias in aliases)
+                ctx.Output.WriteLine($"  {alias}");
+
+            if (!string.IsNullOrEmpty(main))
+                ctx.Output.WriteLine($"{descIndent}{Ansi.Dim(Ansi.StyleOptionDescription(main))}");
+
+            foreach (var meta in metadata)
+                ctx.Output.WriteLine($"{metaIndent}{Ansi.StyleOptionDescription(meta)}");
         }
+    }
+
+    /// <summary>
+    /// Splits the first-column text into individual alias strings and appends
+    /// the appropriate value indicator to the last alias.
+    /// Bool options: --no-* aliases listed first, main alias last with [true|false].
+    /// Multi-value options: last alias gets [value...].
+    /// Single-value options: last alias gets [value].
+    /// </summary>
+    private static List<string> SplitAliasesWithValueHint(
+        string firstColumnText,
+        bool isBool,
+        bool isMultiValue
+    )
+    {
+        // Strip any type hint that System.CommandLine adds (e.g. <String>, <json|column|...>)
+        var match = TypeHintRegex().Match(firstColumnText);
+        var withoutHint = match.Success ? firstColumnText[..match.Index] : firstColumnText;
+        var rawAliases = withoutHint.Split(", ").ToList();
+
+        if (isBool)
+        {
+            // Reorder: --no-* variants first, main aliases last; add [true|false] to last main alias
+            var noAliases = rawAliases
+                .Where(a => a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
+                .Select(Ansi.White)
+                .ToList();
+            var mainAliases = rawAliases
+                .Where(a => !a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
+                .Select(Ansi.White)
+                .ToList();
+            if (mainAliases.Count > 0)
+                mainAliases[^1] += " " + Ansi.Cyan("[true|false]");
+            return [.. noAliases, .. mainAliases];
+        }
+
+        // Non-bool: always add value indicator regardless of whether S.CommandLine added a hint
+        var aliases = rawAliases.Select(Ansi.White).ToList();
+        if (aliases.Count > 0)
+            aliases[^1] += " " + Ansi.Cyan(isMultiValue ? "[value...]" : "[value]");
+        return aliases;
+    }
+
+    [GeneratedRegex(@"\s*<[^>]+>$")]
+    private static partial Regex TypeHintRegex();
+
+    private static bool DescriptionSection(HelpContext ctx)
+    {
+        var description = ctx.Command.Description;
+        if (string.IsNullOrWhiteSpace(description))
+            return false;
+        ctx.Output.WriteLine();
+        ctx.Output.WriteLine(Ansi.Header("Description:"));
+        ctx.Output.WriteLine($"  {description}");
+        return true;
     }
 
     private static bool RemarksSection(HelpContext ctx)
@@ -183,16 +247,20 @@ internal static class GroupedHelpLayout
             .Select(command =>
             {
                 var row = ctx.HelpBuilder.GetTwoColumnRow(command, ctx);
-                return (command, row.FirstColumnText, row.SecondColumnText);
+                var displayName = DataPlaneRegistry.IsDataPlane(command)
+                    ? row.FirstColumnText + Ansi.LightRed("*")
+                    : row.FirstColumnText;
+                return (command, displayName, row.SecondColumnText);
             })
             .ToList();
 
-        var firstWidth = rows.Max(r => r.FirstColumnText.Length);
+        var firstWidth = rows.Max(r => Ansi.VisibleLength(r.displayName));
 
         foreach (var row in rows)
         {
+            var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.displayName));
             ctx.Output.WriteLine(
-                $"  {row.FirstColumnText.PadRight(firstWidth)}  {row.SecondColumnText}"
+                $"  {row.displayName}{padding}  {row.SecondColumnText}"
             );
 
             var detail = RemarksRegistry.Get(row.command);
@@ -225,66 +293,146 @@ internal static class GroupedHelpLayout
         return true;
     }
 
-    private static string BuildFirstColumn(Option option)
+    private static (string main, List<string> metadata) SplitOptionDescriptionAndMetadata(
+        Option option,
+        string secondColumnText
+    )
     {
-        var aliases = option.Aliases.ToList();
-
-        // Boolean compaction: --foo + --no-foo → --[no-]foo
-        for (int i = aliases.Count - 1; i >= 0; i--)
-        {
-            var alias = aliases[i];
-            if (!alias.StartsWith("--", StringComparison.Ordinal))
-                continue;
-            var noVariant = "--no-" + alias[2..];
-            int j = aliases.IndexOf(noVariant);
-            if (j >= 0)
-            {
-                aliases[i] = "--[no-]" + alias[2..];
-                aliases.RemoveAt(j);
-            }
-        }
-
-        // Prefix compaction: --foo + --foo-bar → --foo[-bar]
-        // Only compact when both start with "--" and suffix starts with "-"
-        for (int i = aliases.Count - 1; i >= 0; i--)
-        {
-            var a = aliases[i];
-            if (!a.StartsWith("--", StringComparison.Ordinal))
-                continue;
-            for (int j = aliases.Count - 1; j >= 0; j--)
-            {
-                if (i == j) continue;
-                var b = aliases[j];
-                if (!b.StartsWith("--", StringComparison.Ordinal))
-                    continue;
-                // b is strict prefix of a, suffix starts with "-"
-                if (a.Length > b.Length && a.StartsWith(b, StringComparison.Ordinal) && a[b.Length] == '-')
-                {
-                    var suffix = a[b.Length..];
-                    aliases[j] = b + "[" + suffix + "]";
-                    aliases.RemoveAt(i);
-                    break;
-                }
-            }
-        }
-
-        var placeholder = string.IsNullOrEmpty(option.HelpName) ? "" : $" <{option.HelpName}>";
-        return string.Join(", ", aliases) + placeholder;
-    }
-
-    private static (string main, List<string> metadata) BuildDescriptionAndMetadata(Option option)
-    {
-        var main = option.Description ?? "";
         var metadata = new List<string>();
-        var meta = OptionMetadataRegistry.Get(option);
-        if (meta is not null)
+        var main = secondColumnText;
+
+        foreach (Match match in MetadataTagRegex().Matches(secondColumnText))
         {
-            if (meta.EnvVar is not null) metadata.Add($"[env: {meta.EnvVar}]");
-            if (meta.AllowedValues is not null) metadata.Add($"[allowed: {meta.AllowedValues}]");
-            if (meta.DefaultText is not null) metadata.Add($"[default: {meta.DefaultText}]");
+            var tag = match.Value;
+            if (tag.StartsWith("[default:", StringComparison.OrdinalIgnoreCase))
+            {
+                var rewritten = RewriteEnumDefaultTag(option, tag);
+                if (option.AllowMultipleArgumentsPerToken)
+                    rewritten = NormalizeDefaultTagListSeparators(rewritten);
+                metadata.Add(rewritten);
+                main = main.Replace(tag, "", StringComparison.Ordinal);
+                continue;
+            }
+
+            if (tag.StartsWith("[env:", StringComparison.OrdinalIgnoreCase))
+            {
+                metadata.Add(tag);
+                main = main.Replace(tag, "", StringComparison.Ordinal);
+                continue;
+            }
+
+            if (tag.StartsWith("[allowed:", StringComparison.OrdinalIgnoreCase))
+            {
+                metadata.Add(tag);
+                main = main.Replace(tag, "", StringComparison.Ordinal);
+            }
         }
+
+        main = Regex.Replace(main, "\\s{2,}", " ").Trim();
         return (main, metadata);
     }
+
+    private static string NormalizeDefaultTagListSeparators(string tag)
+    {
+        const string prefix = "[default:";
+        if (!tag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return tag;
+
+        var inner = tag[prefix.Length..].TrimStart();
+        if (inner.EndsWith(']'))
+            inner = inner[..^1].TrimEnd();
+
+        var parts = inner.Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length <= 1 ? tag : $"[default: {string.Join(", ", parts)}]";
+    }
+
+    private static string RewriteEnumDefaultTag(Option option, string defaultTag)
+    {
+        var enumType = GetOptionEnumType(option);
+        if (enumType is null)
+            return defaultTag;
+
+        const string prefix = "[default:";
+        if (!defaultTag.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            return defaultTag;
+
+        var value = defaultTag.Substring(prefix.Length).Trim();
+        value = value.EndsWith(']') ? value[..^1].TrimEnd() : value;
+
+        var converted = value
+            .Split('|', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+            .Select(v => MapEnumTokenToDescription(enumType, v))
+            .ToArray();
+
+        if (converted.Any(c => c is null))
+            return defaultTag;
+
+        return $"[default: {string.Join("|", converted!)}]";
+    }
+
+    private static Type? GetOptionEnumType(Option option)
+    {
+        for (Type? t = option.GetType(); t is not null; t = t.BaseType)
+        {
+            if (!t.IsGenericType || t.GetGenericTypeDefinition() != typeof(Option<>))
+                continue;
+
+            var arg = t.GetGenericArguments()[0];
+            var underlying = Nullable.GetUnderlyingType(arg);
+            var candidate = underlying ?? arg;
+            if (candidate.IsEnum)
+                return candidate;
+
+            if (candidate.IsArray)
+            {
+                var element = candidate.GetElementType();
+                if (element is not null)
+                {
+                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
+                    if (unwrappedElement.IsEnum)
+                        return unwrappedElement;
+                }
+            }
+
+            if (candidate.IsGenericType)
+            {
+                var def = candidate.GetGenericTypeDefinition();
+                if (
+                    def == typeof(List<>)
+                    || def == typeof(IReadOnlyList<>)
+                    || def == typeof(IReadOnlyCollection<>)
+                    || def == typeof(IEnumerable<>)
+                )
+                {
+                    var element = candidate.GetGenericArguments()[0];
+                    var unwrappedElement = Nullable.GetUnderlyingType(element) ?? element;
+                    if (unwrappedElement.IsEnum)
+                        return unwrappedElement;
+                }
+            }
+
+            return null;
+        }
+
+        return null;
+    }
+
+    private static string? MapEnumTokenToDescription(Type enumType, string token)
+    {
+        if (!Enum.TryParse(enumType, token, ignoreCase: true, out var parsed) || parsed is null)
+            return null;
+
+        var memberName = Enum.GetName(enumType, parsed);
+        if (memberName is null)
+            return null;
+
+        var field = enumType.GetField(memberName, BindingFlags.Public | BindingFlags.Static);
+        var desc = field?.GetCustomAttribute<DescriptionAttribute>()?.Description;
+        return string.IsNullOrWhiteSpace(desc) ? token : desc;
+    }
+
+    [GeneratedRegex(@"\[(default|env|allowed): [^\]]+\]", RegexOptions.IgnoreCase)]
+    private static partial Regex MetadataTagRegex();
 
     private static IEnumerable<Option> AllOptions(Command cmd)
     {

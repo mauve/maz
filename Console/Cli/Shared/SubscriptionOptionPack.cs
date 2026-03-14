@@ -1,4 +1,4 @@
-using System.CommandLine.Completions;
+using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 
@@ -14,14 +14,28 @@ public partial class SubscriptionOptionPack : OptionPack
     [CliOption(
         "--subscription-id",
         "-s",
-        "--sub",
-        "--subscription",
         EnvVar = "AZURE_SUBSCRIPTION_ID",
-        CompletionProviderType = typeof(SubscriptionIdCompletionProvider)
+        CompletionProviderType = typeof(SubscriptionIdCompletionProvider),
+        CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? SubscriptionId { get; }
 
     public override string HelpTitle => "Subscription";
+
+    public string RequireSubscriptionId()
+    {
+        var id = SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        if (string.IsNullOrWhiteSpace(id))
+            throw new InvocationException("--subscription-id is required.");
+
+        if (id.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
+        {
+            var parts = id.Split('/');
+            return parts.Length > 2 ? parts[2] : id;
+        }
+
+        return id;
+    }
 
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {
@@ -53,10 +67,12 @@ public partial class SubscriptionOptionPack : OptionPack
 
 internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
 {
-    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CompletionContext context)
+    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
     {
-        var armClient = new ArmClient(new Azure.Identity.DefaultAzureCredential());
-        var word = context.WordToComplete ?? "";
+        var auth = context.GetOptionPack<AuthOptionPack>();
+        var credential = auth?.GetCredential() ?? new DefaultAzureCredential();
+        var armClient = new ArmClient(credential);
+        var word = context.WordToComplete;
         var suggestions = new List<string>();
 
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())

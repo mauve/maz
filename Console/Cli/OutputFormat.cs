@@ -7,9 +7,15 @@ public enum OutputFormat
     [Description("json")]
     Json,
 
-    [Description("table")]
-    Table,
+    [Description("jsonl")]
+    JsonL,
+
+    [Description("json-pretty")]
+    JsonPretty,
 
     [Description("column")]
     Column,
+
+    [Description("text")]
+    Text,
 }

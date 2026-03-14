@@ -109,9 +109,14 @@ public class CliOptionGeneratorCoreTests
             }
             """
         );
+        // Bool option: --no-verbose is appended after the explicit extra aliases
         Assert.IsTrue(
-            text.Contains("new(\"--verbose\", new string[] {\"-v\", \"-vv\", \"--very-verbose\"})"),
-            "Primary alias and extras should be emitted in order"
+            text.Contains("new(\"--verbose\", new string[] {\"-v\", \"-vv\", \"--very-verbose\", \"--no-verbose\"})"),
+            "Bool option gets --no- negation appended after explicit extra aliases"
+        );
+        Assert.IsTrue(
+            text.Contains("CustomParser ="),
+            "Bool option should get toggle custom parser"
         );
     }
 
@@ -231,6 +236,33 @@ public class CliOptionGeneratorCoreTests
             text,
             "AllowMultipleArgumentsPerToken = true",
             "Arity = ArgumentArity.OneOrMore"
+        );
+    }
+
+    [TestMethod]
+    public void BoolOption_AddsNegationAliasAndToggleParser()
+    {
+        var text = GenerateForBody(
+            "ToggleCommand.g.cs",
+            """
+            public partial class ToggleCommand : CommandDef
+            {
+                [CliOption("--verbose")]
+                public partial bool Verbose { get; }
+            }
+            """
+        );
+        Assert.IsTrue(
+            text.Contains("\"--no-verbose\""),
+            "Bool option should generate --no-verbose negation alias"
+        );
+        Assert.IsTrue(
+            text.Contains("CustomParser ="),
+            "Bool option should generate toggle custom parser"
+        );
+        Assert.IsTrue(
+            text.Contains("IdentifierToken"),
+            "Toggle parser should check IdentifierToken to detect --no- invocation"
         );
     }
 
