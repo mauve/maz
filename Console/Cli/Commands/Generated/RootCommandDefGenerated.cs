@@ -29,6 +29,10 @@ public partial class RootCommandDef
     public EventhubCommandDef Eventhub = null!;
     public ServicebusCommandDef Servicebus = null!;
     public EventgridCommandDef Eventgrid = null!;
+    public NotificationhubsCommandDef Notificationhubs = null!;
+    public RelayCommandDef Relay = null!;
+    public SignalrCommandDef Signalr = null!;
+    public WebpubsubCommandDef Webpubsub = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -54,5 +58,9 @@ public partial class RootCommandDef
         Eventhub = new EventhubCommandDef(Auth);
         Servicebus = new ServicebusCommandDef(Auth);
         Eventgrid = new EventgridCommandDef(Auth);
+        Notificationhubs = new NotificationhubsCommandDef(Auth);
+        Relay = new RelayCommandDef(Auth);
+        Signalr = new SignalrCommandDef(Auth);
+        Webpubsub = new WebpubsubCommandDef(Auth);
     }
 }

@@ -2020,6 +2020,208 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "notificationhubs",
+      "displayName": "notificationhubs",
+      "apiVersion": "2023-09-01",
+      "description": "Manage Azure Notification Hubs namespaces and notification hubs.",
+      "detailedDescription": "Covers the full lifecycle of Notification Hubs namespaces and hubs: create, update, delete, list credentials, test sends, and manage authorization rules. Also manages private endpoints. Requires Contributor or Notification Hubs Contributor roles.",
+      "specFiles": [
+        "notificationhubs/resource-manager/Microsoft.NotificationHubs/NotificationHubs/stable/2023-09-01/notificationhubs.json"
+      ],
+      "resourceDescriptions": {
+        "namespace": "Manage Azure Notification Hubs namespaces.",
+        "notificationhub": "Manage notification hubs within a namespace.",
+        "privateendpointconnection": "Manage private endpoint connections for a Notification Hubs namespace."
+      },
+      "resourceDetailedDescriptions": {
+        "namespace": "Full lifecycle of Notification Hubs namespaces: provision, update, delete, check availability, and manage authorization rules.",
+        "notificationhub": "Create and manage notification hubs including credential configuration (APNS, FCM, WNS, etc.) and test sends.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict namespace access within a VNet."
+      },
+      "actionRenames": {
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrUpdate": "create",
+        "Namespaces_ListByResourceGroup": "list",
+        "NotificationHubs_Get": "show",
+        "NotificationHubs_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Namespaces_List",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "relay",
+      "displayName": "relay",
+      "apiVersion": "2024-01-01",
+      "description": "Manage Azure Relay namespaces, hybrid connections, and WCF relays.",
+      "detailedDescription": "Covers the full lifecycle of Relay namespaces: create, update, delete. Also manages hybrid connections and WCF relays with their authorization rules, and private endpoints. Requires Contributor or Azure Relay-specific roles.",
+      "specFiles": [
+        "relay/resource-manager/Microsoft.Relay/Relay/stable/2024-01-01/relay.json"
+      ],
+      "resourceDescriptions": {
+        "hybridconnection": "Manage hybrid connections within an Azure Relay namespace.",
+        "namespace": "Manage Azure Relay namespaces.",
+        "privateendpointconnection": "Manage private endpoint connections for an Azure Relay namespace.",
+        "privatelinkresource": "List private link resources available for an Azure Relay namespace.",
+        "wcfrelay": "Manage WCF relays within an Azure Relay namespace."
+      },
+      "resourceDetailedDescriptions": {
+        "hybridconnection": "Create and manage hybrid connections that enable on-premises services to be securely exposed through the Azure Relay service.",
+        "namespace": "Full lifecycle of Relay namespaces: provision, update, delete, check name availability, and manage authorization rules.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict namespace access within a VNet.",
+        "privatelinkresource": "Enumerate private link group IDs available for creating private endpoints to a Relay namespace.",
+        "wcfrelay": "Create and manage WCF relays for legacy SOAP-based applications that communicate through Azure Relay."
+      },
+      "actionRenames": {
+        "HybridConnections_Get": "show",
+        "HybridConnections_CreateOrUpdate": "create",
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrUpdate": "create",
+        "Namespaces_ListByResourceGroup": "list",
+        "PrivateEndpointConnections_Get": "show",
+        "WCFRelays_Get": "show",
+        "WCFRelays_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Namespaces_List",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "signalr",
+      "displayName": "signalr",
+      "apiVersion": "2024-03-01",
+      "description": "Manage Azure SignalR Service instances, replicas, and private endpoints.",
+      "detailedDescription": "Covers the full lifecycle of SignalR Service instances: create, update, delete, list keys, regenerate keys. Also manages replicas, custom domains, custom certificates, shared private link resources, and private endpoints. Requires Contributor or SignalR Contributor roles.",
+      "specFiles": [
+        "signalr/resource-manager/Microsoft.SignalRService/SignalRService/stable/2024-03-01/signalr.json"
+      ],
+      "resourceDescriptions": {
+        "customcertificate": "Manage custom TLS certificates for an Azure SignalR Service instance.",
+        "customdomain": "Manage custom domain names for an Azure SignalR Service instance.",
+        "privateendpointconnection": "Manage private endpoint connections for an Azure SignalR Service instance.",
+        "privatelinkresource": "List private link resources available for an Azure SignalR Service instance.",
+        "replica": "Manage replicas of an Azure SignalR Service instance for geo-redundancy.",
+        "replicasharedprivatelinkresource": "Manage shared private link resources for SignalR Service replicas.",
+        "sharedprivatelinkresource": "Manage shared private link resources for an Azure SignalR Service instance.",
+        "signal-r": "Manage Azure SignalR Service instances.",
+        "usage": "List usage quotas for Azure SignalR Service in a region."
+      },
+      "resourceDetailedDescriptions": {
+        "customcertificate": "Upload and manage custom TLS certificates used with custom domain names on a SignalR Service instance.",
+        "customdomain": "Bind custom domain names to a SignalR Service instance for client connections.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict SignalR Service access within a VNet.",
+        "privatelinkresource": "Enumerate private link group IDs available for creating private endpoints.",
+        "replica": "Add geo-redundancy by creating replicas of a SignalR Service instance in other Azure regions.",
+        "replicasharedprivatelinkresource": "Configure shared private links on SignalR Service replicas for outbound connectivity to dependent services.",
+        "sharedprivatelinkresource": "Configure outbound private connections from SignalR Service to backend services like Azure Functions or App Service.",
+        "signal-r": "Full lifecycle of SignalR Service: provision, update, delete, manage keys, and check name availability.",
+        "usage": "Query subscription-level quota and usage for SignalR Service resources in a specific region."
+      },
+      "actionRenames": {
+        "SignalR_Get": "show",
+        "SignalR_CreateOrUpdate": "create",
+        "SignalR_ListByResourceGroup": "list",
+        "SignalRCustomCertificates_Get": "show",
+        "SignalRCustomCertificates_CreateOrUpdate": "create",
+        "SignalRCustomDomains_Get": "show",
+        "SignalRCustomDomains_CreateOrUpdate": "create",
+        "SignalRPrivateEndpointConnections_Get": "show",
+        "SignalRReplicas_Get": "show",
+        "SignalRReplicas_CreateOrUpdate": "create",
+        "SignalRReplicaSharedPrivateLinkResources_Get": "show",
+        "SignalRReplicaSharedPrivateLinkResources_CreateOrUpdate": "create",
+        "SignalRSharedPrivateLinkResources_Get": "show",
+        "SignalRSharedPrivateLinkResources_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "SignalR_ListBySubscription",
+          "resourceGroupOperationId": "SignalR_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "webpubsub",
+      "displayName": "webpubsub",
+      "apiVersion": "2024-03-01",
+      "description": "Manage Azure Web PubSub Service instances, hubs, and private endpoints.",
+      "detailedDescription": "Covers the full lifecycle of Web PubSub Service instances: create, update, delete, list keys, regenerate keys. Also manages hubs, replicas, custom domains, custom certificates, shared private link resources, and private endpoints. Requires Contributor or Web PubSub Contributor roles.",
+      "specFiles": [
+        "webpubsub/resource-manager/Microsoft.SignalRService/SignalRService/stable/2024-03-01/webpubsub.json"
+      ],
+      "resourceDescriptions": {
+        "customcertificate": "Manage custom TLS certificates for a Web PubSub Service instance.",
+        "customdomain": "Manage custom domain names for a Web PubSub Service instance.",
+        "hub": "Manage hubs within a Web PubSub Service instance.",
+        "privateendpointconnection": "Manage private endpoint connections for a Web PubSub Service instance.",
+        "privatelinkresource": "List private link resources available for a Web PubSub Service instance.",
+        "replica": "Manage replicas of a Web PubSub Service instance for geo-redundancy.",
+        "replicasharedprivatelinkresource": "Manage shared private link resources for Web PubSub Service replicas.",
+        "sharedprivatelinkresource": "Manage shared private link resources for a Web PubSub Service instance.",
+        "usage": "List usage quotas for Azure Web PubSub Service in a region.",
+        "web-pub-sub": "Manage Azure Web PubSub Service instances."
+      },
+      "resourceDetailedDescriptions": {
+        "customcertificate": "Upload and manage custom TLS certificates for use with custom domain names.",
+        "customdomain": "Bind custom domain names to a Web PubSub Service instance.",
+        "hub": "Configure hub settings including event handlers and permissions for client connections.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict service access within a VNet.",
+        "privatelinkresource": "Enumerate private link group IDs available for creating private endpoints.",
+        "replica": "Add geo-redundancy by creating replicas in other Azure regions.",
+        "replicasharedprivatelinkresource": "Configure shared private links on replicas for outbound connectivity.",
+        "sharedprivatelinkresource": "Configure outbound private connections from Web PubSub Service to backend services.",
+        "usage": "Query subscription-level quota and usage for Web PubSub resources in a specific region.",
+        "web-pub-sub": "Full lifecycle of Web PubSub Service: provision, update, delete, manage keys, and check name availability."
+      },
+      "actionRenames": {
+        "WebPubSub_Get": "show",
+        "WebPubSub_CreateOrUpdate": "create",
+        "WebPubSub_ListByResourceGroup": "list",
+        "WebPubSubCustomCertificates_Get": "show",
+        "WebPubSubCustomCertificates_CreateOrUpdate": "create",
+        "WebPubSubCustomDomains_Get": "show",
+        "WebPubSubCustomDomains_CreateOrUpdate": "create",
+        "WebPubSubHubs_Get": "show",
+        "WebPubSubHubs_CreateOrUpdate": "create",
+        "WebPubSubPrivateEndpointConnections_Get": "show",
+        "WebPubSubReplicas_Get": "show",
+        "WebPubSubReplicas_CreateOrUpdate": "create",
+        "WebPubSubReplicaSharedPrivateLinkResources_Get": "show",
+        "WebPubSubReplicaSharedPrivateLinkResources_CreateOrUpdate": "create",
+        "WebPubSubSharedPrivateLinkResources_Get": "show",
+        "WebPubSubSharedPrivateLinkResources_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "WebPubSub_ListBySubscription",
+          "resourceGroupOperationId": "WebPubSub_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
