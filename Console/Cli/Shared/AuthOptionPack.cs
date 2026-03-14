@@ -11,7 +11,7 @@ public partial class AuthOptionPack : OptionPack
     public partial bool Interactive { get; } = true;
 
     /// <summary>Specifies additional tenants for which the credential may acquire tokens.</summary>
-    [CliOption("--auth-additionally-allowed-tenants", Global = true)]
+    [CliOption("--auth-additionally-allowed-tenants", Global = true, Advanced = true)]
     public partial List<string> AdditionallyAllowedTenants { get; } = [];
 
     /// <summary>The host of the Microsoft Entra authority.</summary>
@@ -54,7 +54,7 @@ public partial class AuthOptionPack : OptionPack
         [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
 
     /// <summary>Path to the workload identity token file.</summary>
-    [CliOption("--auth-token-file-path", Global = true, EnvVar = "AZURE_FEDERATED_TOKEN_FILE")]
+    [CliOption("--auth-token-file-path", Global = true, Advanced = true, EnvVar = "AZURE_FEDERATED_TOKEN_FILE")]
     public partial string? TokenFilePath { get; }
 
     public override string HelpTitle => "Authentication";
