@@ -139,16 +139,20 @@ internal static partial class GroupedHelpLayout
             {
                 var row = ctx.HelpBuilder.GetTwoColumnRow(o, ctx);
                 var (main, metadata) = SplitOptionDescriptionAndMetadata(o, row.SecondColumnText);
-                return (row.FirstColumnText, main, metadata);
+                var firstCol = TransformFirstColumnText(row.FirstColumnText, out bool isRequired);
+                if (isRequired)
+                    main = (main.Length > 0 ? main + " " : "") + Ansi.LightRed("[required]");
+                return (firstCol, main, metadata);
             })
             .ToList();
 
-        var firstWidth = rows.Count == 0 ? 0 : rows.Max(r => r.FirstColumnText.Length);
+        var firstWidth = rows.Count == 0 ? 0 : rows.Max(r => Ansi.VisibleLength(r.firstCol));
         var metadataIndent = new string(' ', 2 + firstWidth + 4);
         foreach (var row in rows)
         {
+            var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.firstCol));
             ctx.Output.WriteLine(
-                $"  {row.FirstColumnText.PadRight(firstWidth)}  {Ansi.StyleOptionDescription(row.main)}"
+                $"  {row.firstCol}{padding}  {Ansi.StyleOptionDescription(row.main)}"
             );
 
             foreach (var meta in row.metadata)
@@ -222,6 +226,67 @@ internal static partial class GroupedHelpLayout
         }
 
         return true;
+    }
+
+    private static string TransformFirstColumnText(string text, out bool isRequired)
+    {
+        isRequired = false;
+
+        // Strip " (REQUIRED)" suffix (case-insensitive)
+        var withoutRequired = Regex.Replace(text, @"\s+\(REQUIRED\)\s*$", "", RegexOptions.IgnoreCase);
+        if (withoutRequired.Length != text.Length)
+            isRequired = true;
+        text = withoutRequired;
+
+        // Extract trailing " <placeholder>"
+        var placeholderMatch = Regex.Match(text, @"\s+<[^>]+>$");
+        var placeholder = placeholderMatch.Success ? placeholderMatch.Value : "";
+        if (placeholderMatch.Success)
+            text = text[..placeholderMatch.Index];
+
+        // Split into aliases
+        var aliases = text.Split(", ").ToList();
+
+        // Boolean compaction: --foo + --no-foo → --[no-]foo
+        for (int i = aliases.Count - 1; i >= 0; i--)
+        {
+            var alias = aliases[i];
+            if (!alias.StartsWith("--", StringComparison.Ordinal))
+                continue;
+            var noVariant = "--no-" + alias[2..];
+            int j = aliases.IndexOf(noVariant);
+            if (j >= 0)
+            {
+                aliases[i] = "--[no-]" + alias[2..];
+                aliases.RemoveAt(j);
+            }
+        }
+
+        // Prefix compaction: --foo + --foo-bar → --foo[-bar]
+        // Only compact when both start with "--" and suffix starts with "-"
+        for (int i = aliases.Count - 1; i >= 0; i--)
+        {
+            var a = aliases[i];
+            if (!a.StartsWith("--", StringComparison.Ordinal))
+                continue;
+            for (int j = aliases.Count - 1; j >= 0; j--)
+            {
+                if (i == j) continue;
+                var b = aliases[j];
+                if (!b.StartsWith("--", StringComparison.Ordinal))
+                    continue;
+                // b is strict prefix of a, suffix starts with "-"
+                if (a.Length > b.Length && a.StartsWith(b, StringComparison.Ordinal) && a[b.Length] == '-')
+                {
+                    var suffix = a[b.Length..];
+                    aliases[j] = b + "[" + suffix + "]";
+                    aliases.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        return string.Join(", ", aliases) + placeholder;
     }
 
     private static (string main, List<string> metadata) SplitOptionDescriptionAndMetadata(
