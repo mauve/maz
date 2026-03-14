@@ -499,7 +499,24 @@ public sealed class ModelBuilder
                 NamingEngine.KebabToCSharpProperty(NamingEngine.PropertyToKebab(paramName))
             );
 
+            // Skip duplicate property names (e.g. dotted query params that collide with path params)
+            if (cliParams.Any(p => p.PropertyName == propName))
+                continue;
+
             cliParams.Add(new CliParamModel(cliFlag, propName, paramName, paramIn, required, desc));
+        }
+
+        // Deduplicate body properties against path/query params to avoid duplicate C# property names
+        if (bodyModel is not null && cliParams.Count > 0)
+        {
+            var existingPropNames = cliParams
+                .Select(p => p.PropertyName)
+                .ToHashSet(StringComparer.Ordinal);
+            var dedupedBodyProps = bodyModel.FlattenedProperties
+                .Where(p => !existingPropNames.Contains(p.PropertyName))
+                .ToList();
+            if (dedupedBodyProps.Count != bodyModel.FlattenedProperties.Count)
+                bodyModel = new BodyModel(dedupedBodyProps);
         }
 
         return new OperationModel(

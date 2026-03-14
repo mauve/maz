@@ -166,7 +166,7 @@ public static partial class NamingEngine
         for (var i = 0; i < name.Length; i++)
         {
             var c = name[i];
-            if (c == '_' || c == '-')
+            if (c == '_' || c == '-' || c == '.')
             {
                 sb.Append('-');
                 continue;
