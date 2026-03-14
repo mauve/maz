@@ -16,6 +16,7 @@ public partial class RootCommandDef : CommandDef
     public override string Name => "maz";
 
     public readonly AuthOptionPack Auth;
+    public readonly DiagnosticOptionPack Diagnostics;
 
     public readonly AccountCommandDef Account;
     public readonly GetTokenCommandDef GetToken;
@@ -26,6 +27,7 @@ public partial class RootCommandDef : CommandDef
     public RootCommandDef()
     {
         Auth = new AuthOptionPack();
+        Diagnostics = new DiagnosticOptionPack();
         Account = new AccountCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
