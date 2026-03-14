@@ -9,9 +9,9 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Returns the properties for the specified storage account including but not limited to name, SKU name, location, and account status. The ListKeys operation should be used to retrieve storage keys.</summary>
-public partial class StorageAccountGetPropertiesCommandDef(AuthOptionPack auth) : CommandDef
+public partial class StorageAccountShowCommandDef(AuthOptionPack auth) : CommandDef
 {
-    public override string Name => "get-properties";
+    public override string Name => "show";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();

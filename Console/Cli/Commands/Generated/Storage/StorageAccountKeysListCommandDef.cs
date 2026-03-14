@@ -9,9 +9,9 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the access keys or Kerberos keys (if active directory enabled) for the specified storage account.</summary>
-public partial class StorageAccountListKeysCommandDef(AuthOptionPack auth) : CommandDef
+public partial class StorageAccountKeysListCommandDef(AuthOptionPack auth) : CommandDef
 {
-    public override string Name => "list-keys";
+    public override string Name => "list";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
