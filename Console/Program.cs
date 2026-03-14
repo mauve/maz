@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.CommandLine.Help;
 using Azure.Core;
 using Console.Cli;
+using Console.Cli.Shared;
 using Console.Rendering;
 
 // Register per-type field visibility for the text renderer.
@@ -71,8 +72,18 @@ foreach (var cmd in AllCommands(rootCmd))
 var config = new CommandLineConfiguration(rootCmd);
 var result = rootCmd.Parse(args, config);
 
-if (result.Errors.Count > 0 && result.Action is not HelpAction)
+if (result.Errors.Count > 0)
 {
+    var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
+        result.GetValue(InteractiveOptionPack.InteractiveOption));
+
+    var suggestionResult = CommandSuggester.TrySuggest(
+        result, args, interactive, System.Console.Error, System.Console.ReadLine);
+
+    if (suggestionResult >= 0)
+        return suggestionResult;
+
+    // No suggestions — fall back to printing raw errors
     foreach (var error in result.Errors)
         System.Console.Error.WriteLine(Ansi.Red(error.Message));
     return 1;
