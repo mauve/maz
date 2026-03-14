@@ -14,12 +14,8 @@ public partial class StorageAccountCustomerInitiatedMigrationCommandDef(AuthOpti
 {
     public override string Name => "customer-initiated-migration";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>
     [CliOption("--body-json")]
@@ -34,7 +30,7 @@ public partial class StorageAccountCustomerInitiatedMigrationCommandDef(AuthOpti
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/startAccountMigration";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/startAccountMigration";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

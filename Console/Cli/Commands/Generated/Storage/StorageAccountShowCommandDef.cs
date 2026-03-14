@@ -14,12 +14,8 @@ public partial class StorageAccountShowCommandDef(AuthOptionPack auth) : Command
 {
     public override string Name => "show";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>May be used to expand the properties within account's properties. By default, data is not included when fetching properties. Currently we only support geoReplicationStats and blobRestoreStatus.</summary>
     [CliOption("--expand")]
@@ -30,7 +26,7 @@ public partial class StorageAccountShowCommandDef(AuthOptionPack auth) : Command
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

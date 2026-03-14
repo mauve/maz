@@ -14,12 +14,8 @@ public partial class StorageManagementpolicyCreateOrUpdateCommandDef(AuthOptionP
 {
     public override string Name => "create-or-update";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>The name of the Storage Account Management Policy. It should always be 'default'</summary>
     [CliOption("--management-policy-name", Required = true)]
@@ -30,7 +26,7 @@ public partial class StorageManagementpolicyCreateOrUpdateCommandDef(AuthOptionP
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/managementPolicies/{ManagementPolicyName}";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/managementPolicies/{ManagementPolicyName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

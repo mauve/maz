@@ -14,12 +14,8 @@ public partial class StorageLocaluserListCommandDef(AuthOptionPack auth) : Comma
 {
     public override string Name => "list";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>Optional, specifies the maximum number of local users that will be included in the list response.</summary>
     [CliOption("--maxpagesize")]
@@ -38,7 +34,7 @@ public partial class StorageLocaluserListCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/localUsers";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/localUsers";
 
         var allItems = client.GetAllAsync(path, "2024-01-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

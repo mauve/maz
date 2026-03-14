@@ -14,12 +14,8 @@ public partial class StorageAccountRestoreBlobRangesCommandDef(AuthOptionPack au
 {
     public override string Name => "restore-blob-ranges";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>Restore blob to the specified time.</summary>
     [CliOption("--time-to-restore", Required = true)]
@@ -42,7 +38,7 @@ public partial class StorageAccountRestoreBlobRangesCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/restoreBlobRanges";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/restoreBlobRanges";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

@@ -14,12 +14,8 @@ public partial class StoragePrivateendpointconnectionPutCommandDef(AuthOptionPac
 {
     public override string Name => "put";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
-
-    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
-    [CliOption("--account-name", Required = true)]
-    public partial string? AccountName { get; }
 
     /// <summary>The name of the private endpoint connection associated with the Azure resource</summary>
     [CliOption("--private-endpoint-connection-name", Required = true)]
@@ -30,7 +26,7 @@ public partial class StoragePrivateendpointconnectionPutCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{AccountName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
+        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

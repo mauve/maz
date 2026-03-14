@@ -41,11 +41,18 @@ public static class OperationCommandEmitter
 
         // Determine scope flags (computed here so both field decls and ExecuteAsync can use them)
         var isMergedList = op.MergedSubscriptionUrlTemplate is not null;
+        var usesStorageAccount =
+            !isDataPlane
+            && op.UrlTemplate.Contains("{accountName}", StringComparison.OrdinalIgnoreCase);
+
+        // When StorageAccountOptionPack absorbs sub/rg, don't emit separate packs
         var usesResourceGroup =
             !isDataPlane
+            && !usesStorageAccount
             && op.UrlTemplate.Contains("{resourceGroupName}", StringComparison.OrdinalIgnoreCase);
         var usesSubscription =
             !isDataPlane
+            && !usesStorageAccount
             && op.UrlTemplate.Contains("{subscriptionId}", StringComparison.OrdinalIgnoreCase);
 
         w.Block(
@@ -68,8 +75,10 @@ public static class OperationCommandEmitter
                 }
                 else
                 {
+                    if (usesStorageAccount)
+                        w.Line("public readonly StorageAccountOptionPack StorageAccount = new();");
                     // Merged list always needs ResourceGroupOptionPack (--resource-group is optional)
-                    if (usesResourceGroup || isMergedList)
+                    else if (usesResourceGroup || isMergedList)
                         w.Line("public readonly ResourceGroupOptionPack ResourceGroup = new();");
                     else if (usesSubscription)
                         w.Line("public readonly SubscriptionOptionPack Subscription = new();");
@@ -81,6 +90,11 @@ public static class OperationCommandEmitter
                 // CLI params (path params other than subscription/rg, plus query params)
                 foreach (var param in op.CliParams)
                 {
+                    if (usesStorageAccount
+                        && param.ParamIn == "path"
+                        && param.UrlParameterName.Equals("accountName", StringComparison.OrdinalIgnoreCase))
+                        continue;  // absorbed by StorageAccountOptionPack
+
                     var requiredAttr = param.Required ? ", Required = true" : "";
                     if (!string.IsNullOrWhiteSpace(param.Description))
                         w.Line(
@@ -165,7 +179,8 @@ public static class OperationCommandEmitter
                                 op,
                                 isMergedList,
                                 usesResourceGroup,
-                                usesSubscription
+                                usesSubscription,
+                                usesStorageAccount
                             );
                         w.Line();
 
@@ -218,7 +233,8 @@ public static class OperationCommandEmitter
         OperationModel op,
         bool isMergedList,
         bool usesResourceGroup,
-        bool usesSubscription
+        bool usesSubscription,
+        bool usesStorageAccount = false
     )
     {
         if (isMergedList)
@@ -245,7 +261,8 @@ public static class OperationCommandEmitter
                 op.UrlTemplate,
                 op,
                 usesResourceGroup,
-                usesSubscription
+                usesSubscription,
+                usesStorageAccount
             );
             w.Line($"var path = {pathExpr};");
         }
@@ -255,18 +272,31 @@ public static class OperationCommandEmitter
         string urlTemplate,
         OperationModel op,
         bool usesResourceGroup,
-        bool usesSubscription
+        bool usesSubscription,
+        bool usesStorageAccount = false
     )
     {
-        // Replace known absorbed params with option-pack calls
-        var expr = urlTemplate
-            .Replace(
-                "{subscriptionId}",
-                usesResourceGroup ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
-                    : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
-                    : "{subscriptionId}"
-            )
-            .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}");
+        var expr = urlTemplate;
+
+        if (usesStorageAccount)
+        {
+            expr = expr
+                .Replace("{subscriptionId}", "{StorageAccount.Subscription.RequireSubscriptionId()}", StringComparison.OrdinalIgnoreCase)
+                .Replace("{resourceGroupName}", "{StorageAccount.ResourceGroup.RequireResourceGroupName()}", StringComparison.OrdinalIgnoreCase)
+                .Replace("{accountName}", "{StorageAccount.RequireAccountName()}", StringComparison.OrdinalIgnoreCase);
+        }
+        else
+        {
+            // Replace known absorbed params with option-pack calls
+            expr = expr
+                .Replace(
+                    "{subscriptionId}",
+                    usesResourceGroup ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
+                        : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
+                        : "{subscriptionId}"
+                )
+                .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}");
+        }
 
         // Replace remaining path parameters with property access
         foreach (var param in op.CliParams.Where(p => p.ParamIn == "path"))
