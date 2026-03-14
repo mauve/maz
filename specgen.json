@@ -1849,6 +1849,177 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "eventgrid",
+      "displayName": "eventgrid",
+      "apiVersion": "2025-02-15",
+      "description": "Manage Azure Event Grid topics, domains, namespaces, and event subscriptions.",
+      "detailedDescription": "Covers the full lifecycle of Event Grid resources: custom topics, domains, system topics, partner topics, and Event Grid namespaces (MQTT broker). Also manages event subscriptions, topic spaces, permission bindings, clients, and partner configurations. Requires Contributor or EventGrid Contributor roles.",
+      "specFiles": [
+        "eventgrid/resource-manager/Microsoft.EventGrid/EventGrid/stable/2025-02-15/EventGrid.json"
+      ],
+      "resourceDescriptions": {
+        "cacertificate": "Manage CA certificates for MQTT client authentication in an Event Grid namespace.",
+        "channel": "Manage channels between partner namespaces and partner topics.",
+        "client": "Manage MQTT clients for an Event Grid namespace.",
+        "clientgroup": "Manage MQTT client groups for an Event Grid namespace.",
+        "domain": "Manage Azure Event Grid domains.",
+        "domaineventsubscription": "Manage event subscriptions scoped to an Event Grid domain.",
+        "domaintopic": "Manage topics within an Event Grid domain.",
+        "domaintopiceventsubscription": "Manage event subscriptions on a domain topic.",
+        "eventsubscription": "Manage global and regional event subscriptions.",
+        "extensiontopic": "Get extension topic details for Azure resources.",
+        "namespace": "Manage Azure Event Grid namespaces (MQTT broker and pull delivery).",
+        "namespacetopic": "Manage topics within an Event Grid namespace.",
+        "namespacetopiceventsubscription": "Manage event subscriptions on a namespace topic.",
+        "operation": "List available operations for Azure Event Grid.",
+        "partnerconfiguration": "Manage partner configurations for enabling partner event sources.",
+        "partnernamespace": "Manage Event Grid partner namespaces.",
+        "partnerregistration": "Manage Event Grid partner registrations.",
+        "partnertopic": "Manage Event Grid partner topics.",
+        "partnertopiceventsubscription": "Manage event subscriptions on partner topics.",
+        "permissionbinding": "Manage permission bindings for MQTT clients in an Event Grid namespace.",
+        "privateendpointconnection": "Manage private endpoint connections for Event Grid resources.",
+        "privatelinkresource": "List private link resources available for Event Grid resources.",
+        "systemtopic": "Manage Event Grid system topics for Azure service events.",
+        "systemtopiceventsubscription": "Manage event subscriptions on system topics.",
+        "topic": "Manage Azure Event Grid custom topics.",
+        "topiceventsubscription": "Manage event subscriptions on custom topics.",
+        "topicspace": "Manage topic spaces for MQTT wildcard topic matching in a namespace.",
+        "topictype": "List available Event Grid topic types and their event types.",
+        "verifiedpartner": "List verified Event Grid partner resources."
+      },
+      "resourceDetailedDescriptions": {
+        "cacertificate": "Upload and manage CA certificate chains used to authenticate MQTT client connections to an Event Grid namespace.",
+        "channel": "Create and manage channels that connect a partner namespace to subscriber partner topics for event routing.",
+        "client": "Register and manage MQTT devices or applications that publish and subscribe to topics in an Event Grid namespace.",
+        "clientgroup": "Define groups of MQTT clients for applying permission bindings across multiple devices at once.",
+        "domain": "Create and manage Event Grid domains that host multiple topics under a single endpoint.",
+        "domaineventsubscription": "Subscribe to events from all topics or specific topics within an Event Grid domain.",
+        "domaintopic": "Create and manage individual topics within an Event Grid domain.",
+        "domaintopiceventsubscription": "Subscribe to events from a specific topic within an Event Grid domain.",
+        "eventsubscription": "Create and manage event subscriptions for routing events to endpoints; supports webhooks, Event Hubs, queues, and more.",
+        "extensiontopic": "Get the extension topic associated with an Azure resource for system event subscription.",
+        "namespace": "Create and manage Event Grid namespaces that provide MQTT broker and pull-based event delivery capabilities.",
+        "namespacetopic": "Create and manage topics within a namespace for pull-based event delivery to consumers.",
+        "namespacetopiceventsubscription": "Subscribe consumers to namespace topics for pull-based event delivery.",
+        "operation": "Enumerate all operations exposed by the Microsoft.EventGrid resource provider.",
+        "partnerconfiguration": "Configure which partner event sources are authorized to publish to your subscription.",
+        "partnernamespace": "Create and manage partner namespaces for partners to deliver events to subscribers.",
+        "partnerregistration": "Register an event source as an Event Grid partner.",
+        "partnertopic": "Create and manage partner topics that expose events from registered partner sources.",
+        "partnertopiceventsubscription": "Subscribe to events published by a partner topic.",
+        "permissionbinding": "Define fine-grained publish/subscribe permissions for MQTT client groups on topic spaces.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections for Event Grid namespaces and domains.",
+        "privatelinkresource": "Enumerate the private link group IDs available for creating private endpoints.",
+        "systemtopic": "Create and manage system topics that surface built-in Azure service events (e.g., Storage blob created).",
+        "systemtopiceventsubscription": "Subscribe to events surfaced by an Event Grid system topic.",
+        "topic": "Create and manage custom Event Grid topics to which your applications publish events.",
+        "topiceventsubscription": "Subscribe to events from a custom Event Grid topic.",
+        "topicspace": "Define MQTT topic wildcard patterns that clients in a namespace can publish or subscribe to.",
+        "topictype": "Query the catalog of Azure services that publish events to Event Grid.",
+        "verifiedpartner": "Browse the list of verified Event Grid partners available for creating partner topics."
+      },
+      "actionRenames": {
+        "CaCertificates_Get": "show",
+        "CaCertificates_CreateOrUpdate": "create",
+        "Channels_Get": "show",
+        "Channels_CreateOrUpdate": "create",
+        "Clients_Get": "show",
+        "Clients_CreateOrUpdate": "create",
+        "ClientGroups_Get": "show",
+        "ClientGroups_CreateOrUpdate": "create",
+        "Domains_Get": "show",
+        "Domains_CreateOrUpdate": "create",
+        "Domains_ListByResourceGroup": "list",
+        "DomainEventSubscriptions_Get": "show",
+        "DomainEventSubscriptions_CreateOrUpdate": "create",
+        "DomainTopics_Get": "show",
+        "DomainTopics_CreateOrUpdate": "create",
+        "DomainTopicEventSubscriptions_Get": "show",
+        "DomainTopicEventSubscriptions_CreateOrUpdate": "create",
+        "EventSubscriptions_Get": "show",
+        "EventSubscriptions_CreateOrUpdate": "create",
+        "ExtensionTopics_Get": "show",
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrUpdate": "create",
+        "Namespaces_ListByResourceGroup": "list",
+        "NamespaceTopics_Get": "show",
+        "NamespaceTopics_CreateOrUpdate": "create",
+        "NamespaceTopicEventSubscriptions_Get": "show",
+        "NamespaceTopicEventSubscriptions_CreateOrUpdate": "create",
+        "PartnerConfigurations_Get": "show",
+        "PartnerConfigurations_CreateOrUpdate": "create",
+        "PartnerNamespaces_Get": "show",
+        "PartnerNamespaces_CreateOrUpdate": "create",
+        "PartnerNamespaces_ListByResourceGroup": "list",
+        "PartnerRegistrations_Get": "show",
+        "PartnerRegistrations_CreateOrUpdate": "create",
+        "PartnerRegistrations_ListByResourceGroup": "list",
+        "PartnerTopics_Get": "show",
+        "PartnerTopics_CreateOrUpdate": "create",
+        "PartnerTopics_ListByResourceGroup": "list",
+        "PartnerTopicEventSubscriptions_Get": "show",
+        "PartnerTopicEventSubscriptions_CreateOrUpdate": "create",
+        "PermissionBindings_Get": "show",
+        "PermissionBindings_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "SystemTopics_Get": "show",
+        "SystemTopics_CreateOrUpdate": "create",
+        "SystemTopics_ListByResourceGroup": "list",
+        "SystemTopicEventSubscriptions_Get": "show",
+        "SystemTopicEventSubscriptions_CreateOrUpdate": "create",
+        "Topics_Get": "show",
+        "Topics_CreateOrUpdate": "create",
+        "Topics_ListByResourceGroup": "list",
+        "TopicEventSubscriptions_Get": "show",
+        "TopicEventSubscriptions_CreateOrUpdate": "create",
+        "TopicSpaces_Get": "show",
+        "TopicSpaces_CreateOrUpdate": "create",
+        "TopicTypes_Get": "show",
+        "VerifiedPartners_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Domains_ListBySubscription",
+          "resourceGroupOperationId": "Domains_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Namespaces_ListBySubscription",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "PartnerNamespaces_ListBySubscription",
+          "resourceGroupOperationId": "PartnerNamespaces_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "PartnerRegistrations_ListBySubscription",
+          "resourceGroupOperationId": "PartnerRegistrations_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "PartnerTopics_ListBySubscription",
+          "resourceGroupOperationId": "PartnerTopics_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SystemTopics_ListBySubscription",
+          "resourceGroupOperationId": "SystemTopics_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Topics_ListBySubscription",
+          "resourceGroupOperationId": "Topics_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }

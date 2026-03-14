@@ -28,6 +28,7 @@ public partial class RootCommandDef
     public ContainerregistryCommandDef Containerregistry = null!;
     public EventhubCommandDef Eventhub = null!;
     public ServicebusCommandDef Servicebus = null!;
+    public EventgridCommandDef Eventgrid = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -52,5 +53,6 @@ public partial class RootCommandDef
         Containerregistry = new ContainerregistryCommandDef(Auth);
         Eventhub = new EventhubCommandDef(Auth);
         Servicebus = new ServicebusCommandDef(Auth);
+        Eventgrid = new EventgridCommandDef(Auth);
     }
 }
