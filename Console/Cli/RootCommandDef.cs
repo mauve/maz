@@ -1,7 +1,6 @@
 using System.CommandLine;
 using Console.Cli.Commands;
 using Console.Cli.Commands.Group;
-using Console.Cli.Commands.Monitor;
 using Console.Cli.Shared;
 
 namespace Console.Cli;
@@ -23,7 +22,6 @@ public partial class RootCommandDef : CommandDef
     public readonly AccountCommandDef Account;
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
-    public readonly MonitorCommandDef Monitor;
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
 
@@ -38,7 +36,6 @@ public partial class RootCommandDef : CommandDef
         Account = new AccountCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
-        Monitor = new MonitorCommandDef(Auth);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
         InitGeneratedCommands();
