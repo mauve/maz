@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -15,8 +16,10 @@ public partial class KeyvaultKeyCryptoVerifyCommandDef(AuthOptionPack auth) : Co
     public override string Name => "verify";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--vault-url", Required = true)]
+    [CliOption("--vault-url")]
     public partial string? VaultUrl { get; }
+
+    public readonly KeyVaultOptionPack KeyVault = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -49,7 +52,8 @@ public partial class KeyvaultKeyCryptoVerifyCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var path = $"{VaultUrl}/keys/{KeyName}/{KeyVersion}/verify";
+        var vaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{vaultBaseUrl}/keys/{KeyName}/{KeyVersion}/verify";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()
