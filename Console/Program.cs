@@ -75,10 +75,16 @@ var result = rootCmd.Parse(args, config);
 if (result.Errors.Count > 0)
 {
     var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
-        result.GetValue(InteractiveOptionPack.InteractiveOption));
+        result.GetValue(InteractiveOptionPack.InteractiveOption)
+    );
 
     var suggestionResult = CommandSuggester.TrySuggest(
-        result, args, interactive, System.Console.Error, System.Console.ReadLine);
+        result,
+        args,
+        interactive,
+        System.Console.Error,
+        System.Console.ReadLine
+    );
 
     if (suggestionResult >= 0)
         return suggestionResult;

@@ -33,10 +33,7 @@ internal static class FuzzyCommandMatcher
         if (candidate.Contains(input, StringComparison.OrdinalIgnoreCase))
             return 50;
 
-        var dist = LevenshteinDistance(
-            input.ToLowerInvariant(),
-            candidate.ToLowerInvariant()
-        );
+        var dist = LevenshteinDistance(input.ToLowerInvariant(), candidate.ToLowerInvariant());
 
         if (dist == 1)
             return 40;

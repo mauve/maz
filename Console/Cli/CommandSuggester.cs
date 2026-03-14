@@ -49,7 +49,10 @@ internal static class CommandSuggester
             if (matches.Count == 1)
             {
                 var suggestion = matches[0].Cmd.Name;
-                var proposed = rootName + " " + string.Join(" ", ReplaceFirst(originalArgs, token, suggestion));
+                var proposed =
+                    rootName
+                    + " "
+                    + string.Join(" ", ReplaceFirst(originalArgs, token, suggestion));
                 stderr.Write($"Did you mean '{proposed}'? [Y/n]: ");
                 var response = readLine()?.Trim().ToLowerInvariant() ?? "";
                 if (response == "" || response == "y" || response == "yes")
@@ -62,7 +65,10 @@ internal static class CommandSuggester
                 stderr.WriteLine("Unknown command. Did you mean one of these?");
                 for (var i = 0; i < matches.Count; i++)
                 {
-                    var proposed = rootName + " " + string.Join(" ", ReplaceFirst(originalArgs, token, matches[i].Cmd.Name));
+                    var proposed =
+                        rootName
+                        + " "
+                        + string.Join(" ", ReplaceFirst(originalArgs, token, matches[i].Cmd.Name));
                     stderr.WriteLine($"  {i + 1}) {proposed}");
                 }
                 stderr.Write("Enter number (or press Enter to cancel): ");
@@ -73,12 +79,7 @@ internal static class CommandSuggester
                     && choice >= 1
                     && choice <= matches.Count
                 )
-                    return ReinvokeWith(
-                        result,
-                        originalArgs,
-                        token,
-                        matches[choice - 1].Cmd.Name
-                    );
+                    return ReinvokeWith(result, originalArgs, token, matches[choice - 1].Cmd.Name);
 
                 return 1;
             }
@@ -87,13 +88,20 @@ internal static class CommandSuggester
         {
             if (matches.Count == 1)
             {
-                var proposed = rootName + " " + string.Join(" ", ReplaceFirst(originalArgs, token, matches[0].Cmd.Name));
+                var proposed =
+                    rootName
+                    + " "
+                    + string.Join(" ", ReplaceFirst(originalArgs, token, matches[0].Cmd.Name));
                 stderr.WriteLine(Ansi.Yellow($"Did you mean: '{proposed}'?"));
             }
             else
             {
-                var suggestions = string.Join(", ", matches.Select(m =>
-                    $"'{rootName} {string.Join(" ", ReplaceFirst(originalArgs, token, m.Cmd.Name))}'"));
+                var suggestions = string.Join(
+                    ", ",
+                    matches.Select(m =>
+                        $"'{rootName} {string.Join(" ", ReplaceFirst(originalArgs, token, m.Cmd.Name))}'"
+                    )
+                );
                 stderr.WriteLine(Ansi.Yellow($"Did you mean one of: {suggestions}?"));
             }
             return 1;
