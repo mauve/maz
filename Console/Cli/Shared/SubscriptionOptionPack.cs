@@ -23,6 +23,21 @@ public partial class SubscriptionOptionPack : OptionPack
 
     public override string HelpTitle => "Subscription";
 
+    public string RequireSubscriptionId()
+    {
+        var id = SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        if (string.IsNullOrWhiteSpace(id))
+            throw new InvocationException("--subscription-id is required.");
+
+        if (id.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
+        {
+            var parts = id.Split('/');
+            return parts.Length > 2 ? parts[2] : id;
+        }
+
+        return id;
+    }
+
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {
         var requested =
