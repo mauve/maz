@@ -1701,6 +1701,154 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "eventhub",
+      "displayName": "eventhub",
+      "apiVersion": "2024-01-01",
+      "description": "Manage Azure Event Hubs namespaces, event hubs, consumer groups, and clusters.",
+      "detailedDescription": "Covers the full lifecycle of Event Hubs namespaces and their resources: create, update, delete. Also manages event hubs, consumer groups, authorization rules, geo-disaster recovery, schema registry, application groups, network rule sets, and private endpoints. Requires Contributor or Event Hubs Data Owner roles.",
+      "specFiles": [
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/namespaces.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/eventhubs.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/consumergroups.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/AuthorizationRules.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/Clusters.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/SchemaRegistry.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/disasterRecoveryConfigs.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/networkrulessets.json",
+        "eventhub/resource-manager/Microsoft.EventHub/Eventhub/stable/2024-01-01/ApplicationGroups.json"
+      ],
+      "resourceDescriptions": {
+        "namespace": "Manage Azure Event Hubs namespaces.",
+        "eventhub": "Manage event hubs within an Event Hubs namespace.",
+        "consumergroup": "Manage consumer groups for an event hub.",
+        "disasterrecoveryconfig": "Manage geo-disaster recovery configurations for Event Hubs namespaces.",
+        "cluster": "Manage dedicated Event Hubs clusters.",
+        "schema-registry": "Manage schema registry groups for an Event Hubs namespace.",
+        "privateendpointconnection": "Manage private endpoint connections for an Event Hubs namespace.",
+        "privatelinkresource": "List private link resources available for an Event Hubs namespace.",
+        "network-security-perimeter-configuration": "Manage network security perimeter configurations for an Event Hubs namespace.",
+        "applicationgroup": "Manage application groups for throttling and access control in Event Hubs."
+      },
+      "resourceDetailedDescriptions": {
+        "namespace": "Full lifecycle of Event Hubs namespaces: provision, update, delete, manage authorization rules, and configure network rules.",
+        "eventhub": "Create and manage event hubs within a namespace including partition count and retention settings.",
+        "consumergroup": "Create and manage consumer groups that track read progress for multiple independent consumers of an event hub.",
+        "disasterrecoveryconfig": "Configure active geo-redundancy pairing between namespaces in different regions for business continuity.",
+        "cluster": "Provision and manage dedicated single-tenant Event Hubs clusters for premium isolation and capacity.",
+        "schema-registry": "Create schema registry groups and schemas for Apache Avro and JSON schema validation of event payloads.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict Event Hubs access within a VNet.",
+        "privatelinkresource": "Enumerate the private link group IDs available for private endpoint connections.",
+        "network-security-perimeter-configuration": "View and manage network security perimeter associations for an Event Hubs namespace.",
+        "applicationgroup": "Create application groups that apply throttling policies to control event publishing throughput per application."
+      },
+      "resourceRenames": {
+        "EventHubs_ListByNamespace": "eventhub",
+        "EventHubs_Get": "eventhub",
+        "EventHubs_CreateOrUpdate": "eventhub",
+        "EventHubs_Delete": "eventhub",
+        "NetworkSecurityPerimeterConfigurations_CreateOrUpdate": "network-security-perimeter-configuration",
+        "NetworkSecurityPerimeterConfigurations_GetResourceAssociationName": "network-security-perimeter-configuration"
+      },
+      "actionRenames": {
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrUpdate": "create",
+        "Namespaces_ListByResourceGroup": "list",
+        "EventHubs_Get": "show",
+        "EventHubs_CreateOrUpdate": "create",
+        "ConsumerGroups_Get": "show",
+        "ConsumerGroups_CreateOrUpdate": "create",
+        "DisasterRecoveryConfigs_Get": "show",
+        "DisasterRecoveryConfigs_CreateOrUpdate": "create",
+        "Clusters_Get": "show",
+        "Clusters_CreateOrUpdate": "create",
+        "SchemaGroups_Get": "show",
+        "SchemaGroups_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "ApplicationGroups_Get": "show",
+        "ApplicationGroups_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Namespaces_List",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "servicebus",
+      "displayName": "servicebus",
+      "apiVersion": "2024-01-01",
+      "description": "Manage Azure Service Bus namespaces, queues, topics, subscriptions, and rules.",
+      "detailedDescription": "Covers the full lifecycle of Service Bus namespaces and their messaging entities: queues, topics, subscriptions, and rules. Also manages authorization rules, disaster recovery configurations, network rule sets, migration configs, and private endpoints. Requires Contributor or Service Bus Data Owner roles.",
+      "specFiles": [
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/namespace-preview.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/Queue.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/topics.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/subscriptions.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/Rules.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/AuthorizationRules.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/DisasterRecoveryConfig.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/networksets.json",
+        "servicebus/resource-manager/Microsoft.ServiceBus/ServiceBus/stable/2024-01-01/migrationconfigs.json"
+      ],
+      "resourceDescriptions": {
+        "namespace": "Manage Azure Service Bus namespaces.",
+        "queue": "Manage queues within an Azure Service Bus namespace.",
+        "topic": "Manage topics within an Azure Service Bus namespace.",
+        "subscription": "Manage subscriptions on a Service Bus topic.",
+        "rule": "Manage filter rules on a Service Bus topic subscription.",
+        "disasterrecoveryconfig": "Manage geo-disaster recovery configurations for Service Bus namespaces.",
+        "privateendpointconnection": "Manage private endpoint connections for a Service Bus namespace.",
+        "privatelinkresource": "List private link resources available for a Service Bus namespace.",
+        "migrationconfig": "Manage migration configurations for migrating from Standard to Premium namespaces."
+      },
+      "resourceDetailedDescriptions": {
+        "namespace": "Full lifecycle of Service Bus namespaces: provision, update, delete, configure network rules, and manage authorization keys.",
+        "queue": "Create and manage Service Bus queues for point-to-point asynchronous messaging with delivery guarantees.",
+        "topic": "Create and manage Service Bus topics for publish-subscribe messaging patterns.",
+        "subscription": "Create and manage subscriptions on a topic to receive filtered copies of published messages.",
+        "rule": "Define SQL filter, correlation filter, or action rules on a topic subscription to route messages.",
+        "disasterrecoveryconfig": "Configure active geo-redundancy pairing between namespaces in different regions for business continuity.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict namespace access within a VNet.",
+        "privatelinkresource": "Enumerate the private link group IDs available for private endpoint connections.",
+        "migrationconfig": "Configure and track the migration of a Service Bus Standard namespace to a Premium namespace."
+      },
+      "actionRenames": {
+        "Namespaces_Get": "show",
+        "Namespaces_CreateOrUpdate": "create",
+        "Namespaces_ListByResourceGroup": "list",
+        "Queues_Get": "show",
+        "Queues_CreateOrUpdate": "create",
+        "Topics_Get": "show",
+        "Topics_CreateOrUpdate": "create",
+        "Subscriptions_Get": "show",
+        "Subscriptions_CreateOrUpdate": "create",
+        "Rules_Get": "show",
+        "Rules_CreateOrUpdate": "create",
+        "DisasterRecoveryConfigs_Get": "show",
+        "DisasterRecoveryConfigs_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "MigrationConfigs_Get": "show",
+        "MigrationConfigs_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Namespaces_List",
+          "resourceGroupOperationId": "Namespaces_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }

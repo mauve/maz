@@ -26,6 +26,8 @@ public partial class RootCommandDef
     public AksCommandDef Aks = null!;
     public ContainerinstanceCommandDef Containerinstance = null!;
     public ContainerregistryCommandDef Containerregistry = null!;
+    public EventhubCommandDef Eventhub = null!;
+    public ServicebusCommandDef Servicebus = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -48,5 +50,7 @@ public partial class RootCommandDef
         Aks = new AksCommandDef(Auth);
         Containerinstance = new ContainerinstanceCommandDef(Auth);
         Containerregistry = new ContainerregistryCommandDef(Auth);
+        Eventhub = new EventhubCommandDef(Auth);
+        Servicebus = new ServicebusCommandDef(Auth);
     }
 }
