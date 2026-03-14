@@ -16,7 +16,7 @@ foreach (var cmd in AllCommands(rootCmd))
 
     var helpMore = new HelpOption("--help-more", [])
     {
-        Description = "Show help including advanced options.",
+        Description = "Show help including advanced options and detailed descriptions.",
         Hidden = true,
     };
     if (helpMore.Action is HelpAction helpMoreAction)
