@@ -19,6 +19,9 @@ public partial class RootCommandDef
     public MysqlCommandDef Mysql = null!;
     public CosmosdbCommandDef Cosmosdb = null!;
     public RedisCommandDef Redis = null!;
+    public RedisenterpriseCommandDef Redisenterprise = null!;
+    public MariadbCommandDef Mariadb = null!;
+    public MongoclusterCommandDef Mongocluster = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -34,5 +37,8 @@ public partial class RootCommandDef
         Mysql = new MysqlCommandDef(Auth);
         Cosmosdb = new CosmosdbCommandDef(Auth);
         Redis = new RedisCommandDef(Auth);
+        Redisenterprise = new RedisenterpriseCommandDef(Auth);
+        Mariadb = new MariadbCommandDef(Auth);
+        Mongocluster = new MongoclusterCommandDef(Auth);
     }
 }
