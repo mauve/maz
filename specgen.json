@@ -929,6 +929,98 @@
           "cliAction": "list"
         }
       ]
+    },
+    {
+      "serviceDir": "postgresql",
+      "displayName": "postgresql",
+      "apiVersion": "2025-08-01",
+      "description": "Manage Azure Database for PostgreSQL Flexible Server instances, databases, and configurations.",
+      "detailedDescription": "Covers the full lifecycle of PostgreSQL Flexible Servers: create, update, delete, start, stop, and restart. Also manages databases, firewall rules, configurations, backups, replicas, migrations, private endpoints, and Microsoft Entra administrators. Requires Contributor or PostgreSQL-specific RBAC roles on the target subscription or resource group.",
+      "specFiles": [
+        "postgresql/resource-manager/Microsoft.DBforPostgreSQL/stable/2025-08-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "administrators-microsoft-entra": "Manage Microsoft Entra (Azure AD) administrators for a PostgreSQL Flexible Server.",
+        "advancedthreatprotectionsetting": "Manage Advanced Threat Protection settings for a PostgreSQL Flexible Server.",
+        "backups-automatic-and-on-demand": "Manage automatic and on-demand backups for a PostgreSQL Flexible Server.",
+        "backups-long-term-retention": "Manage long-term retention backups for a PostgreSQL Flexible Server.",
+        "capabilities-by-location": "List available capabilities (SKUs, versions) for a given Azure region.",
+        "capabilities-by-server": "List capabilities available for an existing PostgreSQL Flexible Server.",
+        "capturedlog": "List captured logs for a PostgreSQL Flexible Server.",
+        "configuration": "Manage server configuration parameters for a PostgreSQL Flexible Server.",
+        "database": "Manage databases within a PostgreSQL Flexible Server.",
+        "firewallrule": "Manage firewall rules for a PostgreSQL Flexible Server.",
+        "migration": "Manage migrations to Azure Database for PostgreSQL Flexible Server.",
+        "name-availability": "Check name availability for PostgreSQL Flexible Server resources.",
+        "operation": "List available operations for Azure Database for PostgreSQL.",
+        "private-dns-zone-suffix": "Get the private DNS zone suffix for PostgreSQL Flexible Server.",
+        "privateendpointconnection": "Manage private endpoint connections for a PostgreSQL Flexible Server.",
+        "privatelinkresource": "List private link resources available for a PostgreSQL Flexible Server.",
+        "quotausage": "List quota usages for Azure Database for PostgreSQL in a region.",
+        "replica": "List read replicas for a PostgreSQL Flexible Server.",
+        "server": "Manage Azure Database for PostgreSQL Flexible Server instances.",
+        "serverthreatprotectionsetting": "Manage threat protection settings for a PostgreSQL Flexible Server.",
+        "tuningoption": "Manage intelligent tuning options and recommendations for a PostgreSQL Flexible Server.",
+        "virtual-network-subnet-usage": "Check virtual network subnet usage for PostgreSQL Flexible Server.",
+        "virtualendpoint": "Manage virtual endpoints for PostgreSQL Flexible Server read replicas."
+      },
+      "resourceDetailedDescriptions": {
+        "administrators-microsoft-entra": "Add, remove, and list Microsoft Entra (Azure AD) principals that have administrator access to a PostgreSQL Flexible Server.",
+        "advancedthreatprotectionsetting": "Configure Microsoft Defender for Cloud threat detection settings on a PostgreSQL Flexible Server.",
+        "backups-automatic-and-on-demand": "View and trigger on-demand backups; list automatic backups for point-in-time restore scenarios.",
+        "backups-long-term-retention": "Configure and manage long-term backup retention policies beyond the standard 7–35 day window.",
+        "capabilities-by-location": "Query available server SKUs, storage options, and PostgreSQL versions for a specific Azure location before provisioning.",
+        "capabilities-by-server": "Query the capabilities that are applicable to an existing server, including available version upgrades.",
+        "capturedlog": "Retrieve server logs captured for diagnostic and auditing purposes.",
+        "configuration": "View and update PostgreSQL server parameters such as max_connections, work_mem, and shared_buffers.",
+        "database": "Create, list, and delete databases hosted within a PostgreSQL Flexible Server instance.",
+        "firewallrule": "Create and manage IP-based firewall rules that allow client access to a PostgreSQL Flexible Server.",
+        "migration": "Orchestrate single-server to flexible-server migrations, including prerequisite checks, cancellation, and status tracking.",
+        "name-availability": "Verify whether a proposed server name is available globally or within a specific Azure location.",
+        "operation": "Enumerate all REST operations exposed by the Microsoft.DBforPostgreSQL resource provider.",
+        "private-dns-zone-suffix": "Retrieve the DNS zone suffix used for private access mode, needed when configuring custom DNS.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to a PostgreSQL Flexible Server.",
+        "privatelinkresource": "List the group IDs available for private link connections to a PostgreSQL Flexible Server.",
+        "quotausage": "Check subscription-level quota consumption for PostgreSQL Flexible Server resources in a region.",
+        "replica": "List read replicas associated with a primary PostgreSQL Flexible Server for high-availability and read-scale scenarios.",
+        "server": "Full lifecycle management of PostgreSQL Flexible Server: provision, configure, start/stop/restart, and delete instances.",
+        "serverthreatprotectionsetting": "Enable or update server-level threat protection to detect anomalous database access patterns.",
+        "tuningoption": "Enable intelligent performance tuning features and retrieve index/query recommendations generated by the tuning engine.",
+        "virtual-network-subnet-usage": "Check whether a subnet is available and not already delegated before deploying a flexible server into a VNet.",
+        "virtualendpoint": "Create and manage virtual endpoints that provide a stable connection string pointing to the current primary or read replica."
+      },
+      "actionRenames": {
+        "AdministratorsMicrosoftEntra_Get": "show",
+        "AdministratorsMicrosoftEntra_CreateOrUpdate": "create",
+        "AdvancedThreatProtectionSettings_Get": "show",
+        "BackupsAutomaticAndOnDemand_Get": "show",
+        "BackupsLongTermRetention_Get": "show",
+        "Configurations_Get": "show",
+        "Configurations_Put": "set",
+        "Databases_Get": "show",
+        "Databases_Create": "create",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "Migrations_Get": "show",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateLinkResources_Get": "show",
+        "Servers_Get": "show",
+        "Servers_CreateOrUpdate": "create",
+        "ServerThreatProtectionSettings_CreateOrUpdate": "set",
+        "TuningOptions_Get": "show",
+        "VirtualEndpoints_Get": "show",
+        "VirtualEndpoints_Create": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Servers_ListBySubscription",
+          "resourceGroupOperationId": "Servers_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }

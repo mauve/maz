@@ -15,6 +15,7 @@ public partial class RootCommandDef
     public ResourcesCommandDef Resources = null!;
     public ComputeCommandDef Compute = null!;
     public NetworkCommandDef Network = null!;
+    public PostgresqlCommandDef Postgresql = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -26,5 +27,6 @@ public partial class RootCommandDef
         Resources = new ResourcesCommandDef(Auth);
         Compute = new ComputeCommandDef(Auth);
         Network = new NetworkCommandDef(Auth);
+        Postgresql = new PostgresqlCommandDef(Auth);
     }
 }
