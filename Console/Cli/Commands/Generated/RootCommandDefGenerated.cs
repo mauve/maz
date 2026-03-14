@@ -23,6 +23,9 @@ public partial class RootCommandDef
     public MariadbCommandDef Mariadb = null!;
     public MongoclusterCommandDef Mongocluster = null!;
     public SqlCommandDef Sql = null!;
+    public AksCommandDef Aks = null!;
+    public ContainerinstanceCommandDef Containerinstance = null!;
+    public ContainerregistryCommandDef Containerregistry = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -42,5 +45,8 @@ public partial class RootCommandDef
         Mariadb = new MariadbCommandDef(Auth);
         Mongocluster = new MongoclusterCommandDef(Auth);
         Sql = new SqlCommandDef(Auth);
+        Aks = new AksCommandDef(Auth);
+        Containerinstance = new ContainerinstanceCommandDef(Auth);
+        Containerregistry = new ContainerregistryCommandDef(Auth);
     }
 }

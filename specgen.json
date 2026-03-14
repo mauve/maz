@@ -1516,6 +1516,191 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "containerservice",
+      "displayName": "aks",
+      "apiVersion": "2026-01-01",
+      "description": "Manage Azure Kubernetes Service (AKS) managed clusters, node pools, and namespaces.",
+      "detailedDescription": "Covers the full AKS cluster lifecycle: create, update, delete, start/stop, certificate rotation, and credential retrieval. Also manages agent pools, machines within pools, maintenance configurations, managed namespaces, private endpoints, and cluster snapshots. Requires Contributor or AKS Cluster roles.",
+      "specFiles": [
+        "containerservice/resource-manager/Microsoft.ContainerService/aks/stable/2026-01-01/managedClusters.json"
+      ],
+      "resourceDescriptions": {
+        "agentpool": "Manage node pools (agent pools) within an AKS managed cluster.",
+        "machine": "List machines within an AKS node pool.",
+        "maintenanceconfiguration": "Manage maintenance configuration windows for an AKS managed cluster.",
+        "managedcluster": "Manage Azure Kubernetes Service (AKS) managed clusters.",
+        "managednamespace": "Manage managed Kubernetes namespaces within an AKS cluster.",
+        "privateendpointconnection": "Manage private endpoint connections for an AKS managed cluster.",
+        "privatelinkresource": "List private link resources available for an AKS managed cluster.",
+        "resolve-private-link-service-id": "Resolve the private link service ID for an AKS cluster.",
+        "snapshot": "Manage node pool snapshots for AKS clusters.",
+        "trustedaccessrole": "List trusted access roles for AKS managed clusters.",
+        "trustedaccessrolebinding": "Manage trusted access role bindings for AKS managed clusters."
+      },
+      "resourceDetailedDescriptions": {
+        "agentpool": "Create, update, and delete node pools; manage OS and Kubernetes version upgrades; abort in-progress operations.",
+        "machine": "Enumerate individual VM instances within an AKS node pool for diagnostics and troubleshooting.",
+        "maintenanceconfiguration": "Configure planned maintenance windows to control when AKS applies node OS patches and Kubernetes upgrades.",
+        "managedcluster": "Full lifecycle of AKS clusters: provision, upgrade, start/stop, rotate certificates, run commands, list credentials, and manage mesh profiles.",
+        "managednamespace": "Create and manage isolated Kubernetes namespaces with separate resource quotas and access controls within an AKS cluster.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict AKS API server access to a VNet.",
+        "privatelinkresource": "Enumerate the private link group IDs available for creating private endpoints to an AKS cluster.",
+        "resolve-private-link-service-id": "Resolve the private link service resource ID for the AKS API server, used when configuring custom private DNS zones.",
+        "snapshot": "Capture node pool configuration as an immutable snapshot for reproducible cluster provisioning.",
+        "trustedaccessrole": "List the Azure service roles that can be granted trusted access to AKS cluster resources.",
+        "trustedaccessrolebinding": "Grant Azure services (e.g., Azure Backup, Defender) trusted access to AKS cluster resources."
+      },
+      "actionRenames": {
+        "AgentPools_Get": "show",
+        "AgentPools_CreateOrUpdate": "create",
+        "MaintenanceConfigurations_Get": "show",
+        "MaintenanceConfigurations_CreateOrUpdate": "create",
+        "ManagedClusters_Get": "show",
+        "ManagedClusters_CreateOrUpdate": "create",
+        "ManagedClusters_ListByResourceGroup": "list",
+        "ManagedNamespaces_Get": "show",
+        "ManagedNamespaces_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "Snapshots_Get": "show",
+        "Snapshots_CreateOrUpdate": "create",
+        "Snapshots_ListByResourceGroup": "list",
+        "TrustedAccessRoleBindings_Get": "show",
+        "TrustedAccessRoleBindings_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "ManagedClusters_List",
+          "resourceGroupOperationId": "ManagedClusters_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "Snapshots_List",
+          "resourceGroupOperationId": "Snapshots_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "containerinstance",
+      "displayName": "containerinstance",
+      "apiVersion": "2025-09-01",
+      "description": "Manage Azure Container Instances container groups and confidential container profiles.",
+      "detailedDescription": "Covers the full lifecycle of container groups: create, update, delete, start, stop, restart, and retrieve outbound network dependencies. Also manages confidential container group profiles (CGProfile), N-Groups, container logs, and exec into running containers. Requires Contributor roles on the target subscription or resource group.",
+      "specFiles": [
+        "containerinstance/resource-manager/Microsoft.ContainerInstance/ContainerInstance/stable/2025-09-01/containerInstance.json"
+      ],
+      "resourceDescriptions": {
+        "cg-profile": "Manage Azure Container Instance confidential container group profiles.",
+        "container": "Execute commands and retrieve logs for containers within a container group.",
+        "containergroup": "Manage Azure Container Instance container groups.",
+        "location": "List Azure Container Instance capabilities, cached images, and usage quotas by location.",
+        "ngroup": "Manage Azure Container Instance N-Groups for running multiple container group replicas.",
+        "subnet-service-association-link": "Manage subnet service association links for container instances in a VNet."
+      },
+      "resourceDetailedDescriptions": {
+        "cg-profile": "Create and manage confidential container group profiles that define reusable container configurations with attestation support.",
+        "container": "Execute interactive commands (exec) in running containers, stream logs, or attach to container output streams.",
+        "containergroup": "Full lifecycle of container groups: create, update, delete, start, stop, restart, and list outbound network dependencies.",
+        "location": "Query regional capabilities, available VM SKUs, cached container images, and quota usage for Container Instances.",
+        "ngroup": "Create and manage N-Groups which run multiple replicas of the same container group definition across availability zones.",
+        "subnet-service-association-link": "Delete the subnet service association link for container groups deployed in a VNet subnet."
+      },
+      "actionRenames": {
+        "CGProfile_Get": "show",
+        "CGProfile_CreateOrUpdate": "create",
+        "CGProfile_GetByRevisionNumber": "show-revision",
+        "CGProfiles_ListByResourceGroup": "list",
+        "ContainerGroups_Get": "show",
+        "ContainerGroups_CreateOrUpdate": "create",
+        "ContainerGroups_ListByResourceGroup": "list",
+        "NGroups_Get": "show",
+        "NGroups_CreateOrUpdate": "create",
+        "NGroups_ListByResourceGroup": "list"
+      },
+      "resourceRenames": {
+        "CGProfiles_ListBySubscription": "cg-profile",
+        "CGProfiles_ListByResourceGroup": "cg-profile"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "ContainerGroups_List",
+          "resourceGroupOperationId": "ContainerGroups_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "CGProfiles_ListBySubscription",
+          "resourceGroupOperationId": "CGProfiles_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "NGroups_List",
+          "resourceGroupOperationId": "NGroups_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "containerregistry",
+      "displayName": "containerregistry",
+      "apiVersion": "2025-11-01",
+      "description": "Manage Azure Container Registry instances, repositories, and tokens.",
+      "detailedDescription": "Covers the full lifecycle of Azure Container Registries: create, update, delete, import images, manage credentials, and configure geo-replications. Also manages cache rules, connected registries, credential sets, scope maps, tokens, webhooks, and private endpoints. Requires Contributor or AcrPush/AcrPull RBAC roles.",
+      "specFiles": [
+        "containerregistry/resource-manager/Microsoft.ContainerRegistry/Registry/stable/2025-11-01/containerregistry.json"
+      ],
+      "resourceDescriptions": {
+        "cacherule": "Manage cache rules for an Azure Container Registry.",
+        "connectedregistry": "Manage connected registries for edge/on-premises scenarios.",
+        "credentialset": "Manage credential sets for authenticating to upstream registries.",
+        "privateendpointconnection": "Manage private endpoint connections for an Azure Container Registry.",
+        "registry": "Manage Azure Container Registry instances.",
+        "replication": "Manage geo-replications for an Azure Container Registry.",
+        "scopemap": "Manage scope maps defining repository-level permissions.",
+        "token": "Manage access tokens for scoped repository access.",
+        "webhook": "Manage webhooks for Azure Container Registry event notifications."
+      },
+      "resourceDetailedDescriptions": {
+        "cacherule": "Configure caching rules to automatically pull and cache images from upstream public registries.",
+        "connectedregistry": "Deploy a locally synchronized copy of an Azure Container Registry to edge devices or on-premises servers.",
+        "credentialset": "Store credentials for authenticating to external registries used as upstream sources for cache rules.",
+        "privateendpointconnection": "Approve, reject, or remove private endpoint connections to restrict registry access within a VNet.",
+        "registry": "Full lifecycle of container registries: create, update, delete, import images, manage admin credentials, list usages, and regenerate credentials.",
+        "replication": "Add, update, or remove geographic replications to bring the registry closer to users and reduce latency.",
+        "scopemap": "Define granular repository-level permissions (push/pull) that can be attached to tokens for CI/CD service accounts.",
+        "token": "Create short-lived or long-lived access tokens scoped to specific repositories using scope maps.",
+        "webhook": "Configure HTTP callbacks for registry events such as image push, delete, and chart push."
+      },
+      "actionRenames": {
+        "CacheRules_Get": "show",
+        "ConnectedRegistries_Get": "show",
+        "CredentialSets_Get": "show",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "Registries_Get": "show",
+        "Registries_ListByResourceGroup": "list",
+        "Replications_Get": "show",
+        "ScopeMaps_Get": "show",
+        "Tokens_Get": "show",
+        "Webhooks_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Registries_List",
+          "resourceGroupOperationId": "Registries_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
