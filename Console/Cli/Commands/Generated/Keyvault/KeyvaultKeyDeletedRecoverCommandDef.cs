@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Recovers the deleted key to its latest version.</summary>
+/// <remarks>The Recover Deleted Key operation is applicable for deleted keys in soft-delete enabled vaults. It recovers the deleted key back to its latest version under /keys. An attempt to recover an non-deleted key will return an error. Consider this the inverse of the delete operation on soft-delete enabled vaults. This operation requires the keys/recover permission.</remarks>
 public partial class KeyvaultKeyDeletedRecoverCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "recover";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyDeletedRecoverCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the deleted key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

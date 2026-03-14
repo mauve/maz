@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get a specified secret from a given key vault.</summary>
+/// <remarks>The GET operation is applicable to any secret stored in Azure Key Vault. This operation requires the secrets/get permission.</remarks>
 public partial class KeyvaultSecretShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,9 +20,11 @@ public partial class KeyvaultSecretShowCommandDef(AuthOptionPack auth) : Command
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 
+    /// <summary>The version of the secret. This URI fragment is optional. If not specified, the latest version of the secret is returned.</summary>
     [CliOption("--secret-version", Required = true)]
     public partial string? SecretVersion { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Restores all key versions of a given key using user supplied SAS token pointing to a previously stored Azure Blob storage backup folder</summary>
+/// <remarks>Restores all key versions of a given key using user supplied SAS token pointing to a previously stored Azure Blob storage backup folder</remarks>
 public partial class KeyvaultRestoreSelectiveCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "selective";
@@ -19,12 +20,15 @@ public partial class KeyvaultRestoreSelectiveCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key to be restored from the user supplied backup</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>Azure Blob storage container Uri</summary>
     [CliOption("--sas-token-parameters-storage-resource-uri", Required = true)]
     public partial string? SasTokenParametersStorageResourceUri { get; }
 
+    /// <summary>The Folder name of the blob where the previous successful full backup was stored</summary>
     [CliOption("--folder", Required = true)]
     public partial string? Folder { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates the specified attributes associated with the given certificate.</summary>
+/// <remarks>The UpdateCertificate operation applies the specified update on the given certificate; the only elements updated are the certificate's attributes. This operation requires the certificates/update permission.</remarks>
 public partial class KeyvaultCertificateUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateUpdateCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate in the given key vault.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>The version of the certificate.</summary>
     [CliOption("--certificate-version", Required = true)]
     public partial string? CertificateVersion { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the available SKUs supported by Microsoft.Storage for given subscription.</summary>
+/// <remarks>Lists the available SKUs supported by Microsoft.Storage for given subscription.</remarks>
 public partial class StorageSkuListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";

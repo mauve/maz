@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List service SAS credentials of a specific resource.</summary>
+/// <remarks>List service SAS credentials of a specific resource.</remarks>
 public partial class StorageAccountSasListServiceSasCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-service-sas";
@@ -16,9 +17,11 @@ public partial class StorageAccountSasListServiceSasCommandDef(AuthOptionPack au
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The canonical path to the signed resource.</summary>
     [CliOption("--canonicalized-resource", Required = true)]
     public partial string? CanonicalizedResource { get; }
 

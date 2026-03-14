@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets the status of the ongoing migration for the specified storage account.</summary>
+/// <remarks>Gets the status of the ongoing migration for the specified storage account.</remarks>
 public partial class StorageAccountGetCustomerInitiatedMigrationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-customer-initiated-migration";
@@ -16,9 +17,11 @@ public partial class StorageAccountGetCustomerInitiatedMigrationCommandDef(AuthO
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of the Storage Account Migration. It should always be 'default'</summary>
     [CliOption("--migration-name", Required = true)]
     public partial string? MigrationName { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes a certificate from a specified key vault.</summary>
+/// <remarks>Deletes all versions of a certificate object along with its associated policy. Delete certificate cannot be used to remove individual versions of a certificate object. This operation requires the certificates/delete permission.</remarks>
 public partial class KeyvaultCertificateDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateDeleteCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

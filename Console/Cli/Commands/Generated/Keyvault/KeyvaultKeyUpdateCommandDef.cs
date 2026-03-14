@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>The update key operation changes specified attributes of a stored key and can be applied to any key type and key version stored in Azure Key Vault.</summary>
+/// <remarks>In order to perform this operation, the key must already exist in the Key Vault. Note: The cryptographic material of a key itself cannot be changed. This operation requires the keys/update permission.</remarks>
 public partial class KeyvaultKeyUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,9 +20,11 @@ public partial class KeyvaultKeyUpdateCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of key to update.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key to update.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 

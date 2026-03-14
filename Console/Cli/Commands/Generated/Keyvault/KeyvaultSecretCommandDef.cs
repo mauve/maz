@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage secrets stored in Azure Key Vault.</summary>
+/// <remarks>Set, retrieve, update, and delete secrets; manage versions and lifecycle (backup, restore, soft-delete).</remarks>
 public partial class KeyvaultSecretCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "secret";

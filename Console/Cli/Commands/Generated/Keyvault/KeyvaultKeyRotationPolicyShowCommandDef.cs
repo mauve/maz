@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the policy for a key.</summary>
+/// <remarks>The GetKeyRotationPolicy operation returns the specified key policy resources in the specified key vault. This operation requires the keys/get permission.</remarks>
 public partial class KeyvaultKeyRotationPolicyShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyRotationPolicyShowCommandDef(AuthOptionPack auth
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key in a given key vault.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

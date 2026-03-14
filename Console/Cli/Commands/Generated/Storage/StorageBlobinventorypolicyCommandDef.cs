@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage blob inventory policies for a storage account.</summary>
+/// <remarks>Blob inventory policies run on a schedule and generate reports of the blobs in your storage account.</remarks>
 public partial class StorageBlobinventorypolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "blobinventorypolicy";

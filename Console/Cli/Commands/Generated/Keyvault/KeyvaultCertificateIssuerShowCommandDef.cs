@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the specified certificate issuer.</summary>
+/// <remarks>The GetCertificateIssuer operation returns the specified certificate issuer resources in the specified key vault. This operation requires the certificates/manageissuers/getissuers permission.</remarks>
 public partial class KeyvaultCertificateIssuerShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateIssuerShowCommandDef(AuthOptionPack auth
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the issuer.</summary>
     [CliOption("--issuer-name", Required = true)]
     public partial string? IssuerName { get; }
 

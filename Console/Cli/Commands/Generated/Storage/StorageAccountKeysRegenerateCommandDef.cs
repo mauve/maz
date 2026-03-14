@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Regenerates one of the access keys or Kerberos keys for the specified storage account.</summary>
+/// <remarks>Regenerates one of the access keys or Kerberos keys for the specified storage account.</remarks>
 public partial class StorageAccountKeysRegenerateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "regenerate";
@@ -16,9 +17,11 @@ public partial class StorageAccountKeysRegenerateCommandDef(AuthOptionPack auth)
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of storage keys that want to be regenerated, possible values are key1, key2, kerb1, kerb2.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

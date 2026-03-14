@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage certificate contact email addresses for lifecycle notifications.</summary>
+/// <remarks>View, set, and delete the list of email addresses that receive certificate lifecycle notifications.</remarks>
 public partial class KeyvaultCertificateContactsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "contacts";

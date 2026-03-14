@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the certificate contacts for a specified key vault.</summary>
+/// <remarks>The GetCertificateContacts operation returns the set of certificate contact resources in the specified key vault. This operation requires the certificates/managecontacts permission.</remarks>
 public partial class KeyvaultCertificateContactsShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets the current usage count and the limit for the resources of the location under the subscription.</summary>
+/// <remarks>Gets the current usage count and the limit for the resources of the location under the subscription.</remarks>
 public partial class StorageUsageListByLocationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-by-location";
@@ -16,6 +17,7 @@ public partial class StorageUsageListByLocationCommandDef(AuthOptionPack auth) :
     public readonly SubscriptionOptionPack Subscription = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The location of the Azure Storage resource.</summary>
     [CliOption("--location", Required = true)]
     public partial string? Location { get; }
 

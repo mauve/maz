@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List account settings.</summary>
+/// <remarks>Retrieves a list of all the available account settings that can be configured.</remarks>
 public partial class KeyvaultSettingListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";

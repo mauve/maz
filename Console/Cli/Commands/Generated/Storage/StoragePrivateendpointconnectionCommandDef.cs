@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage private endpoint connections to a storage account.</summary>
+/// <remarks>Private endpoints allow you to connect to Azure Storage over a private link, eliminating exposure to the public internet.</remarks>
 public partial class StoragePrivateendpointconnectionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "privateendpointconnection";

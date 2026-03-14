@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List all versions of a certificate.</summary>
+/// <remarks>Retrieve all versions of a certificate, including expired and disabled versions.</remarks>
 public partial class KeyvaultCertificateVersionsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "versions";

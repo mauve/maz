@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Key Vault RBAC role definitions.</summary>
+/// <remarks>List, retrieve, create, and delete role definitions used by Key Vault data-plane RBAC.</remarks>
 public partial class KeyvaultRoledefinitionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "roledefinition";

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage soft-deleted keys.</summary>
+/// <remarks>List, show, purge, and recover keys that have been soft-deleted but not yet permanently removed.</remarks>
 public partial class KeyvaultKeyDeletedCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deleted";

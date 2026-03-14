@@ -17,7 +17,11 @@ public record ServiceConfig(
     Dictionary<string, string>? ResourceRenames = null,
     List<MergeConfig>? Merges = null,
     List<SubgroupConfig>? Subgroups = null,
-    bool AutoDetectMerges = true
+    bool AutoDetectMerges = true,
+    string? Description = null,
+    string? DetailedDescription = null,
+    Dictionary<string, string>? ResourceDescriptions = null,
+    Dictionary<string, string>? ResourceDetailedDescriptions = null
 );
 
 /// <summary>
@@ -35,5 +39,7 @@ public record MergeConfig(
 public record SubgroupConfig(
     string Resource,
     string SubgroupCliName,
-    List<string> OperationIds
+    List<string> OperationIds,
+    string? Description = null,
+    string? DetailedDescription = null
 );

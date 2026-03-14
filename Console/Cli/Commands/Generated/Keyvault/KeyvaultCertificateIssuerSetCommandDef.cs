@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Sets the specified certificate issuer.</summary>
+/// <remarks>The SetCertificateIssuer operation adds or updates the specified certificate issuer. This operation requires the certificates/setissuers permission.</remarks>
 public partial class KeyvaultCertificateIssuerSetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "set";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateIssuerSetCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the issuer. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--issuer-name", Required = true)]
     public partial string? IssuerName { get; }
 
+    /// <summary>The issuer provider.</summary>
     [CliOption("--provider", Required = true)]
     public partial string? Provider { get; }
 

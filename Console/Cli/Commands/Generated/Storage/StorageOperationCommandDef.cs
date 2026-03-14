@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List available operations for Azure Storage.</summary>
+/// <remarks>Enumerates all available resource provider operations for Azure Storage.</remarks>
 public partial class StorageOperationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "operation";

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List all versions of a secret.</summary>
+/// <remarks>Retrieve all versions of a secret, including expired and disabled versions.</remarks>
 public partial class KeyvaultSecretVersionsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "versions";

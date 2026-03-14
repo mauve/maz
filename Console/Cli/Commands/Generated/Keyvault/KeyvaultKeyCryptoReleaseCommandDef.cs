@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Releases a key.</summary>
+/// <remarks>The release key operation is applicable to all key types. The target key must be marked exportable. This operation requires the keys/release permission.</remarks>
 public partial class KeyvaultKeyCryptoReleaseCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "release";
@@ -19,12 +20,15 @@ public partial class KeyvaultKeyCryptoReleaseCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key to get.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>Adding the version parameter retrieves a specific version of a key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>The attestation assertion for the target of the key release.</summary>
     [CliOption("--target", Required = true)]
     public partial string? Target { get; }
 

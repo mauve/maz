@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Imports a certificate into a specified key vault.</summary>
+/// <remarks>Imports an existing valid certificate, containing a private key, into Azure Key Vault. This operation requires the certificates/import permission. The certificate to be imported can be in either PFX or PEM format. If the certificate is in PEM format the PEM file must contain the key as well as x509 certificates. Key Vault will only accept a key in PKCS#8 format.</remarks>
 public partial class KeyvaultCertificateImportCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "import";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateImportCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>Base64 encoded representation of the certificate object to import. This certificate needs to contain the private key.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

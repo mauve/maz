@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Permanently deletes the specified deleted certificate.</summary>
+/// <remarks>The PurgeDeletedCertificate operation performs an irreversible deletion of the specified certificate, without possibility for recovery. The operation is not available if the recovery level does not specify 'Purgeable'. This operation requires the certificate/purge permission.</remarks>
 public partial class KeyvaultCertificateDeletedPurgeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "purge";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateDeletedPurgeCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists all the encryption scopes available under the specified storage account.</summary>
+/// <remarks>Lists all the encryption scopes available under the specified storage account.</remarks>
 public partial class StorageEncryptionscopeListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -16,15 +17,19 @@ public partial class StorageEncryptionscopeListCommandDef(AuthOptionPack auth) :
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>Optional, specifies the maximum number of encryption scopes that will be included in the list response.</summary>
     [CliOption("--maxpagesize")]
     public partial string? Maxpagesize { get; }
 
+    /// <summary>Optional. When specified, only encryption scope names starting with the filter will be listed.</summary>
     [CliOption("--filter")]
     public partial string? Filter { get; }
 
+    /// <summary>Optional, when specified, will list encryption scopes with the specific state. Defaults to All</summary>
     [CliOption("--include")]
     public partial string? Include { get; }
 

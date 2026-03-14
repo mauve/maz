@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get properties of specified deleted account resource.</summary>
+/// <remarks>Get properties of specified deleted account resource.</remarks>
 public partial class StorageDeletedaccountGetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get";
@@ -16,9 +17,11 @@ public partial class StorageDeletedaccountGetCommandDef(AuthOptionPack auth) : C
     public readonly SubscriptionOptionPack Subscription = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Name of the deleted storage account.</summary>
     [CliOption("--deleted-account-name", Required = true)]
     public partial string? DeletedAccountName { get; }
 
+    /// <summary>The location of the deleted storage account.</summary>
     [CliOption("--location", Required = true)]
     public partial string? Location { get; }
 

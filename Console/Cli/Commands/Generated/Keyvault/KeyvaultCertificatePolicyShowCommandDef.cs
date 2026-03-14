@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists the policy for a certificate.</summary>
+/// <remarks>The GetCertificatePolicy operation returns the specified certificate policy resources in the specified key vault. This operation requires the certificates/get permission.</remarks>
 public partial class KeyvaultCertificatePolicyShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificatePolicyShowCommandDef(AuthOptionPack auth
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate in a given key vault.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

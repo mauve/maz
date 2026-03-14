@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List certificates in a specified key vault</summary>
+/// <remarks>The GetCertificates operation returns the set of certificates resources in the specified key vault. This operation requires the certificates/list permission.</remarks>
 public partial class KeyvaultCertificateListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateListCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 
+    /// <summary>Specifies whether to include certificates which are not completely provisioned.</summary>
     [CliOption("--include-pending")]
     public partial string? IncludePending { get; }
 

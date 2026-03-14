@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List the local users associated with the storage account.</summary>
+/// <remarks>List the local users associated with the storage account.</remarks>
 public partial class StorageLocaluserListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -16,15 +17,19 @@ public partial class StorageLocaluserListCommandDef(AuthOptionPack auth) : Comma
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>Optional, specifies the maximum number of local users that will be included in the list response.</summary>
     [CliOption("--maxpagesize")]
     public partial string? Maxpagesize { get; }
 
+    /// <summary>Optional. When specified, only local user names starting with the filter will be listed.</summary>
     [CliOption("--filter")]
     public partial string? Filter { get; }
 
+    /// <summary>Optional, when specified, will list local users enabled for the specific protocol. Lists all users by default.</summary>
     [CliOption("--include")]
     public partial string? Include { get; }
 

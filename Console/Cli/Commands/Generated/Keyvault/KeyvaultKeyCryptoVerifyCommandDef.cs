@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Verifies a signature using a specified key.</summary>
+/// <remarks>The VERIFY operation is applicable to symmetric keys stored in Azure Key Vault. VERIFY is not strictly necessary for asymmetric keys stored in Azure Key Vault since signature verification can be performed using the public portion of the key but this operation is supported as a convenience for callers that only have a key-reference and not the public portion of the key. This operation requires the keys/verify permission.</remarks>
 public partial class KeyvaultKeyCryptoVerifyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "verify";
@@ -19,18 +20,23 @@ public partial class KeyvaultKeyCryptoVerifyCommandDef(AuthOptionPack auth) : Co
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>The signing/verification algorithm identifier. For more information on possible algorithm types, see JsonWebKeySignatureAlgorithm.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The digest used for signing.</summary>
     [CliOption("--digest", Required = true)]
     public partial string? Digest { get; }
 
+    /// <summary>The signature to be verified.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get specified account setting object.</summary>
+/// <remarks>Retrieves the setting object of a specified setting name.</remarks>
 public partial class KeyvaultSettingShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultSettingShowCommandDef(AuthOptionPack auth) : Comman
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the account setting. Must be a valid settings option.</summary>
     [CliOption("--setting-name", Required = true)]
     public partial string? SettingName { get; }
 

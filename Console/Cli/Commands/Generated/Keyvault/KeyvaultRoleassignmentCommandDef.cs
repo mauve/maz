@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Key Vault RBAC role assignments.</summary>
+/// <remarks>Create, list, and delete role assignments that grant principals access to vault data-plane operations.</remarks>
 public partial class KeyvaultRoleassignmentCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "roleassignment";

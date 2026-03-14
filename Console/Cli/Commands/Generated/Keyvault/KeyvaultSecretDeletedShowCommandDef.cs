@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets the specified deleted secret.</summary>
+/// <remarks>The Get Deleted Secret operation returns the specified deleted secret along with its attributes. This operation requires the secrets/get permission.</remarks>
 public partial class KeyvaultSecretDeletedShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,6 +20,7 @@ public partial class KeyvaultSecretDeletedShowCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the secret.</summary>
     [CliOption("--secret-name", Required = true)]
     public partial string? SecretName { get; }
 

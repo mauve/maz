@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get the specified role definition.</summary>
+/// <remarks>Get the specified role definition.</remarks>
 public partial class KeyvaultRoledefinitionShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoledefinitionShowCommandDef(AuthOptionPack auth) :
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role definition to get. Managed HSM only supports '/'.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name of the role definition to get.</summary>
     [CliOption("--role-definition-name", Required = true)]
     public partial string? RoleDefinitionName { get; }
 

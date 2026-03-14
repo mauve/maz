@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get the requested number of bytes containing random values.</summary>
+/// <remarks>Get the requested number of bytes containing random values from a managed HSM.</remarks>
 public partial class KeyvaultKeyGenerateRandomCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "generate-random";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyGenerateRandomCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The requested number of random bytes.</summary>
     [CliOption("--count", Required = true)]
     public partial int? Count { get; }
 

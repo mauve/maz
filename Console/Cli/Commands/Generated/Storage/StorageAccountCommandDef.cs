@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage Azure Storage accounts.</summary>
+/// <remarks>Create, configure, inspect, and delete Azure Storage accounts in a resource group.</remarks>
 public partial class StorageAccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "account";

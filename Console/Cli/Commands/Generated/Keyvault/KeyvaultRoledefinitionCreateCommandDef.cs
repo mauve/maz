@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates or updates a custom role definition.</summary>
+/// <remarks>Creates or updates a custom role definition.</remarks>
 public partial class KeyvaultRoledefinitionCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoledefinitionCreateCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role definition to create or update. Managed HSM only supports '/'.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name of the role definition to create or update. It can be any valid GUID.</summary>
     [CliOption("--role-definition-name", Required = true)]
     public partial string? RoleDefinitionName { get; }
 

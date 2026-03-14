@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Sets the blob inventory policy to the specified storage account.</summary>
+/// <remarks>Sets the blob inventory policy to the specified storage account.</remarks>
 public partial class StorageBlobinventorypolicyCreateOrUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create-or-update";
@@ -16,9 +17,11 @@ public partial class StorageBlobinventorypolicyCreateOrUpdateCommandDef(AuthOpti
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of the storage account blob inventory policy. It should always be 'default'</summary>
     [CliOption("--blob-inventory-policy-name", Required = true)]
     public partial string? BlobInventoryPolicyName { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Live Migration of storage account to enable Hns</summary>
+/// <remarks>Live Migration of storage account to enable Hns</remarks>
 public partial class StorageAccountHierarchicalNamespaceMigrationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "hierarchical-namespace-migration";
@@ -16,9 +17,11 @@ public partial class StorageAccountHierarchicalNamespaceMigrationCommandDef(Auth
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>Required. Hierarchical namespace migration type can either be a hierarchical namespace validation request 'HnsOnValidationRequest' or a hydration request 'HnsOnHydrationRequest'. The validation request will validate the migration whereas the hydration request will migrate the account.</summary>
     [CliOption("--request-type", Required = true)]
     public partial string? RequestType { get; }
 

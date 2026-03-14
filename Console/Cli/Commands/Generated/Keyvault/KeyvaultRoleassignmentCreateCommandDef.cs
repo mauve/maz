@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a role assignment.</summary>
+/// <remarks>Creates a role assignment.</remarks>
 public partial class KeyvaultRoleassignmentCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
@@ -19,15 +20,19 @@ public partial class KeyvaultRoleassignmentCreateCommandDef(AuthOptionPack auth)
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role assignment to create.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name of the role assignment to create. It can be any valid GUID.</summary>
     [CliOption("--role-assignment-name", Required = true)]
     public partial string? RoleAssignmentName { get; }
 
+    /// <summary>The role definition ID used in the role assignment.</summary>
     [CliOption("--properties-role-definition-id", Required = true)]
     public partial string? PropertiesRoleDefinitionId { get; }
 
+    /// <summary>The principal ID assigned to the role. This maps to the ID inside the Active Directory. It can point to a user, service principal, or security group.</summary>
     [CliOption("--properties-principal-id", Required = true)]
     public partial string? PropertiesPrincipalId { get; }
 

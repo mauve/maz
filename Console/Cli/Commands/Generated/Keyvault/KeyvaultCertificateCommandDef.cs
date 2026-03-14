@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage X.509 certificates in Azure Key Vault.</summary>
+/// <remarks>Create, import, update, and delete certificates; manage issuance policies, issuers, contacts, operations, and versions.</remarks>
 public partial class KeyvaultCertificateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "certificate";

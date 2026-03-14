@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Returns the status of full backup operation</summary>
+/// <remarks>Returns the status of full backup operation</remarks>
 public partial class KeyvaultBackupShowStatusCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show-status";
@@ -19,6 +20,7 @@ public partial class KeyvaultBackupShowStatusCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The id returned as part of the backup request</summary>
     [CliOption("--job-id", Required = true)]
     public partial string? JobId { get; }
 

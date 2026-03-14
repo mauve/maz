@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List the versions of a certificate.</summary>
+/// <remarks>The GetCertificateVersions operation returns the versions of a certificate in the specified key vault. This operation requires the certificates/list permission.</remarks>
 public partial class KeyvaultCertificateVersionsListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";
@@ -19,9 +20,11 @@ public partial class KeyvaultCertificateVersionsListCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 
+    /// <summary>Maximum number of results to return in a page. If not specified the service will return up to 25 results.</summary>
     [CliOption("--maxresults")]
     public partial string? Maxresults { get; }
 

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage cryptographic keys in Azure Key Vault.</summary>
+/// <remarks>Create, import, rotate, back up, and restore RSA and EC keys; invoke cryptographic operations (encrypt, sign, wrap) against Key Vault-hosted key material.</remarks>
 public partial class KeyvaultKeyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "key";

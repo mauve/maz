@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Lists deleted accounts under the subscription.</summary>
+/// <remarks>Lists deleted accounts under the subscription.</remarks>
 public partial class StorageDeletedaccountListCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list";

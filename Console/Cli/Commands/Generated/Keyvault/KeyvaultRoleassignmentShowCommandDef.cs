@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get the specified role assignment.</summary>
+/// <remarks>Get the specified role assignment.</remarks>
 public partial class KeyvaultRoleassignmentShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,9 +20,11 @@ public partial class KeyvaultRoleassignmentShowCommandDef(AuthOptionPack auth) :
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The scope of the role assignment.</summary>
     [CliOption("--scope", Required = true)]
     public partial string? Scope { get; }
 
+    /// <summary>The name of the role assignment to get.</summary>
     [CliOption("--role-assignment-name", Required = true)]
     public partial string? RoleAssignmentName { get; }
 

@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a new certificate.</summary>
+/// <remarks>If this is the first version, the certificate resource is created. This operation requires the certificates/create permission.</remarks>
 public partial class KeyvaultCertificateCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateCreateCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

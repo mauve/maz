@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Backs up the specified certificate.</summary>
+/// <remarks>Requests that a backup of the specified certificate be downloaded to the client. All versions of the certificate will be downloaded. This operation requires the certificates/backup permission.</remarks>
 public partial class KeyvaultCertificateBackupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "backup";
@@ -19,6 +20,7 @@ public partial class KeyvaultCertificateBackupCommandDef(AuthOptionPack auth) : 
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the certificate.</summary>
     [CliOption("--certificate-name", Required = true)]
     public partial string? CertificateName { get; }
 

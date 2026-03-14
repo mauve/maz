@@ -6,7 +6,9 @@ public record ServiceModel(
     string ClassName,
     List<ResourceGroupModel> Resources,
     bool IsDataPlane = false,
-    string? HostParamName = null
+    string? HostParamName = null,
+    string? Description = null,
+    string? DetailedDescription = null
 );
 
 /// <summary>Represents a group of operations on the same resource type (e.g. "account").</summary>
@@ -14,7 +16,9 @@ public record ResourceGroupModel(
     string CliName,
     string ClassName,
     List<OperationModel> Operations,
-    List<ResourceGroupModel>? Subgroups = null
+    List<ResourceGroupModel>? Subgroups = null,
+    string? Description = null,
+    string? DetailedDescription = null
 );
 
 /// <summary>Represents a single CLI leaf command derived from one OpenAPI operation.</summary>
@@ -31,6 +35,7 @@ public record OperationModel(
     string? NextLinkPropertyName,
     string? ItemsPropertyName,
     string? Description,
+    string? DetailedDescription = null,
     // When non-null, this is a merged list command. The primary URL (UrlTemplate) is the
     // RG-scope URL; this field holds the subscription-scope fallback URL.
     string? MergedSubscriptionUrlTemplate = null

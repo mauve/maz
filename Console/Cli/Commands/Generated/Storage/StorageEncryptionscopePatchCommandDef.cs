@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Update encryption scope properties as specified in the request body. Update fails if the specified encryption scope does not already exist.</summary>
+/// <remarks>Update encryption scope properties as specified in the request body. Update fails if the specified encryption scope does not already exist.</remarks>
 public partial class StorageEncryptionscopePatchCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "patch";
@@ -16,9 +17,11 @@ public partial class StorageEncryptionscopePatchCommandDef(AuthOptionPack auth) 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The name of the encryption scope within the specified storage account. Encryption scope names must be between 3 and 63 characters in length and use numbers, lower-case letters and dash (-) only. Every dash (-) character must be immediately preceded and followed by a letter or number.</summary>
     [CliOption("--encryption-scope-name", Required = true)]
     public partial string? EncryptionScopeName { get; }
 

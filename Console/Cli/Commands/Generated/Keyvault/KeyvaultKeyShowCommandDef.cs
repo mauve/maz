@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Gets the public part of a stored key.</summary>
+/// <remarks>The get key operation is applicable to all key types. If the requested key is symmetric, then no key material is released in the response. This operation requires the keys/get permission.</remarks>
 public partial class KeyvaultKeyShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
@@ -19,9 +20,11 @@ public partial class KeyvaultKeyShowCommandDef(AuthOptionPack auth) : CommandDef
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key to get.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>Adding the version parameter retrieves a specific version of a key. This URI fragment is optional. If not specified, the latest version of the key is returned.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 

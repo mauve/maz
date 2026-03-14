@@ -19,6 +19,10 @@ public static class ServiceCommandEmitter
         w.Line($"namespace {ns};");
         w.Line();
 
+        if (service.Description is { Length: > 0 })
+            w.Line($"/// <summary>{EscapeXml(service.Description)}</summary>");
+        if (service.DetailedDescription is { Length: > 0 })
+            w.Line($"/// <remarks>{EscapeXml(service.DetailedDescription)}</remarks>");
         w.Block($"public partial class {service.ClassName}(AuthOptionPack auth) : CommandDef", () =>
         {
             w.Line($"public override string Name => \"{service.CliName}\";");
@@ -34,4 +38,7 @@ public static class ServiceCommandEmitter
 
         return w.ToString();
     }
+
+    private static string EscapeXml(string text) =>
+        text.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
 }

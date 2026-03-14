@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>List all versions of a key.</summary>
+/// <remarks>Retrieve the full version history of a key, including disabled versions.</remarks>
 public partial class KeyvaultKeyVersionsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "versions";

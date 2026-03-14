@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage the issuance policy for a certificate.</summary>
+/// <remarks>View and update the policy that controls how a certificate is issued, renewed, and validated.</remarks>
 public partial class KeyvaultCertificatePolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "policy";

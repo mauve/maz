@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Checks that the storage account name is valid and is not already in use.</summary>
+/// <remarks>Checks that the storage account name is valid and is not already in use.</remarks>
 public partial class StorageAccountCheckNameAvailabilityCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "check-name-availability";
@@ -16,9 +17,11 @@ public partial class StorageAccountCheckNameAvailabilityCommandDef(AuthOptionPac
     public readonly SubscriptionOptionPack Subscription = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The storage account name.</summary>
     [CliOption("--name", Required = true)]
     public partial string? ParamName { get; }
 
+    /// <summary>The type of resource, Microsoft.Storage/storageAccounts</summary>
     [CliOption("--type", Required = true)]
     public partial string? Type { get; }
 

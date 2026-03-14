@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Decrypts a single block of encrypted data.</summary>
+/// <remarks>The DECRYPT operation decrypts a well-formed block of ciphertext using the target encryption key and specified algorithm. This operation is the reverse of the ENCRYPT operation; only a single block of data may be decrypted, the size of this block is dependent on the target key and the algorithm to be used. The DECRYPT operation applies to asymmetric and symmetric keys stored in Azure Key Vault since it uses the private portion of the key. This operation requires the keys/decrypt permission. Microsoft recommends not to use CBC algorithms for decryption without first ensuring the integrity of the ciphertext using an HMAC, for example. See https://learn.microsoft.com/dotnet/standard/security/vulnerabilities-cbc-mode for more information.</remarks>
 public partial class KeyvaultKeyCryptoDecryptCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "decrypt";
@@ -19,15 +20,19 @@ public partial class KeyvaultKeyCryptoDecryptCommandDef(AuthOptionPack auth) : C
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>An algorithm used for encryption and decryption.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The value to operate on.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

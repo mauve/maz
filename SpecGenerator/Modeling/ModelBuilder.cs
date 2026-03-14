@@ -127,7 +127,9 @@ public sealed class ModelBuilder
             $"{serviceClassName}CommandDef",
             resources,
             isDataPlane,
-            hostParamName);
+            hostParamName,
+            _service.Description,
+            _service.DetailedDescription);
     }
 
     private List<ResourceGroupModel> BuildResourceGroups(
@@ -135,7 +137,7 @@ public sealed class ModelBuilder
         string serviceClassName)
     {
         // Pre-process subgroups: move matched ops out of parent lists
-        var subgroupsByResource = new Dictionary<string, List<(string SubgroupCli, string SubgroupClassName, List<OperationModel> Ops)>>(
+        var subgroupsByResource = new Dictionary<string, List<(string SubgroupCli, string SubgroupClassName, List<OperationModel> Ops, string? Description, string? DetailedDescription)>>(
             StringComparer.OrdinalIgnoreCase);
 
         foreach (var sgConfig in _service.Subgroups ?? [])
@@ -168,7 +170,7 @@ public sealed class ModelBuilder
                 subgroupsByResource[sgConfig.Resource] = sgList;
             }
 
-            sgList.Add((sgConfig.SubgroupCliName, subgroupClassName, renamedOps));
+            sgList.Add((sgConfig.SubgroupCliName, subgroupClassName, renamedOps, sgConfig.Description, sgConfig.DetailedDescription));
         }
 
         return operationsByResource
@@ -181,21 +183,29 @@ public sealed class ModelBuilder
                 var subgroups = new List<ResourceGroupModel>();
                 if (subgroupsByResource.TryGetValue(resourceCli, out var sgList))
                 {
-                    foreach (var (subgroupCli, subgroupClassName, sgOps) in sgList)
+                    foreach (var (subgroupCli, subgroupClassName, sgOps, sgDesc, sgDetailedDesc) in sgList)
                     {
                         // Dedup subgroup ops by CliName
-                        subgroups.Add(new ResourceGroupModel(subgroupCli, subgroupClassName, DeduplicateByCliName(sgOps)));
+                        subgroups.Add(new ResourceGroupModel(subgroupCli, subgroupClassName, DeduplicateByCliName(sgOps),
+                            Description: sgDesc, DetailedDescription: sgDetailedDesc));
                     }
                 }
 
                 // Dedup parent ops by CliName (after subgroup ops have been removed)
                 var parentOps = DeduplicateByCliName(kv.Value.Select(t => t.Model).ToList());
 
+                string? resDesc = null;
+                _service.ResourceDescriptions?.TryGetValue(resourceCli, out resDesc);
+                string? resDetailedDesc = null;
+                _service.ResourceDetailedDescriptions?.TryGetValue(resourceCli, out resDetailedDesc);
+
                 return new ResourceGroupModel(
                     resourceCli,
                     resourceClassName,
                     parentOps,
-                    subgroups.Count > 0 ? subgroups : null);
+                    subgroups.Count > 0 ? subgroups : null,
+                    resDesc,
+                    resDetailedDesc);
             })
             .ToList();
     }
@@ -310,8 +320,10 @@ public sealed class ModelBuilder
         var (resourceCli, actionCli) = NamingEngine.SplitOperationId(operationId, _service.DisplayName);
         var className = NamingEngine.ToClassName(serviceClassName, resourceCli, actionCli);
 
-        var description = opNode["summary"]?.GetValue<string>()
-            ?? opNode["description"]?.GetValue<string>();
+        var summary = opNode["summary"]?.GetValue<string>();
+        var longDesc = opNode["description"]?.GetValue<string>();
+        var description = summary ?? longDesc;
+        var detailedDescription = (longDesc != null && longDesc != summary) ? longDesc : null;
 
         var isLro = opNode["x-ms-long-running-operation"]?.GetValue<bool>() ?? false;
 
@@ -375,7 +387,8 @@ public sealed class ModelBuilder
             IsPaged: isPaged,
             NextLinkPropertyName: nextLinkProp,
             ItemsPropertyName: itemsProp,
-            Description: description);
+            Description: description,
+            DetailedDescription: detailedDescription);
     }
 
     private JsonObject? ResolveParameter(JsonObject? paramNode, SpecDocument doc)

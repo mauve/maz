@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage certificate issuers (CA integrations).</summary>
+/// <remarks>Configure and manage the certificate authorities and CA plug-ins that Key Vault contacts when issuing certificates.</remarks>
 public partial class KeyvaultCertificateIssuerCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "issuer";

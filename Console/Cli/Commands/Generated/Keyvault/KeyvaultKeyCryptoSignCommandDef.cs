@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a signature from a digest using the specified key.</summary>
+/// <remarks>The SIGN operation is applicable to asymmetric and symmetric keys stored in Azure Key Vault since this operation uses the private portion of the key. This operation requires the keys/sign permission.</remarks>
 public partial class KeyvaultKeyCryptoSignCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "sign";
@@ -19,15 +20,19 @@ public partial class KeyvaultKeyCryptoSignCommandDef(AuthOptionPack auth) : Comm
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>The version of the key.</summary>
     [CliOption("--key-version", Required = true)]
     public partial string? KeyVersion { get; }
 
+    /// <summary>The signing/verification algorithm identifier. For more information on possible algorithm types, see JsonWebKeySignatureAlgorithm.</summary>
     [CliOption("--alg", Required = true)]
     public partial string? Alg { get; }
 
+    /// <summary>The value to operate on.</summary>
     [CliOption("--value", Required = true)]
     public partial string? Value { get; }
 

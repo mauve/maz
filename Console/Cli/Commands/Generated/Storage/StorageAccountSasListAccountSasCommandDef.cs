@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>List SAS credentials of a storage account.</summary>
+/// <remarks>List SAS credentials of a storage account.</remarks>
 public partial class StorageAccountSasListAccountSasCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-account-sas";
@@ -16,18 +17,23 @@ public partial class StorageAccountSasListAccountSasCommandDef(AuthOptionPack au
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the storage account within the specified resource group. Storage account names must be between 3 and 24 characters in length and use numbers and lower-case letters only.</summary>
     [CliOption("--account-name", Required = true)]
     public partial string? AccountName { get; }
 
+    /// <summary>The signed services accessible with the account SAS. Possible values include: Blob (b), Queue (q), Table (t), File (f).</summary>
     [CliOption("--signed-services", Required = true)]
     public partial string? SignedServices { get; }
 
+    /// <summary>The signed resource types that are accessible with the account SAS. Service (s): Access to service-level APIs; Container (c): Access to container-level APIs; Object (o): Access to object-level APIs for blobs, queue messages, table entities, and files.</summary>
     [CliOption("--signed-resource-types", Required = true)]
     public partial string? SignedResourceTypes { get; }
 
+    /// <summary>The signed permissions for the account SAS. Possible values include: Read (r), Write (w), Delete (d), List (l), Add (a), Create (c), Update (u) and Process (p).</summary>
     [CliOption("--signed-permission", Required = true)]
     public partial string? SignedPermission { get; }
 
+    /// <summary>The time at which the shared access signature becomes invalid.</summary>
     [CliOption("--signed-expiry", Required = true)]
     public partial string? SignedExpiry { get; }
 

@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Manage encryption scopes for a storage account.</summary>
+/// <remarks>Encryption scopes allow you to manage encryption within a storage account with a scope dedicated to a container or an individual blob.</remarks>
 public partial class StorageEncryptionscopeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "encryptionscope";

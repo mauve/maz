@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes a key of any type from storage in Azure Key Vault.</summary>
+/// <remarks>The delete key operation cannot be used to remove individual versions of a key. This operation removes the cryptographic material associated with the key, which means the key is not usable for Sign/Verify, Wrap/Unwrap or Encrypt/Decrypt operations. This operation requires the keys/delete permission.</remarks>
 public partial class KeyvaultKeyDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyDeleteCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key to delete.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

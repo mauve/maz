@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Deletes the certificate contacts for a specified key vault.</summary>
+/// <remarks>Deletes the certificate contacts for a specified key vault certificate. This operation requires the certificates/managecontacts permission.</remarks>
 public partial class KeyvaultCertificateContactsDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";

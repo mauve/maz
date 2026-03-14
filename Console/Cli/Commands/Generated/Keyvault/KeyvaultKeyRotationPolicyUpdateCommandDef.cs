@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Updates the rotation policy for a key.</summary>
+/// <remarks>Set specified members in the key policy. Leave others as undefined. This operation requires the keys/update permission.</remarks>
 public partial class KeyvaultKeyRotationPolicyUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "update";
@@ -19,6 +20,7 @@ public partial class KeyvaultKeyRotationPolicyUpdateCommandDef(AuthOptionPack au
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name of the key in the given vault.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 

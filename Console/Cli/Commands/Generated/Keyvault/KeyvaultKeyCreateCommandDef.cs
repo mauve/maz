@@ -9,6 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Creates a new key, stores it, then returns key parameters and attributes to the client.</summary>
+/// <remarks>The create key operation can be used to create any key type in Azure Key Vault. If the named key already exists, Azure Key Vault creates a new version of the key. It requires the keys/create permission.</remarks>
 public partial class KeyvaultKeyCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
@@ -19,9 +20,11 @@ public partial class KeyvaultKeyCreateCommandDef(AuthOptionPack auth) : CommandD
 
     public readonly RenderOptionPack Render = new();
 
+    /// <summary>The name for the new key. The system will generate the version name for the new key. The value you provide may be copied globally for the purpose of running the service. The value provided should not include personally identifiable or sensitive information.</summary>
     [CliOption("--key-name", Required = true)]
     public partial string? KeyName { get; }
 
+    /// <summary>JsonWebKey Key Type (kty), as defined in https://tools.ietf.org/html/draft-ietf-jose-json-web-algorithms-40.</summary>
     [CliOption("--kty", Required = true)]
     public partial string? Kty { get; }
 

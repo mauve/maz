@@ -5,6 +5,8 @@ using Console.Cli.Shared;
 
 namespace Console.Cli.Commands.Generated;
 
+/// <summary>Perform cryptographic operations using a Key Vault key.</summary>
+/// <remarks>Encrypt, decrypt, sign, verify, wrap, unwrap, and release operations backed by a Key Vault key.</remarks>
 public partial class KeyvaultKeyCryptoCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "crypto";
