@@ -17,6 +17,7 @@ public partial class RootCommandDef : CommandDef
 
     public readonly AuthOptionPack Auth;
     public readonly DiagnosticOptionPack Diagnostics;
+    public readonly InteractiveOptionPack Interactive;
 
     public readonly AccountCommandDef Account;
     public readonly GetTokenCommandDef GetToken;
@@ -30,6 +31,7 @@ public partial class RootCommandDef : CommandDef
     {
         Auth = new AuthOptionPack();
         Diagnostics = new DiagnosticOptionPack();
+        Interactive = new InteractiveOptionPack();
         Account = new AccountCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
