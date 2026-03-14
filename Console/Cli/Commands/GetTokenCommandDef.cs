@@ -4,6 +4,10 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands;
 
 /// <summary>Get an access token for Azure resources.</summary>
+/// <remarks>
+/// This command acquires a token using the configured Azure credential chain.
+/// It can print either a raw token value or a formatted token response with metadata.
+/// </remarks>
 public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-token";

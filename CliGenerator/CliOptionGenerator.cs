@@ -22,20 +22,21 @@ public class CliOptionGenerator : IIncrementalGenerator
         );
 
         var provider = context
-            .SyntaxProvider.ForAttributeWithMetadataName(
-                "Console.Cli.CliOptionAttribute",
-                predicate: static (node, _) => node is PropertyDeclarationSyntax,
-                transform: static (ctx, _) => (IPropertySymbol)ctx.TargetSymbol
+            .SyntaxProvider.CreateSyntaxProvider(
+                predicate: static (node, _) =>
+                    node is ClassDeclarationSyntax c && c.Modifiers.Any(SyntaxKind.PartialKeyword),
+                transform: static (ctx, ct) =>
+                    ctx.SemanticModel.GetDeclaredSymbol((ClassDeclarationSyntax)ctx.Node, ct)
+                    as INamedTypeSymbol
             )
             .Collect()
             .SelectMany(
-                static (props, _) =>
-                    props
-                        .GroupBy<IPropertySymbol, INamedTypeSymbol>(
-                            p => p.ContainingType,
-                            SymbolEqualityComparer.Default
-                        )
-                        .Select(static g => BuildClassModel(g.Key, g))
+                static (classes, _) =>
+                    classes
+                        .Where(static c => c is not null)
+                        .GroupBy(static c => c!.ToDisplayString())
+                        .Select(static g => g.First())
+                        .Select(static c => BuildClassModel(c!))
             );
 
         context.RegisterSourceOutput(
@@ -58,6 +59,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         public string ClassName = "";
         public bool IsCommandDef;
         public bool IsOptionPack;
+        public bool HasExplicitDescriptionOverride;
+        public bool HasExplicitDetailedDescriptionOverride;
         public string? XmlDescription;
         public string? XmlRemarks;
         public List<OptionPropModel> Options = [];
@@ -95,7 +98,7 @@ public class CliOptionGenerator : IIncrementalGenerator
 
     // ── Build model from symbol ─────────────────────────────────────────────
 
-    static ClassModel? BuildClassModel(INamedTypeSymbol cls, IEnumerable<IPropertySymbol> props)
+    static ClassModel? BuildClassModel(INamedTypeSymbol cls)
     {
         var model = new ClassModel
         {
@@ -121,13 +124,29 @@ public class CliOptionGenerator : IIncrementalGenerator
             }
         }
 
+        if (!model.IsCommandDef && !model.IsOptionPack)
+            return null;
+
         // XML doc description on class
         model.XmlDescription = GetXmlSummary(cls);
         model.XmlRemarks = GetXmlRemarks(cls);
 
+        // An explicitly declared Description override takes precedence over XML summary.
+        model.HasExplicitDescriptionOverride = cls.GetMembers("Description")
+            .OfType<IPropertySymbol>()
+            .Any(p => p.IsOverride && !p.IsStatic && p.Parameters.Length == 0);
+
+        model.HasExplicitDetailedDescriptionOverride = cls.GetMembers("DetailedDescription")
+            .OfType<IPropertySymbol>()
+            .Any(p => p.IsOverride && !p.IsStatic && p.Parameters.Length == 0);
+
         // Options
-        foreach (var prop in props)
+        foreach (var prop in cls.GetMembers().OfType<IPropertySymbol>())
+        {
+            if (!HasCliOptionAttribute(prop))
+                continue;
             model.Options.Add(BuildOptionModel(prop));
+        }
 
         // Children: public instance fields of type CommandDef or OptionPack
         foreach (var member in cls.GetMembers().OfType<IFieldSymbol>())
@@ -154,6 +173,10 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         return model;
     }
+
+    static bool HasCliOptionAttribute(IPropertySymbol prop) =>
+        prop.GetAttributes()
+            .Any(a => a.AttributeClass?.ToDisplayString() == "Console.Cli.CliOptionAttribute");
 
     static OptionPropModel BuildOptionModel(IPropertySymbol prop)
     {
@@ -829,7 +852,11 @@ public class CliOptionGenerator : IIncrementalGenerator
         }
 
         // Description override for CommandDef
-        if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlDescription))
+        if (
+            model.IsCommandDef
+            && !model.HasExplicitDescriptionOverride
+            && !string.IsNullOrEmpty(model.XmlDescription)
+        )
         {
             sb.AppendLine();
             sb.AppendLine(
@@ -837,16 +864,23 @@ public class CliOptionGenerator : IIncrementalGenerator
             );
         }
 
-        // Remarks override for CommandDef
-        if (model.IsCommandDef && !string.IsNullOrEmpty(model.XmlRemarks))
+        // DetailedDescription override for CommandDef
+        if (
+            model.IsCommandDef
+            && !model.HasExplicitDetailedDescriptionOverride
+            && !string.IsNullOrEmpty(model.XmlRemarks)
+        )
         {
             sb.AppendLine();
-            sb.AppendLine($"    protected override string? Remarks => {Quote(model.XmlRemarks!)};");
+            sb.AppendLine(
+                $"    public override string? DetailedDescription => {Quote(model.XmlRemarks!)};"
+            );
         }
 
         sb.AppendLine("}");
         return sb.ToString();
     }
 
-    static string Quote(string s) => $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+    static string Quote(string s) =>
+        $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")}\"";
 }
