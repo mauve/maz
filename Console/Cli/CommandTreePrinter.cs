@@ -33,13 +33,37 @@ internal static class CommandTreePrinter
                 ? baseName + Ansi.LightRed("*")
                 : baseName;
 
-            var desc = string.IsNullOrWhiteSpace(child.Description)
-                ? ""
-                : "  " + (filter is null
-                    ? Ansi.Dim(child.Description)
-                    : HighlightDesc(child.Description, filter));
+            var linePrefix = $"{prefix}{connector}";
+            var descIndent = Ansi.VisibleLength(linePrefix) + Ansi.VisibleLength(name) + 2; // +2 for "  " separator
+            // Keep tree-line characters from prefix; for non-last items place │ at the connector
+            // column so the vertical line continues down to the next sibling
+            var continuationConnector = isLast
+                ? new string(' ', Ansi.VisibleLength(connector))
+                : "│" + new string(' ', Ansi.VisibleLength(connector) - 1);
+            var continuation = prefix + continuationConnector + new string(' ', Ansi.VisibleLength(name) + 2);
 
-            output.WriteLine($"{prefix}{connector}{name}{desc}");
+            if (string.IsNullOrWhiteSpace(child.Description))
+            {
+                output.WriteLine($"{linePrefix}{name}");
+            }
+            else
+            {
+                var consoleWidth = DefinitionList.GetConsoleWidth();
+                var descWidth = Math.Max(1, consoleWidth - descIndent);
+                var lines = DefinitionList.WordWrap(child.Description, descWidth);
+
+                for (var j = 0; j < lines.Count; j++)
+                {
+                    var styledSegment = filter is null
+                        ? Ansi.Dim(lines[j])
+                        : HighlightDesc(lines[j], filter);
+
+                    if (j == 0)
+                        output.WriteLine($"{linePrefix}{name}  {styledSegment}");
+                    else
+                        output.WriteLine($"{continuation}{styledSegment}");
+                }
+            }
             PrintChildren(output, child, prefix + childPrefix, filter);
         }
     }
