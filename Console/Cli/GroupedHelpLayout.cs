@@ -169,7 +169,7 @@ internal static partial class GroupedHelpLayout
     /// <summary>
     /// Splits the first-column text into individual alias strings and appends
     /// the appropriate value indicator to the last alias.
-    /// Bool options: --no-* aliases listed first, main alias last with [true|false].
+    /// Bool options: --foo + --no-foo compacted to --[no-]foo [true|false].
     /// Multi-value options: last alias gets [value...].
     /// Single-value options: last alias gets [value].
     /// </summary>
@@ -179,25 +179,34 @@ internal static partial class GroupedHelpLayout
         bool isMultiValue
     )
     {
-        // Strip any type hint that System.CommandLine adds (e.g. <String>, <json|column|...>)
+        // Strip any type hint and (REQUIRED) suffix that System.CommandLine adds
         var match = TypeHintRegex().Match(firstColumnText);
         var withoutHint = match.Success ? firstColumnText[..match.Index] : firstColumnText;
+        withoutHint = RequiredSuffixRegex().Replace(withoutHint, "");
         var rawAliases = withoutHint.Split(", ").ToList();
 
         if (isBool)
         {
-            // Reorder: --no-* variants first, main aliases last; add [true|false] to last main alias
-            var noAliases = rawAliases
+            // Compact: --foo + --no-foo → --[no-]foo [true|false]
+            var noSet = rawAliases
                 .Where(a => a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
-                .Select(Ansi.White)
-                .ToList();
-            var mainAliases = rawAliases
-                .Where(a => !a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
-                .Select(Ansi.White)
-                .ToList();
-            if (mainAliases.Count > 0)
-                mainAliases[^1] += " " + Ansi.Cyan("[true|false]");
-            return [.. noAliases, .. mainAliases];
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var result = new List<string>();
+            foreach (var alias in rawAliases)
+            {
+                if (alias.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
+                    continue; // emitted as part of the main alias below
+                if (
+                    alias.StartsWith("--", StringComparison.Ordinal)
+                    && noSet.Contains("--no-" + alias[2..])
+                )
+                    result.Add(Ansi.White("--[no-]" + alias[2..]));
+                else
+                    result.Add(Ansi.White(alias));
+            }
+            if (result.Count > 0)
+                result[^1] += " " + Ansi.Cyan("[true|false]");
+            return result;
         }
 
         // Non-bool: always add value indicator regardless of whether S.CommandLine added a hint
@@ -209,6 +218,9 @@ internal static partial class GroupedHelpLayout
 
     [GeneratedRegex(@"\s*<[^>]+>$")]
     private static partial Regex TypeHintRegex();
+
+    [GeneratedRegex(@"\s*\(REQUIRED\)", RegexOptions.IgnoreCase)]
+    private static partial Regex RequiredSuffixRegex();
 
     private static bool DescriptionSection(HelpContext ctx)
     {
@@ -329,6 +341,8 @@ internal static partial class GroupedHelpLayout
         }
 
         main = Regex.Replace(main, "\\s{2,}", " ").Trim();
+        if (option.Required)
+            metadata.Insert(0, "[required]");
         return (main, metadata);
     }
 
