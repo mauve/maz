@@ -5791,7 +5791,7 @@
     },
     {
       "serviceDir": "recoveryservicesbackup",
-      "displayName": "backup",
+      "displayName": "rsbackup",
       "apiVersion": "2025-08-01",
       "description": "Manage Azure Backup for VMs, files, SQL, SAP HANA, and other workloads.",
       "detailedDescription": "Covers backup policy and instance management, protection containers, protected items, restore operations, job monitoring, and resource vault configuration. Supports IaaS VMs, Azure Files, SQL Server, SAP HANA, and DPM/MABS workloads. Requires Backup Contributor or Backup Operator role.",

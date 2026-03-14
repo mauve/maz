@@ -76,7 +76,7 @@ public partial class RootCommandDef
     public DataboxedgeCommandDef Databoxedge = null!;
     public StorageactionsCommandDef Storageactions = null!;
     public RecoveryservicesCommandDef Recoveryservices = null!;
-    public BackupCommandDef Backup = null!;
+    public RsbackupCommandDef Rsbackup = null!;
     public DataprotectionCommandDef Dataprotection = null!;
     public DatareplicationCommandDef Datareplication = null!;
 
@@ -151,7 +151,7 @@ public partial class RootCommandDef
         Databoxedge = new DataboxedgeCommandDef(Auth);
         Storageactions = new StorageactionsCommandDef(Auth);
         Recoveryservices = new RecoveryservicesCommandDef(Auth);
-        Backup = new BackupCommandDef(Auth);
+        Rsbackup = new RsbackupCommandDef(Auth);
         Dataprotection = new DataprotectionCommandDef(Auth);
         Datareplication = new DatareplicationCommandDef(Auth);
     }
