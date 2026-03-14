@@ -1,0 +1,89 @@
+name: CI/CD
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+          dotnet-quality: 'preview'
+
+      - run: dotnet restore
+      - run: dotnet build --no-restore -c Release
+      - run: dotnet test --no-build -c Release
+
+  publish:
+    name: Publish (${{ matrix.rid }})
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - rid: linux-x64
+            asset: maz-linux-x64
+            binary: maz
+          - rid: linux-arm64
+            asset: maz-linux-arm64
+            binary: maz
+          - rid: win-x64
+            asset: maz-win-x64.exe
+            binary: maz.exe
+          - rid: osx-x64
+            asset: maz-osx-x64
+            binary: maz
+          - rid: osx-arm64
+            asset: maz-osx-arm64
+            binary: maz
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.x'
+          dotnet-quality: 'preview'
+
+      - name: Publish
+        run: |
+          dotnet publish Console/Console.csproj \
+            --self-contained true \
+            -r ${{ matrix.rid }} \
+            -p:PublishSingleFile=true \
+            -c Release \
+            -o ./publish
+
+      - name: Stage asset
+        run: mv ./publish/${{ matrix.binary }} ./${{ matrix.asset }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset }}
+          path: ${{ matrix.asset }}
+
+  release:
+    name: Create Release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ./artifacts/*
+          generate_release_notes: true

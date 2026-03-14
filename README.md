@@ -1,8 +1,29 @@
-# README
+# maz
+
+[![CI/CD](https://github.com/mauve/maz/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/mauve/maz/actions/workflows/ci-cd.yml)
 
 Self-contained Azure CLI written in C#.
 
 _Because the official CLI is slow and annoying._
+
+## Install
+
+**Linux / macOS:**
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/mauve/maz/master/install.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+irm https://raw.githubusercontent.com/mauve/maz/master/install.ps1 | iex
+```
+
+The binary is installed to `~/.local/bin/maz` (Linux/macOS) or `%USERPROFILE%\.local\bin\maz.exe` (Windows).
+Both scripts warn you — and the PowerShell one offers to fix it — if the install directory is not yet on your `PATH`.
+
+You can override the install location by setting `MAZ_INSTALL_DIR` before running the script.
 
 ## Dynamic option completions
 
@@ -24,11 +45,14 @@ public interface ICliCompletionProvider
 }
 ```
 
-## Building
+## Building from source
 
-Run the following command to produce a binary for your preferred platform,
-in this example we are building for linux-x64.
+Requires .NET 10 SDK. Run the following command to produce a single self-contained binary for your platform:
 
 ```sh
-dotnet publish --self-contained true -r linux-x64 -p:PublishSingleFile=true
+dotnet publish Console/Console.csproj --self-contained true -r linux-x64 -p:PublishSingleFile=true -c Release
 ```
+
+Replace `linux-x64` with your target RID (`linux-arm64`, `osx-x64`, `osx-arm64`, `win-x64`, etc.).
+
+CI publishes pre-built binaries for all supported platforms on every tagged release.
