@@ -11197,6 +11197,75 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "customer-insights",
+      "displayName": "customerinsights",
+      "apiVersion": "2017-04-26",
+      "description": "Manage Azure Customer Insights hubs and unified customer profiles",
+      "detailedDescription": "Covers Customer Insights hub management, profile and interaction types, KPIs, predictions, relationships, and authorization policies.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/customer-insights/resource-manager/Microsoft.CustomerInsights/CustomerInsights/stable/2017-04-26/customer-insights.json"
+      ],
+      "resourceDescriptions": {
+        "authorizationpolicy": "Manage hub authorization policies",
+        "connector": "Manage data connectors",
+        "connectormapping": "Manage connector mappings",
+        "hub": "Manage Customer Insights hubs",
+        "interaction": "Manage interaction types",
+        "kpi": "Manage Key Performance Indicators",
+        "link": "Manage profile links",
+        "prediction": "Manage ML predictions",
+        "profile": "Manage profile types",
+        "relationship": "Manage relationship types",
+        "relationshiplink": "Manage relationship links",
+        "roleassignment": "Manage role assignments",
+        "view": "Manage user views"
+      },
+      "resourceDetailedDescriptions": {
+        "hub": "Create and manage Customer Insights hubs that unify customer data from multiple sources.",
+        "profile": "Define customer profile schemas for unified data.",
+        "kpi": "Define and track key performance indicators across customer data."
+      },
+      "actionRenames": {
+        "Hubs_Get": "show",
+        "Hubs_CreateOrUpdate": "create",
+        "Hubs_ListByResourceGroup": "list",
+        "AuthorizationPolicies_Get": "show",
+        "AuthorizationPolicies_CreateOrUpdate": "create",
+        "Connectors_Get": "show",
+        "Connectors_CreateOrUpdate": "create",
+        "ConnectorMappings_Get": "show",
+        "ConnectorMappings_CreateOrUpdate": "create",
+        "Interactions_Get": "show",
+        "Interactions_CreateOrUpdate": "create",
+        "Kpi_Get": "show",
+        "Kpi_CreateOrUpdate": "create",
+        "Links_Get": "show",
+        "Links_CreateOrUpdate": "create",
+        "Predictions_Get": "show",
+        "Predictions_CreateOrUpdate": "create",
+        "Profiles_Get": "show",
+        "Profiles_CreateOrUpdate": "create",
+        "Relationships_Get": "show",
+        "Relationships_CreateOrUpdate": "create",
+        "RelationshipLinks_Get": "show",
+        "RelationshipLinks_CreateOrUpdate": "create",
+        "RoleAssignments_Get": "show",
+        "RoleAssignments_CreateOrUpdate": "create",
+        "Views_Get": "show",
+        "Views_CreateOrUpdate": "create"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Hubs_List",
+          "resourceGroupOperationId": "Hubs_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
