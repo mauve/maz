@@ -18,10 +18,10 @@ public partial class AttestationOptionPack : DataplaneResourceOptionPack<Attesta
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Attestation Provider";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Attestation provider name, or combined format: [sub/]rg/provider-name.</summary>

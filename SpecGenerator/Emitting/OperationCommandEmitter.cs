@@ -142,13 +142,23 @@ public static class OperationCommandEmitter
                     )
                         continue; // absorbed by ResourceOptionPack
 
+                    if (
+                        (usesResourceGroup || isMergedList)
+                        && param.CliFlag == "--resource-group"
+                    )
+                        continue; // absorbed by ResourceGroupOptionPack
+
+                    // RenderOptionPack always adds --format/-f; rename colliding API params
+                    var paramCliFlag = param.CliFlag == "--format" ? "--api-format" : param.CliFlag;
+                    var paramPropName = param.CliFlag == "--format" ? "ApiFormat" : param.PropertyName;
+
                     var requiredAttr = param.Required ? ", Required = true" : "";
                     if (!string.IsNullOrWhiteSpace(param.Description))
                         w.Line(
                             $"/// <summary>{EscapeXml(param.Description.Replace("\n", " ").Replace("\r", ""))}</summary>"
                         );
-                    w.Line($"[CliOption(\"{param.CliFlag}\"{requiredAttr})]");
-                    w.Line($"public partial string? {param.PropertyName} {{ get; }}");
+                    w.Line($"[CliOption(\"{paramCliFlag}\"{requiredAttr})]");
+                    w.Line($"public partial string? {paramPropName} {{ get; }}");
                     w.Line();
                 }
 
@@ -165,12 +175,16 @@ public static class OperationCommandEmitter
                         var nullable = $"{typeName}?";
                         var requiredAttr = bp.Required ? ", Required = true" : "";
 
+                        // RenderOptionPack always adds --format/-f; rename colliding API body params
+                        var bpCliFlag = bp.CliFlag == "--format" ? "--api-format" : bp.CliFlag;
+                        var bpPropName = bp.CliFlag == "--format" ? "ApiFormat" : bp.PropertyName;
+
                         if (!string.IsNullOrWhiteSpace(bp.Description))
                             w.Line(
                                 $"/// <summary>{EscapeXml(bp.Description.Replace("\n", " ").Replace("\r", ""))}</summary>"
                             );
-                        w.Line($"[CliOption(\"{bp.CliFlag}\"{requiredAttr})]");
-                        w.Line($"public partial {nullable} {bp.PropertyName} {{ get; }}");
+                        w.Line($"[CliOption(\"{bpCliFlag}\"{requiredAttr})]");
+                        w.Line($"public partial {nullable} {bpPropName} {{ get; }}");
                         w.Line();
                     }
                 }
@@ -403,7 +417,9 @@ public static class OperationCommandEmitter
                         : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
                         : "{subscriptionId}"
                 )
-                .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}");
+                .Replace("{resourceGroupName}", "{ResourceGroup.RequireResourceGroupName()}", StringComparison.OrdinalIgnoreCase);
+            if (usesResourceGroup)
+                expr = expr.Replace("{resourceGroup}", "{ResourceGroup.RequireResourceGroupName()}", StringComparison.OrdinalIgnoreCase);
         }
 
         // Replace remaining path parameters with property access
@@ -553,7 +569,8 @@ public static class OperationCommandEmitter
                 {
                     // Simple scalar top-level property
                     var bp = props[0];
-                    w.Line($"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bp.PropertyName}),");
+                    var bpProp = bp.CliFlag == "--format" ? "ApiFormat" : bp.PropertyName;
+                    w.Line($"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bpProp}),");
                 }
                 else
                 {
@@ -562,9 +579,10 @@ public static class OperationCommandEmitter
                     w.Line("{");
                     w.Indent();
                     foreach (var bp in props)
-                        w.Line(
-                            $"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bp.PropertyName}),"
-                        );
+                    {
+                        var bpProp = bp.CliFlag == "--format" ? "ApiFormat" : bp.PropertyName;
+                        w.Line($"[\"{bp.JsonPropertyName}\"] = JsonValue.Create({bpProp}),");
+                    }
                     w.Outdent();
                     w.Line("},");
                 }

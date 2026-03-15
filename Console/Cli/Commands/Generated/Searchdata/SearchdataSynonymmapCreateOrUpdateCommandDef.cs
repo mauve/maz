@@ -33,8 +33,8 @@ public partial class SearchdataSynonymmapCreateOrUpdateCommandDef(AuthOptionPack
     public partial string? ParamName { get; }
 
     /// <summary>The format of the synonym map. Only the 'solr' format is currently supported.</summary>
-    [CliOption("--format", Required = true)]
-    public partial string? Format { get; }
+    [CliOption("--api-format", Required = true)]
+    public partial string? ApiFormat { get; }
 
     /// <summary>A series of synonym rules in the specified synonym map format. The rules must be separated by newlines.</summary>
     [CliOption("--synonyms", Required = true)]
@@ -57,7 +57,7 @@ public partial class SearchdataSynonymmapCreateOrUpdateCommandDef(AuthOptionPack
             : new JsonObject
             {
                 ["name"] = JsonValue.Create(ParamName),
-                ["format"] = JsonValue.Create(Format),
+                ["format"] = JsonValue.Create(ApiFormat),
                 ["synonyms"] = JsonValue.Create(Synonyms),
             };
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-09-01", body, ct);

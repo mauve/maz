@@ -18,10 +18,10 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Web PubSub";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Web PubSub service name, or combined format: [sub/]rg/service-name.</summary>

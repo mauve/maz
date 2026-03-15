@@ -18,10 +18,10 @@ public partial class ConfidentialLedgerOptionPack : DataplaneResourceOptionPack<
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Confidential Ledger";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Confidential Ledger name, or combined format: [sub/]rg/ledger-name.</summary>

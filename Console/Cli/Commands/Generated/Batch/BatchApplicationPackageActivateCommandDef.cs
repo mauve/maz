@@ -27,8 +27,8 @@ public partial class BatchApplicationPackageActivateCommandDef(AuthOptionPack au
     public partial string? VersionName { get; }
 
     /// <summary>The format of the application package binary file.</summary>
-    [CliOption("--package-format", Required = true)]
-    public partial string? Format { get; }
+    [CliOption("--api-format", Required = true)]
+    public partial string? ApiFormat { get; }
 
     /// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>
     [CliOption("--body-json")]
@@ -45,7 +45,7 @@ public partial class BatchApplicationPackageActivateCommandDef(AuthOptionPack au
             ? JsonNode.Parse(rawJson)!.AsObject()
             : new JsonObject
             {
-                ["format"] = JsonValue.Create(Format),
+                ["format"] = JsonValue.Create(ApiFormat),
             };
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-06-01", body, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

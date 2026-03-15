@@ -18,10 +18,10 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Dev Center";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Dev Center name, or combined format: [sub/]rg/devcenter-name.</summary>

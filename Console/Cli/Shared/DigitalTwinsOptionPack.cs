@@ -18,10 +18,10 @@ public partial class DigitalTwinsOptionPack : DataplaneResourceOptionPack<Digita
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Digital Twins";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Digital Twins instance name, or combined format: [sub/]rg/instance-name.</summary>

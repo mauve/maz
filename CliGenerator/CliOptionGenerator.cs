@@ -899,17 +899,9 @@ public class CliOptionGenerator : IIncrementalGenerator
                     $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
                 );
             foreach (var child in childCmds)
-            {
-                var cliName = FieldToCliName(child.Name);
-                if (child.Description != null)
-                    sb.AppendLine(
-                        $"        cmd.Add({child.Name} is not null ? ((global::Console.Cli.CommandDef){child.Name}).Build() : new global::System.CommandLine.Command({Quote(cliName)}, {Quote(child.Description)}));"
-                    );
-                else
-                    sb.AppendLine(
-                        $"        cmd.Add({child.Name} is not null ? ((global::Console.Cli.CommandDef){child.Name}).Build() : new global::System.CommandLine.Command({Quote(cliName)}));"
-                    );
-            }
+                sb.AppendLine(
+                    $"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
+                );
             sb.AppendLine("    }");
         }
         else if (childPacks.Count > 0 && model.IsOptionPack)
