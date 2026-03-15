@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Read and write to an Azure Confidential Ledger via the data-plane API</summary>
-/// <remarks>Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Requires the ledger URI via --ledger-uri.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Identify the ledger with --ledger / --cl (resolves the endpoint from ARM) or supply the URL directly via --ledger-url.</remarks>
 public partial class LedgerdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "ledgerdata";

@@ -16,10 +16,10 @@ public partial class LoadtestdataLoadTestAdministrationSetAppComponentsCommandDe
     public override string Name => "set-app-components";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--loadtest-endpoint")]
-    public partial string? LoadtestEndpoint { get; }
+    [CliOption("--load-test-url")]
+    public partial string? LoadTestUrl { get; }
 
-    public readonly DirectUriOptionPack LoadTestEndpoint = new();
+    public readonly LoadTestingOptionPack LoadTest = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -32,8 +32,8 @@ public partial class LoadtestdataLoadTestAdministrationSetAppComponentsCommandDe
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var loadTestEndpointBaseUrl = LoadtestEndpoint ?? (await LoadTestEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{loadTestEndpointBaseUrl}/tests/{TestId}/app-components";
+        var loadTestBaseUrl = LoadTestUrl ?? (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{loadTestBaseUrl}/tests/{TestId}/app-components";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2022-11-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

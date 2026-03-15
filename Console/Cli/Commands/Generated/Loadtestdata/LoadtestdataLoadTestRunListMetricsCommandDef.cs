@@ -16,10 +16,10 @@ public partial class LoadtestdataLoadTestRunListMetricsCommandDef(AuthOptionPack
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--loadtest-endpoint")]
-    public partial string? LoadtestEndpoint { get; }
+    [CliOption("--load-test-url")]
+    public partial string? LoadTestUrl { get; }
 
-    public readonly DirectUriOptionPack LoadTestEndpoint = new();
+    public readonly LoadTestingOptionPack LoadTest = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -52,8 +52,8 @@ public partial class LoadtestdataLoadTestRunListMetricsCommandDef(AuthOptionPack
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var loadTestEndpointBaseUrl = LoadtestEndpoint ?? (await LoadTestEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{loadTestEndpointBaseUrl}/test-runs/{TestRunId}/metrics";
+        var loadTestBaseUrl = LoadTestUrl ?? (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{loadTestBaseUrl}/test-runs/{TestRunId}/metrics";
 
         var allItems = client.GetAllAsync(path, "2022-11-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

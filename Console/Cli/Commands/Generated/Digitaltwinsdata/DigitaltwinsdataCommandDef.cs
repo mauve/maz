@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Manage Azure Digital Twins instances, models, relationships, and event routes</summary>
-/// <remarks>Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Requires the Digital Twins endpoint via --digitaltwins-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Identify the instance with --digital-twins / --dt (resolves the endpoint from ARM) or supply the URL directly via --digital-twins-url.</remarks>
 public partial class DigitaltwinsdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "digitaltwinsdata";

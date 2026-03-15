@@ -19,7 +19,7 @@ public partial class DeiddataGetJobShowCommandDef(AuthOptionPack auth) : Command
     [CliOption("--deid-url")]
     public partial string? DeidUrl { get; }
 
-    public readonly DirectUriOptionPack DeidEndpoint = new();
+    public readonly HealthDataAIDeidOptionPack DeidService = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -32,8 +32,8 @@ public partial class DeiddataGetJobShowCommandDef(AuthOptionPack auth) : Command
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://deid.azure.net/.default");
-        var deidEndpointBaseUrl = DeidUrl ?? (await DeidEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{deidEndpointBaseUrl}/jobs/{ParamName}";
+        var deidServiceBaseUrl = DeidUrl ?? (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{deidServiceBaseUrl}/jobs/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-11-15", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

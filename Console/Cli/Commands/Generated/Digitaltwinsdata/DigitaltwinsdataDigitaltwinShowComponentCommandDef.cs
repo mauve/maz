@@ -16,10 +16,10 @@ public partial class DigitaltwinsdataDigitaltwinShowComponentCommandDef(AuthOpti
     public override string Name => "show-component";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--digitaltwins-endpoint")]
-    public partial string? DigitaltwinsEndpoint { get; }
+    [CliOption("--digital-twins-url")]
+    public partial string? DigitalTwinsUrl { get; }
 
-    public readonly DirectUriOptionPack DigitalTwinsEndpoint = new();
+    public readonly DigitalTwinsOptionPack DigitalTwins = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -36,8 +36,8 @@ public partial class DigitaltwinsdataDigitaltwinShowComponentCommandDef(AuthOpti
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var digitalTwinsEndpointBaseUrl = DigitaltwinsEndpoint ?? (await DigitalTwinsEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{digitalTwinsEndpointBaseUrl}/digitaltwins/{Id}/components/{ComponentPath}";
+        var digitalTwinsBaseUrl = DigitalTwinsUrl ?? (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{digitalTwinsBaseUrl}/digitaltwins/{Id}/components/{ComponentPath}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-10-31", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

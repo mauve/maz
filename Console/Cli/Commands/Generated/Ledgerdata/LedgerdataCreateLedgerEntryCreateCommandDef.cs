@@ -17,10 +17,10 @@ public partial class LedgerdataCreateLedgerEntryCreateCommandDef(AuthOptionPack 
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--ledger-uri")]
-    public partial string? LedgerUri { get; }
+    [CliOption("--ledger-url")]
+    public partial string? LedgerUrl { get; }
 
-    public readonly DirectUriOptionPack LedgerEndpoint = new();
+    public readonly ConfidentialLedgerOptionPack Ledger = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -41,8 +41,8 @@ public partial class LedgerdataCreateLedgerEntryCreateCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var ledgerEndpointBaseUrl = LedgerUri ?? (await LedgerEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{ledgerEndpointBaseUrl}/app/transactions";
+        var ledgerBaseUrl = LedgerUrl ?? (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{ledgerBaseUrl}/app/transactions";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

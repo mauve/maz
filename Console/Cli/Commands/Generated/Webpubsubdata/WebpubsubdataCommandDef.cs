@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Send messages and manage connections in Azure Web PubSub hubs</summary>
-/// <remarks>Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Requires the Web PubSub endpoint via --webpubsub-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Identify the service with --web-pubsub / --wps (resolves the endpoint from ARM) or supply the URL directly via --web-pubsub-url.</remarks>
 public partial class WebpubsubdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "webpubsubdata";

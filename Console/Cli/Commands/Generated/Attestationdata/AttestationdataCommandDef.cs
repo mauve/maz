@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Submit attestation evidence and manage attestation policies via the data-plane API</summary>
-/// <remarks>Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Requires an attestation provider URI via --attestation-uri.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Identify the provider with --attestation / --atp (resolves the endpoint from ARM) or supply the URL directly via --attestation-url.</remarks>
 public partial class AttestationdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "attestationdata";
