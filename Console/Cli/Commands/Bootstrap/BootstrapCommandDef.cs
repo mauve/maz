@@ -95,10 +95,13 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         // ── Helpers ────────────────────────────────────────────────────────────
 
+        int pageDemoLines = 0;
+
         async Task StartStepAsync(int i)
         {
             try { pageTopRow = System.Console.CursorTop; } catch { pageTopRow = -1; }
-            await RenderSliceContentAsync(steps[i], i, total);
+            pageDemoLines = GetDemoHeight(steps[i].DemoTag);
+            await RenderSliceContentAsync(steps[i], i, total, pageDemoLines);
             stepCts?.Dispose();
             stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             var token = stepCts.Token;
@@ -107,10 +110,12 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 : null;
         }
 
-        // Cancels the demo (which self-erases its output), then renders the greyed bottom
-        // border and repaints the top border grey so the finished page recedes visually.
+        // Cancels the demo (which self-erases its output back to demo-start), moves to the
+        // pre-rendered bottom border, repaints it grey, then greys the top border too.
         async Task SealPageAsync(int i)
         {
+            bool demoWasRunning = demoTask is { IsCompleted: false };
+
             if (stepCts is not null)
             {
                 await stepCts.CancelAsync();
@@ -127,7 +132,19 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             var nextLabel = i >= total - 1 ? "done " : "next ";
             var navText = $"  ← back  │  → {nextLabel}│  q quit  ";
 
-            // Render grey bottom border at wherever the cursor is now (demo cleaned up).
+            // Position cursor on the pre-rendered bottom border line, then overwrite it grey.
+            if (pageDemoLines > 0)
+            {
+                if (demoWasRunning)
+                    // Demo self-erased → cursor is at start of demo area; skip down to border.
+                    System.Console.Write($"\x1b[{pageDemoLines}B");
+                // else: demo completed naturally (kusto) → cursor is already on the border line.
+            }
+            else
+            {
+                // No demo: cursor is one line past the border; step back up.
+                System.Console.Write("\x1b[1A");
+            }
             WizardUi.RenderBottomBorder(navText, boxWidth, dim: true);
 
             // Repaint the top border in grey using saved cursor position.
@@ -137,9 +154,9 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 if (pageTopRow >= 0 && afterRow > pageTopRow)
                 {
                     var dist = afterRow - pageTopRow;
-                    System.Console.Write($"\x1b[{dist}F");               // up to top border row
+                    System.Console.Write($"\x1b[{dist}F");
                     WizardUi.RenderTopBorder(steps[i].Title, i, total, boxWidth, dim: true);
-                    if (dist > 1) System.Console.Write($"\x1b[{dist - 1}B"); // back down
+                    if (dist > 1) System.Console.Write($"\x1b[{dist - 1}B");
                 }
             }
             catch { /* CursorTop unavailable — skip grey top, layout is still correct */ }
@@ -183,13 +200,17 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     }
 
     /// <summary>
-    /// Renders one wizard slice: full-width top border, blank, content, blank.
-    /// The bottom border is NOT rendered here — it appears when the page is sealed
-    /// (user navigates away), drawn in dim grey via <c>SealPageAsync</c>.
+    /// Renders one wizard slice: top border, blank, content, blank, then the bottom border.
+    /// When <paramref name="demoLines"/> &gt; 0, blank lines are reserved above the border for
+    /// the demo animation, and the cursor is repositioned to the start of that reserved area so
+    /// the demo task can write into it immediately after this method returns.
     /// </summary>
-    private static async Task RenderSliceContentAsync(WizardStep step, int stepIndex, int total)
+    private static async Task RenderSliceContentAsync(
+        WizardStep step, int stepIndex, int total, int demoLines)
     {
         var boxWidth = WizardUi.GetTermWidth() - 1;
+        var nextLabel = stepIndex >= total - 1 ? "done " : "next ";
+        var navAnsi = $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
 
         WizardUi.RenderTopBorder(step.Title, stepIndex, total, boxWidth);
         System.Console.WriteLine();
@@ -198,6 +219,13 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         await step.RenderContent(contentWidth);
 
         System.Console.WriteLine();
+
+        // Reserve blank lines for the demo, render the border, then reposition.
+        for (var i = 0; i < demoLines; i++) System.Console.WriteLine();
+        WizardUi.RenderBottomBorder(navAnsi, boxWidth);
+
+        if (demoLines > 0)
+            System.Console.Write($"\x1b[{demoLines + 1}F"); // back to start of demo area
     }
 
     // ── Step renderers ─────────────────────────────────────────────────────────
@@ -374,4 +402,17 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
     private static bool IsQuitKey(ConsoleKeyInfo k) =>
         k.Key is ConsoleKey.Q or ConsoleKey.Escape;
+
+    /// <summary>
+    /// Returns the exact number of lines each demo animation writes when it runs to completion.
+    /// Used to reserve blank space above the bottom border before starting the demo task.
+    /// </summary>
+    private static int GetDemoHeight(string? tag) => tag switch
+    {
+        "subscriptions"   => 3,   // typewriter+[TAB] line, green result, blank
+        "resource-groups" => 6,   // typewriter+[TAB], green result, blank, dim hint, green, blank
+        "resource-names"  => 3,   // typewriter+[TAB] line, green result, blank
+        "kusto"           => BootstrapAnimator.KustoDemoLines,
+        _                 => 0,
+    };
 }
