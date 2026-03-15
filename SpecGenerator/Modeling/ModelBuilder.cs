@@ -76,13 +76,13 @@ public sealed class ModelBuilder
 
         foreach (var doc in docs)
         {
-            foreach (var (path, method, opNode) in doc.GetOperations())
+            foreach (var (path, method, opNode, pathLevelParams) in doc.GetOperations())
             {
                 var operationId = opNode["operationId"]?.GetValue<string>();
                 if (string.IsNullOrEmpty(operationId))
                     continue;
 
-                if (_service.Exclude.Contains(operationId, StringComparer.OrdinalIgnoreCase))
+                if (_service.Exclude?.Contains(operationId, StringComparer.OrdinalIgnoreCase) == true)
                     continue;
 
                 var model = BuildOperation(
@@ -92,7 +92,8 @@ public sealed class ModelBuilder
                     opNode,
                     operationId,
                     serviceClassName,
-                    extraAbsorbed
+                    extraAbsorbed,
+                    pathLevelParams
                 );
                 if (model is null)
                     continue;
@@ -433,7 +434,8 @@ public sealed class ModelBuilder
         JsonObject opNode,
         string operationId,
         string serviceClassName,
-        HashSet<string>? extraAbsorbedPathParams = null
+        HashSet<string>? extraAbsorbedPathParams = null,
+        System.Text.Json.Nodes.JsonArray? pathLevelParams = null
     )
     {
         var (resourceCli, actionCli) = NamingEngine.SplitOperationId(
@@ -454,8 +456,13 @@ public sealed class ModelBuilder
         var nextLinkProp = pageableNode?["nextLinkName"]?.GetValue<string>() ?? "nextLink";
         var itemsProp = pageableNode?["itemName"]?.GetValue<string>() ?? "value";
 
-        // Resolve parameters
-        var rawParams = opNode["parameters"]?.AsArray() ?? [];
+        // Resolve parameters: path-level params first (operation-level take precedence via dedup)
+        var opParams = opNode["parameters"]?.AsArray() ?? [];
+        var rawParams = pathLevelParams is { Count: > 0 }
+            ? new System.Text.Json.Nodes.JsonArray(
+                pathLevelParams.Select(p => p?.DeepClone()).Concat(opParams.Select(p => p?.DeepClone())).ToArray()
+              )
+            : opParams;
         var cliParams = new List<CliParamModel>();
         BodyModel? bodyModel = null;
 

@@ -11266,6 +11266,687 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "servicebus",
+      "displayName": "servicebusdata",
+      "apiVersion": "2021-05",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/servicebus/data-plane/ServiceBus/stable/2021-05/servicebus.json"
+      ],
+      "description": "Manage Azure Service Bus entities, rules, and subscriptions via the data-plane API",
+      "detailedDescription": "Provides direct data-plane access to Service Bus namespaces for managing queues, topics, subscriptions, and rules. Requires a Service Bus namespace endpoint (--servicebus-url) or --servicebus-namespace to identify the namespace by name for ARM-based endpoint resolution.",
+      "dataplaneOptionPack": {
+        "className": "ServiceBusOptionPack",
+        "fieldName": "ServiceBus",
+        "urlCliFlag": "--servicebus-url",
+        "scope": "https://servicebus.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "entity": "Manage Service Bus queues and topics",
+        "listentity": "List Service Bus entities",
+        "listrule": "List subscription rules",
+        "listsubscription": "List topic subscriptions",
+        "namespace": "Get Service Bus namespace properties",
+        "rule": "Manage subscription rules",
+        "subscription": "Manage topic subscriptions"
+      },
+      "resourceDetailedDescriptions": {
+        "entity": "Create, get, and delete queues and topics within a Service Bus namespace.",
+        "rule": "Manage filter and action rules on topic subscriptions.",
+        "subscription": "Create and manage subscriptions for Service Bus topics."
+      },
+      "actionRenames": {
+        "Entity_Put": "create",
+        "Entity_Get": "show",
+        "Entity_Delete": "delete",
+        "Rule_Put": "create",
+        "Rule_Get": "show",
+        "Rule_Delete": "delete",
+        "Subscription_Put": "create",
+        "Subscription_Get": "show",
+        "Subscription_Delete": "delete",
+        "Namespace_Get": "show",
+        "listEntities": "list",
+        "listRules": "list",
+        "listSubscriptions": "list"
+      }
+    },
+    {
+      "serviceDir": "appconfiguration",
+      "displayName": "appconfigdata",
+      "apiVersion": "2024-09-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/appconfiguration/data-plane/AppConfiguration/stable/2024-09-01/appconfiguration.json"
+      ],
+      "description": "Read and write Azure App Configuration key-values, labels, snapshots, and locks",
+      "resourceRenames": {
+        "GetKeyValue": "key-value",
+        "GetKeyValues": "key-value",
+        "GetSnapshot": "snapshot",
+        "GetSnapshots": "snapshot"
+      },
+      "detailedDescription": "Provides direct data-plane access to App Configuration stores for managing key-value pairs, labels, snapshots, and read locks. Requires an App Configuration endpoint URL (--appconfig-url) or --appconfig to identify the store by name for ARM-based endpoint resolution.",
+      "dataplaneOptionPack": {
+        "className": "AppConfigurationOptionPack",
+        "fieldName": "AppConfig",
+        "urlCliFlag": "--appconfig-url",
+        "scope": "https://azconfig.io/.default"
+      },
+      "resourceDescriptions": {
+        "create-snapshot": "Create App Configuration snapshots",
+        "delete-key-value": "Delete key-values",
+        "delete-lock": "Remove read locks from key-values",
+        "get-key-value": "Get a specific key-value",
+        "get-snapshot": "Get a specific snapshot",
+        "getkey": "List configuration keys",
+        "getkeyvalue": "List configuration key-values",
+        "getlabel": "List configuration labels",
+        "getoperationdetail": "Get long-running operation details",
+        "getrevision": "List key-value revision history",
+        "getsnapshot": "List snapshots",
+        "put-key-value": "Set a key-value",
+        "put-lock": "Lock a key-value to make it read-only",
+        "update-snapshot": "Update snapshot properties"
+      },
+      "resourceDetailedDescriptions": {
+        "getkeyvalue": "Retrieve configuration key-values filtered by key, label, or etag.",
+        "get-key-value": "Get a single key-value entry by key and optional label.",
+        "put-key-value": "Create or update a key-value entry in the App Configuration store.",
+        "getrevision": "Access the revision history of key-values for auditing and rollback."
+      },
+      "actionRenames": {
+        "CreateSnapshot": "create",
+        "DeleteKeyValue": "delete",
+        "DeleteLock": "delete",
+        "GetKeyValue": "show",
+        "GetSnapshot": "show",
+        "GetKeys": "list",
+        "GetKeyValues": "list",
+        "GetLabels": "list",
+        "GetOperationDetails": "show",
+        "GetRevisions": "list",
+        "GetSnapshots": "list",
+        "PutKeyValue": "set",
+        "PutLock": "lock",
+        "UpdateSnapshot": "update"
+      }
+    },
+    {
+      "serviceDir": "batch",
+      "displayName": "batchdata",
+      "apiVersion": "2025-06-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/batch/data-plane/Batch/stable/2025-06-01/BatchService.json"
+      ],
+      "description": "Submit and manage Azure Batch jobs, tasks, pools, and job schedules",
+      "detailedDescription": "Provides direct data-plane access to Batch accounts for creating and monitoring jobs, tasks, pools, and job schedules. Requires a Batch account endpoint (--batch-url) or --batch-account to identify the account by name for ARM-based endpoint resolution.",
+      "dataplaneOptionPack": {
+        "className": "BatchAccountOptionPack",
+        "fieldName": "BatchAccount",
+        "urlCliFlag": "--batch-url",
+        "scope": "https://batch.core.windows.net/.default"
+      },
+      "resourceDescriptions": {
+        "application": "List Batch applications and packages",
+        "job": "Manage Batch jobs",
+        "task": "Manage job tasks",
+        "jobschedule": "Manage job schedules",
+        "pool": "Manage compute node pools",
+        "computenode": "Inspect and manage compute nodes",
+        "certificate": "Manage Batch certificates"
+      },
+      "resourceDetailedDescriptions": {
+        "job": "Create, update, disable, enable, terminate, and delete Batch jobs.",
+        "task": "Add tasks to jobs and monitor their execution.",
+        "pool": "Create, resize, and delete pools of compute nodes.",
+        "computenode": "Reboot, reimage, and manage individual compute nodes in a pool."
+      },
+      "actionRenames": {
+        "Applications_ListApplications": "list",
+        "Applications_GetApplication": "show",
+        "Jobs_ListJobs": "list",
+        "Jobs_CreateJob": "create",
+        "Jobs_GetJob": "show",
+        "Jobs_ReplaceJob": "replace",
+        "Jobs_DeleteJob": "delete",
+        "Jobs_UpdateJob": "update",
+        "Jobs_DisableJob": "disable",
+        "Jobs_EnableJob": "enable",
+        "Jobs_TerminateJob": "terminate",
+        "Tasks_ListTasks": "list",
+        "Tasks_CreateTask": "create",
+        "Tasks_GetTask": "show",
+        "Tasks_ReplaceTask": "replace",
+        "Tasks_DeleteTask": "delete",
+        "Tasks_ReactivateTask": "reactivate",
+        "Tasks_ListSubTasks": "list-subtasks",
+        "Tasks_TerminateTask": "terminate",
+        "Tasks_ListTaskFiles": "list",
+        "Tasks_GetTaskFile": "show",
+        "Tasks_DeleteTaskFile": "delete",
+        "JobSchedules_ListJobSchedules": "list",
+        "JobSchedules_CreateJobSchedule": "create",
+        "JobSchedules_GetJobSchedule": "show",
+        "JobSchedules_ReplaceJobSchedule": "replace",
+        "JobSchedules_DeleteJobSchedule": "delete",
+        "JobSchedules_UpdateJobSchedule": "update",
+        "JobSchedules_DisableJobSchedule": "disable",
+        "JobSchedules_EnableJobSchedule": "enable",
+        "JobSchedules_TerminateJobSchedule": "terminate",
+        "Pools_ListPools": "list",
+        "Pools_CreatePool": "create",
+        "Pools_GetPool": "show",
+        "Pools_DeletePool": "delete",
+        "Pools_UpdatePool": "update",
+        "Pools_ResizePool": "resize"
+      }
+    },
+    {
+      "serviceDir": "containerregistry",
+      "displayName": "acrdata",
+      "apiVersion": "2021-07-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/containerregistry/data-plane/Registry/stable/2021-07-01/containerregistry.json"
+      ],
+      "description": "Manage Azure Container Registry manifests, tags, and blobs via the data-plane API",
+      "detailedDescription": "Provides direct OCI-compatible data-plane access to container registries for managing repositories, manifests, tags, and blob uploads. Requires a registry login server URL (--acr-url) or --acr to identify the registry by name for ARM-based endpoint resolution.",
+      "dataplaneOptionPack": {
+        "className": "ContainerRegistryOptionPack",
+        "fieldName": "Acr",
+        "urlCliFlag": "--acr-url",
+        "scope": "https://containerregistry.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "authentication": "Exchange tokens for registry access",
+        "blob": "Manage image layer blobs",
+        "container-registry": "Manage repository manifests, tags, and properties"
+      },
+      "resourceDetailedDescriptions": {
+        "authentication": "Exchange AAD or refresh tokens for ACR access tokens scoped to a repository.",
+        "blob": "Upload, download, and delete OCI image layer blobs.",
+        "container-registry": "List repositories, manage manifests and tags, and update repository properties."
+      },
+      "actionRenames": {
+        "ContainerRegistry_GetProperties": "show",
+        "ContainerRegistry_UpdateProperties": "update",
+        "ContainerRegistry_GetManifests": "list",
+        "ContainerRegistry_GetManifest": "show",
+        "ContainerRegistry_CreateManifest": "create",
+        "ContainerRegistry_DeleteManifest": "delete",
+        "ContainerRegistry_GetManifestProperties": "show-manifest-properties",
+        "ContainerRegistry_UpdateManifestProperties": "update-manifest-properties",
+        "ContainerRegistry_GetTags": "list",
+        "ContainerRegistry_DeleteTag": "delete",
+        "ContainerRegistry_GetTagProperties": "show-tag-properties",
+        "Authentication_ExchangeAadAccessTokenForAcrRefreshToken": "exchange-aad-token",
+        "Authentication_ExchangeAcrRefreshTokenForAcrAccessToken": "exchange-refresh-token",
+        "ContainerRegistryBlob_GetBlob": "show",
+        "ContainerRegistryBlob_DeleteBlob": "delete",
+        "ContainerRegistryBlob_CompleteUpload": "complete-upload",
+        "ContainerRegistryBlob_CancelUpload": "cancel-upload"
+      },
+      "exclude": [
+        "Authentication_GetAcrAccessTokenFromLogin",
+        "ContainerRegistryBlob_GetUploadStatus",
+        "ContainerRegistryBlob_UploadChunk",
+        "ContainerRegistryBlob_StartUpload",
+        "ContainerRegistryBlob_CheckBlobExists",
+        "ContainerRegistryBlob_CheckChunkExists"
+      ]
+    },
+    {
+      "serviceDir": "search",
+      "displayName": "searchdata",
+      "apiVersion": "2025-09-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/search/data-plane/Search/stable/2025-09-01/searchservice.json"
+      ],
+      "description": "Manage Azure AI Search indexes, indexers, data sources, skillsets, and synonym maps",
+      "detailedDescription": "Provides direct data-plane access to Azure AI Search service management: creating and configuring indexes, indexers, data sources, skillsets, and synonym maps. Requires a search service endpoint (--search-url) or --search-service to identify the service by name for ARM-based endpoint resolution.",
+      "dataplaneOptionPack": {
+        "className": "SearchServiceOptionPack",
+        "fieldName": "SearchService",
+        "urlCliFlag": "--search-url",
+        "scope": "https://search.azure.com/.default"
+      },
+      "resourceDescriptions": {
+        "datasource": "Manage search data sources",
+        "getservicestatistic": "Get search service statistics",
+        "index": "Manage search indexes",
+        "indexer": "Manage search indexers",
+        "skillset": "Manage AI enrichment skillsets",
+        "synonymmap": "Manage synonym maps"
+      },
+      "resourceDetailedDescriptions": {
+        "index": "Create, update, and delete search indexes that define the schema for searchable documents.",
+        "indexer": "Create and run indexers that pull data from data sources into search indexes.",
+        "datasource": "Configure data source connections for indexers (Azure SQL, Cosmos DB, Blob Storage, etc.).",
+        "skillset": "Define AI enrichment pipelines with cognitive skills for text and image analysis."
+      },
+      "actionRenames": {
+        "DataSources_Get": "show",
+        "DataSources_CreateOrUpdate": "create-or-update",
+        "DataSources_Delete": "delete",
+        "DataSources_List": "list",
+        "DataSources_Create": "create",
+        "GetServiceStatistics": "show",
+        "Indexes_List": "list",
+        "Indexes_Create": "create",
+        "Indexes_Get": "show",
+        "Indexes_CreateOrUpdate": "create-or-update",
+        "Indexes_Delete": "delete",
+        "Indexes_GetStatistics": "show-statistics",
+        "Indexes_Analyze": "analyze",
+        "Indexers_Reset": "reset",
+        "Indexers_Run": "run",
+        "Indexers_Get": "show",
+        "Indexers_CreateOrUpdate": "create-or-update",
+        "Indexers_Delete": "delete",
+        "Indexers_List": "list",
+        "Indexers_Create": "create",
+        "Indexers_GetStatus": "show-status",
+        "Skillsets_Get": "show",
+        "Skillsets_CreateOrUpdate": "create-or-update",
+        "Skillsets_Delete": "delete",
+        "Skillsets_List": "list",
+        "Skillsets_Create": "create",
+        "SynonymMaps_Get": "show",
+        "SynonymMaps_CreateOrUpdate": "create-or-update",
+        "SynonymMaps_Delete": "delete",
+        "SynonymMaps_List": "list",
+        "SynonymMaps_Create": "create"
+      }
+    },
+    {
+      "serviceDir": "attestation",
+      "displayName": "attestationdata",
+      "apiVersion": "2025-06-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/attestation/data-plane/Attestation/stable/2025-06-01/attestation.json"
+      ],
+      "description": "Submit attestation evidence and manage attestation policies via the data-plane API",
+      "detailedDescription": "Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Requires an attestation provider URI via --attestation-uri.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "AttestationEndpoint",
+        "urlCliFlag": "--attestation-uri",
+        "scope": "https://attest.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "attestation": "Submit attestation evidence for TEEs",
+        "metadata-configuration": "Get OpenID configuration metadata",
+        "policy": "Manage attestation policies",
+        "policycertificate": "Manage policy management certificates",
+        "signingcertificate": "Get signing certificates",
+        "tcbbaseline": "Get TCB baseline information"
+      },
+      "resourceDetailedDescriptions": {
+        "attestation": "Attest SGX enclaves, TPM devices, SEV-SNP VMs, and TDX VMs by submitting evidence.",
+        "policy": "Get, set, and reset attestation policies for specific TEE types.",
+        "policycertificate": "Manage the set of trusted policy management certificates."
+      },
+      "actionRenames": {
+        "Attestation_AttestAzureGuest": "attest-azure-guest",
+        "Attestation_AttestOpenEnclave": "attest-open-enclave",
+        "Attestation_AttestSevSnpVm": "attest-sev-snp-vm",
+        "Attestation_AttestSgxEnclave": "attest-sgx-enclave",
+        "Attestation_AttestTdxVm": "attest-tdx-vm",
+        "Attestation_AttestTpm": "attest-tpm",
+        "MetadataConfiguration_Get": "show",
+        "Policy_Get": "show",
+        "Policy_Set": "set",
+        "Policy_Reset": "reset",
+        "PolicyCertificates_Get": "show",
+        "PolicyCertificates_Add": "add",
+        "PolicyCertificates_Remove": "remove",
+        "SigningCertificates_Get": "show",
+        "TcbBaselines_Get": "show"
+      }
+    },
+    {
+      "serviceDir": "confidentialledger",
+      "displayName": "ledgerdata",
+      "apiVersion": "2022-05-13",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/confidentialledger/data-plane/ConfidentialLedger/stable/2022-05-13/confidentialledger.json"
+      ],
+      "description": "Read and write to an Azure Confidential Ledger via the data-plane API",
+      "detailedDescription": "Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Requires the ledger URI via --ledger-uri.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "LedgerEndpoint",
+        "urlCliFlag": "--ledger-uri",
+        "scope": "https://confidential-ledger.azure.com/.default"
+      },
+      "resourceDescriptions": {
+        "create-ledger-entry": "Append a new ledger entry",
+        "create-or-update-user": "Create or update a ledger user",
+        "delete-user": "Remove a ledger user",
+        "get-constitution": "Get the ledger constitution",
+        "get-current-ledger-entry": "Get the latest committed ledger entry",
+        "get-ledger-entry": "Get a specific ledger entry",
+        "get-receipt": "Get a cryptographic receipt for an entry",
+        "get-user": "Get ledger user details",
+        "getenclavequote": "Get enclave quotes for verification",
+        "gettransactionstatu": "Get transaction commit status",
+        "listcollection": "List ledger collections",
+        "listconsortiummember": "List consortium members",
+        "listledgerentry": "List ledger entries"
+      },
+      "resourceDetailedDescriptions": {
+        "get-ledger-entry": "Retrieve a committed ledger entry by transaction ID.",
+        "get-receipt": "Get a cryptographic proof receipt to verify a ledger entry.",
+        "get-constitution": "Retrieve the JavaScript constitution that governs the ledger."
+      },
+      "actionRenames": {
+        "CreateLedgerEntry": "create",
+        "CreateOrUpdateUser": "create-or-update",
+        "DeleteUser": "delete",
+        "GetConstitution": "show",
+        "GetCurrentLedgerEntry": "show",
+        "GetLedgerEntry": "show",
+        "GetReceipt": "show",
+        "GetUser": "show",
+        "GetEnclaveQuotes": "list",
+        "GetTransactionStatus": "show",
+        "ListCollections": "list",
+        "ListConsortiumMembers": "list",
+        "ListLedgerEntries": "list"
+      }
+    },
+    {
+      "serviceDir": "digitaltwins",
+      "displayName": "digitaltwinsdata",
+      "apiVersion": "2023-10-31",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/digitaltwins/data-plane/DigitalTwins/stable/2023-10-31/digitaltwins.json"
+      ],
+      "description": "Manage Azure Digital Twins instances, models, relationships, and event routes",
+      "detailedDescription": "Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Requires the Digital Twins endpoint via --digitaltwins-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "DigitalTwinsEndpoint",
+        "urlCliFlag": "--digitaltwins-endpoint",
+        "scope": "https://digitaltwins.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "deletejob": "Manage bulk delete jobs",
+        "digitaltwin": "Manage digital twin instances and relationships",
+        "digitaltwinmodel": "Manage DTDL models",
+        "eventroute": "Manage event routes",
+        "importjob": "Manage bulk import jobs",
+        "query": "Query the digital twin graph"
+      },
+      "resourceDetailedDescriptions": {
+        "digitaltwin": "Create, update, delete, and query digital twin instances and their relationships.",
+        "digitaltwinmodel": "Upload, retrieve, and delete DTDL (Digital Twins Definition Language) models.",
+        "eventroute": "Configure event routes to send telemetry and lifecycle events to endpoints.",
+        "query": "Execute graph queries against the digital twins instance graph."
+      },
+      "actionRenames": {
+        "DeleteJobs_List": "list",
+        "DeleteJobs_Add": "create",
+        "DeleteJobs_GetById": "show",
+        "DigitalTwins_GetById": "show",
+        "DigitalTwins_Add": "create",
+        "DigitalTwins_Delete": "delete",
+        "DigitalTwins_Update": "update",
+        "DigitalTwins_GetRelationshipById": "show-relationship",
+        "DigitalTwins_AddRelationship": "add-relationship",
+        "DigitalTwins_DeleteRelationship": "delete-relationship",
+        "DigitalTwins_UpdateRelationship": "update-relationship",
+        "DigitalTwins_ListRelationships": "list-relationships",
+        "DigitalTwins_ListIncomingRelationships": "list-incoming-relationships",
+        "DigitalTwins_SendTelemetry": "send-telemetry",
+        "DigitalTwins_SendComponentTelemetry": "send-component-telemetry",
+        "DigitalTwins_GetComponent": "show-component",
+        "DigitalTwins_UpdateComponent": "update-component",
+        "DigitalTwinModels_List": "list",
+        "DigitalTwinModels_Add": "create",
+        "DigitalTwinModels_GetById": "show",
+        "DigitalTwinModels_Delete": "delete",
+        "DigitalTwinModels_Update": "update",
+        "EventRoutes_List": "list",
+        "EventRoutes_GetById": "show",
+        "EventRoutes_Add": "create",
+        "EventRoutes_Delete": "delete",
+        "Query_QueryTwins": "execute"
+      }
+    },
+    {
+      "serviceDir": "devcenter",
+      "displayName": "devcenterdata",
+      "apiVersion": "2025-02-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/devcenter/data-plane/Microsoft.DevCenter/stable/2025-02-01/devcenter.json"
+      ],
+      "description": "Manage developer boxes, environments, and projects via the Dev Center data-plane API",
+      "detailedDescription": "Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Requires the Dev Center endpoint URL via --devcenter-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "DevCenterEndpoint",
+        "urlCliFlag": "--devcenter-endpoint",
+        "scope": "https://devcenter.azure.com/.default"
+      },
+      "resourceDescriptions": {
+        "dev-center": "List Dev Center projects",
+        "devbox": "Manage developer boxes and customization tasks",
+        "environment": "Manage developer environments"
+      },
+      "resourceDetailedDescriptions": {
+        "devbox": "Create, start, stop, restart, and delete developer boxes within Dev Center projects.",
+        "environment": "Create and manage ephemeral developer environments backed by environment definitions."
+      },
+      "actionRenames": {
+        "DevCenter_ListProjects": "list-projects",
+        "DevCenter_GetProject": "show-project",
+        "DevCenter_GetProjectAbilities": "show-project-abilities"
+      },
+      "exclude": [
+        "DevBoxes_GetImagingTaskLog",
+        "DevBoxes_ValidateCustomizationTasksAction",
+        "DevBoxes_GetCustomizationTaskDefinitions",
+        "DevBoxes_ListCustomizationTaskDefinitionsByProject"
+      ]
+    },
+    {
+      "serviceDir": "loadtestservice",
+      "displayName": "loadtestdata",
+      "apiVersion": "2022-11-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/loadtestservice/data-plane/loadtesting/stable/2022-11-01/loadtestservice.json"
+      ],
+      "description": "Create and run Azure Load Testing tests, manage test files and server metrics",
+      "detailedDescription": "Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Requires the load test endpoint via --loadtest-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "LoadTestEndpoint",
+        "urlCliFlag": "--loadtest-endpoint",
+        "scope": "https://cnt-prod.loadtesting.azure.com/.default"
+      },
+      "resourceDescriptions": {
+        "load-test-administration": "Manage load test definitions and configuration",
+        "load-test-run": "Create and monitor load test runs"
+      },
+      "resourceDetailedDescriptions": {
+        "load-test-administration": "Create and configure load tests, upload test files, and configure server metrics and app components to monitor during tests.",
+        "load-test-run": "Start, stop, and monitor load test runs. Retrieve test results and metrics."
+      },
+      "actionRenames": {
+        "LoadTestAdministration_ListTests": "list",
+        "LoadTestAdministration_GetTest": "show",
+        "LoadTestAdministration_DeleteTest": "delete",
+        "LoadTestAdministration_CreateOrUpdateTest": "create-or-update",
+        "LoadTestAdministration_GetAppComponents": "show-app-components",
+        "LoadTestAdministration_CreateOrUpdateAppComponents": "set-app-components",
+        "LoadTestAdministration_ListTestFiles": "list-files",
+        "LoadTestAdministration_GetTestFile": "show-file",
+        "LoadTestAdministration_UploadTestFile": "upload-file",
+        "LoadTestAdministration_DeleteTestFile": "delete-file",
+        "LoadTestAdministration_GetServerMetricsConfig": "show-server-metrics",
+        "LoadTestAdministration_CreateOrUpdateServerMetricsConfig": "set-server-metrics",
+        "LoadTestRun_ListTestRuns": "list",
+        "LoadTestRun_GetTestRun": "show",
+        "LoadTestRun_DeleteTestRun": "delete",
+        "LoadTestRun_CreateOrUpdateTestRun": "create-or-update",
+        "LoadTestRun_StopTestRun": "stop"
+      }
+    },
+    {
+      "serviceDir": "purview",
+      "displayName": "purviewdata",
+      "apiVersion": "2023-09-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/purview/data-plane/datamap/stable/2023-09-01/purviewdatamap.json"
+      ],
+      "description": "Search and manage Microsoft Purview data catalog entities, classifications, and glossary terms",
+      "detailedDescription": "Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Requires the Purview account endpoint via --purview-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "PurviewEndpoint",
+        "urlCliFlag": "--purview-url",
+        "scope": "https://purview.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "discovery": "Search and discover data assets",
+        "entity": "Manage catalog entities",
+        "glossary": "Manage business glossary terms",
+        "lineage": "Retrieve data lineage",
+        "relationship": "Manage entity relationships",
+        "type": "Manage type definitions"
+      },
+      "resourceDetailedDescriptions": {
+        "discovery": "Full-text search, auto-complete, and suggest operations across the data catalog.",
+        "entity": "Create, update, delete, and classify data entities in the unified data map.",
+        "glossary": "Manage business glossary terms and categories for semantic data classification.",
+        "type": "Define and manage entity types, classification types, and relationship types."
+      },
+      "exclude": [
+        "Entity_ImportBusinessMetadata",
+        "Entity_ExportGlossaryTermsAsCSV",
+        "Glossary_ImportGlossaryTermsViaCsv",
+        "Glossary_ExportGlossaryTermsAsCsv",
+        "Entity_ListByUniqueAttributes",
+        "Entity_PartialUpdateByUniqueAttributes",
+        "Entity_AddClassificationsByUniqueAttribute",
+        "Entity_UpdateClassificationsByUniqueAttribute",
+        "Entity_RemoveClassificationByUniqueAttribute",
+        "Lineage_GetByUniqueAttribute",
+        "Entity_GetByUniqueAttributes",
+        "Entity_DeleteByUniqueAttribute",
+        "Entity_AddLabelsByUniqueAttribute",
+        "Entity_RemoveLabelsByUniqueAttribute",
+        "Entity_SetLabelsByUniqueAttribute"
+      ]
+    },
+    {
+      "serviceDir": "healthdataaiservices",
+      "displayName": "deiddata",
+      "apiVersion": "2024-11-15",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/healthdataaiservices/data-plane/HealthDataAIServices.DeidServices/stable/2024-11-15/HealthDataAIServices.DeidServices.json"
+      ],
+      "description": "De-identify health documents and manage batch de-identification jobs",
+      "detailedDescription": "Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Requires the De-identification service endpoint via --deid-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "DeidEndpoint",
+        "urlCliFlag": "--deid-url",
+        "scope": "https://deid.azure.net/.default"
+      },
+      "resourceDescriptions": {
+        "cancel-job": "Cancel a running de-identification job",
+        "deidentify-text": "De-identify text in real time",
+        "deidentifydocument": "Submit batch document de-identification jobs",
+        "delete-job": "Delete a de-identification job",
+        "get-job": "Get de-identification job status",
+        "listjob": "List de-identification jobs",
+        "listjobdocument": "List documents in a de-identification job"
+      },
+      "resourceDetailedDescriptions": {
+        "deidentify-text": "Submit text for real-time PHI de-identification using NER-based techniques.",
+        "deidentifydocument": "Create batch jobs to de-identify multiple documents stored in Azure Blob Storage.",
+        "get-job": "Monitor the status and progress of a batch de-identification job."
+      },
+      "actionRenames": {
+        "CancelJob": "cancel",
+        "DeidentifyText": "deidentify",
+        "DeidentifyDocuments": "create",
+        "DeleteJob": "delete",
+        "GetJob": "show",
+        "ListJobs": "list",
+        "ListJobDocuments": "list-documents"
+      }
+    },
+    {
+      "serviceDir": "webpubsub",
+      "displayName": "webpubsubdata",
+      "apiVersion": "2024-12-01",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/webpubsub/data-plane/WebPubSub/stable/2024-12-01/webpubsub.json"
+      ],
+      "description": "Send messages and manage connections in Azure Web PubSub hubs",
+      "detailedDescription": "Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Requires the Web PubSub endpoint via --webpubsub-endpoint.",
+      "dataplaneOptionPack": {
+        "className": "DirectUriOptionPack",
+        "fieldName": "WebPubSubEndpoint",
+        "urlCliFlag": "--webpubsub-endpoint",
+        "scope": "https://webpubsub.azure.com/.default"
+      },
+      "resourceDescriptions": {
+        "add-connection-to-group": "Add a connection to a group",
+        "add-user-to-group": "Add a user to a group",
+        "addconnectionstogroup": "Add multiple connections to groups",
+        "close-connection": "Close a specific connection",
+        "closeallconnection": "Close all connections in a hub",
+        "closegroupconnection": "Close all connections in a group",
+        "closeuserconnection": "Close all connections for a user",
+        "generate-client-token": "Generate a client access token",
+        "grant-permission": "Grant a permission to a connection",
+        "list-connections-in-group": "List connections in a group",
+        "remove-connection-from-group": "Remove a connection from a group",
+        "remove-user-from-all-groups": "Remove a user from all groups",
+        "remove-user-from-group": "Remove a user from a group",
+        "revoke-permission": "Revoke a permission from a connection",
+        "send-to-all": "Broadcast a message to all connections",
+        "send-to-connection": "Send a message to a specific connection",
+        "send-to-group": "Send a message to a group",
+        "send-to-user": "Send a message to a user",
+        "check-connection-exists": "Check if a connection exists",
+        "check-group-exists": "Check if a group has connections",
+        "check-permission": "Check a connection permission",
+        "check-user-exists": "Check if a user has connections"
+      },
+      "resourceDetailedDescriptions": {
+        "generate-client-token": "Generate a JWT client access token scoped to a hub for use by WebSocket clients.",
+        "send-to-all": "Broadcast a message to all WebSocket connections in a hub, optionally filtering by groups.",
+        "send-to-group": "Send a targeted message to all connections in a named group."
+      },
+      "actionRenames": {
+        "AddConnectionToGroup": "add",
+        "AddUserToGroup": "add",
+        "AddConnectionsToGroups": "add",
+        "CloseConnection": "close",
+        "CloseAllConnections": "close-all",
+        "CloseGroupConnections": "close-all",
+        "CloseUserConnections": "close-all",
+        "GenerateClientToken": "generate",
+        "GrantPermission": "grant",
+        "RevokePermission": "revoke",
+        "RemoveConnectionFromGroup": "remove",
+        "RemoveUserFromAllGroups": "remove-all",
+        "RemoveUserFromGroup": "remove",
+        "SendToAll": "send",
+        "SendToConnection": "send",
+        "SendToGroup": "send",
+        "SendToUser": "send",
+        "CheckConnectionExists": "exists",
+        "CheckGroupExists": "exists",
+        "CheckPermission": "check",
+        "CheckUserExists": "exists",
+        "ListConnectionsInGroup": "list"
+      }
     }
   ]
 }

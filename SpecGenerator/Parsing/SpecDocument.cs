@@ -35,7 +35,7 @@ public sealed class SpecDocument
 
     public JsonObject? GetTopLevelParameter(string name) => Root["parameters"]?[name]?.AsObject();
 
-    public IEnumerable<(string Path, string Method, JsonObject Operation)> GetOperations()
+    public IEnumerable<(string Path, string Method, JsonObject Operation, JsonArray? PathLevelParams)> GetOperations()
     {
         var paths = Root["paths"]?.AsObject();
         if (paths is null)
@@ -47,11 +47,13 @@ public sealed class SpecDocument
             if (pathItem is null)
                 continue;
 
+            var pathLevelParams = pathItem["parameters"]?.AsArray();
+
             foreach (var method in HttpMethods)
             {
                 var op = pathItem[method]?.AsObject();
                 if (op is not null)
-                    yield return (pathProp.Key, method, op);
+                    yield return (pathProp.Key, method, op, pathLevelParams);
             }
         }
     }

@@ -157,7 +157,7 @@ static int RunAnalyze(string[] args)
 
     foreach (var doc in docs)
     {
-        foreach (var (path, method, opNode) in doc.GetOperations())
+        foreach (var (path, method, opNode, _) in doc.GetOperations())
         {
             var operationId = opNode["operationId"]?.GetValue<string>();
             if (string.IsNullOrEmpty(operationId))
