@@ -22,10 +22,11 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
 
     public override string HelpTitle => "Storage Account";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
