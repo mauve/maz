@@ -198,59 +198,76 @@ internal static class BootstrapAnimator
         EraseLines(linesAbove);
     }
 
+    /// <summary>
+    /// Returns the fixed number of lines <see cref="PlayKustoAsync"/> writes when it runs to
+    /// completion. Used by the wizard to reserve demo space before rendering the bottom border.
+    /// </summary>
+    internal const int KustoDemoLines = 14;
+
     public static async Task PlayKustoAsync(CancellationToken ct)
     {
-        System.Console.WriteLine();
+        var linesAbove = 0;
+        try
+        {
+            var goodQuery =
+                "AzureActivity\n" +
+                "| where TimeGenerated > ago(1h)\n" +
+                "| where OperationNameValue == \"MICROSOFT.STORAGE/STORAGEACCOUNTS/WRITE\"\n" +
+                "| summarize count() by ResourceGroup, bin(TimeGenerated, 5m)\n" +
+                "| order by TimeGenerated desc";
 
-        var goodQuery =
-            "AzureActivity\n" +
-            "| where TimeGenerated > ago(1h)\n" +
-            "| where OperationNameValue == \"MICROSOFT.STORAGE/STORAGEACCOUNTS/WRITE\"\n" +
-            "| summarize count() by ResourceGroup, bin(TimeGenerated, 5m)\n" +
-            "| order by TimeGenerated desc";
+            System.Console.WriteLine(); linesAbove++;
+            foreach (var line in BootstrapKqlHighlighter.Highlight(goodQuery).Split('\n'))
+                { System.Console.WriteLine("  " + line); linesAbove++; }
+            System.Console.WriteLine(); linesAbove++;
 
-        foreach (var line in BootstrapKqlHighlighter.Highlight(goodQuery).Split('\n'))
-            System.Console.WriteLine("  " + line);
+            await Task.Delay(PauseAfterTypingMs * 3, ct).ConfigureAwait(false);
 
-        System.Console.WriteLine();
-        if (ct.IsCancellationRequested) return;
-        try { await Task.Delay(PauseAfterTypingMs * 3, ct).ConfigureAwait(false); }
-        catch (OperationCanceledException) { return; }
+            System.Console.WriteLine(Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────")); linesAbove++;
+            System.Console.WriteLine(); linesAbove++;
 
-        System.Console.WriteLine(Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────"));
-        System.Console.WriteLine();
+            // Realistic Azure Monitor syntax error: double pipe on line 3, col 2.
+            var badQuery =
+                "AzureActivity\n" +
+                "| where TimeGenerated > ago(1h)\n" +
+                "| | summarize count() by ResourceGroup";
+            foreach (var line in BootstrapKqlHighlighter.Highlight(
+                badQuery,
+                errorLine: 3,
+                errorColumn: 2,
+                errorMessage: "SYN0002: Query could not be parsed at '|'"
+            ).Split('\n'))
+                { System.Console.WriteLine("  " + line); linesAbove++; }
 
-        // Realistic Azure Monitor syntax error: double pipe on line 3, col 2.
-        // AzureErrorParser extracts line/col from the JSON error body and the TUI
-        // renders a caret marker at the exact position — no guessing required.
-        var badQuery =
-            "AzureActivity\n" +
-            "| where TimeGenerated > ago(1h)\n" +
-            "| | summarize count() by ResourceGroup";
-        foreach (var line in BootstrapKqlHighlighter.Highlight(
-            badQuery,
-            errorLine: 3,
-            errorColumn: 2,
-            errorMessage: "SYN0002: Query could not be parsed at '|'"
-        ).Split('\n'))
-            System.Console.WriteLine("  " + line);
-
-        System.Console.WriteLine();
+            System.Console.WriteLine(); linesAbove++;
+            // linesAbove == KustoDemoLines here
+        }
+        catch (OperationCanceledException)
+        {
+            EraseLines(linesAbove);
+        }
     }
 
     // ── Erase helper ───────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Erases from the start of the line that is <paramref name="linesAboveCursor"/> lines above
-    /// the current cursor to the end of the screen, leaving the cursor at column 0 of that line.
-    /// Pass 0 when the cursor is still on the demo-start line (typewriter output, no newline).
+    /// Erases exactly the lines the demo has written and returns the cursor to the start of the
+    /// demo area, without touching anything below (i.e. the pre-rendered bottom border).
+    /// Pass 0 when the cursor is still on the demo-start line (typewriter in progress, no newline yet).
     /// </summary>
     internal static void EraseLines(int linesAboveCursor)
     {
         if (linesAboveCursor > 0)
-            System.Console.Write($"\x1b[{linesAboveCursor}F\x1b[0J");
+        {
+            System.Console.Write($"\x1b[{linesAboveCursor}F"); // up to start of demo area
+            for (var i = 0; i < linesAboveCursor; i++)
+                System.Console.Write("\x1b[2K\x1b[1B");        // erase line, step down
+            System.Console.Write($"\x1b[{linesAboveCursor}A"); // back to start of demo area
+        }
         else
-            System.Console.Write("\r\x1b[0J");
+        {
+            System.Console.Write("\r\x1b[2K"); // erase current (partial typewriter) line only
+        }
     }
 
     // ── Shimmer helpers ────────────────────────────────────────────────────────
