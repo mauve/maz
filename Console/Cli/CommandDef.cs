@@ -76,6 +76,14 @@ public abstract partial class CommandDef
         return null;
     }
 
+    /// <summary>
+    /// Adds this command's generated subcommands directly into <paramref name="parentCmd"/>,
+    /// bypassing the wrapping Command node. Used when this command's <see cref="Name"/> is
+    /// identical to the parent command's name, which would cause a duplicate-key error in
+    /// System.CommandLine's token map.
+    /// </summary>
+    internal void AddSubcommandsTo(Command parentCmd) => AddGeneratedChildren(parentCmd);
+
     internal virtual Command Build()
     {
         var cmd = CreateCommand();

@@ -28,7 +28,7 @@ public class CliOptionGeneratorStructureTests
             text,
             "protected override bool HasGeneratedChildren => true;",
             "((global::Console.Cli.OptionPack)Auth).AddOptionsTo(cmd);",
-            "cmd.Add(((global::Console.Cli.CommandDef)Sub).Build());"
+            "cmd.Add(Sub is not null ? ((global::Console.Cli.CommandDef)Sub).Build() :"
         );
     }
 
