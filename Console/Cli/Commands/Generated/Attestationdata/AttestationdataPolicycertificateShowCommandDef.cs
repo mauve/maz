@@ -15,10 +15,10 @@ public partial class AttestationdataPolicycertificateShowCommandDef(AuthOptionPa
     public override string Name => "show";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--attestation-uri")]
-    public partial string? AttestationUri { get; }
+    [CliOption("--attestation-url")]
+    public partial string? AttestationUrl { get; }
 
-    public readonly DirectUriOptionPack AttestationEndpoint = new();
+    public readonly AttestationOptionPack AttestationProvider = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -27,8 +27,8 @@ public partial class AttestationdataPolicycertificateShowCommandDef(AuthOptionPa
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://attest.azure.net/.default");
-        var attestationEndpointBaseUrl = AttestationUri ?? (await AttestationEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{attestationEndpointBaseUrl}/certificates";
+        var attestationProviderBaseUrl = AttestationUrl ?? (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{attestationProviderBaseUrl}/certificates";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

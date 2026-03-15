@@ -16,10 +16,10 @@ public partial class LedgerdataGetLedgerEntryShowCommandDef(AuthOptionPack auth)
     public override string Name => "show";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--ledger-uri")]
-    public partial string? LedgerUri { get; }
+    [CliOption("--ledger-url")]
+    public partial string? LedgerUrl { get; }
 
-    public readonly DirectUriOptionPack LedgerEndpoint = new();
+    public readonly ConfidentialLedgerOptionPack Ledger = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -36,8 +36,8 @@ public partial class LedgerdataGetLedgerEntryShowCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var ledgerEndpointBaseUrl = LedgerUri ?? (await LedgerEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{ledgerEndpointBaseUrl}/app/transactions/{TransactionId}";
+        var ledgerBaseUrl = LedgerUrl ?? (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{ledgerBaseUrl}/app/transactions/{TransactionId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-05-13", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

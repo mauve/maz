@@ -11571,11 +11571,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/attestation/data-plane/Attestation/stable/2025-06-01/attestation.json"
       ],
       "description": "Submit attestation evidence and manage attestation policies via the data-plane API",
-      "detailedDescription": "Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Requires an attestation provider URI via --attestation-uri.",
+      "detailedDescription": "Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Identify the provider with --attestation / --atp (resolves the endpoint from ARM) or supply the URL directly via --attestation-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "AttestationEndpoint",
-        "urlCliFlag": "--attestation-uri",
+        "className": "AttestationOptionPack",
+        "fieldName": "AttestationProvider",
+        "urlCliFlag": "--attestation-url",
         "scope": "https://attest.azure.net/.default"
       },
       "resourceDescriptions": {
@@ -11617,11 +11617,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/confidentialledger/data-plane/ConfidentialLedger/stable/2022-05-13/confidentialledger.json"
       ],
       "description": "Read and write to an Azure Confidential Ledger via the data-plane API",
-      "detailedDescription": "Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Requires the ledger URI via --ledger-uri.",
+      "detailedDescription": "Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Identify the ledger with --ledger / --cl (resolves the endpoint from ARM) or supply the URL directly via --ledger-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "LedgerEndpoint",
-        "urlCliFlag": "--ledger-uri",
+        "className": "ConfidentialLedgerOptionPack",
+        "fieldName": "Ledger",
+        "urlCliFlag": "--ledger-url",
         "scope": "https://confidential-ledger.azure.com/.default"
       },
       "resourceDescriptions": {
@@ -11668,11 +11668,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/digitaltwins/data-plane/DigitalTwins/stable/2023-10-31/digitaltwins.json"
       ],
       "description": "Manage Azure Digital Twins instances, models, relationships, and event routes",
-      "detailedDescription": "Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Requires the Digital Twins endpoint via --digitaltwins-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Identify the instance with --digital-twins / --dt (resolves the endpoint from ARM) or supply the URL directly via --digital-twins-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "DigitalTwinsEndpoint",
-        "urlCliFlag": "--digitaltwins-endpoint",
+        "className": "DigitalTwinsOptionPack",
+        "fieldName": "DigitalTwins",
+        "urlCliFlag": "--digital-twins-url",
         "scope": "https://digitaltwins.azure.net/.default"
       },
       "resourceDescriptions": {
@@ -11727,11 +11727,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/devcenter/data-plane/Microsoft.DevCenter/stable/2025-02-01/devcenter.json"
       ],
       "description": "Manage developer boxes, environments, and projects via the Dev Center data-plane API",
-      "detailedDescription": "Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Requires the Dev Center endpoint URL via --devcenter-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Identify the Dev Center with --dev-center / --dc (resolves the endpoint from ARM) or supply the URL directly via --dev-center-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "DevCenterEndpoint",
-        "urlCliFlag": "--devcenter-endpoint",
+        "className": "DevCenterOptionPack",
+        "fieldName": "DevCenter",
+        "urlCliFlag": "--dev-center-url",
         "scope": "https://devcenter.azure.com/.default"
       },
       "resourceDescriptions": {
@@ -11763,11 +11763,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/loadtestservice/data-plane/loadtesting/stable/2022-11-01/loadtestservice.json"
       ],
       "description": "Create and run Azure Load Testing tests, manage test files and server metrics",
-      "detailedDescription": "Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Requires the load test endpoint via --loadtest-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Identify the resource with --load-test / --lt (resolves the endpoint from ARM) or supply the URL directly via --load-test-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "LoadTestEndpoint",
-        "urlCliFlag": "--loadtest-endpoint",
+        "className": "LoadTestingOptionPack",
+        "fieldName": "LoadTest",
+        "urlCliFlag": "--load-test-url",
         "scope": "https://cnt-prod.loadtesting.azure.com/.default"
       },
       "resourceDescriptions": {
@@ -11806,10 +11806,10 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/purview/data-plane/datamap/stable/2023-09-01/purviewdatamap.json"
       ],
       "description": "Search and manage Microsoft Purview data catalog entities, classifications, and glossary terms",
-      "detailedDescription": "Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Requires the Purview account endpoint via --purview-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Identify the account with --purview / --pv (resolves the catalog endpoint from ARM) or supply the URL directly via --purview-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "PurviewEndpoint",
+        "className": "PurviewOptionPack",
+        "fieldName": "Purview",
         "urlCliFlag": "--purview-url",
         "scope": "https://purview.azure.net/.default"
       },
@@ -11853,10 +11853,10 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/healthdataaiservices/data-plane/HealthDataAIServices.DeidServices/stable/2024-11-15/HealthDataAIServices.DeidServices.json"
       ],
       "description": "De-identify health documents and manage batch de-identification jobs",
-      "detailedDescription": "Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Requires the De-identification service endpoint via --deid-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Identify the service with --deid-service / --deid (resolves the endpoint from ARM) or supply the URL directly via --deid-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "DeidEndpoint",
+        "className": "HealthDataAIDeidOptionPack",
+        "fieldName": "DeidService",
         "urlCliFlag": "--deid-url",
         "scope": "https://deid.azure.net/.default"
       },
@@ -11892,11 +11892,11 @@
         "/home/mikae/repos/azure-rest-api-specs/specification/webpubsub/data-plane/WebPubSub/stable/2024-12-01/webpubsub.json"
       ],
       "description": "Send messages and manage connections in Azure Web PubSub hubs",
-      "detailedDescription": "Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Requires the Web PubSub endpoint via --webpubsub-endpoint.",
+      "detailedDescription": "Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Identify the service with --web-pubsub / --wps (resolves the endpoint from ARM) or supply the URL directly via --web-pubsub-url.",
       "dataplaneOptionPack": {
-        "className": "DirectUriOptionPack",
-        "fieldName": "WebPubSubEndpoint",
-        "urlCliFlag": "--webpubsub-endpoint",
+        "className": "WebPubSubOptionPack",
+        "fieldName": "WebPubSub",
+        "urlCliFlag": "--web-pubsub-url",
         "scope": "https://webpubsub.azure.com/.default"
       },
       "resourceDescriptions": {

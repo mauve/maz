@@ -16,10 +16,10 @@ public partial class AttestationdataPolicycertificateAddCommandDef(AuthOptionPac
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--attestation-uri")]
-    public partial string? AttestationUri { get; }
+    [CliOption("--attestation-url")]
+    public partial string? AttestationUrl { get; }
 
-    public readonly DirectUriOptionPack AttestationEndpoint = new();
+    public readonly AttestationOptionPack AttestationProvider = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -36,8 +36,8 @@ public partial class AttestationdataPolicycertificateAddCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://attest.azure.net/.default");
-        var attestationEndpointBaseUrl = AttestationUri ?? (await AttestationEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{attestationEndpointBaseUrl}/certificates:add";
+        var attestationProviderBaseUrl = AttestationUrl ?? (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{attestationProviderBaseUrl}/certificates:add";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

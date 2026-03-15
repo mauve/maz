@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Manage developer boxes, environments, and projects via the Dev Center data-plane API</summary>
-/// <remarks>Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Requires the Dev Center endpoint URL via --devcenter-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Identify the Dev Center with --dev-center / --dc (resolves the endpoint from ARM) or supply the URL directly via --dev-center-url.</remarks>
 public partial class DevcenterdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "devcenterdata";

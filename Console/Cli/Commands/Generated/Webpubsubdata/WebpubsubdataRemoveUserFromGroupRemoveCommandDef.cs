@@ -16,10 +16,10 @@ public partial class WebpubsubdataRemoveUserFromGroupRemoveCommandDef(AuthOption
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--webpubsub-endpoint")]
-    public partial string? WebpubsubEndpoint { get; }
+    [CliOption("--web-pubsub-url")]
+    public partial string? WebPubsubUrl { get; }
 
-    public readonly DirectUriOptionPack WebPubSubEndpoint = new();
+    public readonly WebPubSubOptionPack WebPubSub = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -40,8 +40,8 @@ public partial class WebpubsubdataRemoveUserFromGroupRemoveCommandDef(AuthOption
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://webpubsub.azure.com/.default");
-        var webPubSubEndpointBaseUrl = WebpubsubEndpoint ?? (await WebPubSubEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{webPubSubEndpointBaseUrl}/api/hubs/{Hub}/users/{UserId}/groups/{Group}";
+        var webPubSubBaseUrl = WebPubsubUrl ?? (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{webPubSubBaseUrl}/api/hubs/{Hub}/users/{UserId}/groups/{Group}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-12-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

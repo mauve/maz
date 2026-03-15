@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Create and run Azure Load Testing tests, manage test files and server metrics</summary>
-/// <remarks>Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Requires the load test endpoint via --loadtest-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Identify the resource with --load-test / --lt (resolves the endpoint from ARM) or supply the URL directly via --load-test-url.</remarks>
 public partial class LoadtestdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "loadtestdata";

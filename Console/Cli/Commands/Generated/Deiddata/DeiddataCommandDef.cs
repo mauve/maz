@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>De-identify health documents and manage batch de-identification jobs</summary>
-/// <remarks>Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Requires the De-identification service endpoint via --deid-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Identify the service with --deid-service / --deid (resolves the endpoint from ARM) or supply the URL directly via --deid-url.</remarks>
 public partial class DeiddataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deiddata";

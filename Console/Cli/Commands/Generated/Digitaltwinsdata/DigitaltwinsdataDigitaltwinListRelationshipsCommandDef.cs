@@ -16,10 +16,10 @@ public partial class DigitaltwinsdataDigitaltwinListRelationshipsCommandDef(Auth
     public override string Name => "list-relationships";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--digitaltwins-endpoint")]
-    public partial string? DigitaltwinsEndpoint { get; }
+    [CliOption("--digital-twins-url")]
+    public partial string? DigitalTwinsUrl { get; }
 
-    public readonly DirectUriOptionPack DigitalTwinsEndpoint = new();
+    public readonly DigitalTwinsOptionPack DigitalTwins = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -36,8 +36,8 @@ public partial class DigitaltwinsdataDigitaltwinListRelationshipsCommandDef(Auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var digitalTwinsEndpointBaseUrl = DigitaltwinsEndpoint ?? (await DigitalTwinsEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{digitalTwinsEndpointBaseUrl}/digitaltwins/{Id}/relationships";
+        var digitalTwinsBaseUrl = DigitalTwinsUrl ?? (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{digitalTwinsBaseUrl}/digitaltwins/{Id}/relationships";
 
         var allItems = client.GetAllAsync(path, "2023-10-31", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

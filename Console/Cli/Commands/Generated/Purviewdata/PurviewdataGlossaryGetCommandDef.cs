@@ -19,7 +19,7 @@ public partial class PurviewdataGlossaryGetCommandDef(AuthOptionPack auth) : Com
     [CliOption("--purview-url")]
     public partial string? PurviewUrl { get; }
 
-    public readonly DirectUriOptionPack PurviewEndpoint = new();
+    public readonly PurviewOptionPack Purview = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -32,8 +32,8 @@ public partial class PurviewdataGlossaryGetCommandDef(AuthOptionPack auth) : Com
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://purview.azure.net/.default");
-        var purviewEndpointBaseUrl = PurviewUrl ?? (await PurviewEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{purviewEndpointBaseUrl}/atlas/v2/glossary/{GlossaryId}";
+        var purviewBaseUrl = PurviewUrl ?? (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{purviewBaseUrl}/atlas/v2/glossary/{GlossaryId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

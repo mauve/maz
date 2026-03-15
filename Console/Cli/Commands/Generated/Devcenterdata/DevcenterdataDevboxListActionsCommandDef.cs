@@ -16,10 +16,10 @@ public partial class DevcenterdataDevboxListActionsCommandDef(AuthOptionPack aut
     public override string Name => "list-actions";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--devcenter-endpoint")]
-    public partial string? DevcenterEndpoint { get; }
+    [CliOption("--dev-center-url")]
+    public partial string? DevCenterUrl { get; }
 
-    public readonly DirectUriOptionPack DevCenterEndpoint = new();
+    public readonly DevCenterOptionPack DevCenter = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -40,8 +40,8 @@ public partial class DevcenterdataDevboxListActionsCommandDef(AuthOptionPack aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var devCenterEndpointBaseUrl = DevcenterEndpoint ?? (await DevCenterEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{devCenterEndpointBaseUrl}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}/actions";
+        var devCenterBaseUrl = DevCenterUrl ?? (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{devCenterBaseUrl}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}/actions";
 
         var allItems = client.GetAllAsync(path, "2025-02-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

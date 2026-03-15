@@ -17,10 +17,10 @@ public partial class DigitaltwinsdataImportjobAddCommandDef(AuthOptionPack auth)
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--digitaltwins-endpoint")]
-    public partial string? DigitaltwinsEndpoint { get; }
+    [CliOption("--digital-twins-url")]
+    public partial string? DigitalTwinsUrl { get; }
 
-    public readonly DirectUriOptionPack DigitalTwinsEndpoint = new();
+    public readonly DigitalTwinsOptionPack DigitalTwins = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -45,8 +45,8 @@ public partial class DigitaltwinsdataImportjobAddCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var digitalTwinsEndpointBaseUrl = DigitaltwinsEndpoint ?? (await DigitalTwinsEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{digitalTwinsEndpointBaseUrl}/jobs/imports/{Id}";
+        var digitalTwinsBaseUrl = DigitalTwinsUrl ?? (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{digitalTwinsBaseUrl}/jobs/imports/{Id}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

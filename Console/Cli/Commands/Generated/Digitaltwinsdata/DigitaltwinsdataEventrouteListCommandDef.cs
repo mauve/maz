@@ -16,10 +16,10 @@ public partial class DigitaltwinsdataEventrouteListCommandDef(AuthOptionPack aut
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--digitaltwins-endpoint")]
-    public partial string? DigitaltwinsEndpoint { get; }
+    [CliOption("--digital-twins-url")]
+    public partial string? DigitalTwinsUrl { get; }
 
-    public readonly DirectUriOptionPack DigitalTwinsEndpoint = new();
+    public readonly DigitalTwinsOptionPack DigitalTwins = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -28,8 +28,8 @@ public partial class DigitaltwinsdataEventrouteListCommandDef(AuthOptionPack aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var digitalTwinsEndpointBaseUrl = DigitaltwinsEndpoint ?? (await DigitalTwinsEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{digitalTwinsEndpointBaseUrl}/eventroutes";
+        var digitalTwinsBaseUrl = DigitalTwinsUrl ?? (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{digitalTwinsBaseUrl}/eventroutes";
 
         var allItems = client.GetAllAsync(path, "2023-10-31", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

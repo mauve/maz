@@ -17,10 +17,10 @@ public partial class AttestationdataAttestationAttestTpmCommandDef(AuthOptionPac
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--attestation-uri")]
-    public partial string? AttestationUri { get; }
+    [CliOption("--attestation-url")]
+    public partial string? AttestationUrl { get; }
 
-    public readonly DirectUriOptionPack AttestationEndpoint = new();
+    public readonly AttestationOptionPack AttestationProvider = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -29,8 +29,8 @@ public partial class AttestationdataAttestationAttestTpmCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://attest.azure.net/.default");
-        var attestationEndpointBaseUrl = AttestationUri ?? (await AttestationEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{attestationEndpointBaseUrl}/attest/Tpm";
+        var attestationProviderBaseUrl = AttestationUrl ?? (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{attestationProviderBaseUrl}/attest/Tpm";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-06-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

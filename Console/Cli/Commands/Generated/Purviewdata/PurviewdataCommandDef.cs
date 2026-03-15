@@ -6,7 +6,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Search and manage Microsoft Purview data catalog entities, classifications, and glossary terms</summary>
-/// <remarks>Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Requires the Purview account endpoint via --purview-endpoint.</remarks>
+/// <remarks>Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Identify the account with --purview / --pv (resolves the catalog endpoint from ARM) or supply the URL directly via --purview-url.</remarks>
 public partial class PurviewdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "purviewdata";

@@ -17,10 +17,10 @@ public partial class DevcenterdataDevboxDeleteDevBoxCommandDef(AuthOptionPack au
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--devcenter-endpoint")]
-    public partial string? DevcenterEndpoint { get; }
+    [CliOption("--dev-center-url")]
+    public partial string? DevCenterUrl { get; }
 
-    public readonly DirectUriOptionPack DevCenterEndpoint = new();
+    public readonly DevCenterOptionPack DevCenter = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -45,8 +45,8 @@ public partial class DevcenterdataDevboxDeleteDevBoxCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var devCenterEndpointBaseUrl = DevcenterEndpoint ?? (await DevCenterEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{devCenterEndpointBaseUrl}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
+        var devCenterBaseUrl = DevCenterUrl ?? (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{devCenterBaseUrl}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-02-01", null, ct);
         if (!NoWait)

@@ -16,10 +16,10 @@ public partial class LedgerdataListcollectionListCommandDef(AuthOptionPack auth)
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--ledger-uri")]
-    public partial string? LedgerUri { get; }
+    [CliOption("--ledger-url")]
+    public partial string? LedgerUrl { get; }
 
-    public readonly DirectUriOptionPack LedgerEndpoint = new();
+    public readonly ConfidentialLedgerOptionPack Ledger = new();
 
     public readonly RenderOptionPack Render = new();
 
@@ -28,8 +28,8 @@ public partial class LedgerdataListcollectionListCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var ledgerEndpointBaseUrl = LedgerUri ?? (await LedgerEndpoint.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{ledgerEndpointBaseUrl}/app/collections";
+        var ledgerBaseUrl = LedgerUrl ?? (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{ledgerBaseUrl}/app/collections";
 
         var allItems = client.GetAllAsync(path, "2022-05-13", "collections", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();
