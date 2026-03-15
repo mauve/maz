@@ -10282,6 +10282,336 @@
       "exclude": [
         "Operations_List"
       ]
+    },
+    {
+      "serviceDir": "oracle",
+      "displayName": "oracle",
+      "apiVersion": "2025-09-01",
+      "description": "Manage Oracle Database@Azure resources including autonomous databases and Exadata infrastructure",
+      "detailedDescription": "Covers Oracle Autonomous Databases, Exadata infrastructure, VM clusters, and associated resources like backups, character sets, and DB nodes. Requires the Oracle.Database resource provider registered in your subscription.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/oracle/resource-manager/Oracle.Database/stable/2025-09-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "autonomousdatabas": "Manage Oracle Autonomous Databases",
+        "autonomousdatabasebackup": "Manage Autonomous Database backups",
+        "autonomousdatabasecharacterset": "List Autonomous Database character sets",
+        "autonomousdatabasenationalcharacterset": "List Autonomous Database national character sets",
+        "autonomousdatabaseversion": "List Autonomous Database versions",
+        "cloudexadatainfrastructure": "Manage Cloud Exadata infrastructure",
+        "cloudvmcluster": "Manage Cloud VM clusters",
+        "dbnode": "Manage database nodes",
+        "dbserver": "List database servers",
+        "dbsystemshape": "List DB system shapes",
+        "giversion": "List GI versions",
+        "systemversion": "List system versions",
+        "virtualnetworkaddress": "Manage virtual network addresses"
+      },
+      "resourceDetailedDescriptions": {
+        "autonomousdatabas": "Create, update, delete, and operate Oracle Autonomous Databases in Azure. Supports failover, restore, wallet generation, and disaster recovery configuration.",
+        "cloudexadatainfrastructure": "Provision and manage Oracle Cloud Exadata infrastructure, including adding storage capacity and Exascale configuration.",
+        "cloudvmcluster": "Manage Cloud VM clusters on Exadata infrastructure, including adding and removing VMs."
+      },
+      "actionRenames": {
+        "AutonomousDatabases_ListByResourceGroup": "list",
+        "AutonomousDatabases_Get": "show",
+        "AutonomousDatabases_CreateOrUpdate": "create",
+        "AutonomousDatabases_Action": "action",
+        "CloudVmClusters_ListByResourceGroup": "list",
+        "CloudVmClusters_Get": "show",
+        "CloudVmClusters_CreateOrUpdate": "create",
+        "CloudExadataInfrastructures_ListByResourceGroup": "list",
+        "CloudExadataInfrastructures_Get": "show",
+        "CloudExadataInfrastructures_CreateOrUpdate": "create",
+        "AutonomousDatabaseBackups_ListByParent": "list",
+        "AutonomousDatabaseBackups_Get": "show",
+        "AutonomousDatabaseBackups_CreateOrUpdate": "create",
+        "AutonomousDatabaseCharacterSets_ListByLocation": "list",
+        "AutonomousDatabaseCharacterSets_Get": "show",
+        "AutonomousDatabaseNationalCharacterSets_ListByLocation": "list",
+        "AutonomousDatabaseNationalCharacterSets_Get": "show",
+        "AutonomousDatabaseVersions_ListByLocation": "list",
+        "AutonomousDatabaseVersions_Get": "show",
+        "DbNodes_ListByParent": "list",
+        "DbNodes_Get": "show",
+        "DbServers_ListByParent": "list",
+        "DbServers_Get": "show",
+        "DbSystemShapes_ListByLocation": "list",
+        "DbSystemShapes_Get": "show",
+        "GiVersions_ListByLocation": "list",
+        "GiVersions_Get": "show",
+        "SystemVersions_ListByLocation": "list",
+        "SystemVersions_Get": "show",
+        "VirtualNetworkAddresses_ListByParent": "list",
+        "VirtualNetworkAddresses_Get": "show",
+        "VirtualNetworkAddresses_CreateOrUpdate": "create",
+        "OracleSubscriptions_Get": "show",
+        "OracleSubscriptions_CreateOrUpdate": "create"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "paloaltonetworks",
+      "displayName": "paloaltonetworks",
+      "apiVersion": "2025-10-08",
+      "description": "Manage Palo Alto Networks Cloud NGFW firewalls, rulestacks, and security policies in Azure",
+      "detailedDescription": "Covers PAN Cloud Next-Generation Firewall resources including firewalls, local and global rulestacks, pre/post rules, and certificate objects. Requires the PaloAltoNetworks.Cloudngfw resource provider.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/paloaltonetworks/resource-manager/PaloAltoNetworks.Cloudngfw/stable/2025-10-08/PaloAltoNetworks.Cloudngfw.json"
+      ],
+      "resourceDescriptions": {
+        "firewall": "Manage Palo Alto Networks Cloud NGFW firewalls",
+        "globalrulestack": "Manage global rulestacks",
+        "localrulestack": "Manage local rulestacks",
+        "postrule": "Manage post rules in global rulestack",
+        "prerule": "Manage pre rules in global rulestack",
+        "localrule": "Manage local rules in local rulestack",
+        "fqdnlistglobalrulestack": "Manage FQDN lists in global rulestack",
+        "fqdnlistlocalrulestack": "Manage FQDN lists in local rulestack",
+        "prefixlistglobalrulestack": "Manage prefix lists in global rulestack",
+        "prefixlistlocalrulestack": "Manage prefix lists in local rulestack"
+      },
+      "resourceDetailedDescriptions": {
+        "firewall": "Create and manage Palo Alto Networks Cloud NGFW firewall instances, including log profiles and support info.",
+        "globalrulestack": "Manage global rulestacks shared across subscriptions. Supports commit, revert, and security profile operations.",
+        "localrulestack": "Manage local rulestacks scoped to a resource group."
+      },
+      "actionRenames": {
+        "Firewalls_Get": "show",
+        "Firewalls_CreateOrUpdate": "create",
+        "GlobalRulestack_Get": "show",
+        "GlobalRulestack_CreateOrUpdate": "create",
+        "LocalRulestacks_Get": "show",
+        "LocalRulestacks_CreateOrUpdate": "create",
+        "PostRules_Get": "show",
+        "PostRules_CreateOrUpdate": "create",
+        "PreRules_Get": "show",
+        "PreRules_CreateOrUpdate": "create",
+        "LocalRules_Get": "show",
+        "LocalRules_CreateOrUpdate": "create",
+        "FqdnListGlobalRulestack_Get": "show",
+        "FqdnListGlobalRulestack_CreateOrUpdate": "create",
+        "FqdnListLocalRulestack_Get": "show",
+        "FqdnListLocalRulestack_CreateOrUpdate": "create",
+        "PrefixListGlobalRulestack_Get": "show",
+        "PrefixListGlobalRulestack_CreateOrUpdate": "create",
+        "PrefixListLocalRulestack_Get": "show",
+        "PrefixListLocalRulestack_CreateOrUpdate": "create",
+        "CertificateObjectGlobalRulestack_Get": "show",
+        "CertificateObjectGlobalRulestack_CreateOrUpdate": "create",
+        "CertificateObjectLocalRulestack_Get": "show",
+        "CertificateObjectLocalRulestack_CreateOrUpdate": "create"
+      },
+      "exclude": [
+        "Operations_List",
+        "PaloAltoNetworksCloudngfwOperations_createProductSerialNumber"
+      ]
+    },
+    {
+      "serviceDir": "peering",
+      "displayName": "peering",
+      "apiVersion": "2025-05-01",
+      "description": "Manage Azure Peering Service connections, peerings, and network configuration",
+      "detailedDescription": "Covers Microsoft network peerings, peering services, registered ASNs and prefixes, and connection monitor tests. Used for managing BGP peering relationships between customer networks and Microsoft.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/peering/resource-manager/Microsoft.Peering/Peering/stable/2025-05-01/peering.json"
+      ],
+      "resourceDescriptions": {
+        "cdnpeeringprefix": "List CDN peering prefixes by location",
+        "connectionmonitortest": "Manage connection monitor tests for peering services",
+        "legacypeering": "List legacy peerings",
+        "peerasn": "Manage peer Autonomous System Numbers",
+        "peering": "Manage peering connections",
+        "peeringservice": "Manage Azure Peering Service instances",
+        "prefix": "Manage peering service prefixes",
+        "receivedroute": "List received BGP routes",
+        "registeredasn": "Manage registered ASNs for a peering",
+        "registeredprefix": "Manage registered prefixes for a peering"
+      },
+      "resourceDetailedDescriptions": {
+        "peering": "Create and manage BGP peering connections with Microsoft, including exchange, direct, and CDN peering types.",
+        "peeringservice": "Manage Azure Peering Service for optimized Microsoft network connectivity."
+      },
+      "actionRenames": {
+        "Peerings_Get": "show",
+        "Peerings_CreateOrUpdate": "create",
+        "PeeringServices_Get": "show",
+        "PeeringServices_CreateOrUpdate": "create",
+        "PeerAsns_Get": "show",
+        "PeerAsns_CreateOrUpdate": "create",
+        "Prefixes_Get": "show",
+        "Prefixes_CreateOrUpdate": "create",
+        "ConnectionMonitorTests_Get": "show",
+        "ConnectionMonitorTests_CreateOrUpdate": "create",
+        "RegisteredAsns_Get": "show",
+        "RegisteredAsns_CreateOrUpdate": "create",
+        "RegisteredPrefixes_Get": "show",
+        "RegisteredPrefixes_CreateOrUpdate": "create",
+        "CheckServiceProviderAvailability": "show",
+        "LookingGlass_Invoke": "invoke"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "powerbidedicated",
+      "displayName": "powerbidedicated",
+      "apiVersion": "2021-01-01",
+      "description": "Manage Power BI Dedicated capacity and auto-scale v-cores",
+      "detailedDescription": "Covers Power BI Embedded and Premium capacity resources for dedicated compute. Supports suspend, resume, and SKU management for capacity nodes.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/powerbidedicated/resource-manager/Microsoft.PowerBIdedicated/PowerBIDedicated/stable/2021-01-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "autoscalevcore": "Manage auto-scale v-cores for Power BI",
+        "capacity": "Manage Power BI Dedicated capacity nodes"
+      },
+      "resourceDetailedDescriptions": {
+        "capacity": "Create, resize, suspend, and resume Power BI Dedicated capacity nodes. Use list-skus to see available SKUs.",
+        "autoscalevcore": "Manage auto-scale v-core resources for flexible Power BI capacity scaling."
+      },
+      "actionRenames": {
+        "Capacities_GetDetails": "show",
+        "Capacities_Create": "create",
+        "Capacities_ListByResourceGroup": "list",
+        "AutoScaleVCores_Get": "show",
+        "AutoScaleVCores_Create": "create",
+        "AutoScaleVCores_ListByResourceGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Capacities_List",
+          "resourceGroupOperationId": "Capacities_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "redhatopenshift",
+      "displayName": "redhatopenshift",
+      "apiVersion": "2025-07-25",
+      "description": "Manage Azure Red Hat OpenShift clusters",
+      "detailedDescription": "Covers Red Hat OpenShift 4 cluster lifecycle on Azure including create, update, delete, and credential retrieval. Requires the Microsoft.RedHatOpenShift resource provider.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/redhatopenshift/resource-manager/Microsoft.RedHatOpenShift/OpenShiftClusters/stable/2025-07-25/redhatopenshift.json"
+      ],
+      "resourceDescriptions": {
+        "openshiftcluster": "Manage Red Hat OpenShift clusters",
+        "openshiftversion": "List available OpenShift versions",
+        "platformworkloadidentityroleset": "List platform workload identity role sets"
+      },
+      "resourceDetailedDescriptions": {
+        "openshiftcluster": "Create, update, and delete Red Hat OpenShift 4 clusters. Retrieve admin and user credentials for cluster access.",
+        "openshiftversion": "List available OpenShift versions supported by the service."
+      },
+      "actionRenames": {
+        "OpenShiftClusters_Get": "show",
+        "OpenShiftClusters_CreateOrUpdate": "create",
+        "OpenShiftVersions_Get": "show",
+        "PlatformWorkloadIdentityRoleSet_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "OpenShiftClusters_List",
+          "resourceGroupOperationId": "OpenShiftClusters_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "resourceRenames": {
+        "PlatformWorkloadIdentityRoleSets_List": "platform-workload-identity-role-set",
+        "PlatformWorkloadIdentityRoleSet_Get": "platform-workload-identity-role-set"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "resourcemover",
+      "displayName": "resourcemover",
+      "apiVersion": "2023-08-01",
+      "description": "Manage Azure Resource Mover collections for moving resources between regions",
+      "detailedDescription": "Covers move collection lifecycle and move resource management. Use to plan and execute resource moves across Azure regions, including dependency resolution and staged commit/discard.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/resourcemover/resource-manager/Microsoft.Migrate/ResourceMover/stable/2023-08-01/resourcemovercollection.json"
+      ],
+      "resourceDescriptions": {
+        "movecollection": "Manage resource move collections",
+        "moveresource": "Manage individual move resources within a collection",
+        "unresolveddependency": "List unresolved dependencies in a move collection"
+      },
+      "resourceDetailedDescriptions": {
+        "movecollection": "Create and manage move collections. Use prepare, initiate-move, commit, and discard to stage and execute resource moves.",
+        "moveresource": "Add, remove, and inspect individual resources within a move collection."
+      },
+      "actionRenames": {
+        "MoveCollections_Get": "show",
+        "MoveCollections_ListMoveCollectionsBySubscription": "list-by-subscription",
+        "MoveCollections_ListMoveCollectionsByResourceGroup": "list",
+        "MoveResources_Get": "show",
+        "UnresolvedDependencies_Get": "list",
+        "OperationsDiscovery_Get": "list"
+      },
+      "exclude": []
+    },
+    {
+      "serviceDir": "scheduler",
+      "displayName": "scheduler",
+      "apiVersion": "2016-03-01",
+      "description": "Manage Azure Scheduler job collections and scheduled jobs",
+      "detailedDescription": "Covers job collections and individual scheduled jobs for Azure Scheduler. Note: Azure Scheduler is retired; consider migrating to Azure Logic Apps.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/scheduler/resource-manager/Microsoft.Scheduler/Scheduler/stable/2016-03-01/scheduler.json"
+      ],
+      "resourceDescriptions": {
+        "job": "Manage scheduled jobs",
+        "jobcollection": "Manage job collections"
+      },
+      "resourceDetailedDescriptions": {
+        "job": "Create, update, delete, and run scheduled jobs within a job collection.",
+        "jobcollection": "Manage job collections that group and quota scheduled jobs. Supports enable and disable operations."
+      },
+      "actionRenames": {
+        "Jobs_Get": "show",
+        "Jobs_CreateOrUpdate": "create",
+        "Jobs_Patch": "update",
+        "Jobs_ListJobHistory": "list-history",
+        "JobCollections_Get": "show",
+        "JobCollections_CreateOrUpdate": "create",
+        "JobCollections_Patch": "update",
+        "JobCollections_ListByResourceGroup": "list",
+        "JobCollections_ListBySubscription": "list-by-subscription"
+      },
+      "exclude": []
+    },
+    {
+      "serviceDir": "serialconsole",
+      "displayName": "serialconsole",
+      "apiVersion": "2024-07-01",
+      "description": "Manage Azure Serial Console access for virtual machines",
+      "detailedDescription": "Covers enabling, disabling, and checking the status of Serial Console for a subscription, plus managing serial ports on virtual machines.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/serialconsole/resource-manager/Microsoft.SerialConsole/SerialConsole/stable/2024-07-01/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "serialport": "Manage serial ports on virtual machines"
+      },
+      "resourceDetailedDescriptions": {
+        "serialport": "List, create, and connect to serial ports on Azure virtual machines for out-of-band console access."
+      },
+      "actionRenames": {
+        "SerialPorts_Get": "show",
+        "DisableConsole": "disable",
+        "EnableConsole": "enable",
+        "GetConsoleStatus": "show-status",
+        "ListOperations": "list-operations"
+      },
+      "exclude": []
     }
   ]
 }
