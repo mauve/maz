@@ -18,10 +18,10 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
     public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Load Testing";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Load Testing resource name, or combined format: [sub/]rg/resource-name.</summary>
