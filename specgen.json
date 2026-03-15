@@ -10902,6 +10902,165 @@
       "exclude": [
         "Operations_List"
       ]
-    }
+    },
+    {
+      "serviceDir": "networkcloud",
+      "displayName": "networkcloud",
+      "apiVersion": "2025-09-01",
+      "description": "Manage Azure Operator Nexus bare-metal machines, clusters, and network fabric resources",
+      "detailedDescription": "Covers Azure Operator Nexus (Network Cloud) infrastructure including bare-metal machines, Kubernetes clusters, storage appliances, virtual machines, and L2/L3 networks.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/networkcloud/resource-manager/Microsoft.NetworkCloud/stable/2025-09-01/networkcloud.json"
+      ],
+      "resourceDescriptions": {
+        "agentpool": "Manage agent pools for Network Cloud Kubernetes clusters",
+        "baremetalmachine": "Manage bare-metal machines in Operator Nexus clusters",
+        "baremetalmachinepool": "Manage bare-metal machine pools",
+        "bmckeyset": "Manage baseboard management controller key sets",
+        "cluster": "Manage Network Cloud clusters",
+        "clustermanager": "Manage cluster managers",
+        "cloudservicesnetwork": "Manage cloud services networks",
+        "console": "Manage virtual machine consoles",
+        "defaultcninetwork": "Manage default CNI networks",
+        "kubernetescluster": "Manage Network Cloud Kubernetes clusters",
+        "l2network": "Manage L2 networks",
+        "l3network": "Manage L3 networks",
+        "racksku": "List rack SKUs",
+        "storageappliance": "Manage storage appliances",
+        "trunkednetwork": "Manage trunked networks",
+        "virtualmachine": "Manage virtual machines on bare-metal",
+        "volume": "Manage storage volumes"
+      },
+      "resourceDetailedDescriptions": {
+        "baremetalmachine": "Manage bare-metal machines including cordon, reimage, restart, power-off, and remote management operations.",
+        "kubernetescluster": "Create and manage Kubernetes clusters on Network Cloud bare-metal infrastructure.",
+        "cluster": "Manage top-level Network Cloud clusters. Supports version updates, deploy, and update operations."
+      },
+      "actionRenames": {
+        "AgentPools_Get": "show",
+        "AgentPools_CreateOrUpdate": "create",
+        "BareMetalMachines_Get": "show",
+        "BareMetalMachines_CreateOrUpdate": "create",
+        "BareMetalMachinePools_Get": "show",
+        "BareMetalMachinePools_CreateOrUpdate": "create",
+        "BmcKeySets_Get": "show",
+        "BmcKeySets_CreateOrUpdate": "create",
+        "Clusters_Get": "show",
+        "Clusters_CreateOrUpdate": "create",
+        "Clusters_ListByResourceGroup": "list",
+        "ClusterManagers_Get": "show",
+        "ClusterManagers_CreateOrUpdate": "create",
+        "CloudServicesNetworks_Get": "show",
+        "CloudServicesNetworks_CreateOrUpdate": "create",
+        "Consoles_Get": "show",
+        "Consoles_CreateOrUpdate": "create",
+        "DefaultCniNetworks_Get": "show",
+        "DefaultCniNetworks_CreateOrUpdate": "create",
+        "KubernetesClusters_Get": "show",
+        "KubernetesClusters_CreateOrUpdate": "create",
+        "KubernetesClusters_ListByResourceGroup": "list",
+        "L2Networks_Get": "show",
+        "L2Networks_CreateOrUpdate": "create",
+        "L3Networks_Get": "show",
+        "L3Networks_CreateOrUpdate": "create",
+        "StorageAppliances_Get": "show",
+        "StorageAppliances_CreateOrUpdate": "create",
+        "TrunkedNetworks_Get": "show",
+        "TrunkedNetworks_CreateOrUpdate": "create",
+        "VirtualMachines_Get": "show",
+        "VirtualMachines_CreateOrUpdate": "create",
+        "VirtualMachines_ListByResourceGroup": "list",
+        "Volumes_Get": "show",
+        "Volumes_CreateOrUpdate": "create"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "hybridaks",
+      "displayName": "hybridaks",
+      "apiVersion": "2024-01-01",
+      "description": "Manage Azure Hybrid AKS provisioned cluster instances on Arc-enabled infrastructure",
+      "detailedDescription": "Covers Hybrid AKS provisioned cluster instances, agent pools, and VM SKUs for Kubernetes clusters running on Arc-enabled hardware.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridaks/resource-manager/Microsoft.HybridContainerService/stable/2024-01-01/provisionedClusterInstances.json"
+      ],
+      "resourceDescriptions": {
+        "agent-pool": "Manage agent pools in Hybrid AKS clusters",
+        "hybrid-identity-metadata": "Manage hybrid identity metadata",
+        "kubernetesversion": "List supported Kubernetes versions",
+        "provisionedclusterinstance": "Manage Hybrid AKS provisioned cluster instances",
+        "vmsku": "List supported VM SKUs"
+      },
+      "resourceDetailedDescriptions": {
+        "provisionedclusterinstance": "Create and manage Hybrid AKS cluster instances on Arc-enabled infrastructure. Retrieve admin/user kubeconfig and upgrade profiles.",
+        "agent-pool": "Manage agent pools within a Hybrid AKS provisioned cluster."
+      },
+      "actionRenames": {
+        "provisionedClusterInstances_Get": "show",
+        "provisionedClusterInstances_CreateOrUpdate": "create",
+        "provisionedClusterInstances_GetUpgradeProfile": "show-upgrade-profile",
+        "agentPool_Get": "show",
+        "agentPool_CreateOrUpdate": "create",
+        "agentPool_ListByProvisionedCluster": "list",
+        "HybridIdentityMetadata_Get": "show",
+        "HybridIdentityMetadata_Put": "create",
+        "KubernetesVersions_List": "list",
+        "VMSkus_List": "list",
+        "GetKubernetesVersions": "show",
+        "GetVMSkus": "show",
+        "PutKubernetesVersions": "show",
+        "PutVMSkus": "show",
+        "DeleteKubernetesVersions": "delete",
+        "DeleteVMSkus": "delete"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "policyinsights",
+      "displayName": "policyinsights",
+      "apiVersion": "2024-10-01",
+      "description": "Query Azure Policy compliance states, events, and manage remediations and attestations",
+      "detailedDescription": "Covers policy states, events, remediations, attestations, and metadata for Azure Policy. Use to audit compliance, trigger remediations, and review policy evaluation results.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/remediations.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/attestations.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyStates.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyEvents.json"
+      ],
+      "resourceDescriptions": {
+        "attestation": "Manage policy compliance attestations",
+        "remediation": "Manage policy remediations",
+        "policystate": "Query policy compliance states",
+        "policyevent": "Query policy evaluation events"
+      },
+      "resourceDetailedDescriptions": {
+        "remediation": "Create and manage policy remediations that bring non-compliant resources into compliance. Supports management group, subscription, resource group, and resource scopes.",
+        "attestation": "Create attestations for manual policy compliance with evidence.",
+        "policystate": "Query current and historical policy compliance states at any scope."
+      },
+      "actionRenames": {
+        "Remediations_GetAtManagementGroup": "show",
+        "Remediations_CreateOrUpdateAtManagementGroup": "create",
+        "Remediations_GetAtResourceGroup": "show-at-resource-group",
+        "Remediations_CreateOrUpdateAtResourceGroup": "create-at-resource-group",
+        "Remediations_GetAtSubscription": "show-at-subscription",
+        "Remediations_CreateOrUpdateAtSubscription": "create-at-subscription",
+        "Remediations_GetAtResource": "show-at-resource",
+        "Remediations_CreateOrUpdateAtResource": "create-at-resource",
+        "Attestations_GetAtResourceGroup": "show-at-resource-group",
+        "Attestations_CreateOrUpdateAtResourceGroup": "create-at-resource-group",
+        "Attestations_GetAtSubscription": "show-at-subscription",
+        "Attestations_CreateOrUpdateAtSubscription": "create-at-subscription",
+        "Attestations_GetAtResource": "show-at-resource",
+        "Attestations_CreateOrUpdateAtResource": "create-at-resource"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
   ]
 }
