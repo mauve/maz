@@ -136,6 +136,14 @@ public partial class RootCommandDef
     public NginxCommandDef Nginx = null!;
     public SphereCommandDef Sphere = null!;
     public WorkloadsCommandDef Workloads = null!;
+    public OracleCommandDef Oracle = null!;
+    public PaloaltonetworksCommandDef Paloaltonetworks = null!;
+    public PeeringCommandDef Peering = null!;
+    public PowerbidedicatedCommandDef Powerbidedicated = null!;
+    public RedhatopenshiftCommandDef Redhatopenshift = null!;
+    public ResourcemoverCommandDef Resourcemover = null!;
+    public SchedulerCommandDef Scheduler = null!;
+    public SerialconsoleCommandDef Serialconsole = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -268,5 +276,13 @@ public partial class RootCommandDef
         Nginx = new NginxCommandDef(Auth);
         Sphere = new SphereCommandDef(Auth);
         Workloads = new WorkloadsCommandDef(Auth);
+        Oracle = new OracleCommandDef(Auth);
+        Paloaltonetworks = new PaloaltonetworksCommandDef(Auth);
+        Peering = new PeeringCommandDef(Auth);
+        Powerbidedicated = new PowerbidedicatedCommandDef(Auth);
+        Redhatopenshift = new RedhatopenshiftCommandDef(Auth);
+        Resourcemover = new ResourcemoverCommandDef(Auth);
+        Scheduler = new SchedulerCommandDef(Auth);
+        Serialconsole = new SerialconsoleCommandDef(Auth);
     }
 }
