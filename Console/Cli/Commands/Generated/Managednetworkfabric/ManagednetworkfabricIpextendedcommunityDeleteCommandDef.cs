@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class ManagednetworkfabricIpextendedcommunityDeleteCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ManagedNetworkFabric/ipExtendedCommunities/{IpExtendedCommunityName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            IpExtendedCommunityName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipExtendedCommunities", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/ipExtendedCommunities/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-06-15", null, ct);
         if (!NoWait)

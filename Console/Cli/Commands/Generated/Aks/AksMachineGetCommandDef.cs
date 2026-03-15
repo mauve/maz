@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -34,7 +35,10 @@ public partial class AksMachineGetCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ContainerService/managedClusters/{ResourceName}/agentPools/{AgentPoolName}/machines/{MachineName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ContainerService/managedClusters", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerService/managedClusters/{resolvedName}/agentPools/{AgentPoolName}/machines/{MachineName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

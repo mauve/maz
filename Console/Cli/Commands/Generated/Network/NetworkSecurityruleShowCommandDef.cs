@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,7 +31,10 @@ public partial class NetworkSecurityruleShowCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Network/networkSecurityGroups/{NetworkSecurityGroupName}/securityRules/{SecurityRuleName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            NetworkSecurityGroupName!, ResourceGroup, armClient, "Microsoft.Network/networkSecurityGroups", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/networkSecurityGroups/{resolvedName}/securityRules/{SecurityRuleName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

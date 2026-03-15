@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class ImagebuilderVirtualmachineimagetemplateRunCommandDef(AuthOp
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.VirtualMachineImages/imageTemplates/{ImageTemplateName}/run";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ImageTemplateName!, ResourceGroup, armClient, "Microsoft.VirtualMachineImages/imageTemplates", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VirtualMachineImages/imageTemplates/{resolvedName}/run";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-02-01", null, ct);
         if (!NoWait)

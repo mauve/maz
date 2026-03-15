@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,7 +31,10 @@ public partial class ManagednetworkfabricExternalnetworkGetCommandDef(AuthOption
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ManagedNetworkFabric/l3IsolationDomains/{L3IsolationDomainName}/externalNetworks/{ExternalNetworkName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            L3IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l3IsolationDomains", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/l3IsolationDomains/{resolvedName}/externalNetworks/{ExternalNetworkName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

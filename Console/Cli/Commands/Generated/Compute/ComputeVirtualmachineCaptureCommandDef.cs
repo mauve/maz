@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -47,7 +48,10 @@ public partial class ComputeVirtualmachineCaptureCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Compute/virtualMachines/{VmName}/capture";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachines/{resolvedName}/capture";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,7 +31,10 @@ public partial class HsmDedicatedHsmUpdateCommandDef(AuthOptionPack auth) : Comm
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{ParamName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ParamName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/dedicatedHSMs", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-03-31", null, ct);
         if (!NoWait)

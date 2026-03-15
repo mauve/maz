@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class HealthcareapisServiceDeleteCommandDef(AuthOptionPack auth) 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.HealthcareApis/services/{ResourceName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ResourceName!, ResourceGroup, armClient, "Microsoft.HealthcareApis/services", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthcareApis/services/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-03-31", null, ct);
         if (!NoWait)

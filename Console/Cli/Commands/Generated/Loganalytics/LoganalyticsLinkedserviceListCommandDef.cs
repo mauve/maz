@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -26,7 +27,10 @@ public partial class LoganalyticsLinkedserviceListCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.OperationalInsights/workspaces/{WorkspaceName}/linkedServices";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}/linkedServices";
 
         var allItems = client.GetAllAsync(path, "2025-07-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

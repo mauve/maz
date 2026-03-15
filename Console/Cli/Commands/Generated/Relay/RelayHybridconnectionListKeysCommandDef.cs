@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class RelayHybridconnectionListKeysCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Relay/namespaces/{NamespaceName}/hybridConnections/{HybridConnectionName}/authorizationRules/{AuthorizationRuleName}/listKeys";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.Relay/namespaces", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Relay/namespaces/{resolvedName}/hybridConnections/{HybridConnectionName}/authorizationRules/{AuthorizationRuleName}/listKeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

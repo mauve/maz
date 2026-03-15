@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class NetworkVpnServerConfigurationsAssociatedWithVirtualWanListC
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Network/virtualWans/{VirtualWanname}/vpnServerConfigurations";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VirtualWanname!, ResourceGroup, armClient, "Microsoft.Network/virtualWans", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualWans/{resolvedName}/vpnServerConfigurations";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);
         if (!NoWait)

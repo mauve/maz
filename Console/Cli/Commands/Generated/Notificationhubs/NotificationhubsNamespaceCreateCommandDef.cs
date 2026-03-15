@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -34,7 +35,10 @@ public partial class NotificationhubsNamespaceCreateCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.NotificationHubs/namespaces/{NamespaceName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NotificationHubs/namespaces/{resolvedName}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()
