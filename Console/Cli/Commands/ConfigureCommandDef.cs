@@ -1,4 +1,5 @@
 using Azure.ResourceManager;
+using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Shared;
 using Console.Config;
 
@@ -18,10 +19,14 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
     private readonly AuthOptionPack _auth = auth;
     private readonly InteractiveOptionPack _interactive = interactive;
 
-    protected override async Task<int> ExecuteAsync(CancellationToken ct)
+    protected override Task<int> ExecuteAsync(CancellationToken ct) =>
+        RunConfigureAsync(_auth, _interactive, ct);
+
+    internal static async Task<int> RunConfigureAsync(
+        AuthOptionPack auth, InteractiveOptionPack interactive, CancellationToken ct)
     {
         var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(
-            _interactive.Interactive
+            interactive.Interactive
         );
         if (!isInteractive)
         {
@@ -36,12 +41,15 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         System.Console.WriteLine();
 
         var existing = MazConfig.Current;
+        var boxWidth = WizardUi.GetTermWidth() - 1;
+        const int total = 5;
 
-        // Step 1/5: Allowed subscriptions
-        System.Console.WriteLine("Step 1/5: Allowed subscriptions for suggestions");
-        System.Console.WriteLine("Fetching your subscriptions...");
+        // ── Step 1/5: Allowed subscriptions ───────────────────────────────────
+        WizardUi.RenderTopBorder("Allowed Subscriptions", 0, total, boxWidth);
+        System.Console.WriteLine();
+        System.Console.WriteLine("  Fetching your subscriptions...");
 
-        var armClient = new ArmClient(_auth.GetCredential());
+        var armClient = new ArmClient(auth.GetCredential());
         var allSubs = new List<(string Name, string Id)>();
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync(ct))
         {
@@ -50,40 +58,44 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
             allSubs.Add((name, id));
         }
 
-        for (var i = 0; i < allSubs.Count; i++)
-        {
-            var (name, id) = allSubs[i];
-            System.Console.WriteLine($"  [{i + 1}] {name, -30} (/s/{name}:{id})");
-        }
+        // Erase the "Fetching..." line once loaded
+        System.Console.Write("\x1b[1A\x1b[2K");
 
-        System.Console.Write(
-            "Enter numbers (comma-separated) to allow, or leave blank to allow all: "
-        );
-        var allowInput = System.Console.ReadLine()?.Trim() ?? "";
+        var existingAllowed = existing.AllowedSubscriptions.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var initialChecked = allSubs
+            .Select(s => existingAllowed.Count == 0 || existingAllowed.Contains($"/s/{s.Name}:{s.Id}"))
+            .ToArray();
+
+        var checkedIndices = CheckboxList.Show(
+            allSubs.Select(s => (s.Name, $"/s/{s.Name}:{s.Id}")).ToArray(),
+            initialChecked,
+            ct);
 
         var allowedSubs = new List<string>();
         var allowedSubNames = new List<string>();
-        if (!string.IsNullOrEmpty(allowInput))
+        if (checkedIndices.Length > 0 && checkedIndices.Length < allSubs.Count)
         {
-            foreach (var part in allowInput.Split(','))
+            foreach (var i in checkedIndices)
             {
-                if (int.TryParse(part.Trim(), out var idx) && idx >= 1 && idx <= allSubs.Count)
-                {
-                    var (name, id) = allSubs[idx - 1];
-                    allowedSubs.Add($"/s/{name}:{id}");
-                    allowedSubNames.Add(name);
-                }
+                var (name, id) = allSubs[i];
+                allowedSubs.Add($"/s/{name}:{id}");
+                allowedSubNames.Add(name);
             }
-            System.Console.WriteLine($"→ Allowed: {string.Join(", ", allowedSubNames)}");
+            System.Console.WriteLine($"  \x1b[2m→ Allowed: {string.Join(", ", allowedSubNames)}\x1b[0m");
         }
         else
         {
-            System.Console.WriteLine("→ All subscriptions allowed");
+            System.Console.WriteLine("  \x1b[2m→ All subscriptions allowed\x1b[0m");
         }
+
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  Space toggle  ↑↓ move  Ctrl+A all  Ctrl+U none  Enter confirm  ", boxWidth);
         System.Console.WriteLine();
 
-        // Step 2/5: Default subscription
-        System.Console.WriteLine("Step 2/5: Default subscription");
+        // ── Step 2/5: Default subscription ────────────────────────────────────
+        WizardUi.RenderTopBorder("Default Subscription", 1, total, boxWidth);
+        System.Console.WriteLine();
+
         var subChoices =
             allowedSubs.Count > 0
                 ? allowedSubs
@@ -94,100 +106,97 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         var currentDefaultSub = existing.GlobalDefaults.TryGetValue("subscription-id", out var cds)
             ? cds
             : null;
-        for (var i = 0; i < subChoices.Count; i++)
-        {
-            var marker =
-                currentDefaultSub is not null && subChoices[i] == currentDefaultSub
-                    ? " [current]"
-                    : "";
-            System.Console.WriteLine($"  [{i + 1}] {subNames[i]}{marker}");
-        }
-        System.Console.Write("Select default (blank = none): ");
-        var defSubInput = System.Console.ReadLine()?.Trim() ?? "";
 
-        string? defaultSubscription = null;
-        if (
-            !string.IsNullOrEmpty(defSubInput)
-            && int.TryParse(defSubInput, out var defSubIdx)
-            && defSubIdx >= 1
-            && defSubIdx <= subChoices.Count
-        )
+        // Prepend a "(none)" option
+        var subItems = subNames.Select((n, i) =>
         {
-            defaultSubscription = subChoices[defSubIdx - 1];
-            System.Console.WriteLine($"→ Default: {defaultSubscription}");
-        }
-        else
-        {
-            System.Console.WriteLine("→ No default subscription set");
-        }
+            var detail = subChoices[i];
+            var marker = subChoices[i] == currentDefaultSub ? " [current]" : "";
+            return (n + marker, detail);
+        }).Prepend(("(none)", "no default")).ToArray();
+
+        var currentSubIdx = currentDefaultSub is not null
+            ? subChoices.IndexOf(currentDefaultSub) + 1  // +1 for "(none)" at index 0
+            : 0;
+        if (currentSubIdx < 0) currentSubIdx = 0;
+
+        var defSubIdx = RadioList.Show(subItems, currentSubIdx, ct);
+        string? defaultSubscription = defSubIdx > 0 ? subChoices[defSubIdx - 1] : null;
+
+        System.Console.WriteLine(
+            defaultSubscription is not null
+                ? $"  \x1b[2m→ Default: {defaultSubscription}\x1b[0m"
+                : "  \x1b[2m→ No default subscription set\x1b[0m"
+        );
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  ↑↓ to move  Enter to confirm  ", boxWidth);
         System.Console.WriteLine();
 
-        // Step 3/5: Default resource group
-        System.Console.WriteLine("Step 3/5: Default resource group");
+        // ── Step 3/5: Default resource group ──────────────────────────────────
+        WizardUi.RenderTopBorder("Default Resource Group", 2, total, boxWidth);
+        System.Console.WriteLine();
+
         var currentRg = existing.GlobalDefaults.TryGetValue("resource-group", out var crg)
             ? crg
             : null;
         var rgPrompt = currentRg is not null ? $" [current: {currentRg}]" : "";
-        System.Console.Write($"Enter resource group name (blank = none){rgPrompt}: ");
+        System.Console.Write($"  Enter resource group name (blank = none){rgPrompt}: ");
         var rgInput = System.Console.ReadLine()?.Trim() ?? "";
 
         string? defaultRg;
         if (!string.IsNullOrEmpty(rgInput))
         {
             defaultRg = rgInput;
-            System.Console.WriteLine($"→ Default: {defaultRg}");
+            System.Console.WriteLine($"  \x1b[2m→ Default: {defaultRg}\x1b[0m");
         }
         else if (currentRg is not null)
         {
             defaultRg = currentRg;
-            System.Console.WriteLine($"→ Kept: {currentRg}");
+            System.Console.WriteLine($"  \x1b[2m→ Kept: {currentRg}\x1b[0m");
         }
         else
         {
             defaultRg = null;
-            System.Console.WriteLine("→ No default resource group set");
+            System.Console.WriteLine("  \x1b[2m→ No default resource group set\x1b[0m");
         }
+
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  Type and press Enter  ", boxWidth);
         System.Console.WriteLine();
 
-        // Step 4/5: Default output format
-        System.Console.WriteLine("Step 4/5: Default output format");
+        // ── Step 4/5: Default output format ───────────────────────────────────
+        WizardUi.RenderTopBorder("Default Output Format", 3, total, boxWidth);
+        System.Console.WriteLine();
+
         var formats = new[] { "column", "json", "json-pretty", "text" };
-        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf)
-            ? cf
-            : "column";
-        for (var i = 0; i < formats.Length; i++)
-        {
-            var marker = formats[i] == currentFormat ? " [current]" : "";
-            var desc = formats[i] == "column" ? "  (default, aligned columns)" : "";
-            System.Console.WriteLine($"  [{i + 1}] {formats[i]}{desc}{marker}");
-        }
-        System.Console.Write("Select format (blank = keep current): ");
-        var fmtInput = System.Console.ReadLine()?.Trim() ?? "";
+        var formatDetails = new[] { "aligned columns (default)", "compact JSON", "indented JSON", "one field per line" };
+        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf) ? cf : "column";
+        var currentFmtIdx = Array.IndexOf(formats, currentFormat);
+        if (currentFmtIdx < 0) currentFmtIdx = 0;
 
-        var defaultFormat = currentFormat;
-        if (
-            !string.IsNullOrEmpty(fmtInput)
-            && int.TryParse(fmtInput, out var fmtIdx)
-            && fmtIdx >= 1
-            && fmtIdx <= formats.Length
-        )
+        var formatItems = formats.Select((f, i) =>
         {
-            defaultFormat = formats[fmtIdx - 1];
-            System.Console.WriteLine($"→ Format: {defaultFormat}");
-        }
-        else
-        {
-            System.Console.WriteLine($"→ Kept: {defaultFormat}");
-        }
+            var marker = f == currentFormat ? " [current]" : "";
+            return (f + marker, formatDetails[i]);
+        }).ToArray();
+
+        var fmtIdx = RadioList.Show(formatItems, currentFmtIdx, ct);
+        var defaultFormat = formats[fmtIdx];
+
+        System.Console.WriteLine($"  \x1b[2m→ Format: {defaultFormat}\x1b[0m");
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  ↑↓ to move  Enter to confirm  ", boxWidth);
         System.Console.WriteLine();
 
-        // Step 5/5: Require confirmation
-        System.Console.WriteLine("Step 5/5: Require confirmation for destructive operations?");
+        // ── Step 5/5: Require confirmation ────────────────────────────────────
+        WizardUi.RenderTopBorder("Require Confirmation", 4, total, boxWidth);
+        System.Console.WriteLine();
+
         var currentRequireConfirm =
             existing.GlobalDefaults.TryGetValue("require-confirmation", out var rc)
             && string.Equals(rc, "true", StringComparison.OrdinalIgnoreCase);
         System.Console.Write(
-            $"Current: {currentRequireConfirm.ToString().ToLowerInvariant()}. Enable? (y/N): "
+            $"  Current: {currentRequireConfirm.ToString().ToLowerInvariant()}. Enable? (y/N): "
         );
         var confirmInput = System.Console.ReadLine()?.Trim().ToLowerInvariant() ?? "";
 
@@ -195,22 +204,26 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         if (confirmInput is "y" or "yes")
         {
             requireConfirmation = true;
-            System.Console.WriteLine("→ Enabled");
+            System.Console.WriteLine("  \x1b[2m→ Enabled\x1b[0m");
         }
         else if (confirmInput is "n" or "no")
         {
             requireConfirmation = false;
-            System.Console.WriteLine("→ Disabled");
+            System.Console.WriteLine("  \x1b[2m→ Disabled\x1b[0m");
         }
         else
         {
             requireConfirmation = currentRequireConfirm;
             System.Console.WriteLine(
-                $"→ Kept: {currentRequireConfirm.ToString().ToLowerInvariant()}"
+                $"  \x1b[2m→ Kept: {currentRequireConfirm.ToString().ToLowerInvariant()}\x1b[0m"
             );
         }
+
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  y / n  Enter to confirm  ", boxWidth);
         System.Console.WriteLine();
 
+        // ── Done ───────────────────────────────────────────────────────────────
         WriteConfigFile(
             configPath,
             allowedSubs,
@@ -219,7 +232,12 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
             defaultFormat,
             requireConfirmation
         );
-        System.Console.WriteLine($"Configuration written to {configPath}");
+
+        WizardUi.RenderTopBorder("Done", 4, total, boxWidth);
+        System.Console.WriteLine();
+        System.Console.WriteLine($"  \x1b[32m✓\x1b[0m  Configuration written to {configPath}");
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  ", boxWidth);
 
         return 0;
     }
