@@ -900,7 +900,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                 );
             foreach (var child in childCmds)
                 sb.AppendLine(
-                    $"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
+                    $"        if ({child.Name} is not null) cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
                 );
             sb.AppendLine("    }");
         }
