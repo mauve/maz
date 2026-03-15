@@ -36,12 +36,14 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
     {
         if (!InteractiveOptionPack.IsEffectivelyInteractive(true))
             throw new InvocationException(
-                "The explore command requires an interactive terminal. " +
-                "Output appears to be redirected — use 'maz loganalytics query' instead.");
+                "The explore command requires an interactive terminal. "
+                    + "Output appears to be redirected — use 'maz loganalytics query' instead."
+            );
 
         if (WorkspaceId is null && ResourceId is null)
             throw new InvocationException(
-                "Either --workspace-id or --resource-id must be specified.");
+                "Either --workspace-id or --resource-id must be specified."
+            );
 
         var client = new LogsQueryClient(_auth.GetCredential());
         await using var app = new KustoTuiApp(
@@ -49,7 +51,8 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
             WorkspaceId?.ToString(),
             ResourceId,
             InitialQuery,
-            HistorySize);
+            HistorySize
+        );
         await app.RunAsync(ct);
         return 0;
     }

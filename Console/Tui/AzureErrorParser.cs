@@ -16,7 +16,8 @@ internal static class AzureErrorParser
         string DisplayMessage,
         string? QueryLine,
         int? LineNumber,
-        int? Column);
+        int? Column
+    );
 
     /// <summary>
     /// Parse a raw Azure SDK exception message and, if the query text is supplied,
@@ -39,7 +40,8 @@ internal static class AzureErrorParser
 
             // Strip " Headers: ..." that follows the JSON body
             int headersIdx = jsonSlice.IndexOf("} Headers:", StringComparison.Ordinal);
-            if (headersIdx >= 0) jsonSlice = jsonSlice[..(headersIdx + 1)];
+            if (headersIdx >= 0)
+                jsonSlice = jsonSlice[..(headersIdx + 1)];
 
             try
             {
@@ -52,11 +54,15 @@ internal static class AzureErrorParser
                 else if (doc.RootElement.TryGetProperty("message", out var rootMsg))
                 {
                     // Alternative format: {"code":"...","message":"..."} with no "error" wrapper
-                    msg  = rootMsg.GetString();
-                    code = doc.RootElement.TryGetProperty("code", out var rootCode) ? rootCode.GetString() : null;
+                    msg = rootMsg.GetString();
+                    code = doc.RootElement.TryGetProperty("code", out var rootCode)
+                        ? rootCode.GetString()
+                        : null;
                 }
             }
-            catch { /* malformed JSON — fall through to text fallback */ }
+            catch
+            { /* malformed JSON — fall through to text fallback */
+            }
         }
 
         // Build the display message
@@ -72,7 +78,8 @@ internal static class AzureErrorParser
             foreach (var cut in new[] { " Status:", " Content:", " Headers:" })
             {
                 int idx = displayMessage.IndexOf(cut, StringComparison.Ordinal);
-                if (idx > 0) displayMessage = displayMessage[..idx];
+                if (idx > 0)
+                    displayMessage = displayMessage[..idx];
             }
             displayMessage = displayMessage.Trim();
         }
@@ -88,9 +95,7 @@ internal static class AzureErrorParser
             {
                 queryLine = lines[lineIdx];
                 // KQL reports pos as 1-based; convert to 0-based, clamp to line length
-                column = jsonPos.HasValue
-                    ? Math.Clamp(jsonPos.Value - 1, 0, queryLine.Length)
-                    : 0;
+                column = jsonPos.HasValue ? Math.Clamp(jsonPos.Value - 1, 0, queryLine.Length) : 0;
             }
         }
 
@@ -100,10 +105,10 @@ internal static class AzureErrorParser
     // Recurse into innererror to find the most specific error node (deepest with position or code).
     private static (string? msg, string? code, int? line, int? pos) ExtractDeepest(JsonElement el)
     {
-        string? msg  = el.TryGetProperty("message", out var m)   ? m.GetString()  : null;
-        string? code = el.TryGetProperty("code",    out var c)   ? c.GetString()  : null;
-        int?    line = el.TryGetProperty("line",    out var l)   ? l.GetInt32()   : (int?)null;
-        int?    pos  = el.TryGetProperty("pos",     out var p)   ? p.GetInt32()   : (int?)null;
+        string? msg = el.TryGetProperty("message", out var m) ? m.GetString() : null;
+        string? code = el.TryGetProperty("code", out var c) ? c.GetString() : null;
+        int? line = el.TryGetProperty("line", out var l) ? l.GetInt32() : (int?)null;
+        int? pos = el.TryGetProperty("pos", out var p) ? p.GetInt32() : (int?)null;
 
         if (el.TryGetProperty("innererror", out var inner))
         {
@@ -111,11 +116,7 @@ internal static class AzureErrorParser
             // Prefer the inner level when it carries more specific info
             if (innerMsg is not null || innerLine.HasValue || !string.IsNullOrEmpty(innerCode))
             {
-                return (
-                    innerMsg  ?? msg,
-                    innerCode ?? code,
-                    innerLine ?? line,
-                    innerPos  ?? pos);
+                return (innerMsg ?? msg, innerCode ?? code, innerLine ?? line, innerPos ?? pos);
             }
         }
 

@@ -48,7 +48,8 @@ internal sealed class EditorPane
     }
 
     /// <summary>Show a red '!' error marker on the given 0-indexed line.</summary>
-    public void SetErrorMarker(int line) => _errorMarkerLine = Math.Clamp(line, 0, _lines.Count - 1);
+    public void SetErrorMarker(int line) =>
+        _errorMarkerLine = Math.Clamp(line, 0, _lines.Count - 1);
 
     /// <summary>Remove the error marker.</summary>
     public void ClearErrorMarker() => _errorMarkerLine = null;
@@ -66,9 +67,11 @@ internal sealed class EditorPane
             return (_cursorLine, _cursorLine);
 
         int start = _cursorLine;
-        while (start > 0 && !string.IsNullOrWhiteSpace(_lines[start - 1])) start--;
+        while (start > 0 && !string.IsNullOrWhiteSpace(_lines[start - 1]))
+            start--;
         int end = _cursorLine;
-        while (end < _lines.Count - 1 && !string.IsNullOrWhiteSpace(_lines[end + 1])) end++;
+        while (end < _lines.Count - 1 && !string.IsNullOrWhiteSpace(_lines[end + 1]))
+            end++;
         return (start, end);
     }
 
@@ -86,7 +89,14 @@ internal sealed class EditorPane
         var line = _lines[_cursorLine];
         int start = _cursorCol;
         // Include '-' so hyphenated KQL operators like project-away are matched whole
-        while (start > 0 && (char.IsLetterOrDigit(line[start - 1]) || line[start - 1] == '_' || line[start - 1] == '-'))
+        while (
+            start > 0
+            && (
+                char.IsLetterOrDigit(line[start - 1])
+                || line[start - 1] == '_'
+                || line[start - 1] == '-'
+            )
+        )
             start--;
         return line[start.._cursorCol];
     }
@@ -100,24 +110,28 @@ internal sealed class EditorPane
 
     public bool DismissAutocomplete()
     {
-        if (!_autocompleteVisible) return false;
+        if (!_autocompleteVisible)
+            return false;
         _autocompleteVisible = false;
         return true;
     }
 
     public void AutocompleteUp()
     {
-        if (_completionIndex > 0) _completionIndex--;
+        if (_completionIndex > 0)
+            _completionIndex--;
     }
 
     public void AutocompleteDown()
     {
-        if (_completionIndex < _completions.Count - 1) _completionIndex++;
+        if (_completionIndex < _completions.Count - 1)
+            _completionIndex++;
     }
 
     public void AutocompleteAccept()
     {
-        if (!_autocompleteVisible || _completionIndex >= _completions.Count) return;
+        if (!_autocompleteVisible || _completionIndex >= _completions.Count)
+            return;
         var word = GetWordAtCursor();
         var completion = _completions[_completionIndex];
         var line = _lines[_cursorLine];
@@ -134,7 +148,8 @@ internal sealed class EditorPane
         var text = string.Join("\n", _lines[start..(end + 1)]);
         var formatted = KqlFormatter.Format(text);
         var formattedLines = formatted.Split('\n').ToList();
-        if (formattedLines.Count == 0) formattedLines = [""];
+        if (formattedLines.Count == 0)
+            formattedLines = [""];
         _lines.RemoveRange(start, end - start + 1);
         _lines.InsertRange(start, formattedLines);
         _cursorLine = Math.Clamp(_cursorLine, start, start + formattedLines.Count - 1);
@@ -149,15 +164,33 @@ internal sealed class EditorPane
         _autocompleteVisible = false;
         switch (key.Key)
         {
-            case ConsoleKey.LeftArrow:  MoveCursorLeft();  break;
-            case ConsoleKey.RightArrow: MoveCursorRight(); break;
-            case ConsoleKey.UpArrow:    MoveCursorUp();    break;
-            case ConsoleKey.DownArrow:  MoveCursorDown();  break;
-            case ConsoleKey.Home:       _cursorCol = 0;    break;
-            case ConsoleKey.End:        _cursorCol = _lines[_cursorLine].Length; break;
-            case ConsoleKey.Backspace:  DeleteBack();      break;
-            case ConsoleKey.Delete:     DeleteForward();   break;
-            case ConsoleKey.Enter:      InsertNewline();   break;
+            case ConsoleKey.LeftArrow:
+                MoveCursorLeft();
+                break;
+            case ConsoleKey.RightArrow:
+                MoveCursorRight();
+                break;
+            case ConsoleKey.UpArrow:
+                MoveCursorUp();
+                break;
+            case ConsoleKey.DownArrow:
+                MoveCursorDown();
+                break;
+            case ConsoleKey.Home:
+                _cursorCol = 0;
+                break;
+            case ConsoleKey.End:
+                _cursorCol = _lines[_cursorLine].Length;
+                break;
+            case ConsoleKey.Backspace:
+                DeleteBack();
+                break;
+            case ConsoleKey.Delete:
+                DeleteForward();
+                break;
+            case ConsoleKey.Enter:
+                InsertNewline();
+                break;
             default:
                 if (key.Modifiers == ConsoleModifiers.Control)
                     HandleCtrl(key.Key);
@@ -171,9 +204,15 @@ internal sealed class EditorPane
     {
         switch (key)
         {
-            case ConsoleKey.A: _cursorCol = 0; break;
-            case ConsoleKey.E: _cursorCol = _lines[_cursorLine].Length; break;
-            case ConsoleKey.K: _lines[_cursorLine] = _lines[_cursorLine][.._cursorCol]; break;
+            case ConsoleKey.A:
+                _cursorCol = 0;
+                break;
+            case ConsoleKey.E:
+                _cursorCol = _lines[_cursorLine].Length;
+                break;
+            case ConsoleKey.K:
+                _lines[_cursorLine] = _lines[_cursorLine][.._cursorCol];
+                break;
             case ConsoleKey.U:
                 _lines[_cursorLine] = _lines[_cursorLine][_cursorCol..];
                 _cursorCol = 0;
@@ -229,14 +268,24 @@ internal sealed class EditorPane
 
     private void MoveCursorLeft()
     {
-        if (_cursorCol > 0) _cursorCol--;
-        else if (_cursorLine > 0) { _cursorLine--; _cursorCol = _lines[_cursorLine].Length; }
+        if (_cursorCol > 0)
+            _cursorCol--;
+        else if (_cursorLine > 0)
+        {
+            _cursorLine--;
+            _cursorCol = _lines[_cursorLine].Length;
+        }
     }
 
     private void MoveCursorRight()
     {
-        if (_cursorCol < _lines[_cursorLine].Length) _cursorCol++;
-        else if (_cursorLine < _lines.Count - 1) { _cursorLine++; _cursorCol = 0; }
+        if (_cursorCol < _lines[_cursorLine].Length)
+            _cursorCol++;
+        else if (_cursorLine < _lines.Count - 1)
+        {
+            _cursorLine++;
+            _cursorCol = 0;
+        }
     }
 
     private void MoveCursorUp()
@@ -274,7 +323,8 @@ internal sealed class EditorPane
     //   top+2+: 2-char margin + editor lines
     public void Render(int top, int left, int width, int height)
     {
-        if (height < 2) return;
+        if (height < 2)
+            return;
 
         int contentHeight = Math.Max(1, height - 2);
         int contentWidth = Math.Max(1, width - 2); // 2-char left margin
@@ -305,7 +355,9 @@ internal sealed class EditorPane
             if (lineIndex < _lines.Count)
             {
                 // Left margin (2 chars)
-                System.Console.Write(GetMarginString(lineIndex, activeStart, activeEnd, showActiveMarker));
+                System.Console.Write(
+                    GetMarginString(lineIndex, activeStart, activeEnd, showActiveMarker)
+                );
                 // Content
                 var highlighted = KqlHighlighter.Highlight(_lines[lineIndex]);
                 var vis = Ansi.VisibleLength(highlighted);
@@ -331,12 +383,21 @@ internal sealed class EditorPane
             RenderAutocomplete(top, left, width);
     }
 
-    private string GetMarginString(int lineIndex, int activeStart, int activeEnd, bool showActiveMarker)
+    private string GetMarginString(
+        int lineIndex,
+        int activeStart,
+        int activeEnd,
+        bool showActiveMarker
+    )
     {
         if (lineIndex == _errorMarkerLine)
             return Ansi.LightRed("! ");
-        if (showActiveMarker && lineIndex >= activeStart && lineIndex <= activeEnd
-            && !string.IsNullOrWhiteSpace(_lines[lineIndex]))
+        if (
+            showActiveMarker
+            && lineIndex >= activeStart
+            && lineIndex <= activeEnd
+            && !string.IsNullOrWhiteSpace(_lines[lineIndex])
+        )
             return Ansi.Color("│ ", "\x1b[2;94m"); // dim bright-blue vertical bar
         return "  ";
     }
@@ -349,11 +410,13 @@ internal sealed class EditorPane
         {
             if (string.IsNullOrWhiteSpace(line))
             {
-                if (seenContent) seenBlankAfterContent = true;
+                if (seenContent)
+                    seenBlankAfterContent = true;
             }
             else
             {
-                if (seenBlankAfterContent) return true;
+                if (seenBlankAfterContent)
+                    return true;
                 seenContent = true;
             }
         }
@@ -375,16 +438,19 @@ internal sealed class EditorPane
             bool selected = i == _completionIndex;
 
             var text = (" " + item).PadRight(PopupWidth);
-            if (text.Length > PopupWidth) text = text[..PopupWidth];
+            if (text.Length > PopupWidth)
+                text = text[..PopupWidth];
 
-            System.Console.Write(selected
-                ? Ansi.Color(text, "\x1b[7m")  // reverse video for selection
-                : Ansi.Dim(text));
+            System.Console.Write(
+                selected
+                    ? Ansi.Color(text, "\x1b[7m") // reverse video for selection
+                    : Ansi.Dim(text)
+            );
         }
     }
 
-    private static void MoveTo(int row, int col)
-        => System.Console.Write($"\x1b[{row + 1};{col + 1}H");
+    private static void MoveTo(int row, int col) =>
+        System.Console.Write($"\x1b[{row + 1};{col + 1}H");
 
     private static void WriteCell(string text, int width)
     {

@@ -51,8 +51,8 @@ public class CliOptionGenerator : IIncrementalGenerator
         );
 
         // Secondary provider: find classes with [CliManualOptions] (non-partial option packs)
-        var manualOptsProvider = context.SyntaxProvider
-            .CreateSyntaxProvider(
+        var manualOptsProvider = context
+            .SyntaxProvider.CreateSyntaxProvider(
                 predicate: static (node, _) =>
                     node is ClassDeclarationSyntax c && c.AttributeLists.Count > 0,
                 transform: static (ctx, ct) =>
@@ -60,10 +60,8 @@ public class CliOptionGenerator : IIncrementalGenerator
                     if (ctx.Node is not ClassDeclarationSyntax)
                         return null;
                     var sym =
-                        ctx.SemanticModel.GetDeclaredSymbol(
-                            (ClassDeclarationSyntax)ctx.Node,
-                            ct
-                        ) as INamedTypeSymbol;
+                        ctx.SemanticModel.GetDeclaredSymbol((ClassDeclarationSyntax)ctx.Node, ct)
+                        as INamedTypeSymbol;
                     if (sym is null)
                         return null;
                     var allAliases = new List<string>();
@@ -129,6 +127,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         public List<OptionPropModel> Options = [];
         public List<ChildModel> Children = [];
         public bool HasExecuteHandler;
+
         /// <summary>
         /// CLI name returned by the <c>Name</c> property override, if it is a simple string literal.
         /// Used to detect child commands whose CLI name collides with this command's name.
@@ -525,8 +524,7 @@ public class CliOptionGenerator : IIncrementalGenerator
     /// </summary>
     static string? GetCliNameLiteral(INamedTypeSymbol cls)
     {
-        var nameProp = cls
-            .GetMembers("Name")
+        var nameProp = cls.GetMembers("Name")
             .OfType<IPropertySymbol>()
             .FirstOrDefault(static p => p.IsOverride && !p.IsStatic && p.Parameters.Length == 0);
         if (nameProp == null)
@@ -1012,9 +1010,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                 // throws a duplicate-key error in its token map. Flatten by adding the child's
                 // subcommands directly into the parent instead of wrapping them in a new Command.
                 if (model.CliName != null && cliName == model.CliName)
-                    sb.AppendLine(
-                        $"        {child.Name}?.AddSubcommandsTo(cmd);"
-                    );
+                    sb.AppendLine($"        {child.Name}?.AddSubcommandsTo(cmd);");
                 else
                     sb.AppendLine(
                         $"        if ({child.Name} is not null) cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
@@ -1099,8 +1095,10 @@ public class CliOptionGenerator : IIncrementalGenerator
         public string CliName = "";
         public List<string> Options = [];
         public List<NodeData> Children = [];
+
         /// <summary>Full type name of the ClassModel this node came from (used to avoid cycles).</summary>
         public string TypeFullName = "";
+
         /// <summary>Fully-qualified type name of the static helper method key.</summary>
         public string MethodKey = "";
     }
@@ -1135,7 +1133,14 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         // Build the node tree
         var visited = new HashSet<string>(StringComparer.Ordinal);
-        var root = BuildNodeData("Console.Cli.RootCommandDef", null, rootModel, dict, manualDict, visited);
+        var root = BuildNodeData(
+            "Console.Cli.RootCommandDef",
+            null,
+            rootModel,
+            dict,
+            manualDict,
+            visited
+        );
         if (root is null)
             return null;
 

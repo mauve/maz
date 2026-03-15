@@ -24,36 +24,42 @@ public static class ResourceNameResolver
     /// When the resource group is not provided (via combined format or --resource-group / env var),
     /// performs an ARM lookup using <paramref name="resourceType"/> to find the resource.
     /// </summary>
-    public static Task<(string SubscriptionId, string ResourceGroupName, string ResourceName)>
+    public static Task<(
+        string SubscriptionId,
+        string ResourceGroupName,
+        string ResourceName
+    )> ResolveAsync(
+        string rawValue,
+        ResourceGroupOptionPack resourceGroup,
+        ArmClient armClient,
+        string resourceType,
+        CancellationToken ct = default
+    ) =>
         ResolveAsync(
-            string rawValue,
-            ResourceGroupOptionPack resourceGroup,
-            ArmClient armClient,
-            string resourceType,
-            CancellationToken ct = default
-        )
-    => ResolveAsync(
-        rawValue,
-        resourceGroup.Subscription.SubscriptionId,
-        resourceGroup.ResourceGroupName,
-        armClient,
-        resourceType,
-        ct
-    );
+            rawValue,
+            resourceGroup.Subscription.SubscriptionId,
+            resourceGroup.ResourceGroupName,
+            armClient,
+            resourceType,
+            ct
+        );
 
     /// <summary>
     /// Core resolution logic. Accepts the explicit subscription/resource-group strings directly,
     /// as read from the corresponding option pack properties (null when not supplied by the user).
     /// </summary>
-    internal static async Task<(string SubscriptionId, string ResourceGroupName, string ResourceName)>
-        ResolveAsync(
-            string rawValue,
-            string? explicitSubscriptionId,
-            string? explicitResourceGroupName,
-            ArmClient armClient,
-            string resourceType,
-            CancellationToken ct = default
-        )
+    internal static async Task<(
+        string SubscriptionId,
+        string ResourceGroupName,
+        string ResourceName
+    )> ResolveAsync(
+        string rawValue,
+        string? explicitSubscriptionId,
+        string? explicitResourceGroupName,
+        ArmClient armClient,
+        string resourceType,
+        CancellationToken ct = default
+    )
     {
         var parsed = ResourceIdentifierParser.Parse(rawValue);
 
@@ -72,8 +78,7 @@ public static class ResourceNameResolver
         // Resolve effective subscription string (no ARM call yet)
         var effectiveSub = combinedHasSub
             ? ResourceIdentifierParser.NormalizeSubscriptionSegment(parsed.SubscriptionSegment)
-            : explicitSubscriptionId
-                ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+            : explicitSubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
 
         // Resolve effective resource group string
         var effectiveRg = combinedHasRg
@@ -97,7 +102,9 @@ public static class ResourceNameResolver
 
         var matches = new List<(string Rg, string Name)>();
         var filter = $"resourceType eq '{resourceType}' and name eq '{resourceName}'";
-        await foreach (var resource in sub.GetGenericResourcesAsync(filter: filter, cancellationToken: ct))
+        await foreach (
+            var resource in sub.GetGenericResourcesAsync(filter: filter, cancellationToken: ct)
+        )
         {
             var rg = resource.Id?.ResourceGroupName;
             if (rg is not null)

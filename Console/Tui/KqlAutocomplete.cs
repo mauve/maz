@@ -5,28 +5,111 @@ internal static class KqlAutocomplete
 {
     private static readonly string[] KqlKeywords =
     [
-        "where", "summarize", "by", "extend", "project", "distinct", "top", "limit", "take",
-        "join", "union", "let", "as", "render", "make-series", "mv-expand", "parse", "range",
-        "sort", "order", "search", "print", "getschema", "evaluate", "datatable",
-        "count", "sum", "avg", "min", "max", "countif", "sumif", "dcount", "dcountif",
-        "tostring", "toint", "tolong", "todouble", "todatetime", "totimespan",
-        "format_datetime", "format_timespan", "now", "ago", "bin", "floor", "ceiling", "round",
-        "strlen", "substring", "split", "strcat", "toupper", "tolower", "trim", "replace",
-        "parse_json", "todynamic", "tobool", "iff", "case", "coalesce",
-        "isempty", "isnotempty", "isnull", "isnotnull", "true", "false",
-        "make_list", "make_set", "percentile", "stdev", "any",
-        "startofday", "endofday", "startofmonth", "endofmonth",
-        "array_length", "bag_keys", "strcat_array", "pack_all", "pack",
-        "and", "or", "not", "asc", "desc", "kind", "on", "with",
-        "project-away", "project-rename", "project-reorder", "project-keep", "project-smart",
-        "mv-apply", "make-series",
+        "where",
+        "summarize",
+        "by",
+        "extend",
+        "project",
+        "distinct",
+        "top",
+        "limit",
+        "take",
+        "join",
+        "union",
+        "let",
+        "as",
+        "render",
+        "make-series",
+        "mv-expand",
+        "parse",
+        "range",
+        "sort",
+        "order",
+        "search",
+        "print",
+        "getschema",
+        "evaluate",
+        "datatable",
+        "count",
+        "sum",
+        "avg",
+        "min",
+        "max",
+        "countif",
+        "sumif",
+        "dcount",
+        "dcountif",
+        "tostring",
+        "toint",
+        "tolong",
+        "todouble",
+        "todatetime",
+        "totimespan",
+        "format_datetime",
+        "format_timespan",
+        "now",
+        "ago",
+        "bin",
+        "floor",
+        "ceiling",
+        "round",
+        "strlen",
+        "substring",
+        "split",
+        "strcat",
+        "toupper",
+        "tolower",
+        "trim",
+        "replace",
+        "parse_json",
+        "todynamic",
+        "tobool",
+        "iff",
+        "case",
+        "coalesce",
+        "isempty",
+        "isnotempty",
+        "isnull",
+        "isnotnull",
+        "true",
+        "false",
+        "make_list",
+        "make_set",
+        "percentile",
+        "stdev",
+        "any",
+        "startofday",
+        "endofday",
+        "startofmonth",
+        "endofmonth",
+        "array_length",
+        "bag_keys",
+        "strcat_array",
+        "pack_all",
+        "pack",
+        "and",
+        "or",
+        "not",
+        "asc",
+        "desc",
+        "kind",
+        "on",
+        "with",
+        "project-away",
+        "project-rename",
+        "project-reorder",
+        "project-keep",
+        "project-smart",
+        "mv-apply",
+        "make-series",
     ];
 
     public static async Task<List<string>> GetCompletionsAsync(
         string prefix,
         string fullQuery,
         SchemaProvider schema,
-        CancellationToken ct = default)
+        CancellationToken ct = default
+    )
     {
         if (string.IsNullOrEmpty(prefix))
             return [];
@@ -52,14 +135,19 @@ internal static class KqlAutocomplete
             schemaCompletions = await schema.GetTablesAsync(ct);
         }
 
-        return [.. KqlKeywords
-            .Concat(schemaCompletions)
-            .Where(c => c.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                        && c.Length > prefix.Length)
-            .Distinct(StringComparer.OrdinalIgnoreCase)
-            .OrderBy(c => c.StartsWith(prefix, StringComparison.Ordinal) ? 0 : 1)
-            .ThenBy(c => c, StringComparer.OrdinalIgnoreCase)
-            .Take(20)];
+        return
+        [
+            .. KqlKeywords
+                .Concat(schemaCompletions)
+                .Where(c =>
+                    c.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                    && c.Length > prefix.Length
+                )
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(c => c.StartsWith(prefix, StringComparison.Ordinal) ? 0 : 1)
+                .ThenBy(c => c, StringComparer.OrdinalIgnoreCase)
+                .Take(20),
+        ];
     }
 
     /// <summary>
@@ -75,13 +163,25 @@ internal static class KqlAutocomplete
             char c = query[i];
             if (inString)
             {
-                if (c == '\\') { i++; continue; }
-                if (c == stringChar) inString = false;
+                if (c == '\\')
+                {
+                    i++;
+                    continue;
+                }
+                if (c == stringChar)
+                    inString = false;
                 continue;
             }
-            if (c == '"' || c == '\'') { inString = true; stringChar = c; continue; }
-            if (c == '/' && i + 1 < query.Length && query[i + 1] == '/') break;
-            if (c == '|') return true;
+            if (c == '"' || c == '\'')
+            {
+                inString = true;
+                stringChar = c;
+                continue;
+            }
+            if (c == '/' && i + 1 < query.Length && query[i + 1] == '/')
+                break;
+            if (c == '|')
+                return true;
         }
         return false;
     }
@@ -96,10 +196,12 @@ internal static class KqlAutocomplete
             int end = 0;
             while (end < line.Length && (char.IsLetterOrDigit(line[end]) || line[end] == '_'))
                 end++;
-            if (end == 0) continue;
+            if (end == 0)
+                continue;
             var word = line[..end];
             return knownTables.FirstOrDefault(t =>
-                string.Equals(t, word, StringComparison.OrdinalIgnoreCase));
+                string.Equals(t, word, StringComparison.OrdinalIgnoreCase)
+            );
         }
         return null;
     }

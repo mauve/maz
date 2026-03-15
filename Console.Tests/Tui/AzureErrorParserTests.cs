@@ -9,12 +9,17 @@ public class AzureErrorParserTests
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     /// <summary>Wraps a JSON body in the "Content: {body} Headers: ..." envelope that the Azure SDK produces.</summary>
-    private static string Sdk(string leadText, string jsonBody, string statusCode = "400 (Bad Request)")
-        => $"{leadText} Status: {statusCode} ErrorCode: BadArgumentError " +
-           $"Content: {jsonBody} " +
-           $"Headers: Date: Sun, 15 Mar 2026 12:00:00 GMT Connection: keep-alive";
+    private static string Sdk(
+        string leadText,
+        string jsonBody,
+        string statusCode = "400 (Bad Request)"
+    ) =>
+        $"{leadText} Status: {statusCode} ErrorCode: BadArgumentError "
+        + $"Content: {jsonBody} "
+        + $"Headers: Date: Sun, 15 Mar 2026 12:00:00 GMT Connection: keep-alive";
 
-    private static string Sdk(string jsonBody) => Sdk("The request had some invalid properties", jsonBody);
+    private static string Sdk(string jsonBody) =>
+        Sdk("The request had some invalid properties", jsonBody);
 
     // ── Real SDK format (Content: on its own line) ────────────────────────────
 
@@ -28,19 +33,22 @@ public class AzureErrorParserTests
     {
         // Reproduce the exact multiline format produced by Azure SDK RequestFailedException
         var raw =
-            "The request had some invalid properties\n" +
-            "Status: 400 (Bad Request)\n" +
-            "ErrorCode: BadArgumentError\n" +
-            "Content:\n" +
-            "{\"error\":{\"code\":\"BadArgumentError\",\"message\":\"The request had some invalid properties\"," +
-            "\"innererror\":{\"code\":\"SyntaxError\",\"message\":\"A recognition error occurred in the query.\"," +
-            "\"innererror\":{\"code\":\"SYN0002\",\"message\":\"Query could not be parsed at '|' on line [2,20]\"," +
-            "\"line\":2,\"pos\":20,\"token\":\"|\"}}}}";
+            "The request had some invalid properties\n"
+            + "Status: 400 (Bad Request)\n"
+            + "ErrorCode: BadArgumentError\n"
+            + "Content:\n"
+            + "{\"error\":{\"code\":\"BadArgumentError\",\"message\":\"The request had some invalid properties\","
+            + "\"innererror\":{\"code\":\"SyntaxError\",\"message\":\"A recognition error occurred in the query.\","
+            + "\"innererror\":{\"code\":\"SYN0002\",\"message\":\"Query could not be parsed at '|' on line [2,20]\","
+            + "\"line\":2,\"pos\":20,\"token\":\"|\"}}}}";
 
         var query = "SecurityEvent\n| where TimeGenerated > ago(1h) | badtoken";
         var result = AzureErrorParser.Parse(raw, query);
 
-        Assert.AreEqual("SYN0002: Query could not be parsed at '|' on line [2,20]", result.DisplayMessage);
+        Assert.AreEqual(
+            "SYN0002: Query could not be parsed at '|' on line [2,20]",
+            result.DisplayMessage
+        );
         Assert.AreEqual(2, result.LineNumber);
         Assert.AreEqual("| where TimeGenerated > ago(1h) | badtoken", result.QueryLine);
         Assert.AreEqual(19, result.Column);
@@ -51,19 +59,22 @@ public class AzureErrorParserTests
     {
         // SDK also embeds literal \n inside JSON string values (doubly-invalid)
         var raw =
-            "The request had some invalid properties\n" +
-            "Status: 400 (Bad Request)\n" +
-            "Content:\n" +
-            "{\"error\":{\"message\":\"The request had some invalid\n  properties\"," +
-            "\"code\":\"BadArgumentError\"," +
-            "\"innererror\":{\"code\":\"SYN0002\"," +
-            "\"message\":\"Query could not be parsed at '|' on line [2,20]\"," +
-            "\"line\":2,\"pos\":20,\"token\":\"|\"}}}\n" +
-            "Headers:\nDate: Sun, 15 Mar 2026 13:00:00 GMT";
+            "The request had some invalid properties\n"
+            + "Status: 400 (Bad Request)\n"
+            + "Content:\n"
+            + "{\"error\":{\"message\":\"The request had some invalid\n  properties\","
+            + "\"code\":\"BadArgumentError\","
+            + "\"innererror\":{\"code\":\"SYN0002\","
+            + "\"message\":\"Query could not be parsed at '|' on line [2,20]\","
+            + "\"line\":2,\"pos\":20,\"token\":\"|\"}}}\n"
+            + "Headers:\nDate: Sun, 15 Mar 2026 13:00:00 GMT";
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("SYN0002: Query could not be parsed at '|' on line [2,20]", result.DisplayMessage);
+        Assert.AreEqual(
+            "SYN0002: Query could not be parsed at '|' on line [2,20]",
+            result.DisplayMessage
+        );
         Assert.AreEqual(2, result.LineNumber);
     }
 
@@ -76,7 +87,10 @@ public class AzureErrorParserTests
         var result = AzureErrorParser.Parse(raw);
 
         Assert.IsFalse(result.DisplayMessage.Contains('\n'), "No newlines in display message");
-        Assert.IsFalse(result.DisplayMessage.Contains('\r'), "No carriage returns in display message");
+        Assert.IsFalse(
+            result.DisplayMessage.Contains('\r'),
+            "No carriage returns in display message"
+        );
     }
 
     // ── SYN errors — doubly-nested innererror with position ───────────────────
@@ -84,36 +98,47 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_SynError_DoublyNested_ExtractsInnermostCodeAndMessage()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"BadArgumentError","message":"The request had some invalid properties",
             "innererror":{"code":"SyntaxError","message":"A recognition error occurred in the query.",
             "innererror":{"code":"SYN0002","message":"Query could not be parsed at '|' on line [2,20]",
             "line":2,"pos":20,"token":"|"}}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("SYN0002: Query could not be parsed at '|' on line [2,20]", result.DisplayMessage);
+        Assert.AreEqual(
+            "SYN0002: Query could not be parsed at '|' on line [2,20]",
+            result.DisplayMessage
+        );
         Assert.AreEqual(2, result.LineNumber);
         Assert.IsNull(result.QueryLine, "No query text supplied");
-        Assert.IsNull(result.Column,    "No query text supplied");
+        Assert.IsNull(result.Column, "No query text supplied");
     }
 
     [TestMethod]
     public void Parse_SynError_DoublyNested_WithQueryText_ExtractsLineAndColumn()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"BadArgumentError","message":"...",
             "innererror":{"code":"SyntaxError","message":"...",
             "innererror":{"code":"SYN0002","message":"Query could not be parsed at '|' on line [2,20]",
             "line":2,"pos":20,"token":"|"}}}}
-            """);
+            """
+        );
 
-        var query = "SecurityEvent\n| where TimeGenerated > ago(1h) | summarize count() by Computer\n| take 10";
+        var query =
+            "SecurityEvent\n| where TimeGenerated > ago(1h) | summarize count() by Computer\n| take 10";
         var result = AzureErrorParser.Parse(raw, query);
 
         Assert.AreEqual(2, result.LineNumber);
-        Assert.AreEqual("| where TimeGenerated > ago(1h) | summarize count() by Computer", result.QueryLine);
+        Assert.AreEqual(
+            "| where TimeGenerated > ago(1h) | summarize count() by Computer",
+            result.QueryLine
+        );
         Assert.AreEqual(19, result.Column, "pos=20 (1-based) → column 19 (0-based)");
     }
 
@@ -121,35 +146,47 @@ public class AzureErrorParserTests
     public void Parse_SynError_WithEmbeddedNewlinesInJson_ParsesSuccessfully()
     {
         // Azure SDK embeds literal \n inside JSON string values — this is the real-world bug
-        var raw = "The request had some invalid properties Status: 400 (Bad Request) " +
-                  "Content: {\"error\":{\"message\":\"The request had some invalid\n  properties\"," +
-                  "\"code\":\"BadArgumentError\",\"innererror\":{\"code\":\"SyntaxError\"," +
-                  "\"message\":\"A recognition error occurred\n  in the query.\"," +
-                  "\"innererror\":{\"code\":\"SYN0002\"," +
-                  "\"message\":\"Query could not be parsed at '|' on line [2,20]\"," +
-                  "\"line\":2,\"pos\":20,\"token\":\"|\"}}}} " +
-                  "Headers: Date: Sun, 15 Mar 2026 13:00:00 GMT";
+        var raw =
+            "The request had some invalid properties Status: 400 (Bad Request) "
+            + "Content: {\"error\":{\"message\":\"The request had some invalid\n  properties\","
+            + "\"code\":\"BadArgumentError\",\"innererror\":{\"code\":\"SyntaxError\","
+            + "\"message\":\"A recognition error occurred\n  in the query.\","
+            + "\"innererror\":{\"code\":\"SYN0002\","
+            + "\"message\":\"Query could not be parsed at '|' on line [2,20]\","
+            + "\"line\":2,\"pos\":20,\"token\":\"|\"}}}} "
+            + "Headers: Date: Sun, 15 Mar 2026 13:00:00 GMT";
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("SYN0002: Query could not be parsed at '|' on line [2,20]", result.DisplayMessage);
+        Assert.AreEqual(
+            "SYN0002: Query could not be parsed at '|' on line [2,20]",
+            result.DisplayMessage
+        );
         Assert.AreEqual(2, result.LineNumber);
     }
 
     [TestMethod]
     public void Parse_SynError_DisplayMessage_ContainsNoRawJson()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"BadArgumentError","message":"...",
             "innererror":{"code":"SYN0002","message":"Syntax error near '('","line":3,"pos":5}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
         StringAssert.Contains(result.DisplayMessage, "SYN0002");
         StringAssert.Contains(result.DisplayMessage, "Syntax error near '('");
-        Assert.IsFalse(result.DisplayMessage.Contains('{'), "No raw JSON braces in display message");
-        Assert.IsFalse(result.DisplayMessage.Contains("BadArgumentError"), "Outer code suppressed by inner");
+        Assert.IsFalse(
+            result.DisplayMessage.Contains('{'),
+            "No raw JSON braces in display message"
+        );
+        Assert.IsFalse(
+            result.DisplayMessage.Contains("BadArgumentError"),
+            "Outer code suppressed by inner"
+        );
     }
 
     // ── SEM errors — single innererror level with position ────────────────────
@@ -157,27 +194,34 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_SemError_SingleInnererror_ExtractsPositionFromInnererror()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"BadArgumentError",
             "message":"Failed to resolve scalar expression named 'foo'",
             "innererror":{"code":"SEM0003",
             "message":"Failed to resolve scalar expression named 'foo'",
             "line":1,"pos":14}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("SEM0003: Failed to resolve scalar expression named 'foo'", result.DisplayMessage);
+        Assert.AreEqual(
+            "SEM0003: Failed to resolve scalar expression named 'foo'",
+            result.DisplayMessage
+        );
         Assert.AreEqual(1, result.LineNumber);
     }
 
     [TestMethod]
     public void Parse_SemError_WithQueryText_ExtractsColumnFromPos()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"BadArgumentError","message":"...",
             "innererror":{"code":"SEM0003","message":"Unknown column 'foo'","line":1,"pos":14}}}
-            """);
+            """
+        );
 
         var query = "SecurityEvent | where foo > 0";
         var result = AzureErrorParser.Parse(raw, query);
@@ -194,11 +238,15 @@ public class AzureErrorParserTests
         var raw = Sdk(
             "Query result exceeds the maximum allowed size",
             "{\"error\":{\"code\":\"LIM0001\",\"message\":\"Query result exceeds the maximum allowed size (67108864 bytes).\"}}",
-            "400 (Bad Request)");
+            "400 (Bad Request)"
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("LIM0001: Query result exceeds the maximum allowed size (67108864 bytes).", result.DisplayMessage);
+        Assert.AreEqual(
+            "LIM0001: Query result exceeds the maximum allowed size (67108864 bytes).",
+            result.DisplayMessage
+        );
         Assert.IsNull(result.LineNumber, "LIM errors have no position");
         Assert.IsNull(result.QueryLine);
     }
@@ -211,11 +259,15 @@ public class AzureErrorParserTests
         var raw = Sdk(
             "Workspace not found",
             "{\"error\":{\"code\":\"WorkspaceNotFoundError\",\"message\":\"The workspace with ID 'aaa-bbb' was not found.\"}}",
-            "404 (Not Found)");
+            "404 (Not Found)"
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.AreEqual("WorkspaceNotFoundError: The workspace with ID 'aaa-bbb' was not found.", result.DisplayMessage);
+        Assert.AreEqual(
+            "WorkspaceNotFoundError: The workspace with ID 'aaa-bbb' was not found.",
+            result.DisplayMessage
+        );
         Assert.IsNull(result.LineNumber);
     }
 
@@ -225,7 +277,8 @@ public class AzureErrorParserTests
         var raw = Sdk(
             "Too many requests",
             "{\"error\":{\"code\":\"TooManyRequests\",\"message\":\"The request is throttled. Please wait before retrying.\"}}",
-            "429 (Too Many Requests)");
+            "429 (Too Many Requests)"
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
@@ -239,7 +292,8 @@ public class AzureErrorParserTests
         var raw = Sdk(
             "Authorization failed",
             "{\"error\":{\"code\":\"AuthorizationFailedError\",\"message\":\"The client does not have authorization to perform action.\"}}",
-            "403 (Forbidden)");
+            "403 (Forbidden)"
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
@@ -251,9 +305,10 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_RootLevelCodeMessage_NoErrorWrapper_Extracted()
     {
-        var raw = "Operation failed Status: 400 (Bad Request) " +
-                  "Content: {\"code\":\"InvalidQuery\",\"message\":\"The query is not valid.\"} " +
-                  "Headers: x: y";
+        var raw =
+            "Operation failed Status: 400 (Bad Request) "
+            + "Content: {\"code\":\"InvalidQuery\",\"message\":\"The query is not valid.\"} "
+            + "Headers: x: y";
 
         var result = AzureErrorParser.Parse(raw);
 
@@ -265,9 +320,11 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_WithQueryText_LineOneError_ExtractsFirstLine()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"innererror":{"code":"SYN0001","message":"bad token","line":1,"pos":3}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw, "abc\n| take 10");
 
@@ -278,9 +335,11 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_ColumnBeyondLineLength_ClampedToLineLength()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"innererror":{"code":"SYN0001","message":"msg","line":1,"pos":999}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw, "short");
 
@@ -291,9 +350,11 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_LineNumberBeyondQueryLines_QueryLineIsNull()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"innererror":{"code":"SYN0001","message":"msg","line":99,"pos":1}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw, "only one line");
 
@@ -304,9 +365,11 @@ public class AzureErrorParserTests
     [TestMethod]
     public void Parse_NullQueryText_PositionFieldsAreNull()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"innererror":{"code":"SYN0002","message":"error","line":2,"pos":5}}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw, queryText: null);
 
@@ -381,21 +444,32 @@ public class AzureErrorParserTests
         var result = AzureErrorParser.Parse(raw);
 
         Assert.IsFalse(result.DisplayMessage.Contains("Headers:"), "HTTP headers must not appear");
-        Assert.IsFalse(result.DisplayMessage.Contains("Date:"),    "HTTP date must not appear");
-        Assert.IsFalse(result.DisplayMessage.Contains("Content:"), "Content marker must not appear");
+        Assert.IsFalse(result.DisplayMessage.Contains("Date:"), "HTTP date must not appear");
+        Assert.IsFalse(
+            result.DisplayMessage.Contains("Content:"),
+            "Content marker must not appear"
+        );
     }
 
     [TestMethod]
     public void Parse_DisplayMessage_NeverContainsCorrelationId()
     {
-        var raw = Sdk("""
+        var raw = Sdk(
+            """
             {"error":{"code":"SEM0003","message":"Unknown column",
             "correlationId":"d6563826-d091-4cbc-9a19-bdd196024a9c"}}
-            """);
+            """
+        );
 
         var result = AzureErrorParser.Parse(raw);
 
-        Assert.IsFalse(result.DisplayMessage.Contains("correlationId"), "Correlation ID must be stripped");
-        Assert.IsFalse(result.DisplayMessage.Contains("d6563826"),      "Correlation ID value must be stripped");
+        Assert.IsFalse(
+            result.DisplayMessage.Contains("correlationId"),
+            "Correlation ID must be stripped"
+        );
+        Assert.IsFalse(
+            result.DisplayMessage.Contains("d6563826"),
+            "Correlation ID value must be stripped"
+        );
     }
 }

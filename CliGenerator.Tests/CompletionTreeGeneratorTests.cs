@@ -118,7 +118,9 @@ public class CompletionTreeGeneratorTests
     public void GeneratesCompletionTreeFile()
     {
         var result = CliGeneratorTestHelpers.RunAndGetResult(Source);
-        var tree = result.GeneratedTrees.SingleOrDefault(t => t.FilePath.EndsWith("CompletionTree.g.cs"));
+        var tree = result.GeneratedTrees.SingleOrDefault(t =>
+            t.FilePath.EndsWith("CompletionTree.g.cs")
+        );
         Assert.IsNotNull(tree, "CompletionTree.g.cs should be generated");
     }
 
@@ -126,7 +128,9 @@ public class CompletionTreeGeneratorTests
     public void RootNodeContainsAllTopLevelCommands()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
         // The root node's children should include "foo" and "bar"
         Assert.IsTrue(text.Contains("\"foo\""), "Root children should contain 'foo'");
@@ -137,7 +141,9 @@ public class CompletionTreeGeneratorTests
     public void ChildNodeContainsSubcommands()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
         // FooCommandDef has a "list" child
         Assert.IsTrue(text.Contains("\"list\""), "Foo node should contain 'list' subcommand");
@@ -147,40 +153,69 @@ public class CompletionTreeGeneratorTests
     public void AdvancedOptionsAreExcluded()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
-        Assert.IsFalse(text.Contains("\"--secret\""), "Advanced options should not appear in the completion tree");
+        Assert.IsFalse(
+            text.Contains("\"--secret\""),
+            "Advanced options should not appear in the completion tree"
+        );
     }
 
     [TestMethod]
     public void ManualOptionsFromAttributeAreIncluded()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
-        Assert.IsTrue(text.Contains("\"--verbose\""), "[CliManualOptions] aliases should be in the tree");
-        Assert.IsTrue(text.Contains("\"--detailed-errors\""), "[CliManualOptions] aliases should be in the tree");
+        Assert.IsTrue(
+            text.Contains("\"--verbose\""),
+            "[CliManualOptions] aliases should be in the tree"
+        );
+        Assert.IsTrue(
+            text.Contains("\"--detailed-errors\""),
+            "[CliManualOptions] aliases should be in the tree"
+        );
     }
 
     [TestMethod]
     public void GeneratedOptionsFromPartialPackAreIncluded()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
         // SubOptionPack has "--output" / "-o"
-        Assert.IsTrue(text.Contains("\"--output\""), "Generated options from partial OptionPack should be included");
-        Assert.IsTrue(text.Contains("\"-o\""), "Extra aliases from partial OptionPack should be included");
+        Assert.IsTrue(
+            text.Contains("\"--output\""),
+            "Generated options from partial OptionPack should be included"
+        );
+        Assert.IsTrue(
+            text.Contains("\"-o\""),
+            "Extra aliases from partial OptionPack should be included"
+        );
     }
 
     [TestMethod]
     public void DynamicProvidersMapIsGenerated()
     {
         var text = CliGeneratorTestHelpers.GetGeneratedText(
-            CliGeneratorTestHelpers.RunAndGetResult(Source), "CompletionTree.g.cs");
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
 
         // DynamicProviders dictionary should be emitted
-        Assert.IsTrue(text.Contains("DynamicProviders"), "DynamicProviders field should be emitted");
-        Assert.IsTrue(text.Contains("IReadOnlyDictionary"), "DynamicProviders should use IReadOnlyDictionary");
+        Assert.IsTrue(
+            text.Contains("DynamicProviders"),
+            "DynamicProviders field should be emitted"
+        );
+        Assert.IsTrue(
+            text.Contains("IReadOnlyDictionary"),
+            "DynamicProviders should use IReadOnlyDictionary"
+        );
     }
 }

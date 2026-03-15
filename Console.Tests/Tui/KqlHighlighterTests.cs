@@ -123,8 +123,11 @@ public class KqlHighlighterTests
         var asIdentifier = KqlHighlighter.Highlight("count");
 
         // The highlighted forms must differ when ANSI is on
-        Assert.AreNotEqual(asFunction, asIdentifier,
-            "'count()' and 'count' should produce different highlighted output");
+        Assert.AreNotEqual(
+            asFunction,
+            asIdentifier,
+            "'count()' and 'count' should produce different highlighted output"
+        );
     }
 
     [TestMethod]
