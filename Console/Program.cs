@@ -65,6 +65,15 @@ foreach (var cmd in AllCommands(rootCmd))
     helpCommands.Action = new CommandTreeAction(cmd, helpCommands);
     cmd.Add(helpCommands);
 
+    var helpCommandsFlat = new Option<string?>("--help-commands-flat", [])
+    {
+        Description = "Show all commands as a flat list. Optionally filter by name or alias.",
+        Hidden = !isRoot,
+        Arity = ArgumentArity.ZeroOrOne,
+    };
+    helpCommandsFlat.Action = new CommandFlatAction(cmd, helpCommandsFlat);
+    cmd.Add(helpCommandsFlat);
+
     const string helpGroup = "Help";
     if (isRoot)
     {
@@ -75,6 +84,7 @@ foreach (var cmd in AllCommands(rootCmd))
             helpOpt.Description = "Show usage information for the current command.";
         HelpGroupRegistry.Tag(helpMore, helpGroup, "");
         HelpGroupRegistry.Tag(helpCommands, helpGroup, "");
+        HelpGroupRegistry.Tag(helpCommandsFlat, helpGroup, "");
     }
     else
     {

@@ -34,10 +34,11 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
     // Child packs — declared HERE so the generator can see them
     // -----------------------------------------------------------------------
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     // -----------------------------------------------------------------------
