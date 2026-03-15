@@ -50,6 +50,16 @@ internal static class WizardUi
         );
     }
 
+    /// <summary>Moves the cursor to the specified 1-indexed terminal row and column.</summary>
+    public static void MoveTo(int row, int col = 1) =>
+        System.Console.Write($"\x1b[{row};{col}H");
+
+    public static int GetTermHeight()
+    {
+        try { return Math.Clamp(System.Console.WindowHeight, 10, 500); }
+        catch { return 24; }
+    }
+
     private static string StripAnsi(string s) =>
         System.Text.RegularExpressions.Regex.Replace(s, @"\x1b\[[0-9;]*m", "");
 }

@@ -10,7 +10,18 @@ internal static class BootstrapAnimator
     private const int PauseAfterTypingMs = 600;
     private const int LoopPauseMs = 2200;
 
-    // ── Welcome logo with shimmer ──────────────────────────────────────────────
+    // ── Demo line counts (space each animation needs in the TUI demo area) ──────
+
+    /// <summary>Lines needed by the subscriptions demo (typewriter + 3 items + hint = 5).</summary>
+    internal const int SubscriptionsDemoLines = 5;
+    /// <summary>Lines needed by the resource-groups demo (same dropdown + 5-line final state).</summary>
+    internal const int ResourceGroupsDemoLines = 5;
+    /// <summary>Lines needed by the resource-names demo (same as subscriptions).</summary>
+    internal const int ResourceNamesDemoLines = 5;
+    /// <summary>Lines needed by the kusto demo.</summary>
+    internal const int KustoDemoLines = 14;
+
+    // ── Welcome logo ───────────────────────────────────────────────────────────
 
     public static async Task PlayWelcomeLogoAsync(int contentWidth, CancellationToken ct)
     {
@@ -61,14 +72,14 @@ internal static class BootstrapAnimator
         System.Console.WriteLine(new string(' ', logoIndent) + tagline);
     }
 
-    // ── Demo animations ────────────────────────────────────────────────────────
+    // ── Demo animations (absolute-row TUI versions) ────────────────────────────
 
     /// <summary>
     /// Loops the subscription tab-completion demo until <paramref name="ct"/> is cancelled.
-    /// On cancellation the method erases any partial output and returns with the cursor at the
-    /// position it was when the demo started (the blank line below content).
+    /// Writes into the reserved demo area starting at 1-indexed terminal row <paramref name="startRow"/>.
+    /// On cancellation the area is cleared and the method returns.
     /// </summary>
-    public static async Task PlaySubscriptionsAsync(CancellationToken ct)
+    public static async Task PlaySubscriptionsAsync(int startRow, CancellationToken ct)
     {
         var command = "maz storage account list --subscription-id ";
         var items = new[]
@@ -78,41 +89,35 @@ internal static class BootstrapAnimator
             ("Staging",     "/s/Staging:a1b2c3d4-0000-0000-0000-000000000003"),
         };
 
-        // linesAbove tracks how far below the demo-start line the cursor currently is.
-        // Used to erase partial output on cancellation.
-        var linesAbove = 0;
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                linesAbove = 0;
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
                 if (ct.IsCancellationRequested) break;
 
-                // ShowDropdownAsync always erases its own items (via finally), so after it
-                // returns or throws, cursor is 1 line below the typewriter line.
-                try { await ShowDropdownAsync(items, selectedIndex: 0, ct); }
-                finally { linesAbove = 1; }
+                await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
                 if (ct.IsCancellationRequested) break;
 
-                System.Console.WriteLine("  $ " + Ansi.Green(command + items[0].Item2));
-                linesAbove = 2;
-                System.Console.WriteLine();
-                linesAbove = 3;
+                // Overwrite typewriter row with green result; rows below are already cleared.
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
+                System.Console.Write("  $ " + Ansi.Green(command + items[0].Item2));
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
                 if (ct.IsCancellationRequested) break;
 
-                EraseLines(linesAbove);
-                linesAbove = 0;
+                ClearDemoArea(startRow, SubscriptionsDemoLines);
             }
             catch (OperationCanceledException) { break; }
         }
 
-        EraseLines(linesAbove);
+        ClearDemoArea(startRow, SubscriptionsDemoLines);
     }
 
-    public static async Task PlayResourceGroupsAsync(CancellationToken ct)
+    public static async Task PlayResourceGroupsAsync(int startRow, CancellationToken ct)
     {
         var command = "maz storage account list --resource-group ";
         var items = new[]
@@ -122,43 +127,39 @@ internal static class BootstrapAnimator
             ("staging-rg",     "eastus2"),
         };
 
-        var linesAbove = 0;
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                linesAbove = 0;
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
                 if (ct.IsCancellationRequested) break;
 
-                try { await ShowDropdownAsync(items.Select(i => (i.Item1, i.Item2)).ToArray(), selectedIndex: 0, ct); }
-                finally { linesAbove = 1; }
+                await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
                 if (ct.IsCancellationRequested) break;
 
-                System.Console.WriteLine("  $ " + Ansi.Green(command + items[0].Item1));
-                linesAbove = 2;
-                System.Console.WriteLine();
-                linesAbove = 3;
-                System.Console.WriteLine("  " + Ansi.Dim("[global] subscription-id + resource-group set → no flags needed"));
-                linesAbove = 4;
-                System.Console.WriteLine("  $ " + Ansi.Green("maz storage account list"));
-                linesAbove = 5;
-                System.Console.WriteLine();
-                linesAbove = 6;
+                WizardUi.MoveTo(startRow);     System.Console.Write("\x1b[2K");
+                System.Console.Write("  $ " + Ansi.Green(command + items[0].Item1));
+                WizardUi.MoveTo(startRow + 1); System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + 2); System.Console.Write("\x1b[2K");
+                System.Console.Write("  " + Ansi.Dim("[global] subscription-id + resource-group set → no flags needed"));
+                WizardUi.MoveTo(startRow + 3); System.Console.Write("\x1b[2K");
+                System.Console.Write("  $ " + Ansi.Green("maz storage account list"));
+                WizardUi.MoveTo(startRow + 4); System.Console.Write("\x1b[2K");
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
                 if (ct.IsCancellationRequested) break;
 
-                EraseLines(linesAbove);
-                linesAbove = 0;
+                ClearDemoArea(startRow, ResourceGroupsDemoLines);
             }
             catch (OperationCanceledException) { break; }
         }
 
-        EraseLines(linesAbove);
+        ClearDemoArea(startRow, ResourceGroupsDemoLines);
     }
 
-    public static async Task PlayResourceNamesAsync(CancellationToken ct)
+    public static async Task PlayResourceNamesAsync(int startRow, CancellationToken ct)
     {
         var command = "maz storage account show --name ";
         var items = new[]
@@ -168,45 +169,37 @@ internal static class BootstrapAnimator
             ("devstoreaccount", "Standard_LRS"),
         };
 
-        var linesAbove = 0;
         while (!ct.IsCancellationRequested)
         {
             try
             {
-                linesAbove = 0;
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
                 if (ct.IsCancellationRequested) break;
 
-                try { await ShowDropdownAsync(items.Select(i => (i.Item1, i.Item2)).ToArray(), selectedIndex: 0, ct); }
-                finally { linesAbove = 1; }
+                await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
                 if (ct.IsCancellationRequested) break;
 
-                System.Console.WriteLine("  $ " + Ansi.Green(command + items[0].Item1));
-                linesAbove = 2;
-                System.Console.WriteLine();
-                linesAbove = 3;
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
+                System.Console.Write("  $ " + Ansi.Green(command + items[0].Item1));
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
                 if (ct.IsCancellationRequested) break;
 
-                EraseLines(linesAbove);
-                linesAbove = 0;
+                ClearDemoArea(startRow, ResourceNamesDemoLines);
             }
             catch (OperationCanceledException) { break; }
         }
 
-        EraseLines(linesAbove);
+        ClearDemoArea(startRow, ResourceNamesDemoLines);
     }
 
-    /// <summary>
-    /// Returns the fixed number of lines <see cref="PlayKustoAsync"/> writes when it runs to
-    /// completion. Used by the wizard to reserve demo space before rendering the bottom border.
-    /// </summary>
-    internal const int KustoDemoLines = 14;
-
-    public static async Task PlayKustoAsync(CancellationToken ct)
+    public static async Task PlayKustoAsync(int startRow, CancellationToken ct)
     {
-        var linesAbove = 0;
+        // Writes exactly KustoDemoLines lines into the demo area starting at startRow.
+        var written = 0;
         try
         {
             var goodQuery =
@@ -216,57 +209,56 @@ internal static class BootstrapAnimator
                 "| summarize count() by ResourceGroup, bin(TimeGenerated, 5m)\n" +
                 "| order by TimeGenerated desc";
 
-            System.Console.WriteLine(); linesAbove++;
+            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+
             foreach (var line in BootstrapKqlHighlighter.Highlight(goodQuery).Split('\n'))
-                { System.Console.WriteLine("  " + line); linesAbove++; }
-            System.Console.WriteLine(); linesAbove++;
+            {
+                WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
+                System.Console.Write("  " + line);
+                written++;
+            }
+
+            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
 
             await Task.Delay(PauseAfterTypingMs * 3, ct).ConfigureAwait(false);
 
-            System.Console.WriteLine(Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────")); linesAbove++;
-            System.Console.WriteLine(); linesAbove++;
+            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
+            System.Console.Write(Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────"));
+            written++;
 
-            // Realistic Azure Monitor syntax error: double pipe on line 3, col 2.
+            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+
             var badQuery =
                 "AzureActivity\n" +
                 "| where TimeGenerated > ago(1h)\n" +
                 "| | summarize count() by ResourceGroup";
             foreach (var line in BootstrapKqlHighlighter.Highlight(
-                badQuery,
-                errorLine: 3,
-                errorColumn: 2,
-                errorMessage: "SYN0002: Query could not be parsed at '|'"
-            ).Split('\n'))
-                { System.Console.WriteLine("  " + line); linesAbove++; }
+                badQuery, errorLine: 3, errorColumn: 2,
+                errorMessage: "SYN0002: Query could not be parsed at '|'").Split('\n'))
+            {
+                WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
+                System.Console.Write("  " + line);
+                written++;
+            }
 
-            System.Console.WriteLine(); linesAbove++;
-            // linesAbove == KustoDemoLines here
+            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+            // written == KustoDemoLines here
         }
         catch (OperationCanceledException)
         {
-            EraseLines(linesAbove);
+            ClearDemoArea(startRow, KustoDemoLines);
         }
     }
 
-    // ── Erase helper ───────────────────────────────────────────────────────────
+    // ── Demo area helpers ──────────────────────────────────────────────────────
 
-    /// <summary>
-    /// Erases exactly the lines the demo has written and returns the cursor to the start of the
-    /// demo area, without touching anything below (i.e. the pre-rendered bottom border).
-    /// Pass 0 when the cursor is still on the demo-start line (typewriter in progress, no newline yet).
-    /// </summary>
-    internal static void EraseLines(int linesAboveCursor)
+    /// <summary>Clears <paramref name="lines"/> rows of the demo area using absolute positioning.</summary>
+    internal static void ClearDemoArea(int startRow, int lines)
     {
-        if (linesAboveCursor > 0)
+        for (var i = 0; i < lines; i++)
         {
-            System.Console.Write($"\x1b[{linesAboveCursor}F"); // up to start of demo area
-            for (var i = 0; i < linesAboveCursor; i++)
-                System.Console.Write("\x1b[2K\x1b[1B");        // erase line, step down
-            System.Console.Write($"\x1b[{linesAboveCursor}A"); // back to start of demo area
-        }
-        else
-        {
-            System.Console.Write("\r\x1b[2K"); // erase current (partial typewriter) line only
+            WizardUi.MoveTo(startRow + i);
+            System.Console.Write("\x1b[2K");
         }
     }
 
@@ -316,12 +308,13 @@ internal static class BootstrapAnimator
     }
 
     /// <summary>
-    /// Renders the dropdown and holds for <see cref="DropdownHoldMs"/>.
-    /// The items are always erased (via <c>finally</c>) regardless of cancellation, so the
-    /// caller's cursor ends up 1 line below the typewriter line in all exit paths.
+    /// Renders the dropdown below the typewriter line (absolute positioning) and holds.
+    /// On exit (cancellation or timeout) the item rows are cleared, leaving only the
+    /// typewriter row intact at <paramref name="typewriterRow"/>.
     /// </summary>
     private static async Task ShowDropdownAsync(
-        (string Label, string Detail)[] items, int selectedIndex, CancellationToken ct)
+        (string Label, string Detail)[] items, int selectedIndex,
+        int typewriterRow, CancellationToken ct)
     {
         if (!Ansi.IsEnabled)
         {
@@ -331,16 +324,25 @@ internal static class BootstrapAnimator
             return;
         }
 
-        System.Console.WriteLine("[TAB]");
+        // Append [TAB] to the typewriter line (cursor is at end of that line).
+        System.Console.Write("[TAB]");
+
+        // Items at typewriterRow+1 .. typewriterRow+items.Length
         for (var i = 0; i < items.Length; i++)
         {
             var (label, detail) = items[i];
+            WizardUi.MoveTo(typewriterRow + 1 + i);
+            System.Console.Write("\x1b[2K");
             if (i == selectedIndex)
-                System.Console.WriteLine("    " + Ansi.Green($"❯ {label,-16}") + Ansi.Dim($"  ({detail})"));
+                System.Console.Write("    " + Ansi.Green($"❯ {label,-16}") + Ansi.Dim($"  ({detail})"));
             else
-                System.Console.WriteLine($"      {label,-16}" + Ansi.Dim($"  ({detail})"));
+                System.Console.Write($"      {label,-16}" + Ansi.Dim($"  ({detail})"));
         }
-        System.Console.WriteLine(Ansi.Dim("  (↑↓ select, Enter confirm, Esc cancel)"));
+
+        // Hint at typewriterRow+1+items.Length
+        WizardUi.MoveTo(typewriterRow + 1 + items.Length);
+        System.Console.Write("\x1b[2K");
+        System.Console.Write(Ansi.Dim("  (↑↓ select, Enter confirm, Esc cancel)"));
 
         try
         {
@@ -348,9 +350,12 @@ internal static class BootstrapAnimator
         }
         finally
         {
-            // Always erase the dropdown so the caller's cursor is 1 line below typewriter.
+            // Clear item and hint rows absolutely — never touches rows outside this range.
             for (var i = 0; i < items.Length + 1; i++)
-                System.Console.Write("\x1b[1A\x1b[2K");
+            {
+                WizardUi.MoveTo(typewriterRow + 1 + i);
+                System.Console.Write("\x1b[2K");
+            }
         }
     }
 }
