@@ -12,7 +12,8 @@ namespace Console.Cli.Shared;
 ///   sub/rg/instance-name
 ///   /dt/instance-name
 /// </summary>
-public partial class DigitalTwinsOptionPack : DataplaneResourceOptionPack<DigitalTwinsDescriptionResource, Uri>
+public partial class DigitalTwinsOptionPack
+    : DataplaneResourceOptionPack<DigitalTwinsDescriptionResource, Uri>
 {
     public const string ShortPathPrefix = "/dt/";
     public override string ResourceShortPathPrefix => ShortPathPrefix;
@@ -28,7 +29,10 @@ public partial class DigitalTwinsOptionPack : DataplaneResourceOptionPack<Digita
     [CliOption(
         "--digital-twins",
         "--dt",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<DigitalTwinsOptionPack, DigitalTwinsDescriptionResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            DigitalTwinsOptionPack,
+            DigitalTwinsDescriptionResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? InstanceName { get; }
@@ -63,12 +67,18 @@ public partial class DigitalTwinsOptionPack : DataplaneResourceOptionPack<Digita
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Digital Twins instance '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Digital Twins instance '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} instances:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }
@@ -87,7 +97,9 @@ public partial class DigitalTwinsOptionPack : DataplaneResourceOptionPack<Digita
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var dt in rg.Value.GetDigitalTwinsDescriptions().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var dt in rg.Value.GetDigitalTwinsDescriptions().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (dt.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(dt.Data.Name);

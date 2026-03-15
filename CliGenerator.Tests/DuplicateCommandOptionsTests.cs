@@ -14,9 +14,11 @@ public class DuplicateCommandOptionsTests
         var violations = new List<string>();
         CheckCommand(root, "maz", violations);
 
-        if (violations.Count == 0) return;
+        if (violations.Count == 0)
+            return;
         var msg = new StringBuilder("Commands with duplicate option names or aliases:\n");
-        foreach (var v in violations.OrderBy(x => x)) msg.AppendLine(v);
+        foreach (var v in violations.OrderBy(x => x))
+            msg.AppendLine(v);
         Assert.Fail(msg.ToString());
     }
 
@@ -28,7 +30,9 @@ public class DuplicateCommandOptionsTests
             foreach (var alias in opt.Aliases.Prepend(opt.Name))
             {
                 if (!seen.TryAdd(alias, opt.Name))
-                    violations.Add($"{path}: '{alias}' used by both '{seen[alias]}' and '{opt.Name}'");
+                    violations.Add(
+                        $"{path}: '{alias}' used by both '{seen[alias]}' and '{opt.Name}'"
+                    );
             }
         }
         foreach (var sub in cmd.Subcommands)

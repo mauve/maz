@@ -12,7 +12,8 @@ namespace Console.Cli.Shared;
 ///   sub/rg/ledger-name
 ///   /cl/ledger-name
 /// </summary>
-public partial class ConfidentialLedgerOptionPack : DataplaneResourceOptionPack<ConfidentialLedgerResource, Uri>
+public partial class ConfidentialLedgerOptionPack
+    : DataplaneResourceOptionPack<ConfidentialLedgerResource, Uri>
 {
     public const string ShortPathPrefix = "/cl/";
     public override string ResourceShortPathPrefix => ShortPathPrefix;
@@ -28,7 +29,10 @@ public partial class ConfidentialLedgerOptionPack : DataplaneResourceOptionPack<
     [CliOption(
         "--ledger",
         "--cl",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<ConfidentialLedgerOptionPack, ConfidentialLedgerResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            ConfidentialLedgerOptionPack,
+            ConfidentialLedgerResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? LedgerName { get; }
@@ -63,12 +67,18 @@ public partial class ConfidentialLedgerOptionPack : DataplaneResourceOptionPack<
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Confidential Ledger '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Confidential Ledger '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} ledgers:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }
@@ -87,7 +97,9 @@ public partial class ConfidentialLedgerOptionPack : DataplaneResourceOptionPack<
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var l in rg.Value.GetConfidentialLedgers().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var l in rg.Value.GetConfidentialLedgers().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (l.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(l.Data.Name);

@@ -12,7 +12,8 @@ namespace Console.Cli.Shared;
 ///   sub/rg/provider-name
 ///   /atp/provider-name
 /// </summary>
-public partial class AttestationOptionPack : DataplaneResourceOptionPack<AttestationProviderResource, Uri>
+public partial class AttestationOptionPack
+    : DataplaneResourceOptionPack<AttestationProviderResource, Uri>
 {
     public const string ShortPathPrefix = "/atp/";
     public override string ResourceShortPathPrefix => ShortPathPrefix;
@@ -28,7 +29,10 @@ public partial class AttestationOptionPack : DataplaneResourceOptionPack<Attesta
     [CliOption(
         "--attestation",
         "--atp",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<AttestationOptionPack, AttestationProviderResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            AttestationOptionPack,
+            AttestationProviderResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? ProviderName { get; }
@@ -63,12 +67,18 @@ public partial class AttestationOptionPack : DataplaneResourceOptionPack<Attesta
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Attestation provider '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Attestation provider '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} providers:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }
@@ -87,7 +97,9 @@ public partial class AttestationOptionPack : DataplaneResourceOptionPack<Attesta
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var p in rg.Value.GetAttestationProviders().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var p in rg.Value.GetAttestationProviders().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (p.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(p.Data.Name);

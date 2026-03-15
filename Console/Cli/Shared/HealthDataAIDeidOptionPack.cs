@@ -12,7 +12,8 @@ namespace Console.Cli.Shared;
 ///   sub/rg/service-name
 ///   /deid/service-name
 /// </summary>
-public partial class HealthDataAIDeidOptionPack : DataplaneResourceOptionPack<DeidServiceResource, Uri>
+public partial class HealthDataAIDeidOptionPack
+    : DataplaneResourceOptionPack<DeidServiceResource, Uri>
 {
     public const string ShortPathPrefix = "/deid/";
     public override string ResourceShortPathPrefix => ShortPathPrefix;
@@ -28,7 +29,10 @@ public partial class HealthDataAIDeidOptionPack : DataplaneResourceOptionPack<De
     [CliOption(
         "--deid-service",
         "--deid",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<HealthDataAIDeidOptionPack, DeidServiceResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            HealthDataAIDeidOptionPack,
+            DeidServiceResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? ServiceName { get; }
@@ -63,12 +67,18 @@ public partial class HealthDataAIDeidOptionPack : DataplaneResourceOptionPack<De
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"De-identification service '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"De-identification service '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} services:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }

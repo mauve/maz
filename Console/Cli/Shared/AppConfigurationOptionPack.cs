@@ -66,9 +66,7 @@ public partial class AppConfigurationOptionPack
         }
 
         var matches = new List<AppConfigurationStoreResource>();
-        await foreach (
-            var store in sub.GetAppConfigurationStoresAsync(cancellationToken: ct)
-        )
+        await foreach (var store in sub.GetAppConfigurationStoresAsync(cancellationToken: ct))
         {
             if (store.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
                 matches.Add(store);
@@ -107,9 +105,7 @@ public partial class AppConfigurationOptionPack
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
             await foreach (
-                var store in rg.Value
-                    .GetAppConfigurationStores()
-                    .GetAllAsync(cancellationToken: ct)
+                var store in rg.Value.GetAppConfigurationStores().GetAllAsync(cancellationToken: ct)
             )
             {
                 if (store.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))

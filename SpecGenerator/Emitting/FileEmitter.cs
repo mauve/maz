@@ -37,7 +37,13 @@ public sealed class FileEmitter
 
             // Leaf operation commands and resource group commands
             foreach (var resource in service.Resources)
-                EmitResource(resource, serviceName, serviceDir, service.DataplaneOptionPack, service.ResourceOptionPack);
+                EmitResource(
+                    resource,
+                    serviceName,
+                    serviceDir,
+                    service.DataplaneOptionPack,
+                    service.ResourceOptionPack
+                );
 
             // Service command
             var serviceContent = ServiceCommandEmitter.Emit(service, _config.CommandNamespace);
