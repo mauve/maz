@@ -6,6 +6,7 @@ namespace Console.Cli.Shared;
 /// Global options that modify the behaviour of any maz command,
 /// independent of the specific command being run.
 /// </summary>
+[CliManualOptions("--require-confirmation", "--no-require-confirmation")]
 public class GlobalBehaviorOptionPack : OptionPack
 {
     /// <summary>

@@ -21,19 +21,7 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
 {
     var pos = int.Parse(first[9..^1]);
     var line = args.Length >= 2 ? args[1] : "";
-    var completionTokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var completionCandidate =
-        completionTokens.Length > 1
-            ? completionTokens.Skip(1).FirstOrDefault(a => !a.StartsWith('-') && !a.StartsWith('['))
-            : null;
-    // Use the matched service for a full subtree build; fall back to "" (stubs only) so
-    // top-level tab-completion ("maz <TAB>") doesn't pay the cost of building all 165 services.
-    var completionService =
-        completionCandidate is not null
-        && RootCommandDef.KnownServices.Contains(completionCandidate)
-            ? completionCandidate
-            : "";
-    await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef(completionService));
+    await CliCompletionHandler.HandleAsync(line, pos);
     return 0;
 }
 

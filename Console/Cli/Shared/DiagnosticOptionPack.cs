@@ -2,6 +2,7 @@ using System.CommandLine;
 
 namespace Console.Cli.Shared;
 
+[CliManualOptions("--detailed-errors", "--verbose")]
 public class DiagnosticOptionPack : OptionPack
 {
     /// <summary>
