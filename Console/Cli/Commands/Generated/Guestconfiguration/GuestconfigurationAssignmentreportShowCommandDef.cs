@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -34,7 +35,10 @@ public partial class GuestconfigurationAssignmentreportShowCommandDef(AuthOption
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Compute/virtualMachines/{VmName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{GuestConfigurationAssignmentName}/reports/{ReportId}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachines/{resolvedName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{GuestConfigurationAssignmentName}/reports/{ReportId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-01-25", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

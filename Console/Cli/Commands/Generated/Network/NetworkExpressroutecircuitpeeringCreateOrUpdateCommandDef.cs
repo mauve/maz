@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class NetworkExpressroutecircuitpeeringCreateOrUpdateCommandDef(A
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Network/expressRouteCircuits/{CircuitName}/peerings/{PeeringName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/expressRouteCircuits/{resolvedName}/peerings/{PeeringName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-05-01", null, ct);
         if (!NoWait)

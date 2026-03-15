@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -39,7 +40,10 @@ public partial class DatareplicationProtectedItemDeleteCommandDef(AuthOptionPack
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DataReplication/replicationVaults/{VaultName}/protectedItems/{ProtectedItemName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataReplication/replicationVaults/{resolvedName}/protectedItems/{ProtectedItemName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-09-01", null, ct);
         if (!NoWait)

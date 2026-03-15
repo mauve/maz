@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class InformaticaServerlessruntimeServerlessResourceByIdCommandDe
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Informatica.DataManagement/organizations/{OrganizationName}/serverlessRuntimes/{ServerlessRuntimeName}/serverlessResourceById";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Informatica.DataManagement/organizations/{resolvedName}/serverlessRuntimes/{ServerlessRuntimeName}/serverlessResourceById";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-11-27", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

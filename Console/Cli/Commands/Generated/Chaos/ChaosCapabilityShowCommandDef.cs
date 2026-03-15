@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -42,7 +43,10 @@ public partial class ChaosCapabilityShowCommandDef(AuthOptionPack auth) : Comman
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/{ParentProviderNamespace}/{ParentResourceType}/{ParentResourceName}/providers/Microsoft.Chaos/targets/{TargetName}/capabilities/{CapabilityName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ParentProviderNamespace!, ResourceGroup, armClient, "{parentProviderNamespace}/{parentResourceType}", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{resolvedName}/{ParentResourceType}/{ParentResourceName}/providers/Microsoft.Chaos/targets/{TargetName}/capabilities/{CapabilityName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

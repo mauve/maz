@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,7 +31,10 @@ public partial class AvdMsixpackageUpdateCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DesktopVirtualization/hostPools/{HostPoolName}/msixPackages/{MsixPackageFullName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/hostPools/{resolvedName}/msixPackages/{MsixPackageFullName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2024-04-03", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

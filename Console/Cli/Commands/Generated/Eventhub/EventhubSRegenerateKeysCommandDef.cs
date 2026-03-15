@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -43,7 +44,10 @@ public partial class EventhubSRegenerateKeysCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.EventHub/namespaces/{NamespaceName}/eventhubs/{EventHubName}/authorizationRules/{AuthorizationRuleName}/regenerateKeys";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventHub/namespaces", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventHub/namespaces/{resolvedName}/eventhubs/{EventHubName}/authorizationRules/{AuthorizationRuleName}/regenerateKeys";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

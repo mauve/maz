@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,10 @@ public partial class NetworkVirtualnetworkgatewaySupportedVpnDevicesCommandDef(A
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Network/virtualNetworkGateways/{VirtualNetworkGatewayName}/supportedvpndevices";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VirtualNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworkGateways", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualNetworkGateways/{resolvedName}/supportedvpndevices";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-05-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -42,7 +43,10 @@ public partial class MaintenanceUpdateListWithParentCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/{ProviderName}/{ResourceParentType}/{ResourceParentName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/updates";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceParentType}", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ResourceParentType}/{ResourceParentName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/updates";
 
         var allItems = client.GetAllAsync(path, "2023-04-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

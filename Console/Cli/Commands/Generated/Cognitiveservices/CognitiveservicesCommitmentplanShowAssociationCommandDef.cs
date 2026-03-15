@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,7 +31,10 @@ public partial class CognitiveservicesCommitmentplanShowAssociationCommandDef(Au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.CognitiveServices/commitmentPlans/{CommitmentPlanName}/accountAssociations/{CommitmentPlanAssociationName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            CommitmentPlanName!, ResourceGroup, armClient, "Microsoft.CognitiveServices/commitmentPlans", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.CognitiveServices/commitmentPlans/{resolvedName}/accountAssociations/{CommitmentPlanAssociationName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-12-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
