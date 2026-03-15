@@ -94,6 +94,16 @@ public partial class RootCommandDef
     public ReservationsCommandDef Reservations = null!;
     public ManagementgroupsCommandDef Managementgroups = null!;
     public ManagedservicesCommandDef Managedservices = null!;
+    public BatchCommandDef Batch = null!;
+    public MapsCommandDef Maps = null!;
+    public LoadtestserviceCommandDef Loadtestservice = null!;
+    public ResourcegraphCommandDef Resourcegraph = null!;
+    public SupportCommandDef Support = null!;
+    public ChaosCommandDef Chaos = null!;
+    public MigrateCommandDef Migrate = null!;
+    public BotserviceCommandDef Botservice = null!;
+    public ServicefabricCommandDef Servicefabric = null!;
+    public AutomationCommandDef Automation = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -184,5 +194,15 @@ public partial class RootCommandDef
         Reservations = new ReservationsCommandDef(Auth);
         Managementgroups = new ManagementgroupsCommandDef(Auth);
         Managedservices = new ManagedservicesCommandDef(Auth);
+        Batch = new BatchCommandDef(Auth);
+        Maps = new MapsCommandDef(Auth);
+        Loadtestservice = new LoadtestserviceCommandDef(Auth);
+        Resourcegraph = new ResourcegraphCommandDef(Auth);
+        Support = new SupportCommandDef(Auth);
+        Chaos = new ChaosCommandDef(Auth);
+        Migrate = new MigrateCommandDef(Auth);
+        Botservice = new BotserviceCommandDef(Auth);
+        Servicefabric = new ServicefabricCommandDef(Auth);
+        Automation = new AutomationCommandDef(Auth);
     }
 }
