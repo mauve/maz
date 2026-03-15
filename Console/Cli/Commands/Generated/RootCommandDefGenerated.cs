@@ -144,6 +144,15 @@ public partial class RootCommandDef
     public ResourcemoverCommandDef Resourcemover = null!;
     public SchedulerCommandDef Scheduler = null!;
     public SerialconsoleCommandDef Serialconsole = null!;
+    public AzureactivedirectoryCommandDef Azureactivedirectory = null!;
+    public DatabasewatcherCommandDef Databasewatcher = null!;
+    public HealthdataaiservicesCommandDef Healthdataaiservices = null!;
+    public InformaticaCommandDef Informatica = null!;
+    public MarketplaceCommandDef Marketplace = null!;
+    public PostgresqlhscCommandDef Postgresqlhsc = null!;
+    public PurviewCommandDef Purview = null!;
+    public VoiceservicesCommandDef Voiceservices = null!;
+    public HelpCommandDef Help = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -284,5 +293,14 @@ public partial class RootCommandDef
         Resourcemover = new ResourcemoverCommandDef(Auth);
         Scheduler = new SchedulerCommandDef(Auth);
         Serialconsole = new SerialconsoleCommandDef(Auth);
+        Azureactivedirectory = new AzureactivedirectoryCommandDef(Auth);
+        Databasewatcher = new DatabasewatcherCommandDef(Auth);
+        Healthdataaiservices = new HealthdataaiservicesCommandDef(Auth);
+        Informatica = new InformaticaCommandDef(Auth);
+        Marketplace = new MarketplaceCommandDef(Auth);
+        Postgresqlhsc = new PostgresqlhscCommandDef(Auth);
+        Purview = new PurviewCommandDef(Auth);
+        Voiceservices = new VoiceservicesCommandDef(Auth);
+        Help = new HelpCommandDef(Auth);
     }
 }

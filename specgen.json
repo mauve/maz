@@ -10612,6 +10612,296 @@
         "ListOperations": "list-operations"
       },
       "exclude": []
+    },
+    {
+      "serviceDir": "azureactivedirectory",
+      "displayName": "azureactivedirectory",
+      "apiVersion": "2020-03-01",
+      "description": "Manage Azure Active Directory private link resources",
+      "detailedDescription": "Covers private link policies for Azure AD, enabling secure private endpoint connectivity to Azure Active Directory services.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/azureactivedirectory/resource-manager/Microsoft.Aadiam/AzureActiveDirectory/stable/2020-03-01/privateLinkForAzureAD.json"
+      ],
+      "resourceDescriptions": {
+        "private-link-for-azure-ad": "Manage private link policies for Azure Active Directory"
+      },
+      "resourceDetailedDescriptions": {
+        "private-link-for-azure-ad": "Create and manage private link policies that allow secure private endpoint access to Azure AD."
+      },
+      "actionRenames": {
+        "privateLinkForAzureAd_Get": "show",
+        "privateLinkForAzureAd_Create": "create",
+        "privateLinkForAzureAd_Update": "update",
+        "privateLinkForAzureAd_Delete": "delete",
+        "privateLinkForAzureAd_ListBySubscription": "list-by-subscription",
+        "privateLinkForAzureAd_List": "list"
+      },
+      "exclude": []
+    },
+    {
+      "serviceDir": "databasewatcher",
+      "displayName": "databasewatcher",
+      "apiVersion": "2025-01-02",
+      "description": "Manage Azure Database Watcher instances for database monitoring",
+      "detailedDescription": "Covers Database Watcher resources that collect and analyze database metrics. Includes watchers, targets, alert rules, health validations, and shared private link resources.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/databasewatcher/resource-manager/Microsoft.DatabaseWatcher/stable/2025-01-02/Watcher.json"
+      ],
+      "resourceDescriptions": {
+        "alertruleresource": "Manage alert rules for Database Watcher",
+        "healthvalidation": "Manage health validations for Database Watcher",
+        "sharedprivatelinkresource": "Manage shared private link resources",
+        "target": "Manage monitoring targets for Database Watcher",
+        "watcher": "Manage Database Watcher instances"
+      },
+      "resourceDetailedDescriptions": {
+        "watcher": "Create and manage Database Watcher instances that monitor Azure SQL and other databases. Supports start/stop operations.",
+        "target": "Add and manage database monitoring targets within a watcher."
+      },
+      "actionRenames": {
+        "AlertRuleResources_Get": "show",
+        "AlertRuleResources_CreateOrUpdate": "create",
+        "HealthValidations_Get": "show",
+        "SharedPrivateLinkResources_Get": "show",
+        "Targets_Get": "show",
+        "Targets_CreateOrUpdate": "create",
+        "Watchers_Get": "show",
+        "Watchers_CreateOrUpdate": "create",
+        "Watchers_ListByResourceGroup": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "healthdataaiservices",
+      "displayName": "healthdataaiservices",
+      "apiVersion": "2024-09-20",
+      "description": "Manage Health Data AI Services De-identification Service resources",
+      "detailedDescription": "Covers De-identification Service (DeidService) instances for PHI de-identification in health data pipelines. Includes private endpoint connectivity management.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/healthdataaiservices/resource-manager/Microsoft.HealthDataAIServices/stable/2024-09-20/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "deidservice": "Manage De-identification Service instances",
+        "privateendpointconnection": "Manage private endpoint connections for DeidService",
+        "privatelink": "List private link resources for DeidService"
+      },
+      "resourceDetailedDescriptions": {
+        "deidservice": "Create and manage De-identification Service instances that anonymize protected health information in Azure.",
+        "privateendpointconnection": "Approve, reject, or delete private endpoint connections for secure DeidService access."
+      },
+      "actionRenames": {
+        "DeidServices_Get": "show",
+        "DeidServices_Create": "create",
+        "DeidServices_ListByResourceGroup": "list",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_Create": "create",
+        "PrivateLinks_ListByDeidService": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "informatica",
+      "displayName": "informatica",
+      "apiVersion": "2025-11-27",
+      "description": "Manage Informatica Intelligent Data Management Cloud organizations in Azure",
+      "detailedDescription": "Covers Informatica IDMC organization resources and serverless runtimes deployed in Azure. Requires the Informatica.DataManagement resource provider.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/informatica/resource-manager/Informatica.DataManagement/stable/2025-11-27/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "organization": "Manage Informatica IDMC organizations",
+        "serverlessruntime": "Manage Informatica serverless runtimes"
+      },
+      "resourceDetailedDescriptions": {
+        "organization": "Create and manage Informatica IDMC organization resources in Azure. Retrieve serverless metadata and all serverless runtimes.",
+        "serverlessruntime": "Manage serverless runtime instances within an Informatica organization. Supports dependency checks and start operations."
+      },
+      "actionRenames": {
+        "Organizations_Get": "show",
+        "Organizations_CreateOrUpdate": "create",
+        "Organizations_ListByResourceGroup": "list",
+        "ServerlessRuntimes_Get": "show",
+        "ServerlessRuntimes_CreateOrUpdate": "create",
+        "ServerlessRuntimes_ListByInformaticaOrganizationResource": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "marketplace",
+      "displayName": "marketplace",
+      "apiVersion": "2025-01-01",
+      "description": "Manage Azure Marketplace private stores and offer access policies",
+      "detailedDescription": "Covers private store management for controlling which Marketplace offers are available within a tenant. Includes offer management, approval workflows, and collection administration.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/marketplace/resource-manager/Microsoft.Marketplace/Marketplace/stable/2025-01-01/Marketplace.json"
+      ],
+      "resourceDescriptions": {
+        "private-store": "Manage private stores for Azure Marketplace access control",
+        "collection": "Manage collections within a private store",
+        "offer": "Manage offers within a private store or collection",
+        "request": "Manage offer access requests"
+      },
+      "resourceDetailedDescriptions": {
+        "private-store": "Create and configure private stores to curate which Marketplace offers are visible to your organization.",
+        "collection": "Organize offers into collections within a private store for easier management."
+      },
+      "actionRenames": {
+        "PrivateStore_Get": "show",
+        "PrivateStore_CreateOrUpdate": "create",
+        "PrivateStore_Delete": "delete",
+        "PrivateStore_List": "list",
+        "PrivateStore_GetOffer": "show-offer",
+        "PrivateStore_CreateOrUpdateOffer": "create-offer",
+        "PrivateStore_DeleteOffer": "delete-offer",
+        "Collections_Get": "show",
+        "Collections_CreateOrUpdate": "create"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "postgresqlhsc",
+      "displayName": "postgresqlhsc",
+      "apiVersion": "2022-11-08",
+      "description": "Manage Azure Cosmos DB for PostgreSQL (Hyperscale Citus) clusters",
+      "detailedDescription": "Covers Cosmos DB for PostgreSQL cluster lifecycle, servers, configurations, firewalls, and roles. Formerly known as Azure Database for PostgreSQL Hyperscale (Citus).",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/postgresqlhsc/resource-manager/Microsoft.DBforPostgreSQL/PostgresqlHsc/stable/2022-11-08/postgresqlhsc.json"
+      ],
+      "resourceDescriptions": {
+        "cluster": "Manage Cosmos DB for PostgreSQL clusters",
+        "configuration": "Manage cluster and server configuration parameters",
+        "firewallrule": "Manage firewall rules for cluster access",
+        "role": "Manage database roles",
+        "server": "List cluster servers"
+      },
+      "resourceDetailedDescriptions": {
+        "cluster": "Create, scale, and manage Cosmos DB for PostgreSQL (Hyperscale Citus) clusters. Supports restart, start, stop, and read-replica promotion.",
+        "configuration": "Configure server parameters on coordinator and worker nodes."
+      },
+      "actionRenames": {
+        "Clusters_Get": "show",
+        "Clusters_Create": "create",
+        "Clusters_ListByResourceGroup": "list",
+        "Configurations_ListByServer": "list",
+        "Configurations_GetCoordinator": "show-coordinator",
+        "Configurations_GetNode": "show-node",
+        "FirewallRules_Get": "show",
+        "FirewallRules_CreateOrUpdate": "create",
+        "Roles_Get": "show",
+        "Roles_Create": "create",
+        "Servers_Get": "show"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Clusters_List",
+          "resourceGroupOperationId": "Clusters_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "purview",
+      "displayName": "purview",
+      "apiVersion": "2021-12-01",
+      "description": "Manage Microsoft Purview accounts and governance resources",
+      "detailedDescription": "Covers Purview account lifecycle, Kafka configurations, private endpoint connections, and default account management. Requires the Microsoft.Purview resource provider.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/purview/resource-manager/Microsoft.Purview/Purview/stable/2021-12-01/purview.json"
+      ],
+      "resourceDescriptions": {
+        "account": "Manage Microsoft Purview accounts",
+        "defaultaccount": "Manage the default Purview account for a scope",
+        "kafkaconfiguration": "Manage Kafka configurations for event streaming",
+        "privateendpointconnection": "Manage private endpoint connections",
+        "privatelinkresource": "List private link resources"
+      },
+      "resourceDetailedDescriptions": {
+        "account": "Create and manage Purview accounts for data governance and cataloging. Supports key listing and root collection admin assignment.",
+        "kafkaconfiguration": "Configure Kafka event hub integration for Purview atlas events."
+      },
+      "actionRenames": {
+        "Accounts_Get": "show",
+        "Accounts_CreateOrUpdate": "create",
+        "Accounts_ListByResourceGroup": "list",
+        "DefaultAccounts_Get": "show",
+        "DefaultAccounts_Set": "set",
+        "DefaultAccounts_Remove": "remove",
+        "KafkaConfigurations_Get": "show",
+        "KafkaConfigurations_CreateOrUpdate": "create",
+        "PrivateEndpointConnections_Get": "show",
+        "PrivateEndpointConnections_CreateOrUpdate": "create",
+        "PrivateLinkResources_GetByGroupId": "show",
+        "Usages_Get": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "voiceservices",
+      "displayName": "voiceservices",
+      "apiVersion": "2023-09-01",
+      "description": "Manage Azure Operator Voice Services communications gateways",
+      "detailedDescription": "Covers Communications Gateway resources for Azure Operator Voice Services, including test lines for pre-deployment validation.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/voiceservices/resource-manager/Microsoft.VoiceServices/stable/2023-09-01/voiceservices.json"
+      ],
+      "resourceDescriptions": {
+        "communicationsgateway": "Manage Communications Gateway resources",
+        "testline": "Manage test lines for gateway validation"
+      },
+      "resourceDetailedDescriptions": {
+        "communicationsgateway": "Create and manage Communications Gateway instances for Azure Operator Voice Services (AOVS).",
+        "testline": "Manage test lines within a Communications Gateway for pre-deployment SIP trunk validation."
+      },
+      "actionRenames": {
+        "CommunicationsGateways_Get": "show",
+        "CommunicationsGateways_CreateOrUpdate": "create",
+        "CommunicationsGateways_ListByResourceGroup": "list",
+        "TestLines_Get": "show",
+        "TestLines_CreateOrUpdate": "create",
+        "NameAvailability_CheckLocal": "check-local"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "help",
+      "displayName": "help",
+      "apiVersion": "2023-06-01",
+      "description": "Manage Azure Help API diagnostics and solution discovery",
+      "detailedDescription": "Covers the Azure Help API for creating self-help diagnostics and discovering solutions to common Azure issues.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/help/resource-manager/Microsoft.Help/Help/stable/2023-06-01/help.json"
+      ],
+      "resourceDescriptions": {
+        "diagnostic": "Manage self-help diagnostics",
+        "discovery-solution": "Discover solutions for Azure issues"
+      },
+      "resourceDetailedDescriptions": {
+        "diagnostic": "Create and retrieve diagnostics that run automated troubleshooting for Azure resources.",
+        "discovery-solution": "Search for Azure solutions and troubleshooting guides relevant to a specific resource."
+      },
+      "actionRenames": {
+        "Diagnostics_Get": "show",
+        "Diagnostics_Create": "create",
+        "DiscoverySolution_List": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
