@@ -1,5 +1,6 @@
 using System.CommandLine;
 using Console.Cli.Commands;
+using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Group;
 using Console.Cli.Shared;
 
@@ -25,6 +26,7 @@ public partial class RootCommandDef : CommandDef
     public readonly GroupCommandDef Group;
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
+    public readonly BootstrapCommandDef Bootstrap;
 
     partial void InitGeneratedCommands(string? targetService);
 
@@ -39,6 +41,7 @@ public partial class RootCommandDef : CommandDef
         Group = new GroupCommandDef(Auth);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
+        Bootstrap = new BootstrapCommandDef(Auth, Interactive);
         InitGeneratedCommands(targetService);
     }
 

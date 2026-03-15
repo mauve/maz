@@ -122,6 +122,57 @@ Cold-start times (published binary, no warmup):
 | `maz storage account list --help` | ~50 ms |
 | `maz --help` (full tree) | ~400 ms |
 
+## Making a release
+
+Releases are created by pushing an annotated tag. CI builds self-contained binaries for all platforms, extracts the matching section from `CHANGELOG.md`, and publishes a GitHub release with that as the body.
+
+### Step-by-step
+
+1. **Write the changelog entry** in `CHANGELOG.md` before tagging. Use the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format:
+
+   ```markdown
+   ## [1.2.3] - 2026-03-15
+   ### Added
+   - ...
+   ### Fixed
+   - ...
+   ```
+
+   The section header must be exactly `## [<version>]` — the CI script matches on that pattern.
+
+2. **Commit the changelog:**
+
+   ```sh
+   git commit -am "chore: prepare release 1.2.3"
+   ```
+
+3. **Tag and push:**
+
+   ```sh
+   # Creates an annotated tag locally
+   ./scripts/tag-release.sh 1.2.3
+
+   # Push the commit and the tag together
+   git push origin master v1.2.3
+   ```
+
+   `tag-release.sh` validates that the version is a plain `major.minor.patch` semver and refuses anything else.
+
+4. **Watch CI.** The `publish` job builds for all five platforms (`linux-x64`, `linux-arm64`, `win-x64`, `osx-x64`, `osx-arm64`) and embeds the version in the binary (`maz --version` will print `1.2.3`). The `release` job then creates the GitHub release with the `CHANGELOG.md` section as the body.
+
+### Verifying the version locally
+
+```sh
+# Local builds always show 0.0.0-dev (set in Directory.Build.props)
+dotnet build Console/Console.csproj
+./artifacts/bin/Console/debug/maz --version   # → 0.0.0-dev+<git-hash>
+
+# Simulate what CI does
+dotnet publish Console/Console.csproj --self-contained true -r linux-x64 \
+  -p:PublishSingleFile=true -p:InformationalVersion=1.2.3 -c Release -o ./publish
+./publish/maz --version   # → 1.2.3
+```
+
 ## Code style
 
 All warnings are treated as errors (`TreatWarningsAsErrors=true`). The project uses C# `latest` language version with nullable reference types enabled. Code style is enforced via `EnforceCodeStyleInBuild=true` — run `dotnet build` locally to catch style issues before pushing.
