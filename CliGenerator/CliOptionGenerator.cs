@@ -49,6 +49,69 @@ public class CliOptionGenerator : IIncrementalGenerator
                 ctx.AddSource($"{model.ClassName}.g.cs", SourceText.From(source, Encoding.UTF8));
             }
         );
+
+        // Secondary provider: find classes with [CliManualOptions] (non-partial option packs)
+        var manualOptsProvider = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) =>
+                    node is ClassDeclarationSyntax c && c.AttributeLists.Count > 0,
+                transform: static (ctx, ct) =>
+                {
+                    if (ctx.Node is not ClassDeclarationSyntax)
+                        return null;
+                    var sym =
+                        ctx.SemanticModel.GetDeclaredSymbol(
+                            (ClassDeclarationSyntax)ctx.Node,
+                            ct
+                        ) as INamedTypeSymbol;
+                    if (sym is null)
+                        return null;
+                    var allAliases = new List<string>();
+                    foreach (var attr in sym.GetAttributes())
+                    {
+                        if (
+                            attr.AttributeClass?.ToDisplayString()
+                            != "Console.Cli.CliManualOptionsAttribute"
+                        )
+                            continue;
+                        var ctorArg = attr.ConstructorArguments.FirstOrDefault();
+                        if (ctorArg.Kind == TypedConstantKind.Array)
+                            allAliases.AddRange(
+                                ctorArg
+                                    .Values.Select(v => v.Value?.ToString() ?? "")
+                                    .Where(s => s.Length > 0)
+                            );
+                        else if (ctorArg.Value is string sv && sv.Length > 0)
+                            allAliases.Add(sv);
+                    }
+                    if (allAliases.Count == 0)
+                        return null;
+                    return new ManualOptsModel
+                    {
+                        TypeFullName = sym.ToDisplayString(),
+                        Aliases = allAliases.ToArray(),
+                    };
+                }
+            )
+            .Where(static m => m is not null);
+
+        // Batch step: emit the compile-time completion tree
+        var allModels = provider.Collect();
+        var allManualOpts = manualOptsProvider.Collect();
+        var combined = allModels.Combine(allManualOpts);
+        context.RegisterSourceOutput(
+            combined,
+            static (ctx, pair) =>
+            {
+                var (models, manualOpts) = pair;
+                var source = EmitCompletionTree(
+                    models.Where(m => m is not null).Select(m => m!).ToList(),
+                    manualOpts.Where(m => m is not null).Select(m => m!).ToList()
+                );
+                if (source is not null)
+                    ctx.AddSource("CompletionTree.g.cs", SourceText.From(source, Encoding.UTF8));
+            }
+        );
     }
 
     // ── Model ──────────────────────────────────────────────────────────────
@@ -103,6 +166,12 @@ public class CliOptionGenerator : IIncrementalGenerator
         public bool IsOptionPack;
         public string TypeName = "";
         public string? Description;
+    }
+
+    sealed class ManualOptsModel
+    {
+        public string TypeFullName = "";
+        public string[] Aliases = Array.Empty<string>();
     }
 
     // ── Build model from symbol ─────────────────────────────────────────────
@@ -1021,4 +1090,334 @@ public class CliOptionGenerator : IIncrementalGenerator
 
     static string Quote(string s) =>
         $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n").Replace("\t", "\\t")}\"";
+
+    // ── Completion tree emission ─────────────────────────────────────────────
+
+    // Intermediate node representation used during tree construction.
+    sealed class NodeData
+    {
+        public string CliName = "";
+        public List<string> Options = [];
+        public List<NodeData> Children = [];
+        /// <summary>Full type name of the ClassModel this node came from (used to avoid cycles).</summary>
+        public string TypeFullName = "";
+        /// <summary>Fully-qualified type name of the static helper method key.</summary>
+        public string MethodKey = "";
+    }
+
+    static string? EmitCompletionTree(List<ClassModel> models, List<ManualOptsModel> manualOpts)
+    {
+        // Build lookup dicts
+        var dict = new Dictionary<string, ClassModel>(StringComparer.Ordinal);
+        foreach (var m in models)
+        {
+            var key = m.Namespace.Length > 0 ? $"{m.Namespace}.{m.ClassName}" : m.ClassName;
+            if (!dict.ContainsKey(key))
+                dict[key] = m;
+        }
+
+        var manualDict = new Dictionary<string, List<string>>(StringComparer.Ordinal);
+        foreach (var mo in manualOpts)
+        {
+            if (!manualDict.TryGetValue(mo.TypeFullName, out var list))
+                manualDict[mo.TypeFullName] = list = [];
+            foreach (var a in mo.Aliases)
+                if (!list.Contains(a))
+                    list.Add(a);
+        }
+
+        if (!dict.TryGetValue("Console.Cli.RootCommandDef", out var rootModel))
+            return null;
+
+        // Collect dynamic providers: alias → fully-qualified type name
+        var dynamicProviders = new Dictionary<string, string>(StringComparer.Ordinal);
+        CollectDynamicProviders(rootModel, dict, dynamicProviders, new HashSet<string>());
+
+        // Build the node tree
+        var visited = new HashSet<string>(StringComparer.Ordinal);
+        var root = BuildNodeData("Console.Cli.RootCommandDef", null, rootModel, dict, manualDict, visited);
+        if (root is null)
+            return null;
+
+        // Collect all non-leaf nodes in a flat list (DFS, post-order so children come before parents)
+        // Also track which types need their own Build_ method (those with children or referenced multiple times)
+        var allNodes = new List<NodeData>();
+        CollectAllNodes(root, allNodes);
+
+        var sb = new StringBuilder();
+        sb.AppendLine("// <auto-generated/>");
+        sb.AppendLine("#nullable enable");
+        sb.AppendLine("namespace Console.Cli;");
+        sb.AppendLine();
+        sb.AppendLine("internal static class CompletionTree");
+        sb.AppendLine("{");
+
+        // DynamicProviders map
+        sb.AppendLine(
+            "    internal static readonly System.Collections.Generic.IReadOnlyDictionary<string, ICliCompletionProvider> DynamicProviders ="
+        );
+        sb.AppendLine(
+            "        new System.Collections.Generic.Dictionary<string, ICliCompletionProvider>"
+        );
+        sb.AppendLine("        {");
+        foreach (var kvp in dynamicProviders)
+            sb.AppendLine($"            [{Quote(kvp.Key)}] = new {kvp.Value}(),");
+        sb.AppendLine("        };");
+        sb.AppendLine();
+
+        // Emit private Build_ helper methods for all nodes with children
+        // (leaf nodes are inlined in their parent's Build_ method)
+        // Assign unique method keys
+        int methodIdx = 0;
+        foreach (var node in allNodes)
+        {
+            if (node.MethodKey.Length == 0)
+                node.MethodKey = $"_n{methodIdx++}";
+        }
+
+        foreach (var node in allNodes)
+        {
+            sb.Append($"    private static CompletionNode {node.MethodKey}()");
+            sb.AppendLine();
+            sb.Append("        => new(");
+            sb.Append(Quote(node.CliName));
+            sb.AppendLine(",");
+            EmitOptionsArray(sb, node.Options, "            ");
+            sb.AppendLine(",");
+            if (node.Children.Count == 0)
+            {
+                sb.Append("            []");
+            }
+            else
+            {
+                sb.AppendLine("            new global::Console.Cli.CompletionNode[]");
+                sb.AppendLine("            {");
+                foreach (var child in node.Children)
+                {
+                    sb.AppendLine($"                {child.MethodKey}(),");
+                }
+                sb.Append("            }");
+            }
+            sb.AppendLine(");");
+            sb.AppendLine();
+        }
+
+        // Root field
+        sb.AppendLine($"    internal static readonly CompletionNode Root = {root.MethodKey}();");
+        sb.AppendLine("}");
+
+        return sb.ToString();
+    }
+
+    static void CollectAllNodes(NodeData node, List<NodeData> result)
+    {
+        // Post-order: children first, then parent
+        foreach (var child in node.Children)
+            CollectAllNodes(child, result);
+        result.Add(node);
+    }
+
+    static void EmitOptionsArray(StringBuilder sb, List<string> options, string indent)
+    {
+        if (options.Count == 0)
+        {
+            sb.Append($"{indent}System.Array.Empty<string>()");
+            return;
+        }
+        sb.Append($"{indent}new[] {{");
+        sb.Append(string.Join(", ", options.Select(Quote)));
+        sb.Append('}');
+    }
+
+    static NodeData? BuildNodeData(
+        string fullTypeName,
+        string? fieldName,
+        ClassModel model,
+        Dictionary<string, ClassModel> dict,
+        Dictionary<string, List<string>> manualDict,
+        HashSet<string> visited
+    )
+    {
+        if (!visited.Add(fullTypeName))
+            return null;
+
+        var cliName =
+            model.CliName
+            ?? (fieldName is not null ? FieldToCliName(fieldName) : null)
+            ?? model.ClassName.ToLowerInvariant();
+
+        var options = CollectNodeOptions(model, dict, manualDict, new HashSet<string>());
+
+        var children = new List<NodeData>();
+        foreach (var child in model.Children)
+        {
+            if (!child.IsCommandDef)
+                continue;
+
+            var childCliName = FieldToCliName(child.Name);
+
+            // Parent-child name collision: inline grandchildren directly
+            if (model.CliName is not null && childCliName == model.CliName)
+            {
+                if (dict.TryGetValue(child.TypeName, out var inlinedModel))
+                {
+                    var inlinedChildren = BuildCommandDefChildren(
+                        inlinedModel,
+                        dict,
+                        manualDict,
+                        new HashSet<string>(visited)
+                    );
+                    children.AddRange(inlinedChildren);
+                    // Merge the inlined command's options into ours
+                    var inlinedOpts = CollectNodeOptions(
+                        inlinedModel,
+                        dict,
+                        manualDict,
+                        new HashSet<string>()
+                    );
+                    foreach (var o in inlinedOpts)
+                        if (!options.Contains(o))
+                            options.Add(o);
+                }
+                continue;
+            }
+
+            if (!dict.TryGetValue(child.TypeName, out var childModel))
+                continue;
+
+            var childNode = BuildNodeData(
+                child.TypeName,
+                child.Name,
+                childModel,
+                dict,
+                manualDict,
+                new HashSet<string>(visited)
+            );
+            if (childNode is not null)
+                children.Add(childNode);
+        }
+
+        visited.Remove(fullTypeName);
+
+        return new NodeData
+        {
+            TypeFullName = fullTypeName,
+            CliName = cliName,
+            Options = options,
+            Children = children,
+        };
+    }
+
+    static List<NodeData> BuildCommandDefChildren(
+        ClassModel model,
+        Dictionary<string, ClassModel> dict,
+        Dictionary<string, List<string>> manualDict,
+        HashSet<string> visited
+    )
+    {
+        var result = new List<NodeData>();
+        foreach (var child in model.Children)
+        {
+            if (!child.IsCommandDef)
+                continue;
+            if (!dict.TryGetValue(child.TypeName, out var childModel))
+                continue;
+            var childNode = BuildNodeData(
+                child.TypeName,
+                child.Name,
+                childModel,
+                dict,
+                manualDict,
+                new HashSet<string>(visited)
+            );
+            if (childNode is not null)
+                result.Add(childNode);
+        }
+        return result;
+    }
+
+    /// <summary>
+    /// Collects all non-advanced option aliases from a CommandDef or OptionPack model,
+    /// recursively including its OptionPack children.
+    /// </summary>
+    static List<string> CollectNodeOptions(
+        ClassModel model,
+        Dictionary<string, ClassModel> dict,
+        Dictionary<string, List<string>> manualDict,
+        HashSet<string> visited
+    )
+    {
+        var modelKey =
+            model.Namespace.Length > 0 ? $"{model.Namespace}.{model.ClassName}" : model.ClassName;
+        if (!visited.Add(modelKey))
+            return [];
+
+        var result = new List<string>();
+
+        // Options declared on this class
+        foreach (var opt in model.Options)
+        {
+            if (opt.IsAdvanced)
+                continue;
+            result.Add(opt.PrimaryAlias);
+            foreach (var extra in opt.ExtraAliases)
+                result.Add(extra);
+        }
+
+        // Recurse into OptionPack children
+        foreach (var child in model.Children)
+        {
+            if (!child.IsOptionPack)
+                continue;
+
+            // From ClassModel (partial OptionPacks)
+            if (dict.TryGetValue(child.TypeName, out var packModel))
+            {
+                var packOpts = CollectNodeOptions(packModel, dict, manualDict, visited);
+                foreach (var o in packOpts)
+                    if (!result.Contains(o))
+                        result.Add(o);
+            }
+
+            // From [CliManualOptions] (non-partial OptionPacks)
+            if (manualDict.TryGetValue(child.TypeName, out var manualAliases))
+                foreach (var a in manualAliases)
+                    if (!result.Contains(a))
+                        result.Add(a);
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Walks the full command tree collecting dynamic provider registrations.
+    /// </summary>
+    static void CollectDynamicProviders(
+        ClassModel model,
+        Dictionary<string, ClassModel> dict,
+        Dictionary<string, string> result,
+        HashSet<string> visited
+    )
+    {
+        var modelKey =
+            model.Namespace.Length > 0 ? $"{model.Namespace}.{model.ClassName}" : model.ClassName;
+        if (!visited.Add(modelKey))
+            return;
+
+        foreach (var opt in model.Options)
+        {
+            if (opt.IsAdvanced || opt.CompletionProviderTypeName is null)
+                continue;
+            var allAliases = new[] { opt.PrimaryAlias }.Concat(opt.ExtraAliases);
+            foreach (var alias in allAliases)
+                if (!result.ContainsKey(alias))
+                    result[alias] = opt.CompletionProviderTypeName;
+        }
+
+        foreach (var child in model.Children)
+        {
+            if (dict.TryGetValue(child.TypeName, out var childModel))
+                CollectDynamicProviders(childModel, dict, result, visited);
+        }
+    }
 }

@@ -2,6 +2,7 @@ using System.CommandLine;
 
 namespace Console.Cli.Shared;
 
+[CliManualOptions("--interactive", "--no-interactive")]
 public class InteractiveOptionPack : OptionPack
 {
     internal static readonly GlobalOption<bool> InteractiveOption = new(
