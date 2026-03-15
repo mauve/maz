@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -15,16 +16,13 @@ public partial class KeyvaultmanagementVaultPurgeDeletedCommandDef(AuthOptionPac
     public override string Name => "purge-deleted";
     protected override bool IsDestructive => true;
 
-    public readonly SubscriptionOptionPack Subscription = new();
+    public readonly KeyVaultOptionPack KeyVault = new();
+
     public readonly RenderOptionPack Render = new();
 
     /// <summary>The name of the Azure region.</summary>
     [CliOption("--location", Required = true)]
     public partial string? Location { get; }
-
-    /// <summary>The name of the vault.</summary>
-    [CliOption("--vault-name", Required = true)]
-    public partial string? VaultName { get; }
 
     /// <summary>Do not wait for the long-running operation to complete.</summary>
     [CliOption("--no-wait")]
@@ -35,7 +33,8 @@ public partial class KeyvaultmanagementVaultPurgeDeletedCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.KeyVault/locations/{Location}/deletedVaults/{VaultName}/purge";
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var path = $"{keyVaultId}/purge";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-01", null, ct);
         if (!NoWait)

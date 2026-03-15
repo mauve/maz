@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -15,12 +16,9 @@ public partial class KeyvaultmanagementVaultCreateCommandDef(AuthOptionPack auth
     public override string Name => "create";
     protected override bool IsDestructive => true;
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-    public readonly RenderOptionPack Render = new();
+    public readonly KeyVaultOptionPack KeyVault = new();
 
-    /// <summary>The name of the vault.</summary>
-    [CliOption("--vault-name", Required = true)]
-    public partial string? VaultName { get; }
+    public readonly RenderOptionPack Render = new();
 
     /// <summary>The supported Azure location where the key vault should be created.</summary>
     [CliOption("--location", Required = true)]
@@ -39,7 +37,8 @@ public partial class KeyvaultmanagementVaultCreateCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.KeyVault/vaults/{VaultName}";
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var path = keyVaultId;
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()
