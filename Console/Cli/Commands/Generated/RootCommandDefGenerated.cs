@@ -122,6 +122,20 @@ public partial class RootCommandDef
     public ViCommandDef Vi = null!;
     public WindowsiotCommandDef Windowsiot = null!;
     public AzurestackhciCommandDef Azurestackhci = null!;
+    public AzurearcdataCommandDef Azurearcdata = null!;
+    public CarbonCommandDef Carbon = null!;
+    public CommunitytrainingCommandDef Communitytraining = null!;
+    public ConfluentCommandDef Confluent = null!;
+    public DashboardCommandDef Dashboard = null!;
+    public DynatraceCommandDef Dynatrace = null!;
+    public ElasticCommandDef Elastic = null!;
+    public ExtendedlocationCommandDef Extendedlocation = null!;
+    public FluidrelayCommandDef Fluidrelay = null!;
+    public GuestconfigurationCommandDef Guestconfiguration = null!;
+    public NetworkfunctionCommandDef Networkfunction = null!;
+    public NginxCommandDef Nginx = null!;
+    public SphereCommandDef Sphere = null!;
+    public WorkloadsCommandDef Workloads = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -240,5 +254,19 @@ public partial class RootCommandDef
         Vi = new ViCommandDef(Auth);
         Windowsiot = new WindowsiotCommandDef(Auth);
         Azurestackhci = new AzurestackhciCommandDef(Auth);
+        Azurearcdata = new AzurearcdataCommandDef(Auth);
+        Carbon = new CarbonCommandDef(Auth);
+        Communitytraining = new CommunitytrainingCommandDef(Auth);
+        Confluent = new ConfluentCommandDef(Auth);
+        Dashboard = new DashboardCommandDef(Auth);
+        Dynatrace = new DynatraceCommandDef(Auth);
+        Elastic = new ElasticCommandDef(Auth);
+        Extendedlocation = new ExtendedlocationCommandDef(Auth);
+        Fluidrelay = new FluidrelayCommandDef(Auth);
+        Guestconfiguration = new GuestconfigurationCommandDef(Auth);
+        Networkfunction = new NetworkfunctionCommandDef(Auth);
+        Nginx = new NginxCommandDef(Auth);
+        Sphere = new SphereCommandDef(Auth);
+        Workloads = new WorkloadsCommandDef(Auth);
     }
 }

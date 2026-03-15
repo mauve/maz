@@ -9450,6 +9450,838 @@
         "EdgeDeviceJobs_Delete",
         "Clusters_ConfigureRemoteSupport"
       ]
+    },
+    {
+      "serviceDir": "azurearcdata",
+      "displayName": "azurearcdata",
+      "apiVersion": "2026-01-01",
+      "description": "Manage Azure Arc-enabled data services including SQL Managed Instances and PostgreSQL.",
+      "detailedDescription": "Azure Arc-enabled data services allow running Azure data services on-premises, at the edge, and in multi-cloud environments. Covers Arc data controllers, SQL Managed Instances, SQL Server instances, and PostgreSQL instances connected to Azure.",
+      "specFiles": [
+        "azurearcdata/resource-manager/Microsoft.AzureArcData/stable/2026-01-01/azurearcdata.json"
+      ],
+      "resourceDescriptions": {
+        "datacontroller": "Azure Arc data controllers managing Arc-enabled data services",
+        "sqlmanagedinstance": "SQL Managed Instances running on Arc-enabled infrastructure",
+        "sqlserverinstance": "SQL Server instances registered with Azure Arc",
+        "postgresinstance": "PostgreSQL instances running on Arc-enabled infrastructure"
+      },
+      "resourceDetailedDescriptions": {
+        "datacontroller": "Deploy and manage Arc data controllers on Kubernetes that host Arc-enabled data services.",
+        "sqlmanagedinstance": "Deploy and manage SQL Managed Instances on Arc infrastructure with Azure-managed licensing and patching.",
+        "sqlserverinstance": "Register and manage on-premises SQL Server instances with Azure Arc for inventory, assessment, and ESU licensing.",
+        "postgresinstance": "Deploy and manage PostgreSQL instances on Arc-enabled Kubernetes infrastructure."
+      },
+      "actionRenames": {
+        "DataControllers_GetDataController": "show",
+        "DataControllers_PutDataController": "create",
+        "DataControllers_DeleteDataController": "delete",
+        "DataControllers_PatchDataController": "update",
+        "DataControllers_ListInGroup": "list",
+        "DataControllers_ListInSubscription": "list-by-subscription",
+        "SqlManagedInstances_Get": "show",
+        "SqlManagedInstances_Create": "create",
+        "SqlManagedInstances_Delete": "delete",
+        "SqlManagedInstances_Update": "update",
+        "SqlManagedInstances_ListByResourceGroup": "list",
+        "SqlManagedInstances_List": "list",
+        "SqlServerInstances_Get": "show",
+        "SqlServerInstances_Create": "create",
+        "SqlServerInstances_Delete": "delete",
+        "SqlServerInstances_Update": "update",
+        "SqlServerInstances_ListByResourceGroup": "list",
+        "SqlServerInstances_List": "list",
+        "PostgresInstances_Get": "show",
+        "PostgresInstances_Create": "create",
+        "PostgresInstances_Delete": "delete",
+        "PostgresInstances_Update": "update",
+        "PostgresInstances_ListByResourceGroup": "list",
+        "PostgresInstances_List": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "SqlManagedInstances_List",
+          "resourceGroupOperationId": "SqlManagedInstances_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SqlServerInstances_List",
+          "resourceGroupOperationId": "SqlServerInstances_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "PostgresInstances_List",
+          "resourceGroupOperationId": "PostgresInstances_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "resourceRenames": {
+        "DataControllers_GetDataController": "datacontroller",
+        "DataControllers_PutDataController": "datacontroller",
+        "DataControllers_DeleteDataController": "datacontroller",
+        "DataControllers_PatchDataController": "datacontroller",
+        "DataControllers_ListInGroup": "datacontroller",
+        "DataControllers_ListInSubscription": "datacontroller"
+      },
+      "exclude": [
+        "Operations_List",
+        "SqlServerInstances_getBestPracticesAssessment",
+        "SqlServerInstances_runMigrationAssessment",
+        "SqlServerInstances_runBestPracticesAssessment",
+        "SqlServerInstances_runManagedInstanceLinkAssessment",
+        "SqlServerInstances_preUpgrade",
+        "SqlServerInstances_postUpgrade",
+        "SqlServerLicenses_Get",
+        "SqlServerLicenses_Create",
+        "SqlServerLicenses_Delete",
+        "SqlServerLicenses_Update",
+        "SqlServerLicenses_ListByResourceGroup",
+        "SqlServerLicenses_List",
+        "SqlServerLicenses_CancelTransition",
+        "SqlServerLicenses_InitiateTransition",
+        "ActiveDirectoryConnectors_Get",
+        "ActiveDirectoryConnectors_Create",
+        "ActiveDirectoryConnectors_Delete",
+        "ActiveDirectoryConnectors_List",
+        "SqlManagedInstanceRestorableDroppedDatabases_List",
+        "SqlManagedInstanceRestorableDroppedDatabases_Get",
+        "FailoverGroups_Get",
+        "FailoverGroups_Create",
+        "FailoverGroups_Delete",
+        "FailoverGroups_Update",
+        "FailoverGroups_List",
+        "SqlManagedInstanceMigrations_Get",
+        "SqlManagedInstanceMigrations_Create",
+        "SqlManagedInstanceMigrationsCancel_Cancel",
+        "SqlManagedInstanceMigrationsComplete_Complete",
+        "SqlManagedInstanceMigrations_List"
+      ]
+    },
+    {
+      "serviceDir": "carbon",
+      "displayName": "carbon",
+      "apiVersion": "2025-04-01",
+      "description": "Query Azure carbon emission reports for sustainability tracking and reporting.",
+      "detailedDescription": "Azure Carbon Optimization provides carbon emission data for Azure resource usage. Query emission reports for sustainability dashboards and regulatory reporting. Requires Reader role on the queried subscription.",
+      "specFiles": [
+        "carbon/resource-manager/Microsoft.Carbon/stable/2025-04-01/main.json"
+      ],
+      "resourceDescriptions": {
+        "service": "Carbon emission query service"
+      },
+      "resourceDetailedDescriptions": {
+        "service": "Query carbon emission reports and available date ranges for Azure resource consumption across subscriptions."
+      },
+      "actionRenames": {
+        "CarbonService_QueryCarbonEmissionReports": "query-emissions",
+        "CarbonService_QueryCarbonEmissionDataAvailableDateRange": "query-date-range"
+      },
+      "resourceRenames": {
+        "CarbonService_QueryCarbonEmissionReports": "service",
+        "CarbonService_QueryCarbonEmissionDataAvailableDateRange": "service"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "communitytraining",
+      "displayName": "communitytraining",
+      "apiVersion": "2023-11-01",
+      "description": "Manage Azure Community Training resources for large-scale learning management.",
+      "detailedDescription": "Azure Community Training is a learning management platform enabling organizations to deliver training at scale. Covers Community Training resource lifecycle management.",
+      "specFiles": [
+        "communitytraining/resource-manager/Microsoft.Community/stable/2023-11-01/CommunityTrainings.json"
+      ],
+      "resourceDescriptions": {
+        "communitytraining": "Azure Community Training platform resources"
+      },
+      "resourceDetailedDescriptions": {
+        "communitytraining": "Create and manage Community Training instances providing scalable learning management for communities and organizations."
+      },
+      "actionRenames": {
+        "CommunityTrainings_Get": "show",
+        "CommunityTrainings_Create": "create",
+        "CommunityTrainings_Delete": "delete",
+        "CommunityTrainings_Update": "update",
+        "CommunityTrainings_ListByResourceGroup": "list",
+        "CommunityTrainings_ListBySubscription": "list-by-subscription"
+      },
+      "resourceRenames": {
+        "CommunityTrainings_Get": "communitytraining",
+        "CommunityTrainings_Create": "communitytraining",
+        "CommunityTrainings_Delete": "communitytraining",
+        "CommunityTrainings_Update": "communitytraining",
+        "CommunityTrainings_ListByResourceGroup": "communitytraining",
+        "CommunityTrainings_ListBySubscription": "communitytraining"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "confluent",
+      "displayName": "confluent",
+      "apiVersion": "2024-07-01",
+      "description": "Manage Confluent Cloud organizations integrated with Azure for Apache Kafka workloads.",
+      "detailedDescription": "Confluent on Azure provides a fully managed Apache Kafka service. Covers organization lifecycle management and integration with Azure billing. Requires a Confluent marketplace subscription.",
+      "specFiles": [
+        "confluent/resource-manager/Microsoft.Confluent/stable/2024-07-01/confluent.json"
+      ],
+      "resourceDescriptions": {
+        "organization": "Confluent Cloud organizations linked to Azure subscriptions"
+      },
+      "resourceDetailedDescriptions": {
+        "organization": "Create and manage Confluent Cloud organizations, manage environments, clusters, API keys, and role bindings through the Azure-Confluent integration."
+      },
+      "actionRenames": {
+        "Organization_Get": "show",
+        "Organization_Create": "create",
+        "Organization_Delete": "delete",
+        "Organization_Update": "update",
+        "Organization_ListByResourceGroup": "list",
+        "Organization_ListBySubscription": "list-by-subscription"
+      },
+      "resourceRenames": {
+        "Organization_Get": "organization",
+        "Organization_Create": "organization",
+        "Organization_Delete": "organization",
+        "Organization_Update": "organization",
+        "Organization_ListByResourceGroup": "organization",
+        "Organization_ListBySubscription": "organization"
+      },
+      "exclude": [
+        "Operations_List",
+        "Marketplace_SaaSResourceList",
+        "Validations_ValidateOrganization",
+        "Validations_ValidateOrganizationV2",
+        "Organization_GetClusterAPIKey",
+        "Organization_DeleteClusterAPIKey",
+        "Organization_CreateAPIKey",
+        "Organization_GetEnvironmentById",
+        "Organization_GetClusterById",
+        "Organization_GetSchemaRegistryClusterById",
+        "Organization_ListClusters",
+        "Organization_ListSchemaRegistryClusters",
+        "Organization_ListEnvironments",
+        "Organization_ListRegions",
+        "Access_InviteUser",
+        "Access_ListUsers",
+        "Access_CreateRoleBinding",
+        "Access_DeleteRoleBinding",
+        "Access_ListRoleBindings",
+        "Access_ListRoleBindingNameList",
+        "Access_ListServiceAccounts",
+        "Access_ListInvitations",
+        "Access_DeleteInvitation"
+      ]
+    },
+    {
+      "serviceDir": "dashboard",
+      "displayName": "dashboard",
+      "apiVersion": "2025-08-01",
+      "description": "Manage Azure Managed Grafana workspaces for observability and analytics dashboards.",
+      "detailedDescription": "Azure Managed Grafana provides fully managed Grafana as a service natively integrated with Azure data sources. Covers Grafana workspace lifecycle, managed private endpoints, and plugin management.",
+      "specFiles": [
+        "dashboard/resource-manager/Microsoft.Dashboard/stable/2025-08-01/grafana.json"
+      ],
+      "resourceDescriptions": {
+        "grafana": "Azure Managed Grafana workspace instances",
+        "managedprivateendpoint": "Managed private endpoints for Grafana data source connectivity",
+        "manageddashboard": "Managed dashboards within a Grafana workspace"
+      },
+      "resourceDetailedDescriptions": {
+        "grafana": "Create and manage Managed Grafana workspaces. Each workspace provides a Grafana endpoint with Azure AD authentication, RBAC, and native Azure Monitor integration.",
+        "managedprivateendpoint": "Configure managed private endpoints enabling Grafana to access Azure data sources over private connectivity.",
+        "manageddashboard": "Manage Grafana dashboard resources stored within a workspace."
+      },
+      "actionRenames": {
+        "Grafana_Get": "show",
+        "Grafana_Create": "create",
+        "Grafana_Delete": "delete",
+        "Grafana_Update": "update",
+        "Grafana_ListByResourceGroup": "list",
+        "Grafana_List": "list",
+        "Grafana_CheckEnterpriseDetails": "show-enterprise-details",
+        "Grafana_FetchAvailablePlugins": "list-plugins",
+        "ManagedPrivateEndpoints_Get": "show",
+        "ManagedPrivateEndpoints_Create": "create",
+        "ManagedPrivateEndpoints_Delete": "delete",
+        "ManagedPrivateEndpoints_Update": "update",
+        "ManagedPrivateEndpoints_List": "list",
+        "ManagedPrivateEndpoints_Refresh": "refresh",
+        "ManagedDashboards_Create": "create",
+        "ManagedDashboards_Delete": "delete",
+        "ManagedDashboards_Update": "update"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Grafana_List",
+          "resourceGroupOperationId": "Grafana_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "PrivateEndpointConnections_List",
+        "PrivateEndpointConnections_Get",
+        "PrivateEndpointConnections_Approve",
+        "PrivateEndpointConnections_Delete",
+        "PrivateLinkResources_List",
+        "PrivateLinkResources_Get",
+        "Dashboards_ListBySubscription",
+        "Dashboards_List",
+        "Dashboards_Get",
+        "Dashboards_CreateOrUpdate",
+        "Dashboards_Update",
+        "Dashboards_Delete",
+        "IntegrationFabrics_List",
+        "IntegrationFabrics_Get",
+        "IntegrationFabrics_Create",
+        "IntegrationFabrics_Delete",
+        "IntegrationFabrics_Update"
+      ]
+    },
+    {
+      "serviceDir": "dynatrace",
+      "displayName": "dynatrace",
+      "apiVersion": "2024-04-24",
+      "description": "Manage Dynatrace observability monitors integrated with Azure.",
+      "detailedDescription": "Dynatrace on Azure provides AI-powered full-stack observability. Covers Dynatrace monitor lifecycle, SSO configuration, tag rules for automatic resource monitoring, and monitored subscription management.",
+      "specFiles": [
+        "dynatrace/resource-manager/Dynatrace.Observability/stable/2024-04-24/dynatrace.json"
+      ],
+      "resourceDescriptions": {
+        "monitor": "Dynatrace monitor resources linked to Azure subscriptions",
+        "single-sign-on": "SSO configurations for Dynatrace monitors",
+        "tagrule": "Tag-based rules for automatic Azure resource monitoring"
+      },
+      "resourceDetailedDescriptions": {
+        "monitor": "Create and manage Dynatrace monitor resources that connect Azure subscriptions to Dynatrace environments for observability.",
+        "single-sign-on": "Configure single sign-on settings for Dynatrace monitors enabling Azure AD-based authentication.",
+        "tagrule": "Define tag-based rules to automatically include or exclude Azure resources from Dynatrace monitoring."
+      },
+      "actionRenames": {
+        "Monitors_Get": "show",
+        "Monitors_CreateOrUpdate": "create",
+        "Monitors_Delete": "delete",
+        "Monitors_Update": "update",
+        "Monitors_ListByResourceGroup": "list",
+        "Monitors_ListBySubscriptionId": "list-by-subscription",
+        "Monitors_ListHosts": "list-hosts",
+        "Monitors_ListMonitoredResources": "list-monitored-resources",
+        "Monitors_ListAppServices": "list-app-services",
+        "Monitors_GetVMHostPayload": "show-vm-payload",
+        "Monitors_GetMetricStatus": "show-metric-status",
+        "SingleSignOn_Get": "show",
+        "SingleSignOn_CreateOrUpdate": "create",
+        "SingleSignOn_List": "list",
+        "TagRules_Get": "show",
+        "TagRules_CreateOrUpdate": "create",
+        "TagRules_Delete": "delete",
+        "TagRules_List": "list"
+      },
+      "resourceRenames": {
+        "SingleSignOn_Get": "single-sign-on",
+        "SingleSignOn_CreateOrUpdate": "single-sign-on",
+        "SingleSignOn_List": "single-sign-on"
+      },
+      "exclude": [
+        "Operations_List",
+        "Monitors_GetMarketplaceSaaSResourceDetails",
+        "Monitors_GetSSODetails",
+        "Monitors_GetAllConnectedResourcesCount",
+        "Monitors_ListLinkableEnvironments",
+        "Monitors_ManageAgentInstallation",
+        "Monitors_UpgradePlan",
+        "MonitoredSubscriptions_List",
+        "MonitoredSubscriptions_Get",
+        "MonitoredSubscriptions_CreateOrUpdate",
+        "MonitoredSubscriptions_Delete",
+        "MonitoredSubscriptions_Update",
+        "CreationSupported_List",
+        "CreationSupported_Get"
+      ]
+    },
+    {
+      "serviceDir": "elastic",
+      "displayName": "elastic",
+      "apiVersion": "2025-06-01",
+      "description": "Manage Elastic Cloud monitors integrated with Azure for Elasticsearch observability.",
+      "detailedDescription": "Elastic Cloud on Azure provides fully managed Elasticsearch, Kibana, and APM as a service. Covers monitor lifecycle, monitored resource management, and traffic filter configuration for network isolation.",
+      "specFiles": [
+        "elastic/resource-manager/Microsoft.Elastic/stable/2025-06-01/elastic.json"
+      ],
+      "resourceDescriptions": {
+        "monitor": "Elastic Cloud monitor resources linked to Azure subscriptions"
+      },
+      "resourceDetailedDescriptions": {
+        "monitor": "Create and manage Elastic Cloud monitors that connect Azure subscriptions to Elastic Cloud environments. Monitors handle billing and observability agent configuration."
+      },
+      "actionRenames": {
+        "Monitors_Get": "show",
+        "Monitors_Create": "create",
+        "Monitors_Delete": "delete",
+        "Monitors_Update": "update",
+        "Monitors_ListByResourceGroup": "list",
+        "Monitors_List": "list",
+        "Monitor_Upgrade": "upgrade"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Monitors_List",
+          "resourceGroupOperationId": "Monitors_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "resourceRenames": {
+        "Monitor_Upgrade": "monitor"
+      },
+      "exclude": [
+        "Operations_List",
+        "AllTrafficFilters_list",
+        "AssociateTrafficFilter_Associate",
+        "BillingInfo_Get",
+        "ConnectedPartnerResources_List",
+        "createAndAssociateIPFilter_Create",
+        "createAndAssociatePLFilter_Create",
+        "DeploymentInfo_List",
+        "DetachAndDeleteTrafficFilter_Delete",
+        "DetachTrafficFilter_Update",
+        "ExternalUser_CreateOrUpdate",
+        "listAssociatedTrafficFilters_list",
+        "MonitoredResources_List",
+        "MonitoredSubscriptions_List",
+        "MonitoredSubscriptions_Get",
+        "MonitoredSubscriptions_CreateorUpdate",
+        "MonitoredSubscriptions_Delete",
+        "MonitoredSubscriptions_Update",
+        "OpenAI_List",
+        "OpenAI_Get",
+        "OpenAI_CreateOrUpdate",
+        "OpenAI_Delete",
+        "TagRules_List",
+        "TagRules_Get",
+        "TagRules_CreateOrUpdate",
+        "TagRules_Delete",
+        "TrafficFilters_List",
+        "TrafficFilters_Delete",
+        "UpgradableVersions_Details"
+      ]
+    },
+    {
+      "serviceDir": "extendedlocation",
+      "displayName": "extendedlocation",
+      "apiVersion": "2021-08-15",
+      "description": "Manage Azure Arc custom locations for extending Azure management to on-premises clusters.",
+      "detailedDescription": "Azure Arc custom locations enable creating a layer on top of Arc-enabled Kubernetes clusters to deploy Azure services like SQL Managed Instance and App Services on-premises.",
+      "specFiles": [
+        "extendedlocation/resource-manager/Microsoft.ExtendedLocation/CustomLocations/stable/2021-08-15/customlocations.json"
+      ],
+      "resourceDescriptions": {
+        "customlocation": "Custom location resources enabling Azure service deployment at the edge"
+      },
+      "resourceDetailedDescriptions": {
+        "customlocation": "Create and manage custom locations on Arc-enabled Kubernetes clusters. Custom locations define where Azure services are deployed on-premises."
+      },
+      "actionRenames": {
+        "CustomLocations_Get": "show",
+        "CustomLocations_CreateOrUpdate": "create",
+        "CustomLocations_Delete": "delete",
+        "CustomLocations_Update": "update",
+        "CustomLocations_ListByResourceGroup": "list",
+        "CustomLocations_ListBySubscription": "list-by-subscription",
+        "CustomLocations_ListEnabledResourceTypes": "list-resource-types"
+      },
+      "resourceRenames": {
+        "CustomLocations_Get": "customlocation",
+        "CustomLocations_CreateOrUpdate": "customlocation",
+        "CustomLocations_Delete": "customlocation",
+        "CustomLocations_Update": "customlocation",
+        "CustomLocations_ListByResourceGroup": "customlocation",
+        "CustomLocations_ListBySubscription": "customlocation",
+        "CustomLocations_ListEnabledResourceTypes": "customlocation"
+      },
+      "exclude": [
+        "CustomLocations_ListOperations"
+      ]
+    },
+    {
+      "serviceDir": "fluidrelay",
+      "displayName": "fluidrelay",
+      "apiVersion": "2022-06-01",
+      "description": "Manage Azure Fluid Relay servers for real-time collaborative experiences.",
+      "detailedDescription": "Azure Fluid Relay enables building real-time collaborative applications using the Fluid Framework. Covers Fluid Relay server lifecycle, container management, and access key management.",
+      "specFiles": [
+        "fluidrelay/resource-manager/Microsoft.FluidRelay/stable/2022-06-01/fluidrelay.json"
+      ],
+      "resourceDescriptions": {
+        "server": "Azure Fluid Relay server resources providing real-time collaboration infrastructure",
+        "container": "Fluid containers hosted within a Fluid Relay server"
+      },
+      "resourceDetailedDescriptions": {
+        "server": "Create and manage Fluid Relay servers, retrieve and rotate access keys, and list by subscription or resource group.",
+        "container": "List and delete Fluid containers that host collaborative document state within a Fluid Relay server."
+      },
+      "actionRenames": {
+        "FluidRelayServers_Get": "show",
+        "FluidRelayServers_CreateOrUpdate": "create",
+        "FluidRelayServers_Delete": "delete",
+        "FluidRelayServers_Update": "update",
+        "FluidRelayServers_ListByResourceGroup": "list",
+        "FluidRelayServers_ListBySubscription": "list-by-subscription",
+        "FluidRelayServers_ListKeys": "list-keys",
+        "FluidRelayServers_RegenerateKey": "regenerate-key",
+        "FluidRelayContainers_Get": "show",
+        "FluidRelayContainers_Delete": "delete",
+        "FluidRelayContainers_ListByFluidRelayServers": "list"
+      },
+      "resourceRenames": {
+        "FluidRelayServers_Get": "server",
+        "FluidRelayServers_CreateOrUpdate": "server",
+        "FluidRelayServers_Delete": "server",
+        "FluidRelayServers_Update": "server",
+        "FluidRelayServers_ListByResourceGroup": "server",
+        "FluidRelayServers_ListBySubscription": "server",
+        "FluidRelayServers_ListKeys": "server",
+        "FluidRelayServers_RegenerateKey": "server",
+        "FluidRelayContainers_Get": "container",
+        "FluidRelayContainers_Delete": "container",
+        "FluidRelayContainers_ListByFluidRelayServers": "container"
+      },
+      "exclude": [
+        "FluidRelayOperations_List"
+      ]
+    },
+    {
+      "serviceDir": "guestconfiguration",
+      "displayName": "guestconfiguration",
+      "apiVersion": "2022-01-25",
+      "description": "Manage Azure Guest Configuration assignments for VM compliance and configuration policies.",
+      "detailedDescription": "Azure Policy Guest Configuration audits settings inside virtual machines, Arc-connected machines, and VMSS instances. Covers assignment lifecycle and compliance report retrieval for VMs, Arc machines, and VMSS.",
+      "specFiles": [
+        "guestconfiguration/resource-manager/Microsoft.GuestConfiguration/Assignments/stable/2022-01-25/guestconfiguration.json"
+      ],
+      "resourceDescriptions": {
+        "assignment": "Guest Configuration assignments linking Azure Policy configurations to VMs",
+        "assignmentreport": "Compliance reports for Guest Configuration assignments"
+      },
+      "resourceDetailedDescriptions": {
+        "assignment": "Create and manage Guest Configuration assignments that apply DSC-based configuration policies to Azure VMs, Arc-connected machines, and VMSS.",
+        "assignmentreport": "Retrieve compliance reports showing the current state of Guest Configuration policy assignments on resources."
+      },
+      "actionRenames": {
+        "GuestConfigurationAssignments_Get": "show",
+        "GuestConfigurationAssignments_CreateOrUpdate": "create",
+        "GuestConfigurationAssignments_Delete": "delete",
+        "GuestConfigurationAssignments_List": "list",
+        "GuestConfigurationAssignments_SubscriptionList": "list-by-subscription",
+        "GuestConfigurationAssignments_RGList": "list",
+        "GuestConfigurationAssignmentReports_Get": "show",
+        "GuestConfigurationAssignmentReports_List": "list"
+      },
+      "resourceRenames": {
+        "GuestConfigurationAssignments_Get": "assignment",
+        "GuestConfigurationAssignments_CreateOrUpdate": "assignment",
+        "GuestConfigurationAssignments_Delete": "assignment",
+        "GuestConfigurationAssignments_List": "assignment",
+        "GuestConfigurationAssignments_SubscriptionList": "assignment",
+        "GuestConfigurationAssignments_RGList": "assignment",
+        "GuestConfigurationAssignmentReports_Get": "assignmentreport",
+        "GuestConfigurationAssignmentReports_List": "assignmentreport"
+      },
+      "exclude": [
+        "Operations_List",
+        "GuestConfigurationAssignmentsVMSS_Get",
+        "GuestConfigurationAssignmentsVMSS_CreateOrUpdate",
+        "GuestConfigurationAssignmentsVMSS_Delete",
+        "GuestConfigurationAssignmentsVMSS_List",
+        "GuestConfigurationAssignmentReportsVMSS_List",
+        "GuestConfigurationAssignmentReportsVMSS_Get",
+        "GuestConfigurationHCRPAssignments_Get",
+        "GuestConfigurationHCRPAssignments_CreateOrUpdate",
+        "GuestConfigurationHCRPAssignments_Delete",
+        "GuestConfigurationHCRPAssignments_List",
+        "GuestConfigurationHCRPAssignmentReports_List",
+        "GuestConfigurationHCRPAssignmentReports_Get",
+        "GuestConfigurationConnectedVMwarevSphereAssignments_Get",
+        "GuestConfigurationConnectedVMwarevSphereAssignments_CreateOrUpdate",
+        "GuestConfigurationConnectedVMwarevSphereAssignments_Delete",
+        "GuestConfigurationConnectedVMwarevSphereAssignments_List",
+        "GuestConfigurationConnectedVMwarevSphereAssignmentsReports_List",
+        "GuestConfigurationConnectedVMwarevSphereAssignmentsReports_Get"
+      ]
+    },
+    {
+      "serviceDir": "networkfunction",
+      "displayName": "networkfunction",
+      "apiVersion": "2022-11-01",
+      "description": "Manage Azure Network Function traffic collectors for network observability.",
+      "detailedDescription": "Azure Network Function Manager provides Azure Traffic Collector for capturing flow logs from network functions. Covers traffic collector lifecycle and collector policy configuration.",
+      "specFiles": [
+        "networkfunction/resource-manager/Microsoft.NetworkFunction/TrafficCollector/stable/2022-11-01/AzureTrafficCollector.json"
+      ],
+      "resourceDescriptions": {
+        "azuretrafficcollector": "Azure Traffic Collector resources for network flow capture",
+        "collectorpolicy": "Collector policies defining what traffic to capture"
+      },
+      "resourceDetailedDescriptions": {
+        "azuretrafficcollector": "Create and manage Azure Traffic Collectors that capture network flow data from Azure network functions.",
+        "collectorpolicy": "Configure collector policies specifying the traffic sources and destinations to capture."
+      },
+      "actionRenames": {
+        "AzureTrafficCollectors_Get": "show",
+        "AzureTrafficCollectors_CreateOrUpdate": "create",
+        "AzureTrafficCollectors_Delete": "delete",
+        "AzureTrafficCollectors_UpdateTags": "update",
+        "CollectorPolicies_Get": "show",
+        "CollectorPolicies_CreateOrUpdate": "create",
+        "CollectorPolicies_Delete": "delete",
+        "CollectorPolicies_UpdateTags": "update",
+        "CollectorPolicies_List": "list"
+      },
+      "resourceRenames": {
+        "AzureTrafficCollectors_Get": "azuretrafficcollector",
+        "AzureTrafficCollectors_CreateOrUpdate": "azuretrafficcollector",
+        "AzureTrafficCollectors_Delete": "azuretrafficcollector",
+        "AzureTrafficCollectors_UpdateTags": "azuretrafficcollector"
+      },
+      "exclude": [
+        "NetworkFunction_ListOperations",
+        "AzureTrafficCollectorsByResourceGroup_List",
+        "AzureTrafficCollectorsBySubscription_List"
+      ]
+    },
+    {
+      "serviceDir": "nginx",
+      "displayName": "nginx",
+      "apiVersion": "2025-11-01",
+      "description": "Manage NGINX Plus deployments on Azure with configuration and certificate management.",
+      "detailedDescription": "NGINX as a Service on Azure provides managed NGINX Plus deployments. Covers deployment lifecycle, NGINX configuration file management, certificate upload, API key management, and WAF policy configuration.",
+      "specFiles": [
+        "nginx/resource-manager/Nginx.NginxPlus/stable/2025-11-01/swagger.json"
+      ],
+      "resourceDescriptions": {
+        "deployment": "NGINX Plus deployment instances on Azure",
+        "configuration": "NGINX configuration files for a deployment",
+        "certificate": "TLS certificates uploaded to a deployment",
+        "apikey": "API keys for authenticating NGINX management API calls"
+      },
+      "resourceDetailedDescriptions": {
+        "deployment": "Create and manage NGINX Plus deployments with autoscaling, network configuration, and logging settings.",
+        "configuration": "Manage NGINX configuration files for a deployment, including analysis of configuration validity.",
+        "certificate": "Upload and manage TLS/SSL certificates for use in NGINX deployments.",
+        "apikey": "Create and manage API keys for secure access to the NGINX management API."
+      },
+      "actionRenames": {
+        "Deployments_Get": "show",
+        "Deployments_CreateOrUpdate": "create",
+        "Deployments_Delete": "delete",
+        "Deployments_Update": "update",
+        "Deployments_ListByResourceGroup": "list",
+        "Deployments_List": "list",
+        "Configurations_Get": "show",
+        "Configurations_CreateOrUpdate": "create",
+        "Configurations_Delete": "delete",
+        "Configurations_List": "list",
+        "Configurations_Analysis": "analyze",
+        "Certificates_Get": "show",
+        "Certificates_CreateOrUpdate": "create",
+        "Certificates_Delete": "delete",
+        "Certificates_List": "list",
+        "ApiKeys_Get": "show",
+        "ApiKeys_CreateOrUpdate": "create",
+        "ApiKeys_Delete": "delete",
+        "ApiKeys_List": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Deployments_List",
+          "resourceGroupOperationId": "Deployments_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "DefaultWafPolicy_List",
+        "WafPolicy_List",
+        "WafPolicy_Get",
+        "WafPolicy_Create",
+        "WafPolicy_Delete",
+        "NginxDeploymentWafPolicies_Analysis"
+      ]
+    },
+    {
+      "serviceDir": "sphere",
+      "displayName": "sphere",
+      "apiVersion": "2024-04-01",
+      "description": "Manage Azure Sphere catalogs, products, device groups, and IoT devices.",
+      "detailedDescription": "Azure Sphere is a secured, high-level IoT platform with built-in security features. Covers catalog management, product and device group organization, device registration, certificate management, and firmware deployment.",
+      "specFiles": [
+        "sphere/resource-manager/Microsoft.AzureSphere/stable/2024-04-01/azuresphere.json"
+      ],
+      "resourceDescriptions": {
+        "catalog": "Azure Sphere catalogs grouping products and devices",
+        "product": "Products within an Azure Sphere catalog",
+        "devicegroup": "Device groups within a product for OS update targeting",
+        "device": "Azure Sphere device registrations",
+        "deployment": "Firmware deployments to device groups",
+        "certificate": "Code signing certificates for Azure Sphere"
+      },
+      "resourceDetailedDescriptions": {
+        "catalog": "Create and manage Sphere catalogs that serve as containers for products, devices, and deployments.",
+        "product": "Organize devices into products within a catalog for OS policy management.",
+        "devicegroup": "Configure device groups within a product to control OS update delivery and application deployment.",
+        "device": "Register and manage Azure Sphere devices within device groups.",
+        "deployment": "Manage firmware and application deployments targeting device groups.",
+        "certificate": "Manage Sphere code signing certificates for secure application distribution."
+      },
+      "actionRenames": {
+        "Catalogs_Get": "show",
+        "Catalogs_CreateOrUpdate": "create",
+        "Catalogs_Delete": "delete",
+        "Catalogs_Update": "update",
+        "Catalogs_ListBySubscription": "list-by-subscription",
+        "Catalogs_ListByResourceGroup": "list",
+        "Catalogs_UploadImage": "upload-image",
+        "Catalogs_CountDevices": "count-devices",
+        "Catalogs_ListDeployments": "list-deployments",
+        "Catalogs_ListDeviceGroups": "list-device-groups",
+        "Catalogs_ListDeviceInsights": "list-device-insights",
+        "Catalogs_ListDevices": "list-devices",
+        "Products_Get": "show",
+        "Products_CreateOrUpdate": "create",
+        "Products_Delete": "delete",
+        "Products_Update": "update",
+        "Products_ListByCatalog": "list",
+        "Products_CountDevices": "count-devices",
+        "Products_GenerateDefaultDeviceGroups": "generate-device-groups",
+        "DeviceGroups_Get": "show",
+        "DeviceGroups_CreateOrUpdate": "create",
+        "DeviceGroups_Delete": "delete",
+        "DeviceGroups_Update": "update",
+        "DeviceGroups_ListByProduct": "list",
+        "DeviceGroups_ClaimDevices": "claim-devices",
+        "DeviceGroups_CountDevices": "count-devices",
+        "Devices_Get": "show",
+        "Devices_CreateOrUpdate": "create",
+        "Devices_Delete": "delete",
+        "Devices_Update": "update",
+        "Devices_ListByDeviceGroup": "list",
+        "Devices_GenerateCapabilityImage": "generate-capability-image",
+        "Deployments_Get": "show",
+        "Deployments_CreateOrUpdate": "create",
+        "Deployments_Delete": "delete",
+        "Deployments_ListByDeviceGroup": "list",
+        "Certificates_Get": "show",
+        "Certificates_ListByCatalog": "list",
+        "Certificates_RetrieveCertChain": "show-chain",
+        "Certificates_RetrieveProofOfPossessionNonce": "show-nonce"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "workloads",
+      "displayName": "workloads",
+      "apiVersion": "2023-04-01",
+      "description": "Manage SAP workloads on Azure including SAP Virtual Instances and component instances.",
+      "detailedDescription": "Azure Center for SAP Solutions enables deploying and managing SAP workloads on Azure. Covers SAP Virtual Instance lifecycle, ABAP Central Services (ASCS), database, and application server instance management with start/stop capability.",
+      "specFiles": [
+        "workloads/resource-manager/Microsoft.Workloads/stable/2023-04-01/SAPVirtualInstance.json"
+      ],
+      "resourceDescriptions": {
+        "sapvirtualinstance": "SAP Virtual Instance representing a complete SAP system on Azure",
+        "sapcentralinstance": "SAP ABAP Central Services (ASCS/ERS) instances",
+        "sapdatabaseinstance": "SAP database instances (HANA, ASE, etc.)",
+        "sapapplicationserverinstance": "SAP application server instances",
+        "sapdiskconfiguration": "Recommended SAP disk configurations",
+        "sapsizingrecommendation": "SAP sizing recommendations for Azure",
+        "sap-supported-sku": "Supported VM SKUs for SAP workloads"
+      },
+      "resourceDetailedDescriptions": {
+        "sapvirtualinstance": "Deploy and manage SAP Virtual Instances representing the full SAP S/4HANA or other SAP system topology on Azure.",
+        "sapcentralinstance": "Manage SAP ASCS/ERS central services instances including start/stop operations for maintenance.",
+        "sapdatabaseinstance": "Manage SAP database instances including HANA, SQL Server, and other supported databases with start/stop support.",
+        "sapapplicationserverinstance": "Manage SAP application server instances with individual start/stop for rolling maintenance.",
+        "sapdiskconfiguration": "Get recommended disk configurations for SAP system components at a given Azure region and SKU.",
+        "sapsizingrecommendation": "Get Azure VM sizing recommendations for SAP workloads based on SAPS rating and memory requirements.",
+        "sap-supported-sku": "List supported Azure VM SKUs for SAP workloads at a given region."
+      },
+      "actionRenames": {
+        "SAPVirtualInstances_Get": "show",
+        "SAPVirtualInstances_Create": "create",
+        "SAPVirtualInstances_Delete": "delete",
+        "SAPVirtualInstances_Update": "update",
+        "SAPVirtualInstances_ListByResourceGroup": "list",
+        "SAPVirtualInstances_ListBySubscription": "list-by-subscription",
+        "SAPVirtualInstances_Start": "start",
+        "SAPVirtualInstances_Stop": "stop",
+        "SAPCentralInstances_Get": "show",
+        "SAPCentralInstances_Create": "create",
+        "SAPCentralInstances_Delete": "delete",
+        "SAPCentralInstances_Update": "update",
+        "SAPCentralInstances_List": "list",
+        "SAPCentralInstances_StartInstance": "start",
+        "SAPCentralInstances_StopInstance": "stop",
+        "SAPDatabaseInstances_Get": "show",
+        "SAPDatabaseInstances_Create": "create",
+        "SAPDatabaseInstances_Delete": "delete",
+        "SAPDatabaseInstances_Update": "update",
+        "SAPDatabaseInstances_List": "list",
+        "SAPDatabaseInstances_StartInstance": "start",
+        "SAPDatabaseInstances_StopInstance": "stop",
+        "SAPApplicationServerInstances_Get": "show",
+        "SAPApplicationServerInstances_Create": "create",
+        "SAPApplicationServerInstances_Delete": "delete",
+        "SAPApplicationServerInstances_Update": "update",
+        "SAPApplicationServerInstances_List": "list",
+        "SAPApplicationServerInstances_StartInstance": "start",
+        "SAPApplicationServerInstances_StopInstance": "stop",
+        "SAPDiskConfigurations": "show",
+        "SAPAvailabilityZoneDetails": "show",
+        "SAPSizingRecommendations": "show",
+        "SAPSupportedSku": "list"
+      },
+      "resourceRenames": {
+        "SAPVirtualInstances_Get": "sapvirtualinstance",
+        "SAPVirtualInstances_Create": "sapvirtualinstance",
+        "SAPVirtualInstances_Delete": "sapvirtualinstance",
+        "SAPVirtualInstances_Update": "sapvirtualinstance",
+        "SAPVirtualInstances_ListByResourceGroup": "sapvirtualinstance",
+        "SAPVirtualInstances_ListBySubscription": "sapvirtualinstance",
+        "SAPVirtualInstances_Start": "sapvirtualinstance",
+        "SAPVirtualInstances_Stop": "sapvirtualinstance",
+        "SAPCentralInstances_Get": "sapcentralinstance",
+        "SAPCentralInstances_Create": "sapcentralinstance",
+        "SAPCentralInstances_Delete": "sapcentralinstance",
+        "SAPCentralInstances_Update": "sapcentralinstance",
+        "SAPCentralInstances_List": "sapcentralinstance",
+        "SAPCentralInstances_StartInstance": "sapcentralinstance",
+        "SAPCentralInstances_StopInstance": "sapcentralinstance",
+        "SAPDatabaseInstances_Get": "sapdatabaseinstance",
+        "SAPDatabaseInstances_Create": "sapdatabaseinstance",
+        "SAPDatabaseInstances_Delete": "sapdatabaseinstance",
+        "SAPDatabaseInstances_Update": "sapdatabaseinstance",
+        "SAPDatabaseInstances_List": "sapdatabaseinstance",
+        "SAPDatabaseInstances_StartInstance": "sapdatabaseinstance",
+        "SAPDatabaseInstances_StopInstance": "sapdatabaseinstance",
+        "SAPApplicationServerInstances_Get": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_Create": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_Delete": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_Update": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_List": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_StartInstance": "sapapplicationserverinstance",
+        "SAPApplicationServerInstances_StopInstance": "sapapplicationserverinstance",
+        "SAPDiskConfigurations": "sapdiskconfiguration",
+        "SAPAvailabilityZoneDetails": "sapavailabilityzonedetail",
+        "SAPSizingRecommendations": "sapsizingrecommendation",
+        "SAPSupportedSku": "sap-supported-sku"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
     }
   ]
 }
