@@ -5,6 +5,19 @@ namespace Console.Cli.Commands.Bootstrap;
 /// <summary>Renders a single ## section from GETTING_STARTED.md with ANSI colours.</summary>
 internal static class BootstrapMarkdownRenderer
 {
+    /// <summary>
+    /// Captures <see cref="Render"/> output into a list of lines for TUI absolute-row rendering.
+    /// </summary>
+    public static List<string> RenderToLines(string sectionText, int contentWidth)
+    {
+        var sw = new StringWriter();
+        var old = System.Console.Out;
+        System.Console.SetOut(sw);
+        try { Render(sectionText, contentWidth); }
+        finally { System.Console.SetOut(old); }
+        return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
+    }
+
     /// <param name="sectionText">Raw section markdown text.</param>
     /// <param name="contentWidth">Available visible columns (for word-wrap).</param>
     public static void Render(string sectionText, int contentWidth)

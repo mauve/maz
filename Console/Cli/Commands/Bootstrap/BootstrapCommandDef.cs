@@ -3,11 +3,13 @@ using Console.Rendering;
 
 namespace Console.Cli.Commands.Bootstrap;
 
-/// <summary>Onboarding wizard: completions, guided tutorial, animated demos, and optional configure.</summary>
+/// <summary>Onboarding wizard: completions, guided tutorial, and animated demos.</summary>
 /// <remarks>
-/// Renders a series of full-width "slices" — each a bordered panel that spans the terminal
-/// width. The terminal scrolls naturally as you navigate forward; going back re-renders the
-/// previous step below the current one. Navigate with Ctrl+PgUp/Down, ← →, or Enter.
+/// Full-screen TUI: renders each step into an alternate screen buffer with a fixed top border
+/// and bottom border. Content occupies the rows between them. Demo animations run in the
+/// reserved demo area above the bottom border using absolute cursor positioning, so they can
+/// never overwrite the borders or content.
+/// Navigate with Enter / → (next), ← (back), q / Esc (quit).
 /// </remarks>
 public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionPack interactive)
     : CommandDef
@@ -22,7 +24,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
     private readonly record struct WizardStep(
         string Title,
-        Func<int, Task> RenderContent,
+        Func<int, Task<List<string>>> GetContentLines,
         string? DemoTag = null);
 
     // ── Entry point ────────────────────────────────────────────────────────────
@@ -65,7 +67,20 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         steps.Add(new WizardStep(
             "Welcome to maz",
-            w => RenderWelcomeContentAsync(shell, completionsSetup, w, CancellationToken.None)));
+            async w =>
+            {
+                // Capture logo + completions text into lines (shimmer skipped via cancelled CT).
+                var sw = new StringWriter();
+                var old = System.Console.Out;
+                System.Console.SetOut(sw);
+                try
+                {
+                    await RenderWelcomeContentAsync(shell, completionsSetup, w,
+                        new CancellationToken(canceled: true));
+                }
+                finally { System.Console.SetOut(old); }
+                return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
+            }));
 
         foreach (var section in sections)
         {
@@ -77,7 +92,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
             steps.Add(new WizardStep(
                 title,
-                w => { BootstrapMarkdownRenderer.Render(s, w); return Task.CompletedTask; },
+                w => Task.FromResult(BootstrapMarkdownRenderer.RenderToLines(s, w)),
                 demoTag));
         }
 
@@ -91,141 +106,126 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         CancellationTokenSource? stepCts = null;
         Task? demoTask = null;
-        int pageTopRow = -1;
+        int currentWidth = 0, currentHeight = 0;
 
-        // ── Helpers ────────────────────────────────────────────────────────────
+        // Enter alternate screen buffer and hide cursor.
+        System.Console.TreatControlCAsInput = true;
+        System.Console.Write("\x1b[?1049h\x1b[?25l");
 
-        int pageDemoLines = 0;
-
-        async Task StartStepAsync(int i)
+        try
         {
-            try { pageTopRow = System.Console.CursorTop; } catch { pageTopRow = -1; }
-            pageDemoLines = GetDemoHeight(steps[i].DemoTag);
-            await RenderSliceContentAsync(steps[i], i, total, pageDemoLines);
-            stepCts?.Dispose();
-            stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            var token = stepCts.Token;
-            demoTask = steps[i].DemoTag is { } tag
-                ? Task.Run(() => PlayDemoAsync(tag, token), CancellationToken.None)
-                : null;
+            async Task DrawStepAsync(int i)
+            {
+                // Cancel and await any running demo.
+                if (stepCts != null)
+                {
+                    await stepCts.CancelAsync();
+                    if (demoTask != null)
+                    {
+                        try { await demoTask; } catch (OperationCanceledException) { }
+                        demoTask = null;
+                    }
+                    stepCts.Dispose();
+                    stepCts = null;
+                }
+
+                int w = WizardUi.GetTermWidth();
+                int h = WizardUi.GetTermHeight();
+                currentWidth = w;
+                currentHeight = h;
+
+                var boxWidth = w - 1;
+                var step = steps[i];
+                var demoLines = GetDemoHeight(step.DemoTag);
+                var nextLabel = i >= total - 1 ? "done " : "next ";
+                var navAnsi = $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
+
+                // Clear screen.
+                System.Console.Write("\x1b[2J");
+
+                // Top border at row 1.
+                WizardUi.MoveTo(1);
+                WizardUi.RenderTopBorder(step.Title, i, total, boxWidth);
+
+                // Bottom border at row h.
+                WizardUi.MoveTo(h);
+                WizardUi.RenderBottomBorder(navAnsi, boxWidth);
+
+                // Content area: rows 2..contentAreaEnd.
+                // Leave demoLines rows above the bottom border for the demo animation.
+                var contentAreaEnd = demoLines > 0 ? h - demoLines - 1 : h - 1;
+                var maxContentLines = Math.Max(0, contentAreaEnd - 1); // rows 2..contentAreaEnd
+                var contentWidth = boxWidth - 2;
+
+                var contentLines = await step.GetContentLines(contentWidth);
+                for (var r = 0; r < Math.Min(contentLines.Count, maxContentLines); r++)
+                {
+                    WizardUi.MoveTo(2 + r);
+                    System.Console.Write("\x1b[2K");
+                    System.Console.Write(contentLines[r]);
+                }
+
+                // Start demo loop if this step has one.
+                if (demoLines > 0 && step.DemoTag is { } tag)
+                {
+                    var demoStartRow = h - demoLines; // 1-indexed row of first demo line
+                    stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+                    var token = stepCts.Token;
+                    demoTask = Task.Run(() => PlayDemoAsync(tag, demoStartRow, token), CancellationToken.None);
+                }
+            }
+
+            await DrawStepAsync(index);
+
+            while (!ct.IsCancellationRequested)
+            {
+                // Detect resize.
+                int w = WizardUi.GetTermWidth();
+                int h = WizardUi.GetTermHeight();
+                if (w != currentWidth || h != currentHeight)
+                {
+                    await DrawStepAsync(index);
+                    continue;
+                }
+
+                if (!System.Console.KeyAvailable)
+                {
+                    await Task.Delay(30, ct).ConfigureAwait(false);
+                    continue;
+                }
+
+                var key = System.Console.ReadKey(intercept: true);
+
+                bool forward  = IsForwardKey(key);
+                bool backward = IsBackwardKey(key);
+                bool quit     = IsQuitKey(key);
+
+                bool exiting = quit || (forward && index >= total - 1);
+                bool moved   = !exiting && ((forward && index < total - 1) || (backward && index > 0));
+
+                if (!exiting && !moved) continue;
+
+                if (moved) index = forward ? index + 1 : index - 1;
+                if (exiting) break;
+
+                await DrawStepAsync(index);
+            }
         }
-
-        // Cancels the demo (which self-erases its output back to demo-start), moves to the
-        // pre-rendered bottom border, repaints it grey, then greys the top border too.
-        async Task SealPageAsync(int i)
+        finally
         {
-            bool demoWasRunning = demoTask is { IsCompleted: false };
-
-            if (stepCts is not null)
+            // Cancel demo if running.
+            if (stepCts != null)
             {
                 await stepCts.CancelAsync();
-                if (demoTask is not null)
-                {
+                if (demoTask != null)
                     try { await demoTask; } catch (OperationCanceledException) { }
-                    demoTask = null;
-                }
                 stepCts.Dispose();
-                stepCts = null;
             }
 
-            var boxWidth = WizardUi.GetTermWidth() - 1;
-            var nextLabel = i >= total - 1 ? "done " : "next ";
-            var navText = $"  ← back  │  → {nextLabel}│  q quit  ";
-
-            // Position cursor on the pre-rendered bottom border line, then overwrite it grey.
-            if (pageDemoLines > 0)
-            {
-                if (demoWasRunning)
-                    // Demo self-erased → cursor is at start of demo area; skip down to border.
-                    System.Console.Write($"\x1b[{pageDemoLines}B");
-                // else: demo completed naturally (kusto) → cursor is already on the border line.
-            }
-            else
-            {
-                // No demo: cursor is one line past the border; step back up.
-                System.Console.Write("\x1b[1A");
-            }
-            WizardUi.RenderBottomBorder(navText, boxWidth, dim: true);
-
-            // Repaint the top border in grey using saved cursor position.
-            try
-            {
-                var afterRow = System.Console.CursorTop;
-                if (pageTopRow >= 0 && afterRow > pageTopRow)
-                {
-                    var dist = afterRow - pageTopRow;
-                    System.Console.Write($"\x1b[{dist}F");
-                    WizardUi.RenderTopBorder(steps[i].Title, i, total, boxWidth, dim: true);
-                    if (dist > 1) System.Console.Write($"\x1b[{dist - 1}B");
-                }
-            }
-            catch { /* CursorTop unavailable — skip grey top, layout is still correct */ }
+            // Restore terminal.
+            System.Console.TreatControlCAsInput = false;
+            System.Console.Write("\x1b[?25h\x1b[?1049l");
         }
-
-        // ── Main loop ──────────────────────────────────────────────────────────
-
-        await StartStepAsync(index);
-
-        while (!ct.IsCancellationRequested)
-        {
-            var key = System.Console.ReadKey(intercept: true);
-
-            bool forward  = IsForwardKey(key);
-            bool backward = IsBackwardKey(key);
-            bool quit     = IsQuitKey(key);
-
-            bool exiting = quit || (forward && index >= total - 1);
-            bool moved   = !exiting && ((forward && index < total - 1) || (backward && index > 0));
-
-            if (!exiting && !moved)
-                continue; // unrecognized key or backward-at-step-0 — demo keeps running
-
-            var sealedIndex = index;
-            if (moved)
-                index = forward ? index + 1 : index - 1;
-
-            await SealPageAsync(sealedIndex);
-
-            if (exiting)
-            {
-                System.Console.WriteLine();
-                return;
-            }
-
-            System.Console.WriteLine(); // blank gap between slices
-            await StartStepAsync(index);
-        }
-
-        await SealPageAsync(index);
-    }
-
-    /// <summary>
-    /// Renders one wizard slice: top border, blank, content, blank, then the bottom border.
-    /// When <paramref name="demoLines"/> &gt; 0, blank lines are reserved above the border for
-    /// the demo animation, and the cursor is repositioned to the start of that reserved area so
-    /// the demo task can write into it immediately after this method returns.
-    /// </summary>
-    private static async Task RenderSliceContentAsync(
-        WizardStep step, int stepIndex, int total, int demoLines)
-    {
-        var boxWidth = WizardUi.GetTermWidth() - 1;
-        var nextLabel = stepIndex >= total - 1 ? "done " : "next ";
-        var navAnsi = $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
-
-        WizardUi.RenderTopBorder(step.Title, stepIndex, total, boxWidth);
-        System.Console.WriteLine();
-
-        var contentWidth = boxWidth - 2;
-        await step.RenderContent(contentWidth);
-
-        System.Console.WriteLine();
-
-        // Reserve blank lines for the demo, render the border, then reposition.
-        for (var i = 0; i < demoLines; i++) System.Console.WriteLine();
-        WizardUi.RenderBottomBorder(navAnsi, boxWidth);
-
-        if (demoLines > 0)
-            System.Console.Write($"\x1b[{demoLines + 1}F"); // back to start of demo area
     }
 
     // ── Step renderers ─────────────────────────────────────────────────────────
@@ -359,14 +359,14 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         return section[start..end].Trim();
     }
 
-    private static async Task PlayDemoAsync(string tag, CancellationToken ct)
+    private static async Task PlayDemoAsync(string tag, int startRow, CancellationToken ct)
     {
         switch (tag)
         {
-            case "subscriptions":   await BootstrapAnimator.PlaySubscriptionsAsync(ct);   break;
-            case "resource-groups": await BootstrapAnimator.PlayResourceGroupsAsync(ct);  break;
-            case "resource-names":  await BootstrapAnimator.PlayResourceNamesAsync(ct);   break;
-            case "kusto":           await BootstrapAnimator.PlayKustoAsync(ct);           break;
+            case "subscriptions":   await BootstrapAnimator.PlaySubscriptionsAsync(startRow, ct);   break;
+            case "resource-groups": await BootstrapAnimator.PlayResourceGroupsAsync(startRow, ct);  break;
+            case "resource-names":  await BootstrapAnimator.PlayResourceNamesAsync(startRow, ct);   break;
+            case "kusto":           await BootstrapAnimator.PlayKustoAsync(startRow, ct);           break;
         }
     }
 
@@ -401,17 +401,14 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         || (k.Key == ConsoleKey.PageUp && k.Modifiers.HasFlag(ConsoleModifiers.Control));
 
     private static bool IsQuitKey(ConsoleKeyInfo k) =>
-        k.Key is ConsoleKey.Q or ConsoleKey.Escape;
+        k.Key is ConsoleKey.Q or ConsoleKey.Escape
+        || (k.Key == ConsoleKey.C && k.Modifiers.HasFlag(ConsoleModifiers.Control));
 
-    /// <summary>
-    /// Returns the exact number of lines each demo animation writes when it runs to completion.
-    /// Used to reserve blank space above the bottom border before starting the demo task.
-    /// </summary>
     private static int GetDemoHeight(string? tag) => tag switch
     {
-        "subscriptions"   => 3,   // typewriter+[TAB] line, green result, blank
-        "resource-groups" => 6,   // typewriter+[TAB], green result, blank, dim hint, green, blank
-        "resource-names"  => 3,   // typewriter+[TAB] line, green result, blank
+        "subscriptions"   => BootstrapAnimator.SubscriptionsDemoLines,
+        "resource-groups" => BootstrapAnimator.ResourceGroupsDemoLines,
+        "resource-names"  => BootstrapAnimator.ResourceNamesDemoLines,
         "kusto"           => BootstrapAnimator.KustoDemoLines,
         _                 => 0,
     };
