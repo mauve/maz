@@ -13,6 +13,7 @@ namespace Console.Cli;
 public partial class RootCommandDef : CommandDef
 {
     public override string Name => "maz";
+    protected override bool IsRootCommand => true;
 
     public readonly AuthOptionPack Auth;
     public readonly DiagnosticOptionPack Diagnostics;
@@ -25,9 +26,9 @@ public partial class RootCommandDef : CommandDef
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
 
-    partial void InitGeneratedCommands();
+    partial void InitGeneratedCommands(string? targetService);
 
-    public RootCommandDef()
+    public RootCommandDef(string? targetService = null)
     {
         Auth = new AuthOptionPack();
         Diagnostics = new DiagnosticOptionPack();
@@ -38,7 +39,7 @@ public partial class RootCommandDef : CommandDef
         Group = new GroupCommandDef(Auth);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
-        InitGeneratedCommands();
+        InitGeneratedCommands(targetService);
     }
 
     protected override Command CreateCommand() => new RootCommand(Description);

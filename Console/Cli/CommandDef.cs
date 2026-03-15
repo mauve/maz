@@ -2,6 +2,7 @@
 #pragma warning disable CS8603
 using System.CommandLine;
 using System.CommandLine.Help;
+using System.CommandLine.Invocation;
 using System.Reflection;
 using Azure.Identity;
 
@@ -31,6 +32,18 @@ public abstract partial class CommandDef
     /// destructive commands. Used to attach the global <c>--require-confirmation</c> guard.
     /// </summary>
     protected virtual bool IsDestructive => false;
+
+    /// <summary>
+    /// True when this command overrides <see cref="ExecuteAsync"/>.
+    /// Replaces a runtime reflection check. Emitted <c>true</c> by the source generator for
+    /// leaf commands and by the spec generator for operation commands.
+    /// </summary>
+    protected virtual bool HasExecuteHandler => false;
+
+    /// <summary>
+    /// True for <see cref="RootCommandDef"/>. Used to customize root-only help options.
+    /// </summary>
+    protected virtual bool IsRootCommand => false;
 
     public abstract string Name { get; }
     public virtual string[] Aliases => [];
@@ -72,7 +85,36 @@ public abstract partial class CommandDef
         if (IsDataPlane)
             DataPlaneRegistry.Register(cmd);
         if (IsDestructive)
+        {
             DestructiveCommandRegistry.Register(cmd);
+            var original = cmd.Action;
+            if (original is not null)
+                cmd.SetAction(
+                    async (parseResult, ct) =>
+                    {
+                        var requireConfirm = parseResult.GetValue(
+                            Shared.GlobalBehaviorOptionPack.RequireConfirmationOption
+                        );
+                        if (requireConfirm)
+                        {
+                            var interactive = Shared.InteractiveOptionPack.IsEffectivelyInteractive(
+                                parseResult.GetValue(Shared.InteractiveOptionPack.InteractiveOption)
+                            );
+                            PromptForConfirmation(interactive, cmd.Name);
+                        }
+
+                        return original switch
+                        {
+                            AsynchronousCommandLineAction asyncAction => await asyncAction.InvokeAsync(
+                                parseResult,
+                                ct
+                            ),
+                            SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
+                            _ => 0,
+                        };
+                    }
+                );
+        }
         return cmd;
     }
 
@@ -89,31 +131,28 @@ public abstract partial class CommandDef
         AddGeneratedOptions(cmd);
         AddGeneratedChildren(cmd);
 
-        foreach (var field in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+        // Only scan fields for hand-written commands that declare Option<T>/Argument<T> manually.
+        // Generated commands (HasGeneratedChildren = true) have no such fields.
+        if (!HasGeneratedChildren)
         {
-            var value = field.GetValue(this);
-            if (value is null)
-                continue;
+            foreach (var field in GetType().GetFields(BindingFlags.Public | BindingFlags.Instance))
+            {
+                var value = field.GetValue(this);
+                if (value is null)
+                    continue;
 
-            if (value is OptionPack pack)
-            {
-                if (!HasGeneratedChildren)
+                if (value is OptionPack pack)
                     pack.AddOptionsTo(cmd);
-            }
-            else if (value is CommandDef subDef)
-            {
-                if (!HasGeneratedChildren)
+                else if (value is CommandDef subDef)
                     cmd.Add(subDef.Build());
+                else if (value is Option opt)
+                    cmd.Add(opt);
+                else if (value is Argument arg)
+                    cmd.Add(arg);
             }
-            else if (value is Option opt)
-                cmd.Add(opt);
-            else if (value is Argument arg)
-                cmd.Add(arg);
         }
 
-        var executeMethod = GetType()
-            .GetMethod(nameof(ExecuteAsync), BindingFlags.NonPublic | BindingFlags.Instance);
-        bool hasHandler = executeMethod!.DeclaringType != typeof(CommandDef);
+        bool hasHandler = HasExecuteHandler;
 
         var self = this;
         if (hasHandler)
@@ -157,6 +196,76 @@ public abstract partial class CommandDef
         {
             cmd.Action = new HelpAction();
         }
+
+        // Customize help layout for all commands.
+        if (cmd.Options.OfType<HelpOption>().FirstOrDefault() is { Action: HelpAction optHelp })
+            optHelp.Builder.CustomizeLayout(GroupedHelpLayout.Create);
+        if (cmd.Action is HelpAction cmdHelp)
+            cmdHelp.Builder.CustomizeLayout(GroupedHelpLayout.Create);
+
+        var isRoot = IsRootCommand;
+
+        var helpMore = new HelpOption("--help-more", [])
+        {
+            Description =
+                "Show all options including advanced ones, and detailed command descriptions.",
+            Hidden = !isRoot,
+        };
+        if (helpMore.Action is HelpAction helpMoreAction)
+            helpMoreAction.Builder.CustomizeLayout(GroupedHelpLayout.CreateWithAdvanced);
+        cmd.Add(helpMore);
+
+        var helpCommands = new Option<string?>("--help-commands", [])
+        {
+            Description =
+                "Show the full command tree. Optionally filter by name, alias, or description.",
+            Hidden = !isRoot,
+            Arity = ArgumentArity.ZeroOrOne,
+        };
+        helpCommands.Action = new CommandTreeAction(cmd, helpCommands);
+        cmd.Add(helpCommands);
+
+        var helpCommandsFlat = new Option<string?>("--help-commands-flat", [])
+        {
+            Description = "Show all commands as a flat list. Optionally filter by name or alias.",
+            Hidden = !isRoot,
+            Arity = ArgumentArity.ZeroOrOne,
+        };
+        helpCommandsFlat.Action = new CommandFlatAction(cmd, helpCommandsFlat);
+        cmd.Add(helpCommandsFlat);
+
+        const string helpGroup = "Help";
+        if (isRoot)
+        {
+            // Group --help-more and --help-commands under a visible "Help" section on the root command.
+            // --help is intentionally left untagged so it stays in the ungrouped "Options:" section
+            // on every command (it reaches subcommands via HelpOption's built-in Recursive=true).
+            if (cmd.Options.OfType<HelpOption>().FirstOrDefault() is { } helpOpt)
+                helpOpt.Description = "Show usage information for the current command.";
+            HelpGroupRegistry.Tag(helpMore, helpGroup, "");
+            HelpGroupRegistry.Tag(helpCommands, helpGroup, "");
+            HelpGroupRegistry.Tag(helpCommandsFlat, helpGroup, "");
+        }
+        else
+        {
+            // HelpOption is recursive, so the root's --help-more bleeds into subcommand help via
+            // AllOptions. Suppress the "Help" group on every non-root command so it stays clean.
+            HiddenGroupRegistry.HideGroup(cmd, helpGroup);
+        }
+    }
+
+    private static void PromptForConfirmation(bool interactive, string commandName)
+    {
+        if (!interactive || System.Console.IsInputRedirected)
+            throw new InvocationException(
+                $"Operation '{commandName}' is destructive and --require-confirmation is enabled. "
+                    + "Run interactively and confirm, or disable --require-confirmation."
+            );
+
+        System.Console.Write($"Operation '{commandName}' is destructive. Proceed? (y/N): ");
+        var response = System.Console.ReadLine()?.Trim().ToLowerInvariant();
+        if (response is not ("y" or "yes"))
+            throw new InvocationException("Operation cancelled by user.");
     }
 
     private static void InjectParseResult(object obj, ParseResult result) =>

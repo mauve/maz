@@ -21,7 +21,7 @@ jobs:
 
       - run: dotnet restore
       - run: dotnet build --no-restore -c Release
-      - run: dotnet test --no-build -c Release
+      - run: dotnet test --no-restore --no-build -c Release
 
   publish:
     name: Publish (${{ matrix.rid }})

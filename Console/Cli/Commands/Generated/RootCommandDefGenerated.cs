@@ -173,172 +173,507 @@ public partial class RootCommandDef
     public DeiddataCommandDef Deiddata = null!;
     public WebpubsubdataCommandDef Webpubsubdata = null!;
 
-    partial void InitGeneratedCommands()
+    internal static readonly System.Collections.Generic.HashSet<string> KnownServices =
+        new(System.StringComparer.Ordinal)
+        {
+            "storage",
+            "keyvault",
+            "identity",
+            "subscription",
+            "authorization",
+            "resources",
+            "compute",
+            "network",
+            "postgresql",
+            "mysql",
+            "cosmosdb",
+            "redis",
+            "redisenterprise",
+            "mariadb",
+            "mongocluster",
+            "sql",
+            "aks",
+            "containerinstance",
+            "containerregistry",
+            "eventhub",
+            "servicebus",
+            "eventgrid",
+            "notificationhubs",
+            "relay",
+            "signalr",
+            "webpubsub",
+            "dns",
+            "privatedns",
+            "dnsresolver",
+            "trafficmanager",
+            "cdn",
+            "frontdoor",
+            "webapp",
+            "logic",
+            "keyvaultmanagement",
+            "codesigning",
+            "hsm",
+            "attestation",
+            "confidentialledger",
+            "monitor",
+            "loganalytics",
+            "appinsights",
+            "advisor",
+            "alertsmanagement",
+            "datafactory",
+            "synapse",
+            "cognitiveservices",
+            "machinelearning",
+            "search",
+            "databricks",
+            "hdinsight",
+            "streamanalytics",
+            "datalakeanalytics",
+            "datalakestore",
+            "iothub",
+            "iothubdps",
+            "iotcentral",
+            "digitaltwins",
+            "deviceupdate",
+            "deviceregistry",
+            "storagesync",
+            "storagemover",
+            "storagecache",
+            "elasticsan",
+            "netapp",
+            "databox",
+            "databoxedge",
+            "storageactions",
+            "recoveryservices",
+            "rsbackup",
+            "dataprotection",
+            "datareplication",
+            "imagebuilder",
+            "azurefleet",
+            "standbypool",
+            "computeschedule",
+            "avd",
+            "hybridcompute",
+            "hybridconnectivity",
+            "connectedvmware",
+            "scvmm",
+            "billing",
+            "consumption",
+            "costmanagement",
+            "reservations",
+            "managementgroups",
+            "managedservices",
+            "batch",
+            "maps",
+            "loadtestservice",
+            "resourcegraph",
+            "support",
+            "chaos",
+            "migrate",
+            "botservice",
+            "servicefabric",
+            "automation",
+            "analysisservices",
+            "kusto",
+            "communication",
+            "datashare",
+            "fabric",
+            "healthbot",
+            "maintenance",
+            "marketplaceordering",
+            "resourceconnector",
+            "servicenetworking",
+            "solutions",
+            "sqlvirtualmachine",
+            "servicelinker",
+            "sfmc",
+            "healthcareapis",
+            "vi",
+            "windowsiot",
+            "azurestackhci",
+            "azurearcdata",
+            "carbon",
+            "communitytraining",
+            "confluent",
+            "dashboard",
+            "dynatrace",
+            "elastic",
+            "extendedlocation",
+            "fluidrelay",
+            "guestconfiguration",
+            "networkfunction",
+            "nginx",
+            "sphere",
+            "workloads",
+            "oracle",
+            "paloaltonetworks",
+            "peering",
+            "powerbidedicated",
+            "redhatopenshift",
+            "resourcemover",
+            "scheduler",
+            "serialconsole",
+            "azureactivedirectory",
+            "databasewatcher",
+            "healthdataaiservices",
+            "informatica",
+            "marketplace",
+            "postgresqlhsc",
+            "purview",
+            "voiceservices",
+            "help",
+            "networkcloud",
+            "hybridaks",
+            "policyinsights",
+            "managednetworkfabric",
+            "hybridnetwork",
+            "customerinsights",
+            "servicebusdata",
+            "appconfigdata",
+            "batchdata",
+            "acrdata",
+            "searchdata",
+            "attestationdata",
+            "ledgerdata",
+            "digitaltwinsdata",
+            "devcenterdata",
+            "loadtestdata",
+            "purviewdata",
+            "deiddata",
+            "webpubsubdata",
+        };
+
+    partial void InitGeneratedCommands(string? targetService)
     {
-        Storage = new StorageCommandDef(Auth);
-        Keyvault = new KeyvaultCommandDef(Auth);
-        Identity = new IdentityCommandDef(Auth);
-        Subscription = new SubscriptionCommandDef(Auth);
-        Authorization = new AuthorizationCommandDef(Auth);
-        Resources = new ResourcesCommandDef(Auth);
-        Compute = new ComputeCommandDef(Auth);
-        Network = new NetworkCommandDef(Auth);
-        Postgresql = new PostgresqlCommandDef(Auth);
-        Mysql = new MysqlCommandDef(Auth);
-        Cosmosdb = new CosmosdbCommandDef(Auth);
-        Redis = new RedisCommandDef(Auth);
-        Redisenterprise = new RedisenterpriseCommandDef(Auth);
-        Mariadb = new MariadbCommandDef(Auth);
-        Mongocluster = new MongoclusterCommandDef(Auth);
-        Sql = new SqlCommandDef(Auth);
-        Aks = new AksCommandDef(Auth);
-        Containerinstance = new ContainerinstanceCommandDef(Auth);
-        Containerregistry = new ContainerregistryCommandDef(Auth);
-        Eventhub = new EventhubCommandDef(Auth);
-        Servicebus = new ServicebusCommandDef(Auth);
-        Eventgrid = new EventgridCommandDef(Auth);
-        Notificationhubs = new NotificationhubsCommandDef(Auth);
-        Relay = new RelayCommandDef(Auth);
-        Signalr = new SignalrCommandDef(Auth);
-        Webpubsub = new WebpubsubCommandDef(Auth);
-        Dns = new DnsCommandDef(Auth);
-        Privatedns = new PrivatednsCommandDef(Auth);
-        Dnsresolver = new DnsresolverCommandDef(Auth);
-        Trafficmanager = new TrafficmanagerCommandDef(Auth);
-        Cdn = new CdnCommandDef(Auth);
-        Frontdoor = new FrontdoorCommandDef(Auth);
-        Webapp = new WebappCommandDef(Auth);
-        Logic = new LogicCommandDef(Auth);
-        Keyvaultmanagement = new KeyvaultmanagementCommandDef(Auth);
-        Codesigning = new CodesigningCommandDef(Auth);
-        Hsm = new HsmCommandDef(Auth);
-        Attestation = new AttestationCommandDef(Auth);
-        Confidentialledger = new ConfidentialledgerCommandDef(Auth);
-        Monitor = new MonitorCommandDef(Auth);
-        Loganalytics = new LoganalyticsCommandDef(Auth);
-        Appinsights = new AppinsightsCommandDef(Auth);
-        Advisor = new AdvisorCommandDef(Auth);
-        Alertsmanagement = new AlertsmanagementCommandDef(Auth);
-        Datafactory = new DatafactoryCommandDef(Auth);
-        Synapse = new SynapseCommandDef(Auth);
-        Cognitiveservices = new CognitiveservicesCommandDef(Auth);
-        Machinelearning = new MachinelearningCommandDef(Auth);
-        Search = new SearchCommandDef(Auth);
-        Databricks = new DatabricksCommandDef(Auth);
-        Hdinsight = new HdinsightCommandDef(Auth);
-        Streamanalytics = new StreamanalyticsCommandDef(Auth);
-        Datalakeanalytics = new DatalakeanalyticsCommandDef(Auth);
-        Datalakestore = new DatalakestoreCommandDef(Auth);
-        Iothub = new IothubCommandDef(Auth);
-        Iothubdps = new IothubdpsCommandDef(Auth);
-        Iotcentral = new IotcentralCommandDef(Auth);
-        Digitaltwins = new DigitaltwinsCommandDef(Auth);
-        Deviceupdate = new DeviceupdateCommandDef(Auth);
-        Deviceregistry = new DeviceregistryCommandDef(Auth);
-        Storagesync = new StoragesyncCommandDef(Auth);
-        Storagemover = new StoragemoverCommandDef(Auth);
-        Storagecache = new StoragecacheCommandDef(Auth);
-        Elasticsan = new ElasticsanCommandDef(Auth);
-        Netapp = new NetappCommandDef(Auth);
-        Databox = new DataboxCommandDef(Auth);
-        Databoxedge = new DataboxedgeCommandDef(Auth);
-        Storageactions = new StorageactionsCommandDef(Auth);
-        Recoveryservices = new RecoveryservicesCommandDef(Auth);
-        Rsbackup = new RsbackupCommandDef(Auth);
-        Dataprotection = new DataprotectionCommandDef(Auth);
-        Datareplication = new DatareplicationCommandDef(Auth);
-        Imagebuilder = new ImagebuilderCommandDef(Auth);
-        Azurefleet = new AzurefleetCommandDef(Auth);
-        Standbypool = new StandbypoolCommandDef(Auth);
-        Computeschedule = new ComputescheduleCommandDef(Auth);
-        Avd = new AvdCommandDef(Auth);
-        Hybridcompute = new HybridcomputeCommandDef(Auth);
-        Hybridconnectivity = new HybridconnectivityCommandDef(Auth);
-        Connectedvmware = new ConnectedvmwareCommandDef(Auth);
-        Scvmm = new ScvmmCommandDef(Auth);
-        Billing = new BillingCommandDef(Auth);
-        Consumption = new ConsumptionCommandDef(Auth);
-        Costmanagement = new CostmanagementCommandDef(Auth);
-        Reservations = new ReservationsCommandDef(Auth);
-        Managementgroups = new ManagementgroupsCommandDef(Auth);
-        Managedservices = new ManagedservicesCommandDef(Auth);
-        Batch = new BatchCommandDef(Auth);
-        Maps = new MapsCommandDef(Auth);
-        Loadtestservice = new LoadtestserviceCommandDef(Auth);
-        Resourcegraph = new ResourcegraphCommandDef(Auth);
-        Support = new SupportCommandDef(Auth);
-        Chaos = new ChaosCommandDef(Auth);
-        Migrate = new MigrateCommandDef(Auth);
-        Botservice = new BotserviceCommandDef(Auth);
-        Servicefabric = new ServicefabricCommandDef(Auth);
-        Automation = new AutomationCommandDef(Auth);
-        Analysisservices = new AnalysisservicesCommandDef(Auth);
-        Kusto = new KustoCommandDef(Auth);
-        Communication = new CommunicationCommandDef(Auth);
-        Datashare = new DatashareCommandDef(Auth);
-        Fabric = new FabricCommandDef(Auth);
-        Healthbot = new HealthbotCommandDef(Auth);
-        Maintenance = new MaintenanceCommandDef(Auth);
-        Marketplaceordering = new MarketplaceorderingCommandDef(Auth);
-        Resourceconnector = new ResourceconnectorCommandDef(Auth);
-        Servicenetworking = new ServicenetworkingCommandDef(Auth);
-        Solutions = new SolutionsCommandDef(Auth);
-        Sqlvirtualmachine = new SqlvirtualmachineCommandDef(Auth);
-        Servicelinker = new ServicelinkerCommandDef(Auth);
-        Sfmc = new SfmcCommandDef(Auth);
-        Healthcareapis = new HealthcareapisCommandDef(Auth);
-        Vi = new ViCommandDef(Auth);
-        Windowsiot = new WindowsiotCommandDef(Auth);
-        Azurestackhci = new AzurestackhciCommandDef(Auth);
-        Azurearcdata = new AzurearcdataCommandDef(Auth);
-        Carbon = new CarbonCommandDef(Auth);
-        Communitytraining = new CommunitytrainingCommandDef(Auth);
-        Confluent = new ConfluentCommandDef(Auth);
-        Dashboard = new DashboardCommandDef(Auth);
-        Dynatrace = new DynatraceCommandDef(Auth);
-        Elastic = new ElasticCommandDef(Auth);
-        Extendedlocation = new ExtendedlocationCommandDef(Auth);
-        Fluidrelay = new FluidrelayCommandDef(Auth);
-        Guestconfiguration = new GuestconfigurationCommandDef(Auth);
-        Networkfunction = new NetworkfunctionCommandDef(Auth);
-        Nginx = new NginxCommandDef(Auth);
-        Sphere = new SphereCommandDef(Auth);
-        Workloads = new WorkloadsCommandDef(Auth);
-        Oracle = new OracleCommandDef(Auth);
-        Paloaltonetworks = new PaloaltonetworksCommandDef(Auth);
-        Peering = new PeeringCommandDef(Auth);
-        Powerbidedicated = new PowerbidedicatedCommandDef(Auth);
-        Redhatopenshift = new RedhatopenshiftCommandDef(Auth);
-        Resourcemover = new ResourcemoverCommandDef(Auth);
-        Scheduler = new SchedulerCommandDef(Auth);
-        Serialconsole = new SerialconsoleCommandDef(Auth);
-        Azureactivedirectory = new AzureactivedirectoryCommandDef(Auth);
-        Databasewatcher = new DatabasewatcherCommandDef(Auth);
-        Healthdataaiservices = new HealthdataaiservicesCommandDef(Auth);
-        Informatica = new InformaticaCommandDef(Auth);
-        Marketplace = new MarketplaceCommandDef(Auth);
-        Postgresqlhsc = new PostgresqlhscCommandDef(Auth);
-        Purview = new PurviewCommandDef(Auth);
-        Voiceservices = new VoiceservicesCommandDef(Auth);
-        Help = new HelpCommandDef(Auth);
-        Networkcloud = new NetworkcloudCommandDef(Auth);
-        Hybridaks = new HybridaksCommandDef(Auth);
-        Policyinsights = new PolicyinsightsCommandDef(Auth);
-        Managednetworkfabric = new ManagednetworkfabricCommandDef(Auth);
-        Hybridnetwork = new HybridnetworkCommandDef(Auth);
-        Customerinsights = new CustomerinsightsCommandDef(Auth);
-        Servicebusdata = new ServicebusdataCommandDef(Auth);
-        Appconfigdata = new AppconfigdataCommandDef(Auth);
-        Batchdata = new BatchdataCommandDef(Auth);
-        Acrdata = new AcrdataCommandDef(Auth);
-        Searchdata = new SearchdataCommandDef(Auth);
-        Attestationdata = new AttestationdataCommandDef(Auth);
-        Ledgerdata = new LedgerdataCommandDef(Auth);
-        Digitaltwinsdata = new DigitaltwinsdataCommandDef(Auth);
-        Devcenterdata = new DevcenterdataCommandDef(Auth);
-        Loadtestdata = new LoadtestdataCommandDef(Auth);
-        Purviewdata = new PurviewdataCommandDef(Auth);
-        Deiddata = new DeiddataCommandDef(Auth);
-        Webpubsubdata = new WebpubsubdataCommandDef(Auth);
+        if (targetService is null || targetService == "storage")
+            Storage = new StorageCommandDef(Auth);
+        if (targetService is null || targetService == "keyvault")
+            Keyvault = new KeyvaultCommandDef(Auth);
+        if (targetService is null || targetService == "identity")
+            Identity = new IdentityCommandDef(Auth);
+        if (targetService is null || targetService == "subscription")
+            Subscription = new SubscriptionCommandDef(Auth);
+        if (targetService is null || targetService == "authorization")
+            Authorization = new AuthorizationCommandDef(Auth);
+        if (targetService is null || targetService == "resources")
+            Resources = new ResourcesCommandDef(Auth);
+        if (targetService is null || targetService == "compute")
+            Compute = new ComputeCommandDef(Auth);
+        if (targetService is null || targetService == "network")
+            Network = new NetworkCommandDef(Auth);
+        if (targetService is null || targetService == "postgresql")
+            Postgresql = new PostgresqlCommandDef(Auth);
+        if (targetService is null || targetService == "mysql")
+            Mysql = new MysqlCommandDef(Auth);
+        if (targetService is null || targetService == "cosmosdb")
+            Cosmosdb = new CosmosdbCommandDef(Auth);
+        if (targetService is null || targetService == "redis")
+            Redis = new RedisCommandDef(Auth);
+        if (targetService is null || targetService == "redisenterprise")
+            Redisenterprise = new RedisenterpriseCommandDef(Auth);
+        if (targetService is null || targetService == "mariadb")
+            Mariadb = new MariadbCommandDef(Auth);
+        if (targetService is null || targetService == "mongocluster")
+            Mongocluster = new MongoclusterCommandDef(Auth);
+        if (targetService is null || targetService == "sql")
+            Sql = new SqlCommandDef(Auth);
+        if (targetService is null || targetService == "aks")
+            Aks = new AksCommandDef(Auth);
+        if (targetService is null || targetService == "containerinstance")
+            Containerinstance = new ContainerinstanceCommandDef(Auth);
+        if (targetService is null || targetService == "containerregistry")
+            Containerregistry = new ContainerregistryCommandDef(Auth);
+        if (targetService is null || targetService == "eventhub")
+            Eventhub = new EventhubCommandDef(Auth);
+        if (targetService is null || targetService == "servicebus")
+            Servicebus = new ServicebusCommandDef(Auth);
+        if (targetService is null || targetService == "eventgrid")
+            Eventgrid = new EventgridCommandDef(Auth);
+        if (targetService is null || targetService == "notificationhubs")
+            Notificationhubs = new NotificationhubsCommandDef(Auth);
+        if (targetService is null || targetService == "relay")
+            Relay = new RelayCommandDef(Auth);
+        if (targetService is null || targetService == "signalr")
+            Signalr = new SignalrCommandDef(Auth);
+        if (targetService is null || targetService == "webpubsub")
+            Webpubsub = new WebpubsubCommandDef(Auth);
+        if (targetService is null || targetService == "dns")
+            Dns = new DnsCommandDef(Auth);
+        if (targetService is null || targetService == "privatedns")
+            Privatedns = new PrivatednsCommandDef(Auth);
+        if (targetService is null || targetService == "dnsresolver")
+            Dnsresolver = new DnsresolverCommandDef(Auth);
+        if (targetService is null || targetService == "trafficmanager")
+            Trafficmanager = new TrafficmanagerCommandDef(Auth);
+        if (targetService is null || targetService == "cdn")
+            Cdn = new CdnCommandDef(Auth);
+        if (targetService is null || targetService == "frontdoor")
+            Frontdoor = new FrontdoorCommandDef(Auth);
+        if (targetService is null || targetService == "webapp")
+            Webapp = new WebappCommandDef(Auth);
+        if (targetService is null || targetService == "logic")
+            Logic = new LogicCommandDef(Auth);
+        if (targetService is null || targetService == "keyvaultmanagement")
+            Keyvaultmanagement = new KeyvaultmanagementCommandDef(Auth);
+        if (targetService is null || targetService == "codesigning")
+            Codesigning = new CodesigningCommandDef(Auth);
+        if (targetService is null || targetService == "hsm")
+            Hsm = new HsmCommandDef(Auth);
+        if (targetService is null || targetService == "attestation")
+            Attestation = new AttestationCommandDef(Auth);
+        if (targetService is null || targetService == "confidentialledger")
+            Confidentialledger = new ConfidentialledgerCommandDef(Auth);
+        if (targetService is null || targetService == "monitor")
+            Monitor = new MonitorCommandDef(Auth);
+        if (targetService is null || targetService == "loganalytics")
+            Loganalytics = new LoganalyticsCommandDef(Auth);
+        if (targetService is null || targetService == "appinsights")
+            Appinsights = new AppinsightsCommandDef(Auth);
+        if (targetService is null || targetService == "advisor")
+            Advisor = new AdvisorCommandDef(Auth);
+        if (targetService is null || targetService == "alertsmanagement")
+            Alertsmanagement = new AlertsmanagementCommandDef(Auth);
+        if (targetService is null || targetService == "datafactory")
+            Datafactory = new DatafactoryCommandDef(Auth);
+        if (targetService is null || targetService == "synapse")
+            Synapse = new SynapseCommandDef(Auth);
+        if (targetService is null || targetService == "cognitiveservices")
+            Cognitiveservices = new CognitiveservicesCommandDef(Auth);
+        if (targetService is null || targetService == "machinelearning")
+            Machinelearning = new MachinelearningCommandDef(Auth);
+        if (targetService is null || targetService == "search")
+            Search = new SearchCommandDef(Auth);
+        if (targetService is null || targetService == "databricks")
+            Databricks = new DatabricksCommandDef(Auth);
+        if (targetService is null || targetService == "hdinsight")
+            Hdinsight = new HdinsightCommandDef(Auth);
+        if (targetService is null || targetService == "streamanalytics")
+            Streamanalytics = new StreamanalyticsCommandDef(Auth);
+        if (targetService is null || targetService == "datalakeanalytics")
+            Datalakeanalytics = new DatalakeanalyticsCommandDef(Auth);
+        if (targetService is null || targetService == "datalakestore")
+            Datalakestore = new DatalakestoreCommandDef(Auth);
+        if (targetService is null || targetService == "iothub")
+            Iothub = new IothubCommandDef(Auth);
+        if (targetService is null || targetService == "iothubdps")
+            Iothubdps = new IothubdpsCommandDef(Auth);
+        if (targetService is null || targetService == "iotcentral")
+            Iotcentral = new IotcentralCommandDef(Auth);
+        if (targetService is null || targetService == "digitaltwins")
+            Digitaltwins = new DigitaltwinsCommandDef(Auth);
+        if (targetService is null || targetService == "deviceupdate")
+            Deviceupdate = new DeviceupdateCommandDef(Auth);
+        if (targetService is null || targetService == "deviceregistry")
+            Deviceregistry = new DeviceregistryCommandDef(Auth);
+        if (targetService is null || targetService == "storagesync")
+            Storagesync = new StoragesyncCommandDef(Auth);
+        if (targetService is null || targetService == "storagemover")
+            Storagemover = new StoragemoverCommandDef(Auth);
+        if (targetService is null || targetService == "storagecache")
+            Storagecache = new StoragecacheCommandDef(Auth);
+        if (targetService is null || targetService == "elasticsan")
+            Elasticsan = new ElasticsanCommandDef(Auth);
+        if (targetService is null || targetService == "netapp")
+            Netapp = new NetappCommandDef(Auth);
+        if (targetService is null || targetService == "databox")
+            Databox = new DataboxCommandDef(Auth);
+        if (targetService is null || targetService == "databoxedge")
+            Databoxedge = new DataboxedgeCommandDef(Auth);
+        if (targetService is null || targetService == "storageactions")
+            Storageactions = new StorageactionsCommandDef(Auth);
+        if (targetService is null || targetService == "recoveryservices")
+            Recoveryservices = new RecoveryservicesCommandDef(Auth);
+        if (targetService is null || targetService == "rsbackup")
+            Rsbackup = new RsbackupCommandDef(Auth);
+        if (targetService is null || targetService == "dataprotection")
+            Dataprotection = new DataprotectionCommandDef(Auth);
+        if (targetService is null || targetService == "datareplication")
+            Datareplication = new DatareplicationCommandDef(Auth);
+        if (targetService is null || targetService == "imagebuilder")
+            Imagebuilder = new ImagebuilderCommandDef(Auth);
+        if (targetService is null || targetService == "azurefleet")
+            Azurefleet = new AzurefleetCommandDef(Auth);
+        if (targetService is null || targetService == "standbypool")
+            Standbypool = new StandbypoolCommandDef(Auth);
+        if (targetService is null || targetService == "computeschedule")
+            Computeschedule = new ComputescheduleCommandDef(Auth);
+        if (targetService is null || targetService == "avd")
+            Avd = new AvdCommandDef(Auth);
+        if (targetService is null || targetService == "hybridcompute")
+            Hybridcompute = new HybridcomputeCommandDef(Auth);
+        if (targetService is null || targetService == "hybridconnectivity")
+            Hybridconnectivity = new HybridconnectivityCommandDef(Auth);
+        if (targetService is null || targetService == "connectedvmware")
+            Connectedvmware = new ConnectedvmwareCommandDef(Auth);
+        if (targetService is null || targetService == "scvmm")
+            Scvmm = new ScvmmCommandDef(Auth);
+        if (targetService is null || targetService == "billing")
+            Billing = new BillingCommandDef(Auth);
+        if (targetService is null || targetService == "consumption")
+            Consumption = new ConsumptionCommandDef(Auth);
+        if (targetService is null || targetService == "costmanagement")
+            Costmanagement = new CostmanagementCommandDef(Auth);
+        if (targetService is null || targetService == "reservations")
+            Reservations = new ReservationsCommandDef(Auth);
+        if (targetService is null || targetService == "managementgroups")
+            Managementgroups = new ManagementgroupsCommandDef(Auth);
+        if (targetService is null || targetService == "managedservices")
+            Managedservices = new ManagedservicesCommandDef(Auth);
+        if (targetService is null || targetService == "batch")
+            Batch = new BatchCommandDef(Auth);
+        if (targetService is null || targetService == "maps")
+            Maps = new MapsCommandDef(Auth);
+        if (targetService is null || targetService == "loadtestservice")
+            Loadtestservice = new LoadtestserviceCommandDef(Auth);
+        if (targetService is null || targetService == "resourcegraph")
+            Resourcegraph = new ResourcegraphCommandDef(Auth);
+        if (targetService is null || targetService == "support")
+            Support = new SupportCommandDef(Auth);
+        if (targetService is null || targetService == "chaos")
+            Chaos = new ChaosCommandDef(Auth);
+        if (targetService is null || targetService == "migrate")
+            Migrate = new MigrateCommandDef(Auth);
+        if (targetService is null || targetService == "botservice")
+            Botservice = new BotserviceCommandDef(Auth);
+        if (targetService is null || targetService == "servicefabric")
+            Servicefabric = new ServicefabricCommandDef(Auth);
+        if (targetService is null || targetService == "automation")
+            Automation = new AutomationCommandDef(Auth);
+        if (targetService is null || targetService == "analysisservices")
+            Analysisservices = new AnalysisservicesCommandDef(Auth);
+        if (targetService is null || targetService == "kusto")
+            Kusto = new KustoCommandDef(Auth);
+        if (targetService is null || targetService == "communication")
+            Communication = new CommunicationCommandDef(Auth);
+        if (targetService is null || targetService == "datashare")
+            Datashare = new DatashareCommandDef(Auth);
+        if (targetService is null || targetService == "fabric")
+            Fabric = new FabricCommandDef(Auth);
+        if (targetService is null || targetService == "healthbot")
+            Healthbot = new HealthbotCommandDef(Auth);
+        if (targetService is null || targetService == "maintenance")
+            Maintenance = new MaintenanceCommandDef(Auth);
+        if (targetService is null || targetService == "marketplaceordering")
+            Marketplaceordering = new MarketplaceorderingCommandDef(Auth);
+        if (targetService is null || targetService == "resourceconnector")
+            Resourceconnector = new ResourceconnectorCommandDef(Auth);
+        if (targetService is null || targetService == "servicenetworking")
+            Servicenetworking = new ServicenetworkingCommandDef(Auth);
+        if (targetService is null || targetService == "solutions")
+            Solutions = new SolutionsCommandDef(Auth);
+        if (targetService is null || targetService == "sqlvirtualmachine")
+            Sqlvirtualmachine = new SqlvirtualmachineCommandDef(Auth);
+        if (targetService is null || targetService == "servicelinker")
+            Servicelinker = new ServicelinkerCommandDef(Auth);
+        if (targetService is null || targetService == "sfmc")
+            Sfmc = new SfmcCommandDef(Auth);
+        if (targetService is null || targetService == "healthcareapis")
+            Healthcareapis = new HealthcareapisCommandDef(Auth);
+        if (targetService is null || targetService == "vi")
+            Vi = new ViCommandDef(Auth);
+        if (targetService is null || targetService == "windowsiot")
+            Windowsiot = new WindowsiotCommandDef(Auth);
+        if (targetService is null || targetService == "azurestackhci")
+            Azurestackhci = new AzurestackhciCommandDef(Auth);
+        if (targetService is null || targetService == "azurearcdata")
+            Azurearcdata = new AzurearcdataCommandDef(Auth);
+        if (targetService is null || targetService == "carbon")
+            Carbon = new CarbonCommandDef(Auth);
+        if (targetService is null || targetService == "communitytraining")
+            Communitytraining = new CommunitytrainingCommandDef(Auth);
+        if (targetService is null || targetService == "confluent")
+            Confluent = new ConfluentCommandDef(Auth);
+        if (targetService is null || targetService == "dashboard")
+            Dashboard = new DashboardCommandDef(Auth);
+        if (targetService is null || targetService == "dynatrace")
+            Dynatrace = new DynatraceCommandDef(Auth);
+        if (targetService is null || targetService == "elastic")
+            Elastic = new ElasticCommandDef(Auth);
+        if (targetService is null || targetService == "extendedlocation")
+            Extendedlocation = new ExtendedlocationCommandDef(Auth);
+        if (targetService is null || targetService == "fluidrelay")
+            Fluidrelay = new FluidrelayCommandDef(Auth);
+        if (targetService is null || targetService == "guestconfiguration")
+            Guestconfiguration = new GuestconfigurationCommandDef(Auth);
+        if (targetService is null || targetService == "networkfunction")
+            Networkfunction = new NetworkfunctionCommandDef(Auth);
+        if (targetService is null || targetService == "nginx")
+            Nginx = new NginxCommandDef(Auth);
+        if (targetService is null || targetService == "sphere")
+            Sphere = new SphereCommandDef(Auth);
+        if (targetService is null || targetService == "workloads")
+            Workloads = new WorkloadsCommandDef(Auth);
+        if (targetService is null || targetService == "oracle")
+            Oracle = new OracleCommandDef(Auth);
+        if (targetService is null || targetService == "paloaltonetworks")
+            Paloaltonetworks = new PaloaltonetworksCommandDef(Auth);
+        if (targetService is null || targetService == "peering")
+            Peering = new PeeringCommandDef(Auth);
+        if (targetService is null || targetService == "powerbidedicated")
+            Powerbidedicated = new PowerbidedicatedCommandDef(Auth);
+        if (targetService is null || targetService == "redhatopenshift")
+            Redhatopenshift = new RedhatopenshiftCommandDef(Auth);
+        if (targetService is null || targetService == "resourcemover")
+            Resourcemover = new ResourcemoverCommandDef(Auth);
+        if (targetService is null || targetService == "scheduler")
+            Scheduler = new SchedulerCommandDef(Auth);
+        if (targetService is null || targetService == "serialconsole")
+            Serialconsole = new SerialconsoleCommandDef(Auth);
+        if (targetService is null || targetService == "azureactivedirectory")
+            Azureactivedirectory = new AzureactivedirectoryCommandDef(Auth);
+        if (targetService is null || targetService == "databasewatcher")
+            Databasewatcher = new DatabasewatcherCommandDef(Auth);
+        if (targetService is null || targetService == "healthdataaiservices")
+            Healthdataaiservices = new HealthdataaiservicesCommandDef(Auth);
+        if (targetService is null || targetService == "informatica")
+            Informatica = new InformaticaCommandDef(Auth);
+        if (targetService is null || targetService == "marketplace")
+            Marketplace = new MarketplaceCommandDef(Auth);
+        if (targetService is null || targetService == "postgresqlhsc")
+            Postgresqlhsc = new PostgresqlhscCommandDef(Auth);
+        if (targetService is null || targetService == "purview")
+            Purview = new PurviewCommandDef(Auth);
+        if (targetService is null || targetService == "voiceservices")
+            Voiceservices = new VoiceservicesCommandDef(Auth);
+        if (targetService is null || targetService == "help")
+            Help = new HelpCommandDef(Auth);
+        if (targetService is null || targetService == "networkcloud")
+            Networkcloud = new NetworkcloudCommandDef(Auth);
+        if (targetService is null || targetService == "hybridaks")
+            Hybridaks = new HybridaksCommandDef(Auth);
+        if (targetService is null || targetService == "policyinsights")
+            Policyinsights = new PolicyinsightsCommandDef(Auth);
+        if (targetService is null || targetService == "managednetworkfabric")
+            Managednetworkfabric = new ManagednetworkfabricCommandDef(Auth);
+        if (targetService is null || targetService == "hybridnetwork")
+            Hybridnetwork = new HybridnetworkCommandDef(Auth);
+        if (targetService is null || targetService == "customerinsights")
+            Customerinsights = new CustomerinsightsCommandDef(Auth);
+        if (targetService is null || targetService == "servicebusdata")
+            Servicebusdata = new ServicebusdataCommandDef(Auth);
+        if (targetService is null || targetService == "appconfigdata")
+            Appconfigdata = new AppconfigdataCommandDef(Auth);
+        if (targetService is null || targetService == "batchdata")
+            Batchdata = new BatchdataCommandDef(Auth);
+        if (targetService is null || targetService == "acrdata")
+            Acrdata = new AcrdataCommandDef(Auth);
+        if (targetService is null || targetService == "searchdata")
+            Searchdata = new SearchdataCommandDef(Auth);
+        if (targetService is null || targetService == "attestationdata")
+            Attestationdata = new AttestationdataCommandDef(Auth);
+        if (targetService is null || targetService == "ledgerdata")
+            Ledgerdata = new LedgerdataCommandDef(Auth);
+        if (targetService is null || targetService == "digitaltwinsdata")
+            Digitaltwinsdata = new DigitaltwinsdataCommandDef(Auth);
+        if (targetService is null || targetService == "devcenterdata")
+            Devcenterdata = new DevcenterdataCommandDef(Auth);
+        if (targetService is null || targetService == "loadtestdata")
+            Loadtestdata = new LoadtestdataCommandDef(Auth);
+        if (targetService is null || targetService == "purviewdata")
+            Purviewdata = new PurviewdataCommandDef(Auth);
+        if (targetService is null || targetService == "deiddata")
+            Deiddata = new DeiddataCommandDef(Auth);
+        if (targetService is null || targetService == "webpubsubdata")
+            Webpubsubdata = new WebpubsubdataCommandDef(Auth);
     }
 }
