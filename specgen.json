@@ -8336,6 +8336,1120 @@
         "Watcher_Start",
         "Watcher_Stop"
       ]
+    },
+    {
+      "serviceDir": "analysisservices",
+      "displayName": "analysisservices",
+      "apiVersion": "2017-08-01",
+      "description": "Manage Azure Analysis Services servers for enterprise-grade semantic data models.",
+      "detailedDescription": "Azure Analysis Services provides enterprise-grade analytics as a managed service. Covers server lifecycle management, SKU listing, gateway management, and capacity scaling. Requires Contributor or Analysis Services-specific roles.",
+      "specFiles": [
+        "analysisservices/resource-manager/Microsoft.AnalysisServices/AnalysisServices/stable/2017-08-01/analysisservices.json"
+      ],
+      "resourceDescriptions": {
+        "server": "Azure Analysis Services server instances"
+      },
+      "resourceDetailedDescriptions": {
+        "server": "Create and manage Analysis Services servers, suspend or resume capacity, list SKUs, check gateway status, and dissociate on-premises data gateways."
+      },
+      "actionRenames": {
+        "Servers_GetDetails": "show",
+        "Servers_Create": "create",
+        "Servers_Delete": "delete",
+        "Servers_Update": "update",
+        "Servers_ListByResourceGroup": "list",
+        "Servers_List": "list",
+        "Servers_Suspend": "suspend",
+        "Servers_Resume": "resume",
+        "Servers_ListSkusForNew": "list-skus",
+        "Servers_ListSkusForExisting": "list-skus-for-existing",
+        "Servers_ListGatewayStatus": "show-gateway-status",
+        "Servers_DissociateGateway": "dissociate-gateway",
+        "Servers_CheckNameAvailability": "check-name"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Servers_List",
+          "resourceGroupOperationId": "Servers_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "Servers_ListOperationResults",
+        "Servers_ListOperationStatuses"
+      ]
+    },
+    {
+      "serviceDir": "azure-kusto",
+      "displayName": "kusto",
+      "apiVersion": "2024-04-13",
+      "description": "Manage Azure Data Explorer (Kusto) clusters, databases, and data connections.",
+      "detailedDescription": "Azure Data Explorer (Kusto) is a fast, fully managed data analytics service for real-time analysis on large volumes of data. Covers cluster and database lifecycle, data ingestion connections, principal assignments, and follower database management.",
+      "specFiles": [
+        "azure-kusto/resource-manager/Microsoft.Kusto/Kusto/stable/2024-04-13/kusto.json"
+      ],
+      "resourceDescriptions": {
+        "cluster": "Azure Data Explorer clusters",
+        "database": "Databases within an Azure Data Explorer cluster",
+        "attacheddatabaseconfiguration": "Attached database configurations for cross-cluster database following",
+        "data-connection": "Data ingestion connections from Azure services into Kusto databases",
+        "managed-private-endpoint": "Managed private endpoints for secure cluster connectivity"
+      },
+      "resourceDetailedDescriptions": {
+        "cluster": "Create and manage Kusto clusters, configure SKUs, manage language extensions, start/stop clusters, and diagnose virtual network connectivity.",
+        "database": "Create and manage databases within a cluster, including read-write and read-only follower databases. Manage database principals.",
+        "attacheddatabaseconfiguration": "Configure cross-cluster database following by attaching leader databases to follower clusters.",
+        "data-connection": "Configure event hub, IoT hub, or event grid data connections for continuous data ingestion into Kusto databases.",
+        "managed-private-endpoint": "Configure managed private endpoints for private connectivity from Kusto clusters to other Azure services."
+      },
+      "actionRenames": {
+        "Clusters_Get": "show",
+        "Clusters_CreateOrUpdate": "create",
+        "Clusters_Delete": "delete",
+        "Clusters_Update": "update",
+        "Clusters_Start": "start",
+        "Clusters_Stop": "stop",
+        "Clusters_List": "list",
+        "Clusters_ListByResourceGroup": "list",
+        "Clusters_CheckNameAvailability": "check-name",
+        "Clusters_ListSkus": "list-skus",
+        "Clusters_ListSkusByResource": "list-skus-for-existing",
+        "Clusters_DiagnoseVirtualNetwork": "diagnose-vnet",
+        "Clusters_ListOutboundNetworkDependenciesEndpoints": "list-outbound-endpoints",
+        "Clusters_Migrate": "migrate",
+        "Databases_Get": "show",
+        "Databases_CreateOrUpdate": "create",
+        "Databases_Delete": "delete",
+        "Databases_Update": "update",
+        "Databases_ListByCluster": "list",
+        "Databases_CheckNameAvailability": "check-name",
+        "Databases_ListPrincipals": "list-principals",
+        "Databases_AddPrincipals": "add-principals",
+        "Databases_RemovePrincipals": "remove-principals",
+        "AttachedDatabaseConfigurations_Get": "show",
+        "AttachedDatabaseConfigurations_CreateOrUpdate": "create",
+        "AttachedDatabaseConfigurations_Delete": "delete",
+        "AttachedDatabaseConfigurations_ListByCluster": "list",
+        "AttachedDatabaseConfigurations_CheckNameAvailability": "check-name",
+        "DataConnections_Get": "show",
+        "DataConnections_CreateOrUpdate": "create",
+        "DataConnections_Delete": "delete",
+        "DataConnections_Update": "update",
+        "DataConnections_ListByDatabase": "list",
+        "DataConnections_CheckNameAvailability": "check-name",
+        "DataConnections_dataConnectionValidation": "validate",
+        "ManagedPrivateEndpoints_Get": "show",
+        "ManagedPrivateEndpoints_CreateOrUpdate": "create",
+        "ManagedPrivateEndpoints_Delete": "delete",
+        "ManagedPrivateEndpoints_Update": "update",
+        "ManagedPrivateEndpoints_List": "list",
+        "ManagedPrivateEndpoints_CheckNameAvailability": "check-name"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Clusters_List",
+          "resourceGroupOperationId": "Clusters_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "resourceRenames": {
+        "DataConnections_Get": "data-connection",
+        "DataConnections_CreateOrUpdate": "data-connection",
+        "DataConnections_Delete": "data-connection",
+        "DataConnections_Update": "data-connection",
+        "DataConnections_ListByDatabase": "data-connection",
+        "DataConnections_CheckNameAvailability": "data-connection",
+        "DataConnections_dataConnectionValidation": "data-connection",
+        "ManagedPrivateEndpoints_Get": "managed-private-endpoint",
+        "ManagedPrivateEndpoints_CreateOrUpdate": "managed-private-endpoint",
+        "ManagedPrivateEndpoints_Delete": "managed-private-endpoint",
+        "ManagedPrivateEndpoints_Update": "managed-private-endpoint",
+        "ManagedPrivateEndpoints_List": "managed-private-endpoint",
+        "ManagedPrivateEndpoints_CheckNameAvailability": "managed-private-endpoint"
+      },
+      "exclude": [
+        "Operations_List",
+        "Clusters_ListFollowerDatabasesGet",
+        "Clusters_ListFollowerDatabases",
+        "Clusters_DetachFollowerDatabases",
+        "Clusters_AddCalloutPolicies",
+        "Clusters_ListCalloutPolicies",
+        "Clusters_AddLanguageExtensions",
+        "Clusters_ListLanguageExtensions",
+        "Clusters_RemoveLanguageExtensions",
+        "DatabasePrincipalAssignments_CheckNameAvailability",
+        "DatabasePrincipalAssignments_Get",
+        "DatabasePrincipalAssignments_CreateOrUpdate",
+        "DatabasePrincipalAssignments_Delete",
+        "DatabasePrincipalAssignments_List",
+        "ClusterPrincipalAssignments_CheckNameAvailability",
+        "ClusterPrincipalAssignments_Get",
+        "ClusterPrincipalAssignments_CreateOrUpdate",
+        "ClusterPrincipalAssignments_Delete",
+        "ClusterPrincipalAssignments_List",
+        "DatabaseInviteFollower_Invite",
+        "Databases_InviteFollower",
+        "Scripts_CheckNameAvailability",
+        "Scripts_Get",
+        "Scripts_CreateOrUpdate",
+        "Scripts_Delete",
+        "Scripts_Update",
+        "Scripts_List",
+        "SandboxCustomImages_CheckNameAvailability",
+        "SandboxCustomImages_Get",
+        "SandboxCustomImages_CreateOrUpdate",
+        "SandboxCustomImages_Delete",
+        "SandboxCustomImages_Update",
+        "SandboxCustomImages_List",
+        "PrivateEndpointConnections_Get",
+        "PrivateEndpointConnections_Create",
+        "PrivateEndpointConnections_Delete",
+        "PrivateEndpointConnections_List",
+        "PrivateLinkResources_List",
+        "PrivateLinkResources_Get",
+        "Skus_List"
+      ]
+    },
+    {
+      "serviceDir": "communication",
+      "displayName": "communication",
+      "apiVersion": "2026-03-18",
+      "description": "Manage Azure Communication Services resources, email services, and domains.",
+      "detailedDescription": "Azure Communication Services provides communication capabilities including chat, voice, video, SMS, and email. This RM service covers resource lifecycle, email service management, domain configuration, and sender username management. The data-plane API uses a separate endpoint.",
+      "specFiles": [
+        "communication/resource-manager/Microsoft.Communication/stable/2026-03-18/openapi.json"
+      ],
+      "resourceDescriptions": {
+        "service": "Azure Communication Services resources providing communication endpoints",
+        "emailservice": "Email service resources for sending emails via Azure Communication Services",
+        "domain": "Custom email domains verified with Azure Communication Services",
+        "senderusername": "Sender usernames for email domains"
+      },
+      "resourceDetailedDescriptions": {
+        "service": "Create and manage Communication Services resources. Each resource provides endpoints for chat, SMS, voice, and other communication APIs.",
+        "emailservice": "Create and manage Email Communication Services resources. Email services host domains used for sending transactional and marketing emails.",
+        "domain": "Configure and verify custom email domains attached to an email service. Supports DNS verification and verification cancellation.",
+        "senderusername": "Manage sender usernames associated with email domains for use as the From address in emails."
+      },
+      "actionRenames": {
+        "CommunicationServices_Get": "show",
+        "CommunicationServices_CreateOrUpdate": "create",
+        "CommunicationServices_Delete": "delete",
+        "CommunicationServices_Update": "update",
+        "CommunicationServices_ListByResourceGroup": "list",
+        "CommunicationServices_ListBySubscription": "list-by-subscription",
+        "CommunicationServices_CheckNameAvailability": "check-name",
+        "CommunicationServices_ListKeys": "list-keys",
+        "CommunicationServices_RegenerateKey": "regenerate-key",
+        "CommunicationServices_LinkNotificationHub": "link-notification-hub",
+        "EmailServices_Get": "show",
+        "EmailServices_CreateOrUpdate": "create",
+        "EmailServices_Delete": "delete",
+        "EmailServices_Update": "update",
+        "EmailServices_ListByResourceGroup": "list",
+        "EmailServices_ListBySubscription": "list-by-subscription",
+        "EmailServices_ListVerifiedExchangeOnlineDomains": "list-verified-exchange-domains",
+        "Domains_Get": "show",
+        "Domains_CreateOrUpdate": "create",
+        "Domains_Delete": "delete",
+        "Domains_Update": "update",
+        "Domains_ListByEmailServiceResource": "list",
+        "Domains_InitiateVerification": "initiate-verification",
+        "Domains_CancelVerification": "cancel-verification",
+        "SenderUsernames_Get": "show",
+        "SenderUsernames_CreateOrUpdate": "create",
+        "SenderUsernames_Delete": "delete",
+        "SenderUsernames_ListByDomains": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "datashare",
+      "displayName": "datashare",
+      "apiVersion": "2021-08-01",
+      "description": "Manage Azure Data Share accounts, shares, and subscriptions for secure data collaboration.",
+      "detailedDescription": "Azure Data Share enables sharing data with external organizations safely and simply. Covers account lifecycle, share creation, invitation management, dataset mapping, and share subscription synchronization.",
+      "specFiles": [
+        "datashare/resource-manager/Microsoft.DataShare/DataShare/stable/2021-08-01/DataShare.json"
+      ],
+      "resourceDescriptions": {
+        "account": "Azure Data Share accounts hosting shares and subscriptions",
+        "share": "Data shares containing datasets for sharing with consumers",
+        "invitation": "Invitations sent to consumers to access a share",
+        "dataset": "Datasets within a share (Blob, ADLS, SQL, etc.)",
+        "sharesubscription": "Consumer subscriptions to data shares",
+        "datasetmapping": "Consumer-side mappings of datasets to target storage"
+      },
+      "resourceDetailedDescriptions": {
+        "account": "Create and manage Data Share accounts that act as containers for shares and subscriptions.",
+        "share": "Create and manage data shares. Shares group datasets and synchronization settings for distribution to consumers.",
+        "invitation": "Send, get, and delete invitations that allow consumers to subscribe to a share.",
+        "dataset": "Add and remove datasets (Blob Storage, ADLS Gen2, SQL tables, etc.) to and from a share.",
+        "sharesubscription": "Subscribe to data shares, synchronize datasets, and manage consumer-side share subscriptions.",
+        "datasetmapping": "Map datasets from a subscribed share to consumer-owned storage accounts or databases."
+      },
+      "actionRenames": {
+        "Accounts_Get": "show",
+        "Accounts_Create": "create",
+        "Accounts_Delete": "delete",
+        "Accounts_Update": "update",
+        "Accounts_ListByResourceGroup": "list",
+        "Accounts_ListBySubscription": "list-by-subscription",
+        "Shares_Get": "show",
+        "Shares_Create": "create",
+        "Shares_Delete": "delete",
+        "Shares_ListByAccount": "list",
+        "Shares_ListSynchronizationDetails": "list-sync-details",
+        "Shares_ListSynchronizations": "list-syncs",
+        "Invitations_Get": "show",
+        "Invitations_Create": "create",
+        "Invitations_Delete": "delete",
+        "Invitations_ListByShare": "list",
+        "DataSets_Get": "show",
+        "DataSets_Create": "create",
+        "DataSets_Delete": "delete",
+        "DataSets_ListByShare": "list",
+        "ShareSubscriptions_Get": "show",
+        "ShareSubscriptions_Create": "create",
+        "ShareSubscriptions_Delete": "delete",
+        "ShareSubscriptions_ListByAccount": "list",
+        "ShareSubscriptions_ListSourceShareSynchronizationSettings": "list-source-settings",
+        "ShareSubscriptions_ListSynchronizationDetails": "list-sync-details",
+        "ShareSubscriptions_ListSynchronizations": "list-syncs",
+        "ShareSubscriptions_SynchronizeDataSet": "synchronize",
+        "ShareSubscriptions_CancelSynchronization": "cancel-sync",
+        "DataSetMappings_Get": "show",
+        "DataSetMappings_Create": "create",
+        "DataSetMappings_Delete": "delete",
+        "DataSetMappings_ListByShareSubscription": "list"
+      },
+      "exclude": [
+        "Operations_List",
+        "ConsumerInvitations_ListInvitations",
+        "ConsumerInvitations_Get",
+        "ConsumerInvitations_RejectInvitation",
+        "ConsumerSourceDataSets_ListByShareSubscription",
+        "EmailRegistrations_ActivateEmail",
+        "EmailRegistrations_RegisterEmail",
+        "ProviderShareSubscriptions_Adjust",
+        "ProviderShareSubscriptions_GetByShare",
+        "ProviderShareSubscriptions_ListByShare",
+        "ProviderShareSubscriptions_Reinstate",
+        "ProviderShareSubscriptions_Revoke",
+        "SynchronizationSettings_Get",
+        "SynchronizationSettings_Create",
+        "SynchronizationSettings_Delete",
+        "SynchronizationSettings_ListByShare",
+        "Triggers_Get",
+        "Triggers_Create",
+        "Triggers_Delete",
+        "Triggers_ListByShareSubscription"
+      ]
+    },
+    {
+      "serviceDir": "fabric",
+      "displayName": "fabric",
+      "apiVersion": "2023-11-01",
+      "description": "Manage Microsoft Fabric capacity resources for unified analytics workloads.",
+      "detailedDescription": "Microsoft Fabric is a unified analytics platform integrating data engineering, data science, data warehousing, and real-time analytics. Covers Fabric capacity resource lifecycle, SKU management, and capacity scaling.",
+      "specFiles": [
+        "fabric/resource-manager/Microsoft.Fabric/Fabric/stable/2023-11-01/fabric.json"
+      ],
+      "resourceDescriptions": {
+        "capacity": "Microsoft Fabric capacity resources hosting Fabric workspaces"
+      },
+      "resourceDetailedDescriptions": {
+        "capacity": "Create and manage Fabric capacity resources. Capacities provide compute for Fabric workspaces and support suspend/resume for cost optimization."
+      },
+      "actionRenames": {
+        "FabricCapacities_Get": "show",
+        "FabricCapacities_CreateOrUpdate": "create",
+        "FabricCapacities_Delete": "delete",
+        "FabricCapacities_Update": "update",
+        "FabricCapacities_ListByResourceGroup": "list",
+        "FabricCapacities_ListBySubscription": "list-by-subscription",
+        "FabricCapacities_Resume": "resume",
+        "FabricCapacities_Suspend": "suspend",
+        "FabricCapacities_CheckNameAvailability": "check-name",
+        "FabricCapacities_ListSkus": "list-skus",
+        "FabricCapacities_ListSkusForCapacity": "list-skus-for-existing"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "healthbot",
+      "displayName": "healthbot",
+      "apiVersion": "2025-11-01",
+      "description": "Manage Azure Health Bot resources for AI-powered virtual health assistants.",
+      "detailedDescription": "Azure Health Bot enables healthcare organizations to build and deploy AI-powered virtual health assistants compliant with healthcare industry regulations. Covers bot resource lifecycle and API secret management.",
+      "specFiles": [
+        "healthbot/resource-manager/Microsoft.HealthBot/stable/2025-11-01/healthbot.json"
+      ],
+      "resourceDescriptions": {
+        "bot": "Azure Health Bot instances for virtual health assistant deployments"
+      },
+      "resourceDetailedDescriptions": {
+        "bot": "Create and manage Health Bot instances, retrieve and regenerate API JWT secrets used for integration with healthcare applications."
+      },
+      "actionRenames": {
+        "Bots_Get": "show",
+        "Bots_Create": "create",
+        "Bots_Delete": "delete",
+        "Bots_Update": "update",
+        "Bots_ListByResourceGroup": "list",
+        "Bots_List": "list",
+        "Bots_ListSecrets": "list-secrets",
+        "Bots_RegenerateApiJwtSecret": "regenerate-secret"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Bots_List",
+          "resourceGroupOperationId": "Bots_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "maintenance",
+      "displayName": "maintenance",
+      "apiVersion": "2023-04-01",
+      "description": "Manage Azure Maintenance configurations and assignments for controlled VM patching.",
+      "detailedDescription": "Azure Maintenance Control enables controlling when updates, patches, and other configuration changes are applied to Azure VMs, Azure Arc machines, and dedicated hosts. Covers maintenance configuration lifecycle and assignment to resources.",
+      "specFiles": [
+        "maintenance/resource-manager/Microsoft.Maintenance/Maintenance/stable/2023-04-01/Maintenance.json"
+      ],
+      "resourceDescriptions": {
+        "configuration": "Maintenance configurations defining allowed maintenance windows",
+        "configurationassignment": "Assignments linking resources to maintenance configurations",
+        "publicmaintenanceconfiguration": "Microsoft-managed public maintenance configurations",
+        "applyupdate": "Pending and applied update status for resources",
+        "update": "Available updates pending for resources"
+      },
+      "resourceDetailedDescriptions": {
+        "configuration": "Create and manage maintenance configurations specifying recurring windows during which Azure can apply updates to assigned resources.",
+        "configurationassignment": "Assign resources (VMs, dedicated hosts, Arc machines) to maintenance configurations to control when updates are applied.",
+        "publicmaintenanceconfiguration": "List Microsoft-managed public maintenance schedules for Azure services like SQL Server in VM.",
+        "applyupdate": "Retrieve the status of updates applied to resources within a maintenance configuration assignment.",
+        "update": "List available updates pending for resources within a maintenance configuration assignment."
+      },
+      "actionRenames": {
+        "MaintenanceConfigurations_Get": "show",
+        "MaintenanceConfigurations_CreateOrUpdate": "create",
+        "MaintenanceConfigurations_Delete": "delete",
+        "MaintenanceConfigurations_Update": "update",
+        "MaintenanceConfigurations_List": "list",
+        "ConfigurationAssignments_Get": "show",
+        "ConfigurationAssignments_CreateOrUpdate": "create",
+        "ConfigurationAssignments_Delete": "delete",
+        "ConfigurationAssignments_List": "list",
+        "ConfigurationAssignments_GetParent": "show-with-parent",
+        "ConfigurationAssignments_CreateOrUpdateParent": "create-with-parent",
+        "ConfigurationAssignments_DeleteParent": "delete-with-parent",
+        "ConfigurationAssignments_ListParent": "list-with-parent",
+        "PublicMaintenanceConfigurations_List": "list",
+        "PublicMaintenanceConfigurations_Get": "show",
+        "ApplyUpdates_Get": "show",
+        "ApplyUpdates_CreateOrUpdate": "create",
+        "ApplyUpdates_GetParent": "show-with-parent",
+        "ApplyUpdates_CreateOrUpdateParent": "create-with-parent",
+        "Updates_List": "list",
+        "Updates_ListParent": "list-with-parent"
+      },
+      "exclude": [
+        "Operations_List",
+        "ConfigurationAssignmentsForResourceGroup_Get",
+        "ConfigurationAssignmentsForResourceGroup_CreateOrUpdate",
+        "ConfigurationAssignmentsForResourceGroup_Delete",
+        "ConfigurationAssignmentsForResourceGroup_Update",
+        "ConfigurationAssignmentsWithinSubscription_List",
+        "ConfigurationAssignmentsForSubscriptions_Get",
+        "ConfigurationAssignmentsForSubscriptions_CreateOrUpdate",
+        "ConfigurationAssignmentsForSubscriptions_Delete",
+        "ConfigurationAssignmentsForSubscriptions_Update",
+        "MaintenanceConfigurationsForResourceGroup_List"
+      ]
+    },
+    {
+      "serviceDir": "marketplaceordering",
+      "displayName": "marketplaceordering",
+      "apiVersion": "2021-01-01",
+      "description": "Manage Azure Marketplace purchase agreements for third-party images.",
+      "detailedDescription": "Azure Marketplace Ordering enables accepting and managing legal agreements for Azure Marketplace images. Required before deploying Marketplace virtual machine images from publishers. Covers agreement retrieval, signing, and cancellation.",
+      "specFiles": [
+        "marketplaceordering/resource-manager/Microsoft.MarketplaceOrdering/MarketplaceOrdering/stable/2021-01-01/Agreements.json"
+      ],
+      "resourceDescriptions": {
+        "marketplaceagreement": "Purchase agreements for Azure Marketplace images from third-party publishers"
+      },
+      "resourceDetailedDescriptions": {
+        "marketplaceagreement": "Get, sign, and cancel Marketplace purchase agreements identified by publisher, offer, and plan. Agreements must be signed before deploying Marketplace VM images."
+      },
+      "actionRenames": {
+        "MarketplaceAgreements_Get": "show",
+        "MarketplaceAgreements_Create": "create",
+        "MarketplaceAgreements_Sign": "sign",
+        "MarketplaceAgreements_Cancel": "cancel",
+        "MarketplaceAgreements_GetAgreement": "show-agreement",
+        "MarketplaceAgreements_List": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "resourceconnector",
+      "displayName": "resourceconnector",
+      "apiVersion": "2022-10-27",
+      "description": "Manage Azure Arc Resource Bridge appliances for extending Azure management to on-premises.",
+      "detailedDescription": "Azure Arc Resource Bridge deploys a local management appliance on-premises enabling Azure management of on-premises infrastructure. Covers appliance lifecycle, credential retrieval, and upgrade graph management.",
+      "specFiles": [
+        "resourceconnector/resource-manager/Microsoft.ResourceConnector/ResourceConnector/stable/2022-10-27/appliances.json"
+      ],
+      "resourceDescriptions": {
+        "appliance": "Azure Arc Resource Bridge appliance instances"
+      },
+      "resourceDetailedDescriptions": {
+        "appliance": "Create and manage Arc Resource Bridge appliances. Retrieve cluster user credentials and keys for kubeconfig access, list upgrade graphs for available versions."
+      },
+      "actionRenames": {
+        "Appliances_Get": "show",
+        "Appliances_CreateOrUpdate": "create",
+        "Appliances_Delete": "delete",
+        "Appliances_Update": "update",
+        "Appliances_ListByResourceGroup": "list",
+        "Appliances_ListBySubscription": "list-by-subscription",
+        "Appliances_ListClusterUserCredential": "list-credentials",
+        "Appliances_ListKeys": "list-keys",
+        "Appliances_GetUpgradeGraph": "show-upgrade-graph",
+        "Appliances_GetTelemetryConfig": "show-telemetry-config"
+      },
+      "exclude": [
+        "Appliances_ListOperations"
+      ]
+    },
+    {
+      "serviceDir": "servicenetworking",
+      "displayName": "servicenetworking",
+      "apiVersion": "2025-01-01",
+      "description": "Manage Azure Application Load Balancer (ALB) traffic controllers, frontends, and associations.",
+      "detailedDescription": "Azure Application Load Balancer is a cloud-native load balancing solution. The Service Networking RM API manages traffic controller resources, frontend configurations, backend associations, and security policies.",
+      "specFiles": [
+        "servicenetworking/resource-manager/Microsoft.ServiceNetworking/ServiceNetworking/stable/2025-01-01/TrafficController.json"
+      ],
+      "resourceDescriptions": {
+        "traffic-controller": "Azure ALB traffic controller resources",
+        "frontend": "Frontend configurations exposing traffic controller endpoints",
+        "association": "Backend associations linking traffic controllers to subnets",
+        "security-policy": "Security policies attached to traffic controllers"
+      },
+      "resourceDetailedDescriptions": {
+        "traffic-controller": "Create and manage Application Load Balancer traffic controller resources that orchestrate HTTP(S) load balancing.",
+        "frontend": "Configure frontend endpoints on a traffic controller for receiving client traffic.",
+        "association": "Associate subnets or other backends with a traffic controller for routing traffic to application services.",
+        "security-policy": "Configure security policies (WAF, etc.) attached to traffic controller frontends."
+      },
+      "actionRenames": {
+        "TrafficControllerInterface_Get": "show",
+        "TrafficControllerInterface_CreateOrUpdate": "create",
+        "TrafficControllerInterface_Delete": "delete",
+        "TrafficControllerInterface_Update": "update",
+        "TrafficControllerInterface_ListByResourceGroup": "list",
+        "TrafficControllerInterface_ListBySubscription": "list-by-subscription",
+        "FrontendsInterface_Get": "show",
+        "FrontendsInterface_CreateOrUpdate": "create",
+        "FrontendsInterface_Delete": "delete",
+        "FrontendsInterface_Update": "update",
+        "FrontendsInterface_ListByTrafficController": "list",
+        "AssociationsInterface_Get": "show",
+        "AssociationsInterface_CreateOrUpdate": "create",
+        "AssociationsInterface_Delete": "delete",
+        "AssociationsInterface_Update": "update",
+        "AssociationsInterface_ListByTrafficController": "list",
+        "SecurityPoliciesInterface_Get": "show",
+        "SecurityPoliciesInterface_CreateOrUpdate": "create",
+        "SecurityPoliciesInterface_Delete": "delete",
+        "SecurityPoliciesInterface_Update": "update",
+        "SecurityPoliciesInterface_ListByTrafficController": "list"
+      },
+      "resourceRenames": {
+        "TrafficControllerInterface_Get": "traffic-controller",
+        "TrafficControllerInterface_CreateOrUpdate": "traffic-controller",
+        "TrafficControllerInterface_Delete": "traffic-controller",
+        "TrafficControllerInterface_Update": "traffic-controller",
+        "TrafficControllerInterface_ListByResourceGroup": "traffic-controller",
+        "TrafficControllerInterface_ListBySubscription": "traffic-controller",
+        "FrontendsInterface_Get": "frontend",
+        "FrontendsInterface_CreateOrUpdate": "frontend",
+        "FrontendsInterface_Delete": "frontend",
+        "FrontendsInterface_Update": "frontend",
+        "FrontendsInterface_ListByTrafficController": "frontend",
+        "AssociationsInterface_Get": "association",
+        "AssociationsInterface_CreateOrUpdate": "association",
+        "AssociationsInterface_Delete": "association",
+        "AssociationsInterface_Update": "association",
+        "AssociationsInterface_ListByTrafficController": "association",
+        "SecurityPoliciesInterface_Get": "security-policy",
+        "SecurityPoliciesInterface_CreateOrUpdate": "security-policy",
+        "SecurityPoliciesInterface_Delete": "security-policy",
+        "SecurityPoliciesInterface_Update": "security-policy",
+        "SecurityPoliciesInterface_ListByTrafficController": "security-policy"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "solutions",
+      "displayName": "solutions",
+      "apiVersion": "2021-07-01",
+      "description": "Manage Azure Managed Applications and application definitions for packaged solution deployment.",
+      "detailedDescription": "Azure Managed Applications enables solution providers to publish managed solutions deployable by customers while maintaining operator control. Covers managed application lifecycle, application definitions, and JIT access request management.",
+      "specFiles": [
+        "solutions/resource-manager/Microsoft.Solutions/stable/2021-07-01/managedapplications.json"
+      ],
+      "resourceDescriptions": {
+        "application": "Managed application instances deployed from a definition",
+        "applicationdefinition": "Application definition packages specifying deployment templates and policies",
+        "jitrequest": "Just-in-time access requests for managing deployed applications"
+      },
+      "resourceDetailedDescriptions": {
+        "application": "Deploy and manage managed application instances. Managed apps give vendors control over Azure resources deployed in customer subscriptions.",
+        "applicationdefinition": "Create application definitions containing ARM templates, access policies, and UI definitions for managed application packages.",
+        "jitrequest": "Request and manage just-in-time elevated access to resources within a managed application deployment."
+      },
+      "actionRenames": {
+        "Applications_Get": "show",
+        "Applications_CreateOrUpdate": "create",
+        "Applications_Delete": "delete",
+        "Applications_Update": "update",
+        "Applications_ListByResourceGroup": "list",
+        "Applications_ListBySubscription": "list-by-subscription",
+        "Applications_GetById": "show-by-id",
+        "Applications_CreateOrUpdateById": "create-by-id",
+        "Applications_DeleteById": "delete-by-id",
+        "Applications_UpdateById": "update-by-id",
+        "Applications_RefreshPermissions": "refresh-permissions",
+        "Applications_ListAllowedUpgradePlans": "list-upgrade-plans",
+        "Applications_UpdateAccess": "update-access",
+        "Applications_ListTokens": "list-tokens",
+        "ApplicationDefinitions_Get": "show",
+        "ApplicationDefinitions_CreateOrUpdate": "create",
+        "ApplicationDefinitions_Delete": "delete",
+        "ApplicationDefinitions_Update": "update",
+        "ApplicationDefinitions_ListByResourceGroup": "list",
+        "ApplicationDefinitions_ListBySubscription": "list-by-subscription",
+        "JitRequests_Get": "show",
+        "jitRequests_CreateOrUpdate": "create",
+        "jitRequests_Delete": "delete",
+        "JitRequests_Update": "update",
+        "jitRequests_ListBySubscription": "list-by-subscription",
+        "jitRequests_ListByResourceGroup": "list"
+      },
+      "exclude": [
+        "ListOperations"
+      ]
+    },
+    {
+      "serviceDir": "sqlvirtualmachine",
+      "displayName": "sqlvirtualmachine",
+      "apiVersion": "2023-10-01",
+      "description": "Manage SQL Server on Azure Virtual Machines, VM groups, and availability group listeners.",
+      "detailedDescription": "SQL Server on Azure Virtual Machines enables running SQL Server workloads in the cloud with full OS-level access. Covers SQL VM lifecycle, high availability group configuration with Windows Server Failover Clustering, and SQL Server patch management.",
+      "specFiles": [
+        "sqlvirtualmachine/resource-manager/Microsoft.SqlVirtualMachine/SqlVirtualMachine/stable/2023-10-01/sqlvm.json"
+      ],
+      "resourceDescriptions": {
+        "sqlvm": "SQL Server virtual machines registered with the SQL IaaS Agent extension",
+        "group": "SQL Server VM groups for Windows Server Failover Cluster configuration",
+        "availabilitygrouplistener": "Windows Server Failover Cluster availability group listeners"
+      },
+      "resourceDetailedDescriptions": {
+        "sqlvm": "Register, configure, and manage SQL Server VMs. Controls SQL Server settings, patching, auto-backup, storage configuration, and IaaS agent registration.",
+        "group": "Create and manage SQL VM groups that represent a Windows Server Failover Cluster configuration including cluster nodes and storage accounts.",
+        "availabilitygrouplistener": "Configure availability group listeners within SQL VM groups for Always On high availability read routing."
+      },
+      "actionRenames": {
+        "SqlVirtualMachines_Get": "show",
+        "SqlVirtualMachines_CreateOrUpdate": "create",
+        "SqlVirtualMachines_Delete": "delete",
+        "SqlVirtualMachines_Update": "update",
+        "SqlVirtualMachines_List": "list",
+        "SqlVirtualMachines_ListByResourceGroup": "list",
+        "SqlVirtualMachines_ListBySqlVmGroup": "list-by-group",
+        "SqlVirtualMachines_Redeploy": "redeploy",
+        "SqlVirtualMachines_StartAssessment": "start-assessment",
+        "SqlVirtualMachines_FetchDCAssessment": "fetch-assessment",
+        "SqlVirtualMachineGroups_Get": "show",
+        "SqlVirtualMachineGroups_CreateOrUpdate": "create",
+        "SqlVirtualMachineGroups_Delete": "delete",
+        "SqlVirtualMachineGroups_Update": "update",
+        "SqlVirtualMachineGroups_ListByResourceGroup": "list",
+        "SqlVirtualMachineGroups_List": "list",
+        "AvailabilityGroupListeners_Get": "show",
+        "AvailabilityGroupListeners_CreateOrUpdate": "create",
+        "AvailabilityGroupListeners_Delete": "delete",
+        "AvailabilityGroupListeners_ListByGroup": "list"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "SqlVirtualMachines_List",
+          "resourceGroupOperationId": "SqlVirtualMachines_ListByResourceGroup",
+          "cliAction": "list"
+        },
+        {
+          "subscriptionOperationId": "SqlVirtualMachineGroups_List",
+          "resourceGroupOperationId": "SqlVirtualMachineGroups_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "resourceRenames": {
+        "SqlVirtualMachines_Get": "sqlvm",
+        "SqlVirtualMachines_CreateOrUpdate": "sqlvm",
+        "SqlVirtualMachines_Delete": "sqlvm",
+        "SqlVirtualMachines_Update": "sqlvm",
+        "SqlVirtualMachines_List": "sqlvm",
+        "SqlVirtualMachines_ListByResourceGroup": "sqlvm",
+        "SqlVirtualMachines_ListBySqlVmGroup": "sqlvm",
+        "SqlVirtualMachines_Redeploy": "sqlvm",
+        "SqlVirtualMachines_StartAssessment": "sqlvm",
+        "SqlVirtualMachines_FetchDCAssessment": "sqlvm"
+      },
+      "exclude": [
+        "Operations_List",
+        "SqlVirtualMachineTroubleshoot_Troubleshoot"
+      ]
+    },
+    {
+      "serviceDir": "servicelinker",
+      "displayName": "servicelinker",
+      "apiVersion": "2024-04-01",
+      "description": "Manage Azure Service Connector linkers and connectors for service-to-service connections.",
+      "detailedDescription": "Azure Service Connector simplifies service-to-service connectivity by automatically configuring network settings and authentication. Covers linker management (resource-extension scope) and connector management (local development/deployment scope).",
+      "specFiles": [
+        "servicelinker/resource-manager/Microsoft.ServiceLinker/stable/2024-04-01/servicelinker.json"
+      ],
+      "resourceDescriptions": {
+        "linker": "Service linkers connecting source resources to target services",
+        "connector": "Service connectors for local development and deployment scenarios",
+        "configurationname": "Available configuration name options for service connection parameters"
+      },
+      "resourceDetailedDescriptions": {
+        "linker": "Create and validate linkers that establish authenticated connections between source Azure services and target services like databases, storage, and other Azure resources.",
+        "connector": "Manage connectors for scenarios outside of traditional Azure resource scopes, including local development tools and deployment slots.",
+        "configurationname": "List available configuration name options for service connection parameters such as connection strings and environment variables."
+      },
+      "actionRenames": {
+        "Linker_Get": "show",
+        "Linker_CreateOrUpdate": "create",
+        "Linker_Delete": "delete",
+        "Linker_Update": "update",
+        "Linker_List": "list",
+        "Linker_Validate": "validate",
+        "Linker_ListConfigurations": "list-configurations",
+        "Linkers_GenerateConfigurations": "generate-configurations",
+        "Connector_Get": "show",
+        "Connector_CreateOrUpdate": "create",
+        "Connector_Delete": "delete",
+        "Connector_Update": "update",
+        "Connector_List": "list",
+        "Connector_Validate": "validate",
+        "Connector_GenerateConfigurations": "generate-configurations",
+        "ConfigurationNames_List": "list"
+      },
+      "resourceRenames": {
+        "Linker_Get": "linker",
+        "Linker_CreateOrUpdate": "linker",
+        "Linker_Delete": "linker",
+        "Linker_Update": "linker",
+        "Linker_List": "linker",
+        "Linker_Validate": "linker",
+        "Linker_ListConfigurations": "linker",
+        "Linkers_GenerateConfigurations": "linker"
+      },
+      "exclude": [
+        "Operations_List",
+        "Linker_ListDryrun",
+        "Linker_GetDryrun",
+        "Linker_CreateDryrun",
+        "Linker_DeleteDryrun",
+        "Linker_UpdateDryrun",
+        "Linkers_ListDryrun",
+        "Linkers_GetDryrun",
+        "Linkers_CreateDryrun",
+        "Linkers_DeleteDryrun",
+        "Linkers_UpdateDryrun",
+        "Linkers_ListDaprConfigurations",
+        "Connector_ListDryrun",
+        "Connector_GetDryrun",
+        "Connector_CreateDryrun",
+        "Connector_DeleteDryrun",
+        "Connector_UpdateDryrun"
+      ]
+    },
+    {
+      "serviceDir": "servicefabricmanagedclusters",
+      "displayName": "sfmc",
+      "apiVersion": "2026-02-01",
+      "description": "Manage Azure Service Fabric Managed Clusters for simplified microservices cluster deployment.",
+      "detailedDescription": "Service Fabric Managed Clusters automate the lifecycle of the underlying cluster infrastructure. Covers managed cluster lifecycle, node type management, application deployment, and application type versioning with fewer configuration options than unmanaged clusters.",
+      "specFiles": [
+        "servicefabricmanagedclusters/resource-manager/Microsoft.ServiceFabric/ServiceFabricManagedClusters/stable/2026-02-01/servicefabricmanagedclusters.json"
+      ],
+      "resourceDescriptions": {
+        "managedcluster": "Service Fabric Managed Cluster instances",
+        "nodetype": "Node types (VM scale sets) within a managed cluster",
+        "applicationtype": "Application type definitions registered with a managed cluster",
+        "applicationtypeversion": "Versioned application type packages",
+        "application": "Applications deployed to a Service Fabric Managed Cluster",
+        "service": "Services within a deployed managed cluster application",
+        "managed-cluster-version": "Available managed cluster runtime versions"
+      },
+      "resourceDetailedDescriptions": {
+        "managedcluster": "Create and manage Service Fabric Managed Clusters. Managed clusters handle underlying infrastructure automatically with simplified configuration.",
+        "nodetype": "Configure node types (VM scale sets) including VM SKU, node counts, and placement properties.",
+        "applicationtype": "Register application types that define the schema for deployable application versions.",
+        "applicationtypeversion": "Provision versioned application packages as prerequisites for application deployment.",
+        "application": "Deploy and upgrade application instances from registered application type versions.",
+        "service": "Create and configure individual services within a deployed application.",
+        "managed-cluster-version": "List available Service Fabric runtime versions for managed clusters by environment type."
+      },
+      "actionRenames": {
+        "ManagedClusters_Get": "show",
+        "ManagedClusters_CreateOrUpdate": "create",
+        "ManagedClusters_Delete": "delete",
+        "ManagedClusters_Update": "update",
+        "ManagedClusters_ListByResourceGroup": "list",
+        "ManagedClusters_ListBySubscription": "list-by-subscription",
+        "NodeTypes_Get": "show",
+        "NodeTypes_CreateOrUpdate": "create",
+        "NodeTypes_Delete": "delete",
+        "NodeTypes_Update": "update",
+        "NodeTypes_ListByManagedClusters": "list",
+        "NodeTypes_DeleteNode": "delete-node",
+        "NodeTypes_Reimage": "reimage",
+        "NodeTypes_Restart": "restart",
+        "NodeTypes_Start": "start",
+        "NodeTypes_DeallocateNode": "deallocate-node",
+        "NodeTypes_SkuList": "list-skus",
+        "NodeTypeSkus_List": "list-skus",
+        "ApplicationTypes_Get": "show",
+        "ApplicationTypes_CreateOrUpdate": "create",
+        "ApplicationTypes_Delete": "delete",
+        "ApplicationTypes_Update": "update",
+        "ApplicationTypes_List": "list",
+        "ApplicationTypeVersions_Get": "show",
+        "ApplicationTypeVersions_CreateOrUpdate": "create",
+        "ApplicationTypeVersions_Delete": "delete",
+        "ApplicationTypeVersions_Update": "update",
+        "ApplicationTypeVersions_ListByApplicationTypes": "list",
+        "Applications_Get": "show",
+        "Applications_CreateOrUpdate": "create",
+        "Applications_Delete": "delete",
+        "Applications_Update": "update",
+        "Applications_List": "list",
+        "Services_Get": "show",
+        "Services_CreateOrUpdate": "create",
+        "Services_Delete": "delete",
+        "Services_Update": "update",
+        "Services_List": "list",
+        "ManagedClusterVersion_Get": "show",
+        "ManagedClusterVersion_GetByEnvironment": "show-by-environment",
+        "ManagedClusterVersion_List": "list",
+        "ManagedClusterVersion_ListByEnvironment": "list-by-environment"
+      },
+      "resourceRenames": {
+        "ManagedClusters_Get": "managedcluster",
+        "ManagedClusters_CreateOrUpdate": "managedcluster",
+        "ManagedClusters_Delete": "managedcluster",
+        "ManagedClusters_Update": "managedcluster",
+        "ManagedClusters_ListByResourceGroup": "managedcluster",
+        "ManagedClusters_ListBySubscription": "managedcluster",
+        "ManagedClusterVersion_Get": "managed-cluster-version",
+        "ManagedClusterVersion_GetByEnvironment": "managed-cluster-version",
+        "ManagedClusterVersion_List": "managed-cluster-version",
+        "ManagedClusterVersion_ListByEnvironment": "managed-cluster-version"
+      },
+      "exclude": [
+        "Operations_List",
+        "Applications_FetchHealth",
+        "Applications_ReadUpgrade",
+        "Applications_ResumeUpgrade",
+        "Applications_StartRollback",
+        "Applications_UpdateUpgrade",
+        "Applications_RestartDeployedCodePackage",
+        "managedApplyMaintenanceWindow_Post",
+        "managedAzResiliencyStatus_Get",
+        "managedMaintenanceWindowStatus_Get",
+        "managedUnsupportedVMSizes_List",
+        "managedUnsupportedVMSizes_Get",
+        "OperationResults_Get",
+        "OperationStatuses_Get"
+      ]
+    },
+    {
+      "serviceDir": "healthcareapis",
+      "displayName": "healthcareapis",
+      "apiVersion": "2024-03-31",
+      "description": "Manage Azure Health Data Services workspaces, FHIR services, DICOM services, and IoT connectors.",
+      "detailedDescription": "Azure Health Data Services provides a set of managed API services based on open standards and frameworks including FHIR (R4, STU3), DICOM, and IoT MedTech. Covers workspace lifecycle, FHIR service management, DICOM service management, and IoT connector configuration.",
+      "specFiles": [
+        "healthcareapis/resource-manager/Microsoft.HealthcareApis/HealthcareApis/stable/2024-03-31/healthcare-apis.json"
+      ],
+      "resourceDescriptions": {
+        "workspace": "Azure Health Data Services workspaces grouping FHIR, DICOM, and IoT services",
+        "fhirservice": "FHIR (Fast Healthcare Interoperability Resources) API services",
+        "dicomservice": "DICOM (Digital Imaging and Communications in Medicine) services",
+        "iotconnector": "IoT MedTech connectors for ingesting medical device data"
+      },
+      "resourceDetailedDescriptions": {
+        "workspace": "Create and manage Health Data Services workspaces. Workspaces are logical containers for FHIR services, DICOM services, and IoT connectors.",
+        "fhirservice": "Deploy and configure FHIR R4 or STU3 API services for storing and querying healthcare data using the FHIR standard.",
+        "dicomservice": "Deploy and configure DICOM services for storing and querying medical imaging data using the DICOM standard.",
+        "iotconnector": "Configure IoT MedTech connectors for ingesting medical device telemetry and transforming it into FHIR resources."
+      },
+      "actionRenames": {
+        "Workspaces_Get": "show",
+        "Workspaces_CreateOrUpdate": "create",
+        "Workspaces_Delete": "delete",
+        "Workspaces_Update": "update",
+        "Workspaces_ListByResourceGroup": "list",
+        "Workspaces_ListBySubscription": "list-by-subscription",
+        "FhirServices_Get": "show",
+        "FhirServices_CreateOrUpdate": "create",
+        "FhirServices_Delete": "delete",
+        "FhirServices_Update": "update",
+        "FhirServices_ListByWorkspace": "list",
+        "DicomServices_Get": "show",
+        "DicomServices_CreateOrUpdate": "create",
+        "DicomServices_Delete": "delete",
+        "DicomServices_Update": "update",
+        "DicomServices_ListByWorkspace": "list",
+        "IotConnectors_Get": "show",
+        "IotConnectors_CreateOrUpdate": "create",
+        "IotConnectors_Delete": "delete",
+        "IotConnectors_Update": "update",
+        "IotConnectors_ListByWorkspace": "list",
+        "Services_Get": "show",
+        "Services_CreateOrUpdate": "create",
+        "Services_Delete": "delete",
+        "Services_Update": "update",
+        "Services_List": "list",
+        "Services_ListByResourceGroup": "list",
+        "Services_CheckNameAvailability": "check-name"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Services_List",
+          "resourceGroupOperationId": "Services_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "OperationResults_Get",
+        "PrivateEndpointConnections_ListByService",
+        "PrivateEndpointConnections_Get",
+        "PrivateEndpointConnections_CreateOrUpdate",
+        "PrivateEndpointConnections_Delete",
+        "PrivateLinkResources_ListByService",
+        "PrivateLinkResources_Get",
+        "WorkspacePrivateEndpointConnections_ListByWorkspace",
+        "WorkspacePrivateEndpointConnections_Get",
+        "WorkspacePrivateEndpointConnections_CreateOrUpdate",
+        "WorkspacePrivateEndpointConnections_Delete",
+        "WorkspacePrivateLinkResources_ListByWorkspace",
+        "WorkspacePrivateLinkResources_Get",
+        "FhirDestinations_ListByIotConnector",
+        "IotConnectorFhirDestination_Get",
+        "IotConnectorFhirDestination_CreateOrUpdate",
+        "IotConnectorFhirDestination_Delete"
+      ]
+    },
+    {
+      "serviceDir": "vi",
+      "displayName": "vi",
+      "apiVersion": "2025-04-01",
+      "description": "Manage Azure Video Indexer accounts for AI-powered video and audio content analysis.",
+      "detailedDescription": "Azure Video Indexer extracts rich insights from video and audio content using AI. Covers account lifecycle management and access token generation for the Video Indexer data-plane API.",
+      "specFiles": [
+        "vi/resource-manager/Microsoft.VideoIndexer/stable/2025-04-01/vi.json"
+      ],
+      "resourceDescriptions": {
+        "account": "Azure Video Indexer accounts providing AI video analysis services",
+        "generate": "Access token generation for Video Indexer data-plane API calls"
+      },
+      "resourceDetailedDescriptions": {
+        "account": "Create and manage Video Indexer accounts. Each account provides an endpoint for indexing and analyzing video and audio content.",
+        "generate": "Generate access tokens for calling the Video Indexer data-plane REST API. Supports different access levels including restricted viewer and extension tokens."
+      },
+      "actionRenames": {
+        "Accounts_Get": "show",
+        "Accounts_CreateOrUpdate": "create",
+        "Accounts_Delete": "delete",
+        "Accounts_Update": "update",
+        "Accounts_ListByResourceGroup": "list",
+        "Accounts_List": "list",
+        "Accounts_CheckNameAvailability": "check-name",
+        "Generate_AccessToken": "access-token",
+        "Generate_RestrictedViewerAccessToken": "restricted-viewer-token",
+        "Generate_ExtensionAccessToken": "extension-token",
+        "Generate_ExtensionRestrictedViewerAccessToken": "extension-restricted-viewer-token"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Accounts_List",
+          "resourceGroupOperationId": "Accounts_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List",
+        "PrivateEndpointConnections_ListByAccount",
+        "PrivateEndpointConnections_Get",
+        "PrivateEndpointConnections_CreateOrUpdate",
+        "PrivateEndpointConnections_Delete",
+        "PrivateLinkResources_ListByAccount",
+        "PrivateLinkResources_Get"
+      ]
+    },
+    {
+      "serviceDir": "windowsiot",
+      "displayName": "windowsiot",
+      "apiVersion": "2019-06-01",
+      "description": "Manage Windows IoT device services for device management solutions.",
+      "detailedDescription": "Azure Windows IoT Services provides management APIs for Windows IoT device service resources. Covers service lifecycle and device service name availability checks.",
+      "specFiles": [
+        "windowsiot/resource-manager/Microsoft.WindowsIoT/WindowsIotServices/stable/2019-06-01/WindowsIotServices.json"
+      ],
+      "resourceDescriptions": {
+        "service": "Windows IoT device service resources"
+      },
+      "resourceDetailedDescriptions": {
+        "service": "Create and manage Windows IoT device services for device management. Each service provides endpoints for managing IoT devices running Windows IoT."
+      },
+      "actionRenames": {
+        "Services_Get": "show",
+        "Services_CreateOrUpdate": "create",
+        "Services_Delete": "delete",
+        "Services_Update": "update",
+        "Services_ListByResourceGroup": "list",
+        "Services_List": "list",
+        "Services_CheckDeviceServiceNameAvailability": "check-name"
+      },
+      "merges": [
+        {
+          "subscriptionOperationId": "Services_List",
+          "resourceGroupOperationId": "Services_ListByResourceGroup",
+          "cliAction": "list"
+        }
+      ],
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "azurestackhci",
+      "displayName": "azurestackhci",
+      "apiVersion": "2026-02-01",
+      "description": "Manage Azure Stack HCI clusters, Arc settings, extensions, and deployment configurations.",
+      "detailedDescription": "Azure Stack HCI is a hyperconverged infrastructure (HCI) solution combining on-premises virtualization with Azure cloud services. Covers cluster lifecycle, Arc integration, software update management, security settings, and deployment configuration.",
+      "specFiles": [
+        "azurestackhci/resource-manager/Microsoft.AzureStackHCI/StackHCI/stable/2026-02-01/hci.json"
+      ],
+      "resourceDescriptions": {
+        "cluster": "Azure Stack HCI clusters running on-premises hyperconverged infrastructure",
+        "arcsetting": "Azure Arc integration settings for Stack HCI clusters",
+        "extension": "Arc extensions deployed to HCI cluster nodes",
+        "deploymentsetting": "Deployment configurations for new Stack HCI cluster deployments",
+        "securitysetting": "Security configuration settings for Stack HCI clusters",
+        "update": "Available and applied software updates for Stack HCI clusters"
+      },
+      "resourceDetailedDescriptions": {
+        "cluster": "Create and manage Stack HCI clusters, configure identity, manage software assurance benefits, and trigger log collection for support.",
+        "arcsetting": "Configure and manage Azure Arc integration for HCI clusters enabling Azure management capabilities on the cluster.",
+        "extension": "Deploy and manage Arc extensions (agents and services) on HCI cluster nodes through Arc Settings.",
+        "deploymentsetting": "Configure Stack HCI cluster deployment settings for new deployments including network, storage, and AD configuration.",
+        "securitysetting": "Configure security settings including BitLocker, credential guard, and secure boot enforcement for HCI clusters.",
+        "update": "List available software updates for the Stack HCI cluster and manage the update installation process."
+      },
+      "actionRenames": {
+        "Clusters_Get": "show",
+        "Clusters_Create": "create",
+        "Clusters_Delete": "delete",
+        "Clusters_Update": "update",
+        "Clusters_ListByResourceGroup": "list",
+        "Clusters_ListBySubscription": "list-by-subscription",
+        "Clusters_CreateIdentity": "create-identity",
+        "Clusters_ExtendSoftwareAssuranceBenefit": "extend-software-assurance",
+        "Clusters_TriggerLogCollection": "trigger-log-collection",
+        "Clusters_UploadCertificate": "upload-certificate",
+        "Clusters_ConfigureRemoteSupport": "configure-remote-support",
+        "Clusters_UpdateSecretsLocations": "update-secrets-locations",
+        "ArcSettings_Get": "show",
+        "ArcSettings_Create": "create",
+        "ArcSettings_Delete": "delete",
+        "ArcSettings_Update": "update",
+        "ArcSettings_ListByCluster": "list",
+        "ArcSettings_ConsentAndInstallDefaultExtensions": "consent-install-extensions",
+        "ArcSettings_CreateIdentity": "create-identity",
+        "ArcSettings_GeneratePassword": "generate-password",
+        "ArcSettings_InitializeDisableProcess": "initialize-disable",
+        "ArcSettings_Reconcile": "reconcile",
+        "Extensions_Get": "show",
+        "Extensions_Create": "create",
+        "Extensions_Delete": "delete",
+        "Extensions_Update": "update",
+        "Extensions_ListByArcSetting": "list",
+        "Extensions_Upgrade": "upgrade",
+        "DeploymentSettings_Get": "show",
+        "DeploymentSettings_CreateOrUpdate": "create",
+        "DeploymentSettings_Delete": "delete",
+        "DeploymentSettings_ListByClusters": "list",
+        "SecuritySettings_Get": "show",
+        "SecuritySettings_CreateOrUpdate": "create",
+        "SecuritySettings_Delete": "delete",
+        "SecuritySettings_ListByClusters": "list",
+        "Updates_Get": "show",
+        "Updates_Delete": "delete",
+        "Updates_List": "list",
+        "Updates_Put": "create",
+        "Updates_Post": "apply"
+      },
+      "exclude": [
+        "Operations_List",
+        "Offers_ListByCluster",
+        "Offers_ListByPublisher",
+        "Offers_Get",
+        "Skus_ListByOffer",
+        "Skus_Get",
+        "UpdateRuns_List",
+        "UpdateRuns_Get",
+        "UpdateRuns_Delete",
+        "UpdateRuns_Put",
+        "UpdateSummaries_Get",
+        "UpdateSummaries_Delete",
+        "UpdateSummaries_List",
+        "UpdateSummaries_Put",
+        "Publishers_ListByCluster",
+        "EdgeDevices_List",
+        "EdgeDevices_Get",
+        "EdgeDevices_CreateOrUpdate",
+        "EdgeDevices_Delete",
+        "EdgeDevices_Validate",
+        "EdgeDeviceJobs_ListByEdgeDevice",
+        "EdgeDeviceJobs_Get",
+        "EdgeDeviceJobs_CreateOrUpdate",
+        "EdgeDeviceJobs_Delete",
+        "Clusters_ConfigureRemoteSupport"
+      ]
     }
   ]
 }
