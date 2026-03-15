@@ -5,6 +5,10 @@ using Console.Tui;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Launch an interactive KQL explorer TUI for a Log Analytics workspace or resource.</summary>
+/// <remarks>
+/// Provide either --workspace-id or --resource-id to select the query target.
+/// Requires an interactive terminal; use 'maz loganalytics query' for non-interactive scenarios.
+/// </remarks>
 public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "explore";
