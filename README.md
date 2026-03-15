@@ -25,27 +25,11 @@ Both scripts warn you — and the PowerShell one offers to fix it — if the ins
 
 You can override the install location by setting `MAZ_INSTALL_DIR` before running the script.
 
-## Dynamic option completions
+---
 
 ## Overview
 
 `maz` is a fast, self-contained Azure CLI replacement. It talks directly to the Azure REST API and ARM SDK — no Python, no virtual environments, no startup lag.
-
----
-
-## Getting started / building
-
-```sh
-# Build a self-contained single-file binary for linux-x64
-dotnet publish --self-contained true -r linux-x64 -p:PublishSingleFile=true
-
-# Or for Windows
-dotnet publish --self-contained true -r win-x64 -p:PublishSingleFile=true
-```
-
----
-
-## How maz works
 
 ### Fuzzy command matching + suggestions
 
@@ -265,40 +249,6 @@ These options apply to every command:
 
 ---
 
-## Dynamic option completions (developer reference)
+## Contributing
 
-`[CliOption]` supports dynamic completion providers via `CompletionProviderType`:
-
-```csharp
-[CliOption(
-    "--subscription-id",
-    "-s",
-    EnvVar = "AZURE_SUBSCRIPTION_ID",
-    CompletionProviderType = typeof(SubscriptionIdCompletionProvider),
-    CompletionOptionPacks = [typeof(AuthOptionPack)]
-)]
-public partial string? SubscriptionId { get; }
-```
-
-Provider contract:
-
-```csharp
-public interface ICliCompletionProvider
-{
-    ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context);
-}
-```
-
-`CompletionOptionPacks` lists additional `OptionPack` types whose parsed values are available inside the provider via `context.GetOptionPack<T>()`.
-
-## Building from source
-
-Requires .NET 10 SDK. Run the following command to produce a single self-contained binary for your platform:
-
-```sh
-dotnet publish Console/Console.csproj --self-contained true -r linux-x64 -p:PublishSingleFile=true -c Release
-```
-
-Replace `linux-x64` with your target RID (`linux-arm64`, `osx-x64`, `osx-arm64`, `win-x64`, etc.).
-
-CI publishes pre-built binaries for all supported platforms on every tagged release.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions, project structure, and how to make a release.
