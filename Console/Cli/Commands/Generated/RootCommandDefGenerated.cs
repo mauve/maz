@@ -153,6 +153,9 @@ public partial class RootCommandDef
     public PurviewCommandDef Purview = null!;
     public VoiceservicesCommandDef Voiceservices = null!;
     public HelpCommandDef Help = null!;
+    public NetworkcloudCommandDef Networkcloud = null!;
+    public HybridaksCommandDef Hybridaks = null!;
+    public PolicyinsightsCommandDef Policyinsights = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -302,5 +305,8 @@ public partial class RootCommandDef
         Purview = new PurviewCommandDef(Auth);
         Voiceservices = new VoiceservicesCommandDef(Auth);
         Help = new HelpCommandDef(Auth);
+        Networkcloud = new NetworkcloudCommandDef(Auth);
+        Hybridaks = new HybridaksCommandDef(Auth);
+        Policyinsights = new PolicyinsightsCommandDef(Auth);
     }
 }
