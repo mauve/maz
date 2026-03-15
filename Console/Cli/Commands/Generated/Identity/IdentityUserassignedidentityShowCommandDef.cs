@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -26,7 +27,10 @@ public partial class IdentityUserassignedidentityShowCommandDef(AuthOptionPack a
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{ResourceName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ManagedIdentity/userAssignedIdentities", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-11-30", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

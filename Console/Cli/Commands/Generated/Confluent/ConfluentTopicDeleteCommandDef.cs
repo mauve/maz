@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -43,7 +44,10 @@ public partial class ConfluentTopicDeleteCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Confluent/organizations/{OrganizationName}/environments/{EnvironmentId}/clusters/{ClusterId}/topics/{TopicName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            OrganizationName!, ResourceGroup, armClient, "Microsoft.Confluent/organizations", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Confluent/organizations/{resolvedName}/environments/{EnvironmentId}/clusters/{ClusterId}/topics/{TopicName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-07-01", null, ct);
         if (!NoWait)

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,10 @@ public partial class EventgridDomainListSharedAccessKeysCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.EventGrid/domains/{DomainName}/listKeys";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            DomainName!, ResourceGroup, armClient, "Microsoft.EventGrid/domains", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/domains/{resolvedName}/listKeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-02-15", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

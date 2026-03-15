@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,10 @@ public partial class PeeringRegisteredasnCreateCommandDef(AuthOptionPack auth) :
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Peering/peerings/{PeeringName}/registeredAsns/{RegisteredAsnName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            PeeringName!, ResourceGroup, armClient, "Microsoft.Peering/peerings", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Peering/peerings/{resolvedName}/registeredAsns/{RegisteredAsnName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-05-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

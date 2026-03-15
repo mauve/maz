@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class ConnectedvmwareVirtualnetworkDeleteCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ConnectedVMwarevSphere/virtualNetworks/{VirtualNetworkName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VirtualNetworkName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/virtualNetworks", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/virtualNetworks/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-12-01", null, ct);
         if (!NoWait)

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -26,7 +27,10 @@ public partial class ManagednetworkfabricAccesscontrollistShowCommandDef(AuthOpt
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ManagedNetworkFabric/accessControlLists/{AccessControlListName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            AccessControlListName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/accessControlLists", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/accessControlLists/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
