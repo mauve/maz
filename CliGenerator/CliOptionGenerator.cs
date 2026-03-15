@@ -65,6 +65,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         public string? XmlRemarks;
         public List<OptionPropModel> Options = [];
         public List<ChildModel> Children = [];
+        public bool HasExecuteHandler;
     }
 
     sealed class OptionPropModel
@@ -96,6 +97,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         public bool IsCommandDef;
         public bool IsOptionPack;
         public string TypeName = "";
+        public string? Description;
     }
 
     // ── Build model from symbol ─────────────────────────────────────────────
@@ -167,11 +169,17 @@ public class CliOptionGenerator : IIncrementalGenerator
                             IsCommandDef = isCD,
                             IsOptionPack = isOP,
                             TypeName = fieldTypeName,
+                            Description = isCD ? GetXmlSummary(member.Type) : null,
                         }
                     );
                 }
             }
         }
+
+        // Detect if class overrides ExecuteAsync
+        model.HasExecuteHandler = cls.GetMembers("ExecuteAsync")
+            .OfType<IMethodSymbol>()
+            .Any(static m => m.IsOverride && !m.IsStatic);
 
         return model;
     }
@@ -714,6 +722,24 @@ public class CliOptionGenerator : IIncrementalGenerator
         return sb.ToString();
     }
 
+    static string FieldToCliName(string fieldName)
+    {
+        var sb = new StringBuilder();
+        for (int i = 0; i < fieldName.Length; i++)
+        {
+            var c = fieldName[i];
+            if (char.IsUpper(c) && i > 0)
+            {
+                var prevIsLower = i > 0 && char.IsLower(fieldName[i - 1]);
+                var nextIsLower = i + 1 < fieldName.Length && char.IsLower(fieldName[i + 1]);
+                if (prevIsLower || nextIsLower)
+                    sb.Append('-');
+            }
+            sb.Append(char.ToLowerInvariant(c));
+        }
+        return sb.ToString();
+    }
+
     // ── Code emission ──────────────────────────────────────────────────────
 
     static string Emit(ClassModel model)
@@ -873,9 +899,17 @@ public class CliOptionGenerator : IIncrementalGenerator
                     $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
                 );
             foreach (var child in childCmds)
-                sb.AppendLine(
-                    $"        cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
-                );
+            {
+                var cliName = FieldToCliName(child.Name);
+                if (child.Description != null)
+                    sb.AppendLine(
+                        $"        cmd.Add({child.Name} is not null ? ((global::Console.Cli.CommandDef){child.Name}).Build() : new global::System.CommandLine.Command({Quote(cliName)}, {Quote(child.Description)}));"
+                    );
+                else
+                    sb.AppendLine(
+                        $"        cmd.Add({child.Name} is not null ? ((global::Console.Cli.CommandDef){child.Name}).Build() : new global::System.CommandLine.Command({Quote(cliName)}));"
+                    );
+            }
             sb.AppendLine("    }");
         }
         else if (childPacks.Count > 0 && model.IsOptionPack)
@@ -890,6 +924,13 @@ public class CliOptionGenerator : IIncrementalGenerator
                     $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
                 );
             sb.AppendLine("    }");
+        }
+
+        // HasExecuteHandler override
+        if (model.IsCommandDef && model.HasExecuteHandler)
+        {
+            sb.AppendLine();
+            sb.AppendLine("    protected override bool HasExecuteHandler => true;");
         }
 
         // Description override for CommandDef

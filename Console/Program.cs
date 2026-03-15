@@ -1,6 +1,5 @@
 using System.CommandLine;
 using System.CommandLine.Help;
-using System.CommandLine.Invocation;
 using System.Linq.Expressions;
 using System.Reflection;
 using Azure.Core;
@@ -22,77 +21,36 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
 {
     var pos = int.Parse(first[9..^1]);
     var line = args.Length >= 2 ? args[1] : "";
-    await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef());
+    var completionTokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var completionCandidate = completionTokens.Length > 1
+        ? completionTokens.Skip(1).FirstOrDefault(a => !a.StartsWith('-') && !a.StartsWith('['))
+        : null;
+    // Use the matched service for a full subtree build; fall back to "" (stubs only) so
+    // top-level tab-completion ("maz <TAB>") doesn't pay the cost of building all 165 services.
+    var completionService = completionCandidate is not null
+        && RootCommandDef.KnownServices.Contains(completionCandidate)
+        ? completionCandidate
+        : "";
+    await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef(completionService));
     return 0;
 }
 
-var rootDef = new RootCommandDef();
+// Detect if we need the full tree (--help-commands shows all commands).
+bool needsFullTree = args.Any(a => a is "--help-commands" or "--help-commands-flat");
+
+// First non-option arg that matches a known service is the target service.
+var candidate = args.FirstOrDefault(a => !a.StartsWith('-') && a.Length > 0);
+string? targetService = needsFullTree
+    ? null
+    : candidate is not null && RootCommandDef.KnownServices.Contains(candidate)
+    ? candidate
+    : null;
+
+var rootDef = new RootCommandDef(targetService);
 var rootCmd = rootDef.Build();
 
 // Apply [global] option defaults (for non-string types like enums) and [cmd.X] per-command defaults.
 ApplyCommandDefaults(rootCmd, MazConfig.Current);
-
-// Wrap destructive commands with the global --require-confirmation guard.
-ApplyRequireConfirmationGuard(rootCmd);
-
-// Apply grouped layout to every HelpAction in the tree and add --help-more to each command.
-foreach (var cmd in AllCommands(rootCmd))
-{
-    if (cmd.Options.OfType<HelpOption>().FirstOrDefault() is { Action: HelpAction optHelp })
-        optHelp.Builder.CustomizeLayout(GroupedHelpLayout.Create);
-    if (cmd.Action is HelpAction cmdHelp)
-        cmdHelp.Builder.CustomizeLayout(GroupedHelpLayout.Create);
-
-    var isRoot = cmd == rootCmd;
-
-    var helpMore = new HelpOption("--help-more", [])
-    {
-        Description =
-            "Show all options including advanced ones, and detailed command descriptions.",
-        Hidden = !isRoot,
-    };
-    if (helpMore.Action is HelpAction helpMoreAction)
-        helpMoreAction.Builder.CustomizeLayout(GroupedHelpLayout.CreateWithAdvanced);
-    cmd.Add(helpMore);
-
-    var helpCommands = new Option<string?>("--help-commands", [])
-    {
-        Description =
-            "Show the full command tree. Optionally filter by name, alias, or description.",
-        Hidden = !isRoot,
-        Arity = ArgumentArity.ZeroOrOne,
-    };
-    helpCommands.Action = new CommandTreeAction(cmd, helpCommands);
-    cmd.Add(helpCommands);
-
-    var helpCommandsFlat = new Option<string?>("--help-commands-flat", [])
-    {
-        Description = "Show all commands as a flat list. Optionally filter by name or alias.",
-        Hidden = !isRoot,
-        Arity = ArgumentArity.ZeroOrOne,
-    };
-    helpCommandsFlat.Action = new CommandFlatAction(cmd, helpCommandsFlat);
-    cmd.Add(helpCommandsFlat);
-
-    const string helpGroup = "Help";
-    if (isRoot)
-    {
-        // Group --help-more and --help-commands under a visible "Help" section on the root command.
-        // --help is intentionally left untagged so it stays in the ungrouped "Options:" section
-        // on every command (it reaches subcommands via HelpOption's built-in Recursive=true).
-        if (cmd.Options.OfType<HelpOption>().FirstOrDefault() is { } helpOpt)
-            helpOpt.Description = "Show usage information for the current command.";
-        HelpGroupRegistry.Tag(helpMore, helpGroup, "");
-        HelpGroupRegistry.Tag(helpCommands, helpGroup, "");
-        HelpGroupRegistry.Tag(helpCommandsFlat, helpGroup, "");
-    }
-    else
-    {
-        // HelpOption is recursive, so the root's --help-more bleeds into subcommand help via
-        // AllOptions. Suppress the "Help" group on every non-root command so it stays clean.
-        HiddenGroupRegistry.HideGroup(cmd, helpGroup);
-    }
-}
 
 var config = new CommandLineConfiguration(rootCmd);
 var result = rootCmd.Parse(args, config);
@@ -225,57 +183,4 @@ static void TrySetDefault(Option opt, string value)
     var funcType = typeof(Func<,>).MakeGenericType(argResultType, genericArg);
     var factory = Expression.Lambda(funcType, valueExpr, paramExpr).Compile();
     dfProp.SetValue(opt, factory);
-}
-
-static void ApplyRequireConfirmationGuard(Command rootCmd)
-{
-    foreach (var cmd in AllCommands(rootCmd))
-    {
-        if (!DestructiveCommandRegistry.IsDestructive(cmd))
-            continue;
-
-        var original = cmd.Action;
-        if (original is null)
-            continue;
-
-        cmd.SetAction(
-            async (parseResult, ct) =>
-            {
-                var requireConfirm = parseResult.GetValue(
-                    GlobalBehaviorOptionPack.RequireConfirmationOption
-                );
-                if (requireConfirm)
-                {
-                    var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
-                        parseResult.GetValue(InteractiveOptionPack.InteractiveOption)
-                    );
-                    PromptForConfirmation(interactive, cmd.Name);
-                }
-
-                return original switch
-                {
-                    AsynchronousCommandLineAction asyncAction => await asyncAction.InvokeAsync(
-                        parseResult,
-                        ct
-                    ),
-                    SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
-                    _ => 0,
-                };
-            }
-        );
-    }
-}
-
-static void PromptForConfirmation(bool interactive, string commandName)
-{
-    if (!interactive || System.Console.IsInputRedirected)
-        throw new InvocationException(
-            $"Operation '{commandName}' is destructive and --require-confirmation is enabled. "
-                + "Run interactively and confirm, or disable --require-confirmation."
-        );
-
-    System.Console.Write($"Operation '{commandName}' is destructive. Proceed? (y/N): ");
-    var response = System.Console.ReadLine()?.Trim().ToLowerInvariant();
-    if (response is not ("y" or "yes"))
-        throw new InvocationException("Operation cancelled by user.");
 }

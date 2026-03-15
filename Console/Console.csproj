@@ -2,6 +2,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>maz</AssemblyName>
+    <PublishReadyToRun>true</PublishReadyToRun>
+    <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CliGenerator\CliGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
