@@ -12,7 +12,7 @@ public record ServiceConfig(
     string DisplayName,
     string ApiVersion,
     List<string> SpecFiles,
-    List<string> Exclude,
+    List<string>? Exclude = null,
     Dictionary<string, string>? ActionRenames = null,
     Dictionary<string, string>? ResourceRenames = null,
     List<MergeConfig>? Merges = null,

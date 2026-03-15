@@ -159,6 +159,19 @@ public partial class RootCommandDef
     public ManagednetworkfabricCommandDef Managednetworkfabric = null!;
     public HybridnetworkCommandDef Hybridnetwork = null!;
     public CustomerinsightsCommandDef Customerinsights = null!;
+    public ServicebusdataCommandDef Servicebusdata = null!;
+    public AppconfigdataCommandDef Appconfigdata = null!;
+    public BatchdataCommandDef Batchdata = null!;
+    public AcrdataCommandDef Acrdata = null!;
+    public SearchdataCommandDef Searchdata = null!;
+    public AttestationdataCommandDef Attestationdata = null!;
+    public LedgerdataCommandDef Ledgerdata = null!;
+    public DigitaltwinsdataCommandDef Digitaltwinsdata = null!;
+    public DevcenterdataCommandDef Devcenterdata = null!;
+    public LoadtestdataCommandDef Loadtestdata = null!;
+    public PurviewdataCommandDef Purviewdata = null!;
+    public DeiddataCommandDef Deiddata = null!;
+    public WebpubsubdataCommandDef Webpubsubdata = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -314,5 +327,18 @@ public partial class RootCommandDef
         Managednetworkfabric = new ManagednetworkfabricCommandDef(Auth);
         Hybridnetwork = new HybridnetworkCommandDef(Auth);
         Customerinsights = new CustomerinsightsCommandDef(Auth);
+        Servicebusdata = new ServicebusdataCommandDef(Auth);
+        Appconfigdata = new AppconfigdataCommandDef(Auth);
+        Batchdata = new BatchdataCommandDef(Auth);
+        Acrdata = new AcrdataCommandDef(Auth);
+        Searchdata = new SearchdataCommandDef(Auth);
+        Attestationdata = new AttestationdataCommandDef(Auth);
+        Ledgerdata = new LedgerdataCommandDef(Auth);
+        Digitaltwinsdata = new DigitaltwinsdataCommandDef(Auth);
+        Devcenterdata = new DevcenterdataCommandDef(Auth);
+        Loadtestdata = new LoadtestdataCommandDef(Auth);
+        Purviewdata = new PurviewdataCommandDef(Auth);
+        Deiddata = new DeiddataCommandDef(Auth);
+        Webpubsubdata = new WebpubsubdataCommandDef(Auth);
     }
 }
