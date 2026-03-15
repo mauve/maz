@@ -6,6 +6,9 @@
     <PublishReadyToRunComposite>true</PublishReadyToRunComposite>
   </PropertyGroup>
   <ItemGroup>
+    <EmbeddedResource Include="..\GETTING_STARTED.md" LogicalName="GETTING_STARTED.md" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference
       Include="..\CliGenerator\CliGenerator.csproj"
       OutputItemType="Analyzer"
