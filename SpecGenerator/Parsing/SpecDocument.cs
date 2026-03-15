@@ -35,7 +35,12 @@ public sealed class SpecDocument
 
     public JsonObject? GetTopLevelParameter(string name) => Root["parameters"]?[name]?.AsObject();
 
-    public IEnumerable<(string Path, string Method, JsonObject Operation, JsonArray? PathLevelParams)> GetOperations()
+    public IEnumerable<(
+        string Path,
+        string Method,
+        JsonObject Operation,
+        JsonArray? PathLevelParams
+    )> GetOperations()
     {
         var paths = Root["paths"]?.AsObject();
         if (paths is null)

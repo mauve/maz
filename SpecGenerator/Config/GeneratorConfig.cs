@@ -52,11 +52,7 @@ public record DataplaneOptionPackConfig(
 /// <param name="ClassName">The C# class name of the option pack (e.g. "KeyVaultOptionPack").</param>
 /// <param name="FieldName">The C# field name in the generated command class (e.g. "KeyVault").</param>
 /// <param name="AbsorbedParam">The URL path parameter replaced by the option pack (e.g. "vaultName").</param>
-public record ResourceOptionPackConfig(
-    string ClassName,
-    string FieldName,
-    string AbsorbedParam
-);
+public record ResourceOptionPackConfig(string ClassName, string FieldName, string AbsorbedParam);
 
 /// <summary>
 /// Merges a subscription-scope list and an RG-scope list into one command with a conditional URL.

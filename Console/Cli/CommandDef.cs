@@ -105,11 +105,11 @@ public abstract partial class CommandDef
 
                         return original switch
                         {
-                            AsynchronousCommandLineAction asyncAction => await asyncAction.InvokeAsync(
-                                parseResult,
-                                ct
+                            AsynchronousCommandLineAction asyncAction =>
+                                await asyncAction.InvokeAsync(parseResult, ct),
+                            SynchronousCommandLineAction syncAction => syncAction.Invoke(
+                                parseResult
                             ),
-                            SynchronousCommandLineAction syncAction => syncAction.Invoke(parseResult),
                             _ => 0,
                         };
                     }

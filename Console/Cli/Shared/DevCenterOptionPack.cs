@@ -28,7 +28,10 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
     [CliOption(
         "--dev-center",
         "--dc",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<DevCenterOptionPack, DevCenterResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            DevCenterOptionPack,
+            DevCenterResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? DevCenterName { get; }
@@ -67,8 +70,12 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} dev centers:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }

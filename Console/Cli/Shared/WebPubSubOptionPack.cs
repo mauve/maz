@@ -28,7 +28,10 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
     [CliOption(
         "--web-pubsub",
         "--wps",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<WebPubSubOptionPack, WebPubSubResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            WebPubSubOptionPack,
+            WebPubSubResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? ServiceName { get; }
@@ -63,12 +66,18 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Web PubSub service '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Web PubSub service '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} services:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }

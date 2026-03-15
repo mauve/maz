@@ -22,15 +22,17 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
     var pos = int.Parse(first[9..^1]);
     var line = args.Length >= 2 ? args[1] : "";
     var completionTokens = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    var completionCandidate = completionTokens.Length > 1
-        ? completionTokens.Skip(1).FirstOrDefault(a => !a.StartsWith('-') && !a.StartsWith('['))
-        : null;
+    var completionCandidate =
+        completionTokens.Length > 1
+            ? completionTokens.Skip(1).FirstOrDefault(a => !a.StartsWith('-') && !a.StartsWith('['))
+            : null;
     // Use the matched service for a full subtree build; fall back to "" (stubs only) so
     // top-level tab-completion ("maz <TAB>") doesn't pay the cost of building all 165 services.
-    var completionService = completionCandidate is not null
+    var completionService =
+        completionCandidate is not null
         && RootCommandDef.KnownServices.Contains(completionCandidate)
-        ? completionCandidate
-        : "";
+            ? completionCandidate
+            : "";
     await CliCompletionHandler.HandleAsync(line, pos, new RootCommandDef(completionService));
     return 0;
 }
@@ -40,10 +42,9 @@ bool needsFullTree = args.Any(a => a is "--help-commands" or "--help-commands-fl
 
 // First non-option arg that matches a known service is the target service.
 var candidate = args.FirstOrDefault(a => !a.StartsWith('-') && a.Length > 0);
-string? targetService = needsFullTree
-    ? null
-    : candidate is not null && RootCommandDef.KnownServices.Contains(candidate)
-    ? candidate
+string? targetService =
+    needsFullTree ? null
+    : candidate is not null && RootCommandDef.KnownServices.Contains(candidate) ? candidate
     : null;
 
 var rootDef = new RootCommandDef(targetService);

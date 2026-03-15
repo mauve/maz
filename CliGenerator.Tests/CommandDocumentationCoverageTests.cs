@@ -145,11 +145,15 @@ public class CommandDocumentationCoverageTests
         var close = $"</{tag}>";
         var start = docs.IndexOf(open, StringComparison.Ordinal);
         var end = docs.IndexOf(close, StringComparison.Ordinal);
-        if (start < 0 || end < 0) return null;
+        if (start < 0 || end < 0)
+            return null;
         var raw = docs.Substring(start + open.Length, end - start - open.Length);
-        return string.Join(" ", raw.Split('\n')
-            .Select(l => l.TrimStart().TrimStart('/').Trim())
-            .Where(l => l.Length > 0));
+        return string.Join(
+            " ",
+            raw.Split('\n')
+                .Select(l => l.TrimStart().TrimStart('/').Trim())
+                .Where(l => l.Length > 0)
+        );
     }
 
     private static bool IsCommandDefClass(ClassDeclarationSyntax cls)

@@ -82,7 +82,10 @@ public sealed class ModelBuilder
                 if (string.IsNullOrEmpty(operationId))
                     continue;
 
-                if (_service.Exclude?.Contains(operationId, StringComparer.OrdinalIgnoreCase) == true)
+                if (
+                    _service.Exclude?.Contains(operationId, StringComparer.OrdinalIgnoreCase)
+                    == true
+                )
                     continue;
 
                 var model = BuildOperation(
@@ -461,8 +464,11 @@ public sealed class ModelBuilder
         var opParams = opNode["parameters"]?.AsArray() ?? [];
         var rawParams = pathLevelParams is { Count: > 0 }
             ? new System.Text.Json.Nodes.JsonArray(
-                pathLevelParams.Select(p => p?.DeepClone()).Concat(opParams.Select(p => p?.DeepClone())).ToArray()
-              )
+                pathLevelParams
+                    .Select(p => p?.DeepClone())
+                    .Concat(opParams.Select(p => p?.DeepClone()))
+                    .ToArray()
+            )
             : opParams;
         var cliParams = new List<CliParamModel>();
         BodyModel? bodyModel = null;
@@ -520,8 +526,8 @@ public sealed class ModelBuilder
             var existingPropNames = cliParams
                 .Select(p => p.PropertyName)
                 .ToHashSet(StringComparer.Ordinal);
-            var dedupedBodyProps = bodyModel.FlattenedProperties
-                .Where(p => !existingPropNames.Contains(p.PropertyName))
+            var dedupedBodyProps = bodyModel
+                .FlattenedProperties.Where(p => !existingPropNames.Contains(p.PropertyName))
                 .ToList();
             if (dedupedBodyProps.Count != bodyModel.FlattenedProperties.Count)
                 bodyModel = new BodyModel(dedupedBodyProps);

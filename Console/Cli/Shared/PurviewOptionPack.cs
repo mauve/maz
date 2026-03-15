@@ -28,7 +28,10 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
     [CliOption(
         "--purview",
         "--pv",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<PurviewOptionPack, PurviewAccountResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            PurviewOptionPack,
+            PurviewAccountResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? AccountName { get; }
@@ -63,12 +66,18 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Purview account '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Purview account '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }
@@ -87,7 +96,9 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var a in rg.Value.GetPurviewAccounts().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var a in rg.Value.GetPurviewAccounts().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (a.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(a.Data.Name);

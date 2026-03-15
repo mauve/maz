@@ -105,7 +105,12 @@ internal static class CommandTreePrinter
         PrintFlatCommand(output, root, root.Name, filter);
     }
 
-    private static void PrintFlatCommand(TextWriter output, Command cmd, string path, string? filter)
+    private static void PrintFlatCommand(
+        TextWriter output,
+        Command cmd,
+        string path,
+        string? filter
+    )
     {
         if (filter is null || path.Contains(filter, StringComparison.OrdinalIgnoreCase))
             output.WriteLine(path);

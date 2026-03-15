@@ -35,7 +35,9 @@ public static class RootPatchEmitter
 
                 // Static set of known service CLI names — used by Program.cs to validate
                 // the pre-scanned target service before constructing the command tree.
-                w.Line("internal static readonly System.Collections.Generic.HashSet<string> KnownServices =");
+                w.Line(
+                    "internal static readonly System.Collections.Generic.HashSet<string> KnownServices ="
+                );
                 w.Line("    new(System.StringComparer.Ordinal)");
                 w.Line("    {");
                 foreach (var service in services)
@@ -64,6 +66,5 @@ public static class RootPatchEmitter
         return w.ToString();
     }
 
-    private static string Quote(string s) =>
-        $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
+    private static string Quote(string s) => $"\"{s.Replace("\\", "\\\\").Replace("\"", "\\\"")}\"";
 }

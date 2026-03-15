@@ -28,7 +28,10 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
     [CliOption(
         "--load-test",
         "--lt",
-        CompletionProviderType = typeof(ArmResourceCompletionProvider<LoadTestingOptionPack, LoadTestingResource>),
+        CompletionProviderType = typeof(ArmResourceCompletionProvider<
+            LoadTestingOptionPack,
+            LoadTestingResource
+        >),
         CompletionOptionPacks = [typeof(AuthOptionPack)]
     )]
     public partial string? ResourceName { get; }
@@ -63,12 +66,18 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
 
         return matches.Count switch
         {
-            0 => throw new InvocationException($"Load Testing resource '{name}' not found in subscription."),
+            0 => throw new InvocationException(
+                $"Load Testing resource '{name}' not found in subscription."
+            ),
             1 => matches[0],
             _ => throw new InvocationException(
                 $"'{name}' is ambiguous — matched {matches.Count} resources:\n"
-                    + string.Join("\n", matches.Select(m =>
-                        $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"))
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
             ),
         };
     }
@@ -87,7 +96,9 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
         if (rgHint is not null)
         {
             var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var lt in rg.Value.GetLoadTestingResources().GetAllAsync(cancellationToken: ct))
+            await foreach (
+                var lt in rg.Value.GetLoadTestingResources().GetAllAsync(cancellationToken: ct)
+            )
             {
                 if (lt.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                     results.Add(lt.Data.Name);
