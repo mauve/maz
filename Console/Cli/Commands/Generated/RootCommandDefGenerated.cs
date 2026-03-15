@@ -104,6 +104,24 @@ public partial class RootCommandDef
     public BotserviceCommandDef Botservice = null!;
     public ServicefabricCommandDef Servicefabric = null!;
     public AutomationCommandDef Automation = null!;
+    public AnalysisservicesCommandDef Analysisservices = null!;
+    public KustoCommandDef Kusto = null!;
+    public CommunicationCommandDef Communication = null!;
+    public DatashareCommandDef Datashare = null!;
+    public FabricCommandDef Fabric = null!;
+    public HealthbotCommandDef Healthbot = null!;
+    public MaintenanceCommandDef Maintenance = null!;
+    public MarketplaceorderingCommandDef Marketplaceordering = null!;
+    public ResourceconnectorCommandDef Resourceconnector = null!;
+    public ServicenetworkingCommandDef Servicenetworking = null!;
+    public SolutionsCommandDef Solutions = null!;
+    public SqlvirtualmachineCommandDef Sqlvirtualmachine = null!;
+    public ServicelinkerCommandDef Servicelinker = null!;
+    public SfmcCommandDef Sfmc = null!;
+    public HealthcareapisCommandDef Healthcareapis = null!;
+    public ViCommandDef Vi = null!;
+    public WindowsiotCommandDef Windowsiot = null!;
+    public AzurestackhciCommandDef Azurestackhci = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -204,5 +222,23 @@ public partial class RootCommandDef
         Botservice = new BotserviceCommandDef(Auth);
         Servicefabric = new ServicefabricCommandDef(Auth);
         Automation = new AutomationCommandDef(Auth);
+        Analysisservices = new AnalysisservicesCommandDef(Auth);
+        Kusto = new KustoCommandDef(Auth);
+        Communication = new CommunicationCommandDef(Auth);
+        Datashare = new DatashareCommandDef(Auth);
+        Fabric = new FabricCommandDef(Auth);
+        Healthbot = new HealthbotCommandDef(Auth);
+        Maintenance = new MaintenanceCommandDef(Auth);
+        Marketplaceordering = new MarketplaceorderingCommandDef(Auth);
+        Resourceconnector = new ResourceconnectorCommandDef(Auth);
+        Servicenetworking = new ServicenetworkingCommandDef(Auth);
+        Solutions = new SolutionsCommandDef(Auth);
+        Sqlvirtualmachine = new SqlvirtualmachineCommandDef(Auth);
+        Servicelinker = new ServicelinkerCommandDef(Auth);
+        Sfmc = new SfmcCommandDef(Auth);
+        Healthcareapis = new HealthcareapisCommandDef(Auth);
+        Vi = new ViCommandDef(Auth);
+        Windowsiot = new WindowsiotCommandDef(Auth);
+        Azurestackhci = new AzurestackhciCommandDef(Auth);
     }
 }
