@@ -156,6 +156,8 @@ public partial class RootCommandDef
     public NetworkcloudCommandDef Networkcloud = null!;
     public HybridaksCommandDef Hybridaks = null!;
     public PolicyinsightsCommandDef Policyinsights = null!;
+    public ManagednetworkfabricCommandDef Managednetworkfabric = null!;
+    public HybridnetworkCommandDef Hybridnetwork = null!;
 
     partial void InitGeneratedCommands()
     {
@@ -308,5 +310,7 @@ public partial class RootCommandDef
         Networkcloud = new NetworkcloudCommandDef(Auth);
         Hybridaks = new HybridaksCommandDef(Auth);
         Policyinsights = new PolicyinsightsCommandDef(Auth);
+        Managednetworkfabric = new ManagednetworkfabricCommandDef(Auth);
+        Hybridnetwork = new HybridnetworkCommandDef(Auth);
     }
 }
