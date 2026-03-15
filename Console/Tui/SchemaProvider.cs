@@ -9,7 +9,11 @@ namespace Console.Tui;
 /// Provides Log Analytics workspace schema for tab completion, with session-level caching.
 /// All failures return empty lists so the TUI remains usable even without schema access.
 /// </summary>
-internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId, string? resourceId)
+internal sealed class SchemaProvider(
+    LogsQueryClient client,
+    string? workspaceId,
+    string? resourceId
+)
 {
     private List<string>? _tablesCache;
     private readonly ConcurrentDictionary<string, List<string>> _columnsCache = new();
@@ -37,11 +41,16 @@ internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId
             var result = await QueryAsync(
                 "Usage | where TimeGenerated > ago(30d) | summarize by DataType | sort by DataType asc | limit 300",
                 TimeSpan.FromSeconds(8),
-                ct);
+                ct
+            );
             var tables = new List<string>();
             int colIndex = 0;
             for (int i = 0; i < result.Table.Columns.Count; i++)
-                if (result.Table.Columns[i].Name == "DataType") { colIndex = i; break; }
+                if (result.Table.Columns[i].Name == "DataType")
+                {
+                    colIndex = i;
+                    break;
+                }
             foreach (var row in result.Table.Rows)
                 if (row[colIndex] is string name && !string.IsNullOrEmpty(name))
                     tables.Add(name);
@@ -60,7 +69,8 @@ internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId
             var result = await QueryAsync(
                 "union * | distinct $table | sort by $table asc | limit 300",
                 TimeSpan.FromSeconds(15),
-                ct);
+                ct
+            );
             var tables = new List<string>();
             foreach (var row in result.Table.Rows)
                 if (row[0] is string name && !string.IsNullOrEmpty(name))
@@ -73,7 +83,10 @@ internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId
         }
     }
 
-    public async Task<IReadOnlyList<string>> GetColumnsAsync(string tableName, CancellationToken ct = default)
+    public async Task<IReadOnlyList<string>> GetColumnsAsync(
+        string tableName,
+        CancellationToken ct = default
+    )
     {
         if (_columnsCache.TryGetValue(tableName, out var cached))
             return cached;
@@ -84,7 +97,11 @@ internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId
             var columns = new List<string>();
             int colIndex = -1;
             for (int i = 0; i < result.Table.Columns.Count; i++)
-                if (result.Table.Columns[i].Name == "ColumnName") { colIndex = i; break; }
+                if (result.Table.Columns[i].Name == "ColumnName")
+                {
+                    colIndex = i;
+                    break;
+                }
             if (colIndex >= 0)
                 foreach (var row in result.Table.Rows)
                     if (row[colIndex] is string col && !string.IsNullOrEmpty(col))
@@ -98,13 +115,23 @@ internal sealed class SchemaProvider(LogsQueryClient client, string? workspaceId
         }
     }
 
-    private async Task<LogsQueryResult> QueryAsync(string kql, TimeSpan timeout, CancellationToken ct)
+    private async Task<LogsQueryResult> QueryAsync(
+        string kql,
+        TimeSpan timeout,
+        CancellationToken ct
+    )
     {
         var opts = new LogsQueryOptions { ServerTimeout = timeout };
         if (workspaceId is not null)
             return await client.QueryWorkspaceAsync(workspaceId, kql, QueryTimeRange.All, opts, ct);
         if (resourceId is not null)
-            return await client.QueryResourceAsync(new ResourceIdentifier(resourceId), kql, QueryTimeRange.All, opts, ct);
+            return await client.QueryResourceAsync(
+                new ResourceIdentifier(resourceId),
+                kql,
+                QueryTimeRange.All,
+                opts,
+                ct
+            );
         throw new InvalidOperationException("No workspace or resource ID configured.");
     }
 }

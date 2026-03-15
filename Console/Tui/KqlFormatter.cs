@@ -36,7 +36,8 @@ internal static class KqlFormatter
 
             if (inComment)
             {
-                if (c == '\n') inComment = false;
+                if (c == '\n')
+                    inComment = false;
                 current.Append(c);
                 continue;
             }

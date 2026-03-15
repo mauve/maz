@@ -11,35 +11,52 @@ public class CliCompletionHandlerTests
         "maz",
         ["--interactive", "--no-interactive", "--verbose"],
         [
-            new("account", ["--output"], [
-                new("list", ["--all", "--output"], []),
-                new("show", ["--id", "--output"], []),
-            ]),
-            new("storage", ["--output"], [
-                new("blob", ["--container", "--output"], [
-                    new("list", ["--prefix", "--output"], []),
-                    new("upload", ["--file", "--output"], []),
-                ]),
-            ]),
+            new(
+                "account",
+                ["--output"],
+                [new("list", ["--all", "--output"], []), new("show", ["--id", "--output"], [])]
+            ),
+            new(
+                "storage",
+                ["--output"],
+                [
+                    new(
+                        "blob",
+                        ["--container", "--output"],
+                        [
+                            new("list", ["--prefix", "--output"], []),
+                            new("upload", ["--file", "--output"], []),
+                        ]
+                    ),
+                ]
+            ),
         ]
     );
 
     private sealed class MockSubscriptionProvider : ICliCompletionProvider
     {
-        public ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext ctx)
-            => ValueTask.FromResult<IEnumerable<string>>(["sub-aaa", "sub-bbb"]);
+        public ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext ctx) =>
+            ValueTask.FromResult<IEnumerable<string>>(["sub-aaa", "sub-bbb"]);
     }
 
-    private static readonly IReadOnlyDictionary<string, ICliCompletionProvider> TestDynamicProviders =
-        new Dictionary<string, ICliCompletionProvider>
-        {
-            ["--subscription-id"] = new MockSubscriptionProvider(),
-        };
+    private static readonly IReadOnlyDictionary<
+        string,
+        ICliCompletionProvider
+    > TestDynamicProviders = new Dictionary<string, ICliCompletionProvider>
+    {
+        ["--subscription-id"] = new MockSubscriptionProvider(),
+    };
 
     private static async Task<string[]> Complete(string line)
     {
         var writer = new StringWriter();
-        await CliCompletionHandler.HandleAsync(line, line.Length, TestRoot, TestDynamicProviders, writer);
+        await CliCompletionHandler.HandleAsync(
+            line,
+            line.Length,
+            TestRoot,
+            TestDynamicProviders,
+            writer
+        );
         return writer.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries);
     }
 
@@ -96,7 +113,10 @@ public class CliCompletionHandlerTests
     {
         var results = await Complete("maz --int");
         CollectionAssert.Contains(results, "--interactive");
-        Assert.IsFalse(results.Contains("--verbose"), "Non-matching options should be filtered out");
+        Assert.IsFalse(
+            results.Contains("--verbose"),
+            "Non-matching options should be filtered out"
+        );
     }
 
     [TestMethod]
@@ -104,7 +124,11 @@ public class CliCompletionHandlerTests
     {
         // "--output" has no dynamic provider → nothing printed
         var results = await Complete("maz account list --output ");
-        Assert.AreEqual(0, results.Length, "No completions when preceding token has no dynamic provider");
+        Assert.AreEqual(
+            0,
+            results.Length,
+            "No completions when preceding token has no dynamic provider"
+        );
     }
 
     [TestMethod]

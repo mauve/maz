@@ -21,7 +21,12 @@ internal static class BootstrapKqlHighlighter
     /// <param name="errorLine">1-based line number of the error, or null for no error.</param>
     /// <param name="errorColumn">0-based column of the error within that line, or null for col 0.</param>
     /// <param name="errorMessage">Error code + message, e.g. "SYN0002: Query could not be parsed at '|'"</param>
-    public static string Highlight(string query, int? errorLine, int? errorColumn, string? errorMessage)
+    public static string Highlight(
+        string query,
+        int? errorLine,
+        int? errorColumn,
+        string? errorMessage
+    )
     {
         if (!Ansi.IsEnabled)
             return query;

@@ -73,8 +73,11 @@ public class EditorPaneTests
     {
         // "| project-away" → cursor at end → should return "project-away", not just "away"
         var pane = EditorWith("T | project-away");
-        Assert.AreEqual("project-away", pane.GetWordAtCursor(),
-            "Hyphen must be included so 'project-away' is matched as one token");
+        Assert.AreEqual(
+            "project-away",
+            pane.GetWordAtCursor(),
+            "Hyphen must be included so 'project-away' is matched as one token"
+        );
     }
 
     [TestMethod]
@@ -82,8 +85,11 @@ public class EditorPaneTests
     {
         // "| project-aw" → should return "project-aw" not just "aw"
         var pane = EditorWith("T | project-aw");
-        Assert.AreEqual("project-aw", pane.GetWordAtCursor(),
-            "Partial hyphenated token must include everything up to the cursor");
+        Assert.AreEqual(
+            "project-aw",
+            pane.GetWordAtCursor(),
+            "Partial hyphenated token must include everything up to the cursor"
+        );
     }
 
     [TestMethod]
@@ -107,8 +113,11 @@ public class EditorPaneTests
     {
         // Initial query spans two lines; cursor ends up on last line
         var pane = EditorWith("SecurityEvent\n| where");
-        Assert.AreEqual("where", pane.GetWordAtCursor(),
-            "Should extract word from the current (last) line");
+        Assert.AreEqual(
+            "where",
+            pane.GetWordAtCursor(),
+            "Should extract word from the current (last) line"
+        );
     }
 
     // ── Text state after edits ────────────────────────────────────────────────
@@ -142,7 +151,10 @@ public class EditorPaneTests
 
         Assert.IsTrue(pane.DismissAutocomplete(), "First dismiss should return true");
         Assert.IsFalse(pane.IsAutocompleteVisible);
-        Assert.IsFalse(pane.DismissAutocomplete(), "Second dismiss should return false (already hidden)");
+        Assert.IsFalse(
+            pane.DismissAutocomplete(),
+            "Second dismiss should return false (already hidden)"
+        );
     }
 
     [TestMethod]
@@ -152,8 +164,11 @@ public class EditorPaneTests
         pane.ShowAutocomplete(["where"]);
         pane.AutocompleteAccept();
 
-        Assert.AreEqual("T | where", pane.GetText(),
-            "Accepted completion should replace the partial word");
+        Assert.AreEqual(
+            "T | where",
+            pane.GetText(),
+            "Accepted completion should replace the partial word"
+        );
         Assert.IsFalse(pane.IsAutocompleteVisible);
     }
 
@@ -164,8 +179,11 @@ public class EditorPaneTests
         pane.ShowAutocomplete(["project-away"]);
         pane.AutocompleteAccept();
 
-        Assert.AreEqual("T | project-away", pane.GetText(),
-            "Hyphenated completion must replace the full hyphenated prefix");
+        Assert.AreEqual(
+            "T | project-away",
+            pane.GetText(),
+            "Hyphenated completion must replace the full hyphenated prefix"
+        );
     }
 
     [TestMethod]
@@ -176,7 +194,9 @@ public class EditorPaneTests
         Assert.IsTrue(pane.IsAutocompleteVisible);
 
         pane.HandleKey(new ConsoleKeyInfo('r', ConsoleKey.R, false, false, false));
-        Assert.IsFalse(pane.IsAutocompleteVisible,
-            "Typing a character should dismiss the autocomplete popup");
+        Assert.IsFalse(
+            pane.IsAutocompleteVisible,
+            "Typing a character should dismiss the autocomplete popup"
+        );
     }
 }

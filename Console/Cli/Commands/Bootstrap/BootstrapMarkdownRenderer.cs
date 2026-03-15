@@ -13,8 +13,14 @@ internal static class BootstrapMarkdownRenderer
         var sw = new StringWriter();
         var old = System.Console.Out;
         System.Console.SetOut(sw);
-        try { Render(sectionText, contentWidth); }
-        finally { System.Console.SetOut(old); }
+        try
+        {
+            Render(sectionText, contentWidth);
+        }
+        finally
+        {
+            System.Console.SetOut(old);
+        }
         return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
     }
 
@@ -101,12 +107,10 @@ internal static class BootstrapMarkdownRenderer
     private static void RenderTable(List<string> rawRows, int contentWidth)
     {
         // Parse and drop separator rows (|---|---|)
-        var rows = rawRows
-            .Select(ParseTableRow)
-            .Where(r => !IsSeparatorRow(r))
-            .ToList();
+        var rows = rawRows.Select(ParseTableRow).Where(r => !IsSeparatorRow(r)).ToList();
 
-        if (rows.Count == 0) return;
+        if (rows.Count == 0)
+            return;
 
         var colCount = rows.Max(r => r.Length);
 
@@ -117,7 +121,8 @@ internal static class BootstrapMarkdownRenderer
             for (var c = 0; c < row.Length; c++)
             {
                 var vis = Ansi.VisibleLength(RenderInlineCode(row[c]));
-                if (vis > colWidths[c]) colWidths[c] = vis;
+                if (vis > colWidths[c])
+                    colWidths[c] = vis;
             }
         }
 
@@ -132,7 +137,8 @@ internal static class BootstrapMarkdownRenderer
         // Separator — dim dashes per column
         var sep = string.Join(
             new string(' ', colGap),
-            Enumerable.Range(0, colCount).Select(c => new string('─', colWidths[c])));
+            Enumerable.Range(0, colCount).Select(c => new string('─', colWidths[c]))
+        );
         System.Console.WriteLine("  " + Ansi.Dim(sep));
 
         // Data rows
@@ -149,10 +155,10 @@ internal static class BootstrapMarkdownRenderer
 
         for (var c = 0; c < colCount; c++)
         {
-            var raw  = c < cells.Length ? cells[c] : "";
+            var raw = c < cells.Length ? cells[c] : "";
             var rendered = RenderInlineCode(raw);
-            var vis  = Ansi.VisibleLength(rendered);
-            var pad  = c < colCount - 1 ? Math.Max(0, colWidths[c] - vis) : 0;
+            var vis = Ansi.VisibleLength(rendered);
+            var pad = c < colCount - 1 ? Math.Max(0, colWidths[c] - vis) : 0;
 
             sb.Append(bold ? Ansi.Bold(rendered) : rendered);
             if (c < colCount - 1)
@@ -167,12 +173,13 @@ internal static class BootstrapMarkdownRenderer
         // Split on |; drop the empty segments created by leading/trailing |
         var parts = line.Split('|');
         var start = line.TrimStart().StartsWith('|') ? 1 : 0;
-        var end   = line.TrimEnd().EndsWith('|')     ? parts.Length - 1 : parts.Length;
+        var end = line.TrimEnd().EndsWith('|') ? parts.Length - 1 : parts.Length;
         return parts[start..end].Select(p => p.Trim()).ToArray();
     }
 
     private static bool IsSeparatorRow(string[] cells) =>
-        cells.Length > 0 && cells.All(c => c.Replace("-", "").Replace(":", "").Replace(" ", "").Length == 0);
+        cells.Length > 0
+        && cells.All(c => c.Replace("-", "").Replace(":", "").Replace(" ", "").Length == 0);
 
     // ── Paragraph / inline helpers ────────────────────────────────────────────
 
@@ -181,7 +188,11 @@ internal static class BootstrapMarkdownRenderer
         text = RenderInlineCode(text);
         var prefixVisible = Ansi.VisibleLength(prefix);
         var effective = width - prefixVisible;
-        if (effective <= 0) { System.Console.WriteLine(prefix + text); return; }
+        if (effective <= 0)
+        {
+            System.Console.WriteLine(prefix + text);
+            return;
+        }
 
         var words = text.Split(' ');
         var current = new System.Text.StringBuilder();
@@ -199,17 +210,20 @@ internal static class BootstrapMarkdownRenderer
                 firstLine = true;
             }
 
-            if (current.Length > 0) current.Append(' ');
+            if (current.Length > 0)
+                current.Append(' ');
             current.Append(word);
             firstLine = false;
         }
 
-        if (current.Length > 0) System.Console.WriteLine(prefix + current);
+        if (current.Length > 0)
+            System.Console.WriteLine(prefix + current);
     }
 
     private static string RenderInlineCode(string text)
     {
-        if (!text.Contains('`')) return text;
+        if (!text.Contains('`'))
+            return text;
 
         var sb = new System.Text.StringBuilder();
         var inCode = false;
@@ -224,7 +238,8 @@ internal static class BootstrapMarkdownRenderer
             else if (inCode)
             {
                 var start = i;
-                while (i < text.Length && text[i] != '`') i++;
+                while (i < text.Length && text[i] != '`')
+                    i++;
                 sb.Append(Ansi.Yellow(text[start..i]));
                 continue;
             }

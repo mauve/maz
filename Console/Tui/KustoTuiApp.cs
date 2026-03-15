@@ -19,7 +19,11 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     private readonly ResultsPane _results;
     private readonly QueryHistory _history;
 
-    private enum Focus { Editor, Results }
+    private enum Focus
+    {
+        Editor,
+        Results,
+    }
 
     private bool _running;
     private int _width;
@@ -31,15 +35,16 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     private CancellationTokenSource? _queryCts;
     private Task<List<string>>? _autocompleteTask;
 
-    private int _lastQueryStartLine;   // absolute editor line where the last submitted query began
-    private string? _savedDraft;       // saved editor text while browsing history
+    private int _lastQueryStartLine; // absolute editor line where the last submitted query began
+    private string? _savedDraft; // saved editor text while browsing history
 
     public KustoTuiApp(
         LogsQueryClient client,
         string? workspaceId,
         string? resourceId,
         string? initialQuery,
-        int historySize = 100)
+        int historySize = 100
+    )
     {
         _client = client;
         _workspaceId = workspaceId;
@@ -49,7 +54,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _results = new ResultsPane();
 
         var wsLabel = workspaceId ?? (resourceId?.Split('/').LastOrDefault() ?? "");
-        if (wsLabel.Length > 30) wsLabel = "…" + wsLabel[^29..];
+        if (wsLabel.Length > 30)
+            wsLabel = "…" + wsLabel[^29..];
         _results.SetWorkspace(wsLabel);
 
         var historyPath = ComputeHistoryPath(workspaceId, resourceId);
@@ -69,7 +75,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         System.Console.TreatControlCAsInput = true;
 
         System.Console.Write("\x1b[?1049h"); // enter alternate screen buffer
-        System.Console.Write("\x1b[?25l");   // hide cursor during setup
+        System.Console.Write("\x1b[?25l"); // hide cursor during setup
 
         try
         {
@@ -79,7 +85,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         }
         finally
         {
-            System.Console.Write("\x1b[?25h");   // ensure cursor is visible
+            System.Console.Write("\x1b[?25h"); // ensure cursor is visible
             System.Console.Write("\x1b[?1049l"); // exit alternate screen buffer
             System.Console.TreatControlCAsInput = prevTreatCtrlC;
         }
@@ -115,23 +121,50 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 _results.SetLoading(false);
                 if (outcome.IsSuccess)
                 {
-                    _results.SetResults(outcome.Columns!, outcome.Rows!, outcome.Elapsed, outcome.PartialError);
-                    _history.Add(new QueryHistoryEntry(
-                        outcome.Query, DateTimeOffset.UtcNow,
-                        outcome.Columns, outcome.Rows,
-                        outcome.Elapsed, outcome.PartialError, null, true));
+                    _results.SetResults(
+                        outcome.Columns!,
+                        outcome.Rows!,
+                        outcome.Elapsed,
+                        outcome.PartialError
+                    );
+                    _history.Add(
+                        new QueryHistoryEntry(
+                            outcome.Query,
+                            DateTimeOffset.UtcNow,
+                            outcome.Columns,
+                            outcome.Rows,
+                            outcome.Elapsed,
+                            outcome.PartialError,
+                            null,
+                            true
+                        )
+                    );
                 }
                 else
                 {
                     var parsed = AzureErrorParser.Parse(outcome.ErrorMessage!, outcome.Query);
-                    _results.SetError(parsed.DisplayMessage, parsed.QueryLine, parsed.LineNumber, parsed.Column);
-                    _history.Add(new QueryHistoryEntry(
-                        outcome.Query, DateTimeOffset.UtcNow,
-                        null, null, TimeSpan.Zero, null, parsed.DisplayMessage, false));
+                    _results.SetError(
+                        parsed.DisplayMessage,
+                        parsed.QueryLine,
+                        parsed.LineNumber,
+                        parsed.Column
+                    );
+                    _history.Add(
+                        new QueryHistoryEntry(
+                            outcome.Query,
+                            DateTimeOffset.UtcNow,
+                            null,
+                            null,
+                            TimeSpan.Zero,
+                            null,
+                            parsed.DisplayMessage,
+                            false
+                        )
+                    );
                     if (parsed.LineNumber.HasValue)
                     {
                         int absLine = _lastQueryStartLine + parsed.LineNumber.Value - 1;
-                        int absCol  = parsed.Column ?? 0;
+                        int absCol = parsed.Column ?? 0;
                         _editor.SetCursorAt(absLine, absCol);
                         _editor.SetErrorMarker(absLine);
                     }
@@ -214,9 +247,18 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         // Escape: layered dismiss — autocomplete → history browse → results focus → exit
         if (key.Key == ConsoleKey.Escape)
         {
-            if (_editor.DismissAutocomplete()) return;
-            if (_history.IsBrowsing) { ExitHistoryBrowse(restore: true); return; }
-            if (_focusedPane == Focus.Results) { _focusedPane = Focus.Editor; return; }
+            if (_editor.DismissAutocomplete())
+                return;
+            if (_history.IsBrowsing)
+            {
+                ExitHistoryBrowse(restore: true);
+                return;
+            }
+            if (_focusedPane == Focus.Results)
+            {
+                _focusedPane = Focus.Editor;
+                return;
+            }
             _running = false;
             return;
         }
@@ -226,10 +268,16 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         {
             switch (key.Key)
             {
-                case ConsoleKey.UpArrow:   _editor.AutocompleteUp();     return;
-                case ConsoleKey.DownArrow: _editor.AutocompleteDown();   return;
+                case ConsoleKey.UpArrow:
+                    _editor.AutocompleteUp();
+                    return;
+                case ConsoleKey.DownArrow:
+                    _editor.AutocompleteDown();
+                    return;
                 case ConsoleKey.Tab:
-                case ConsoleKey.Enter:     _editor.AutocompleteAccept(); return;
+                case ConsoleKey.Enter:
+                    _editor.AutocompleteAccept();
+                    return;
             }
         }
 
@@ -238,10 +286,18 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         {
             switch (key.Key)
             {
-                case ConsoleKey.UpArrow:   _results.ScrollUp();               return;
-                case ConsoleKey.DownArrow: _results.ScrollDown();             return;
-                case ConsoleKey.PageUp:    _results.PageUp(ResultsPageSize);  return;
-                case ConsoleKey.PageDown:  _results.PageDown(ResultsPageSize); return;
+                case ConsoleKey.UpArrow:
+                    _results.ScrollUp();
+                    return;
+                case ConsoleKey.DownArrow:
+                    _results.ScrollDown();
+                    return;
+                case ConsoleKey.PageUp:
+                    _results.PageUp(ResultsPageSize);
+                    return;
+                case ConsoleKey.PageDown:
+                    _results.PageDown(ResultsPageSize);
+                    return;
             }
             return;
         }
@@ -249,9 +305,15 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         // ── Editor focus ──────────────────────────────────────────────────────
         switch (key.Key)
         {
-            case ConsoleKey.F5:  StartQuery();          return;
-            case ConsoleKey.F6:  _editor.FormatQuery(); return;
-            case ConsoleKey.Tab: StartAutocomplete();   return;
+            case ConsoleKey.F5:
+                StartQuery();
+                return;
+            case ConsoleKey.F6:
+                _editor.FormatQuery();
+                return;
+            case ConsoleKey.Tab:
+                StartAutocomplete();
+                return;
         }
 
         // Editing while browsing history exits browse mode (historical query becomes new draft)
@@ -274,14 +336,16 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             _savedDraft = _editor.GetText(); // save live draft before first browse
 
         var entry = _history.BrowseBack();
-        if (entry is null) return; // no history
+        if (entry is null)
+            return; // no history
 
         LoadHistoryEntry(entry);
     }
 
     private void HistoryBrowseForward()
     {
-        if (!_history.IsBrowsing) return;
+        if (!_history.IsBrowsing)
+            return;
 
         var entry = _history.BrowseForward();
         if (entry is null)
@@ -334,7 +398,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
         var (queryText, startLine) = _editor.GetActiveQueryInfo();
         queryText = queryText.Trim();
-        if (string.IsNullOrWhiteSpace(queryText)) return;
+        if (string.IsNullOrWhiteSpace(queryText))
+            return;
 
         _lastQueryStartLine = startLine;
         _editor.ClearErrorMarker();
@@ -351,7 +416,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             return;
 
         var prefix = _editor.GetWordAtCursor();
-        if (string.IsNullOrEmpty(prefix)) return;
+        if (string.IsNullOrEmpty(prefix))
+            return;
 
         _autocompleteTask = KqlAutocomplete.GetCompletionsAsync(prefix, _editor.GetText(), _schema);
     }
@@ -365,31 +431,43 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             LogsQueryResult result;
             if (_workspaceId is not null)
                 result = await _client.QueryWorkspaceAsync(
-                    _workspaceId, query, QueryTimeRange.All, opts, ct);
+                    _workspaceId,
+                    query,
+                    QueryTimeRange.All,
+                    opts,
+                    ct
+                );
             else if (_resourceId is not null)
                 result = await _client.QueryResourceAsync(
-                    new ResourceIdentifier(_resourceId), query, QueryTimeRange.All, opts, ct);
+                    new ResourceIdentifier(_resourceId),
+                    query,
+                    QueryTimeRange.All,
+                    opts,
+                    ct
+                );
             else
                 return QueryOutcome.Fail(query, "No workspace or resource ID configured.");
 
             sw.Stop();
             var columns = result.Table.Columns.Select(c => c.Name).ToList();
-            var rows = result.Table.Rows.Select(row =>
-            {
-                var dict = new Dictionary<string, object?>();
-                for (int i = 0; i < columns.Count; i++)
-                    dict[columns[i]] = row[i];
-                return (IReadOnlyDictionary<string, object?>)dict;
-            }).ToList();
+            var rows = result
+                .Table.Rows.Select(row =>
+                {
+                    var dict = new Dictionary<string, object?>();
+                    for (int i = 0; i < columns.Count; i++)
+                        dict[columns[i]] = row[i];
+                    return (IReadOnlyDictionary<string, object?>)dict;
+                })
+                .ToList();
 
             // Capture partial-failure error alongside results
             string? partialError = null;
-            if (result.Status == LogsQueryResultStatus.PartialFailure && result.Error?.Message is string errMsg)
+            if (
+                result.Status == LogsQueryResultStatus.PartialFailure
+                && result.Error?.Message is string errMsg
+            )
             {
-                partialError = errMsg
-                    .ReplaceLineEndings(" ")
-                    .Replace("  ", " ")
-                    .Trim();
+                partialError = errMsg.ReplaceLineEndings(" ").Replace("  ", " ").Trim();
             }
 
             return QueryOutcome.Ok(query, columns, rows, sw.Elapsed, partialError);
@@ -404,12 +482,12 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         }
     }
 
-
     // ── Rendering ─────────────────────────────────────────────────────────────
 
     private void Redraw()
     {
-        if (_width < 10 || _height < 5) return;
+        if (_width < 10 || _height < 5)
+            return;
 
         System.Console.Write("\x1b[?25l"); // hide cursor during redraw
 
@@ -437,9 +515,11 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         if (_history.IsBrowsing)
             bar = "  F7 Older  │  F8 Newer  │  F5 Run this query  │  Esc Discard  ";
         else if (_focusedPane == Focus.Results)
-            bar = "  ↑↓ Scroll  │  PgUp/Dn Page  │  Ctrl+PgUp/Dn Always scroll  │  F2 / Esc  Edit query  ";
+            bar =
+                "  ↑↓ Scroll  │  PgUp/Dn Page  │  Ctrl+PgUp/Dn Always scroll  │  F2 / Esc  Edit query  ";
         else
-            bar = "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F7/F8 History  │  Esc Exit  ";
+            bar =
+                "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F7/F8 History  │  Esc Exit  ";
         System.Console.Write(Ansi.Color(bar.PadRight(_width), "\x1b[7m"));
     }
 
@@ -448,11 +528,17 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     private static string? ComputeHistoryPath(string? workspaceId, string? resourceId)
     {
         var id = workspaceId ?? resourceId?.Split('/').LastOrDefault();
-        if (string.IsNullOrEmpty(id)) return null;
-        var safeName = new string(id.Select(c => char.IsLetterOrDigit(c) || c == '-' ? c : '_').ToArray());
+        if (string.IsNullOrEmpty(id))
+            return null;
+        var safeName = new string(
+            id.Select(c => char.IsLetterOrDigit(c) || c == '-' ? c : '_').ToArray()
+        );
         var dir = Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".maz", "history", "log-analytics-explore");
+            ".maz",
+            "history",
+            "log-analytics-explore"
+        );
         return Path.Combine(dir, safeName + ".json");
     }
 
@@ -461,8 +547,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _queryCts?.Cancel();
         if (_queryTask is not null)
         {
-            try { await _queryTask; }
-            catch { /* already handled inside ExecuteQueryAsync */ }
+            try
+            {
+                await _queryTask;
+            }
+            catch
+            { /* already handled inside ExecuteQueryAsync */
+            }
         }
         _queryCts?.Dispose();
     }
@@ -483,9 +574,23 @@ internal sealed record QueryOutcome
         IReadOnlyList<string> columns,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         TimeSpan elapsed,
-        string? partialError = null) =>
-        new() { IsSuccess = true, Query = query, Columns = columns, Rows = rows, Elapsed = elapsed, PartialError = partialError };
+        string? partialError = null
+    ) =>
+        new()
+        {
+            IsSuccess = true,
+            Query = query,
+            Columns = columns,
+            Rows = rows,
+            Elapsed = elapsed,
+            PartialError = partialError,
+        };
 
     public static QueryOutcome Fail(string query, string message) =>
-        new() { IsSuccess = false, Query = query, ErrorMessage = message };
+        new()
+        {
+            IsSuccess = false,
+            Query = query,
+            ErrorMessage = message,
+        };
 }

@@ -14,10 +14,13 @@ internal static class BootstrapAnimator
 
     /// <summary>Lines needed by the subscriptions demo (typewriter + 3 items + hint = 5).</summary>
     internal const int SubscriptionsDemoLines = 5;
+
     /// <summary>Lines needed by the resource-groups demo (same dropdown + 5-line final state).</summary>
     internal const int ResourceGroupsDemoLines = 5;
+
     /// <summary>Lines needed by the resource-names demo (same as subscriptions).</summary>
     internal const int ResourceNamesDemoLines = 5;
+
     /// <summary>Lines needed by the kusto demo.</summary>
     internal const int KustoDemoLines = 14;
 
@@ -53,7 +56,8 @@ internal static class BootstrapAnimator
 
             for (var x = -bandHalf; x <= logoWidth + bandHalf; x++)
             {
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
                 System.Console.Write($"\x1b[{nLines}A");
                 foreach (var line in logoLines)
                 {
@@ -84,9 +88,9 @@ internal static class BootstrapAnimator
         var command = "maz storage account list --subscription-id ";
         var items = new[]
         {
-            ("Production",  "/s/Production:a1b2c3d4-0000-0000-0000-000000000001"),
+            ("Production", "/s/Production:a1b2c3d4-0000-0000-0000-000000000001"),
             ("Development", "/s/Development:a1b2c3d4-0000-0000-0000-000000000002"),
-            ("Staging",     "/s/Staging:a1b2c3d4-0000-0000-0000-000000000003"),
+            ("Staging", "/s/Staging:a1b2c3d4-0000-0000-0000-000000000003"),
         };
 
         while (!ct.IsCancellationRequested)
@@ -96,10 +100,12 @@ internal static class BootstrapAnimator
                 WizardUi.MoveTo(startRow);
                 System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 // Overwrite typewriter row with green result; rows below are already cleared.
                 WizardUi.MoveTo(startRow);
@@ -107,11 +113,15 @@ internal static class BootstrapAnimator
                 System.Console.Write("  $ " + Ansi.Green(command + items[0].Item2));
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 ClearDemoArea(startRow, SubscriptionsDemoLines);
             }
-            catch (OperationCanceledException) { break; }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
 
         ClearDemoArea(startRow, SubscriptionsDemoLines);
@@ -122,9 +132,9 @@ internal static class BootstrapAnimator
         var command = "maz storage account list --resource-group ";
         var items = new[]
         {
-            ("production-rg",  "eastus"),
+            ("production-rg", "eastus"),
             ("development-rg", "westeurope"),
-            ("staging-rg",     "eastus2"),
+            ("staging-rg", "eastus2"),
         };
 
         while (!ct.IsCancellationRequested)
@@ -134,26 +144,42 @@ internal static class BootstrapAnimator
                 WizardUi.MoveTo(startRow);
                 System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
-                WizardUi.MoveTo(startRow);     System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow);
+                System.Console.Write("\x1b[2K");
                 System.Console.Write("  $ " + Ansi.Green(command + items[0].Item1));
-                WizardUi.MoveTo(startRow + 1); System.Console.Write("\x1b[2K");
-                WizardUi.MoveTo(startRow + 2); System.Console.Write("\x1b[2K");
-                System.Console.Write("  " + Ansi.Dim("[global] subscription-id + resource-group set → no flags needed"));
-                WizardUi.MoveTo(startRow + 3); System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + 1);
+                System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + 2);
+                System.Console.Write("\x1b[2K");
+                System.Console.Write(
+                    "  "
+                        + Ansi.Dim(
+                            "[global] subscription-id + resource-group set → no flags needed"
+                        )
+                );
+                WizardUi.MoveTo(startRow + 3);
+                System.Console.Write("\x1b[2K");
                 System.Console.Write("  $ " + Ansi.Green("maz storage account list"));
-                WizardUi.MoveTo(startRow + 4); System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + 4);
+                System.Console.Write("\x1b[2K");
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 ClearDemoArea(startRow, ResourceGroupsDemoLines);
             }
-            catch (OperationCanceledException) { break; }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
 
         ClearDemoArea(startRow, ResourceGroupsDemoLines);
@@ -164,8 +190,8 @@ internal static class BootstrapAnimator
         var command = "maz storage account show --name ";
         var items = new[]
         {
-            ("myaccount",       "Standard_LRS"),
-            ("backupstorage",   "Standard_GRS"),
+            ("myaccount", "Standard_LRS"),
+            ("backupstorage", "Standard_GRS"),
             ("devstoreaccount", "Standard_LRS"),
         };
 
@@ -176,21 +202,27 @@ internal static class BootstrapAnimator
                 WizardUi.MoveTo(startRow);
                 System.Console.Write("\x1b[2K");
                 await TypewriterAsync("  $ " + command, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 await ShowDropdownAsync(items, selectedIndex: 0, typewriterRow: startRow, ct);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 WizardUi.MoveTo(startRow);
                 System.Console.Write("\x1b[2K");
                 System.Console.Write("  $ " + Ansi.Green(command + items[0].Item1));
 
                 await Task.Delay(LoopPauseMs, ct).ConfigureAwait(false);
-                if (ct.IsCancellationRequested) break;
+                if (ct.IsCancellationRequested)
+                    break;
 
                 ClearDemoArea(startRow, ResourceNamesDemoLines);
             }
-            catch (OperationCanceledException) { break; }
+            catch (OperationCanceledException)
+            {
+                break;
+            }
         }
 
         ClearDemoArea(startRow, ResourceNamesDemoLines);
@@ -203,45 +235,65 @@ internal static class BootstrapAnimator
         try
         {
             var goodQuery =
-                "AzureActivity\n" +
-                "| where TimeGenerated > ago(1h)\n" +
-                "| where OperationNameValue == \"MICROSOFT.STORAGE/STORAGEACCOUNTS/WRITE\"\n" +
-                "| summarize count() by ResourceGroup, bin(TimeGenerated, 5m)\n" +
-                "| order by TimeGenerated desc";
+                "AzureActivity\n"
+                + "| where TimeGenerated > ago(1h)\n"
+                + "| where OperationNameValue == \"MICROSOFT.STORAGE/STORAGEACCOUNTS/WRITE\"\n"
+                + "| summarize count() by ResourceGroup, bin(TimeGenerated, 5m)\n"
+                + "| order by TimeGenerated desc";
 
-            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+            WizardUi.MoveTo(startRow + written);
+            System.Console.Write("\x1b[2K");
+            written++; // blank
 
             foreach (var line in BootstrapKqlHighlighter.Highlight(goodQuery).Split('\n'))
             {
-                WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + written);
+                System.Console.Write("\x1b[2K");
                 System.Console.Write("  " + line);
                 written++;
             }
 
-            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+            WizardUi.MoveTo(startRow + written);
+            System.Console.Write("\x1b[2K");
+            written++; // blank
 
             await Task.Delay(PauseAfterTypingMs * 3, ct).ConfigureAwait(false);
 
-            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
-            System.Console.Write(Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────"));
+            WizardUi.MoveTo(startRow + written);
+            System.Console.Write("\x1b[2K");
+            System.Console.Write(
+                Ansi.Dim("  ── with a syntax error ───────────────────────────────────────────────")
+            );
             written++;
 
-            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+            WizardUi.MoveTo(startRow + written);
+            System.Console.Write("\x1b[2K");
+            written++; // blank
 
             var badQuery =
-                "AzureActivity\n" +
-                "| where TimeGenerated > ago(1h)\n" +
-                "| | summarize count() by ResourceGroup";
-            foreach (var line in BootstrapKqlHighlighter.Highlight(
-                badQuery, errorLine: 3, errorColumn: 2,
-                errorMessage: "SYN0002: Query could not be parsed at '|'").Split('\n'))
+                "AzureActivity\n"
+                + "| where TimeGenerated > ago(1h)\n"
+                + "| | summarize count() by ResourceGroup";
+            foreach (
+                var line in BootstrapKqlHighlighter
+                    .Highlight(
+                        badQuery,
+                        errorLine: 3,
+                        errorColumn: 2,
+                        errorMessage: "SYN0002: Query could not be parsed at '|'"
+                    )
+                    .Split('\n')
+            )
             {
-                WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K");
+                WizardUi.MoveTo(startRow + written);
+                System.Console.Write("\x1b[2K");
                 System.Console.Write("  " + line);
                 written++;
             }
 
-            WizardUi.MoveTo(startRow + written); System.Console.Write("\x1b[2K"); written++; // blank
+            WizardUi.MoveTo(startRow + written);
+            System.Console.Write("\x1b[2K");
+            written++; // blank
             // written == KustoDemoLines here
         }
         catch (OperationCanceledException)
@@ -274,34 +326,42 @@ internal static class BootstrapAnimator
             var code = ShimmerColor(Math.Abs(i - shimmerX), bandHalf);
             if (code != prevCode)
             {
-                if (prevCode.Length > 0) sb.Append("\x1b[0m");
+                if (prevCode.Length > 0)
+                    sb.Append("\x1b[0m");
                 sb.Append(code);
                 prevCode = code;
             }
             sb.Append(line[i]);
         }
 
-        if (prevCode.Length > 0) sb.Append("\x1b[0m");
+        if (prevCode.Length > 0)
+            sb.Append("\x1b[0m");
         return sb.ToString();
     }
 
-    private static string ShimmerColor(int dist, int bandHalf) => dist switch
-    {
-        0 => "\x1b[1;97m",
-        1 => "\x1b[97m",
-        _ when dist <= bandHalf / 2 => "\x1b[37m",
-        _ when dist <= bandHalf => "\x1b[95m",
-        _ => "\x1b[35m",
-    };
+    private static string ShimmerColor(int dist, int bandHalf) =>
+        dist switch
+        {
+            0 => "\x1b[1;97m",
+            1 => "\x1b[97m",
+            _ when dist <= bandHalf / 2 => "\x1b[37m",
+            _ when dist <= bandHalf => "\x1b[95m",
+            _ => "\x1b[35m",
+        };
 
     // ── Shared animation primitives ────────────────────────────────────────────
 
     private static async Task TypewriterAsync(string text, CancellationToken ct)
     {
-        if (!Ansi.IsEnabled) { System.Console.Write(text); return; }
+        if (!Ansi.IsEnabled)
+        {
+            System.Console.Write(text);
+            return;
+        }
         foreach (var ch in text)
         {
-            if (ct.IsCancellationRequested) break;
+            if (ct.IsCancellationRequested)
+                break;
             System.Console.Write(ch);
             await Task.Delay(TypewriterDelayMs, ct).ConfigureAwait(false);
         }
@@ -313,8 +373,11 @@ internal static class BootstrapAnimator
     /// typewriter row intact at <paramref name="typewriterRow"/>.
     /// </summary>
     private static async Task ShowDropdownAsync(
-        (string Label, string Detail)[] items, int selectedIndex,
-        int typewriterRow, CancellationToken ct)
+        (string Label, string Detail)[] items,
+        int selectedIndex,
+        int typewriterRow,
+        CancellationToken ct
+    )
     {
         if (!Ansi.IsEnabled)
         {
@@ -334,9 +397,11 @@ internal static class BootstrapAnimator
             WizardUi.MoveTo(typewriterRow + 1 + i);
             System.Console.Write("\x1b[2K");
             if (i == selectedIndex)
-                System.Console.Write("    " + Ansi.Green($"❯ {label,-16}") + Ansi.Dim($"  ({detail})"));
+                System.Console.Write(
+                    "    " + Ansi.Green($"❯ {label, -16}") + Ansi.Dim($"  ({detail})")
+                );
             else
-                System.Console.Write($"      {label,-16}" + Ansi.Dim($"  ({detail})"));
+                System.Console.Write($"      {label, -16}" + Ansi.Dim($"  ({detail})"));
         }
 
         // Hint at typewriterRow+1+items.Length

@@ -23,11 +23,12 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         RunConfigureAsync(_auth, _interactive, ct);
 
     internal static async Task<int> RunConfigureAsync(
-        AuthOptionPack auth, InteractiveOptionPack interactive, CancellationToken ct)
+        AuthOptionPack auth,
+        InteractiveOptionPack interactive,
+        CancellationToken ct
+    )
     {
-        var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(
-            interactive.Interactive
-        );
+        var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(interactive.Interactive);
         if (!isInteractive)
         {
             System.Console.Error.WriteLine(
@@ -61,15 +62,20 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         // Erase the "Fetching..." line once loaded
         System.Console.Write("\x1b[1A\x1b[2K");
 
-        var existingAllowed = existing.AllowedSubscriptions.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var existingAllowed = existing.AllowedSubscriptions.ToHashSet(
+            StringComparer.OrdinalIgnoreCase
+        );
         var initialChecked = allSubs
-            .Select(s => existingAllowed.Count == 0 || existingAllowed.Contains($"/s/{s.Name}:{s.Id}"))
+            .Select(s =>
+                existingAllowed.Count == 0 || existingAllowed.Contains($"/s/{s.Name}:{s.Id}")
+            )
             .ToArray();
 
         var checkedIndices = CheckboxList.Show(
             allSubs.Select(s => (s.Name, $"/s/{s.Name}:{s.Id}")).ToArray(),
             initialChecked,
-            ct);
+            ct
+        );
 
         var allowedSubs = new List<string>();
         var allowedSubNames = new List<string>();
@@ -81,7 +87,9 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
                 allowedSubs.Add($"/s/{name}:{id}");
                 allowedSubNames.Add(name);
             }
-            System.Console.WriteLine($"  \x1b[2m→ Allowed: {string.Join(", ", allowedSubNames)}\x1b[0m");
+            System.Console.WriteLine(
+                $"  \x1b[2m→ Allowed: {string.Join(", ", allowedSubNames)}\x1b[0m"
+            );
         }
         else
         {
@@ -89,7 +97,10 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         }
 
         System.Console.WriteLine();
-        WizardUi.RenderBottomBorder("  Space toggle  ↑↓ move  Ctrl+A all  Ctrl+U none  Enter confirm  ", boxWidth);
+        WizardUi.RenderBottomBorder(
+            "  Space toggle  ↑↓ move  Ctrl+A all  Ctrl+U none  Enter confirm  ",
+            boxWidth
+        );
         System.Console.WriteLine();
 
         // ── Step 2/5: Default subscription ────────────────────────────────────
@@ -108,17 +119,23 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
             : null;
 
         // Prepend a "(none)" option
-        var subItems = subNames.Select((n, i) =>
-        {
-            var detail = subChoices[i];
-            var marker = subChoices[i] == currentDefaultSub ? " [current]" : "";
-            return (n + marker, detail);
-        }).Prepend(("(none)", "no default")).ToArray();
+        var subItems = subNames
+            .Select(
+                (n, i) =>
+                {
+                    var detail = subChoices[i];
+                    var marker = subChoices[i] == currentDefaultSub ? " [current]" : "";
+                    return (n + marker, detail);
+                }
+            )
+            .Prepend(("(none)", "no default"))
+            .ToArray();
 
         var currentSubIdx = currentDefaultSub is not null
-            ? subChoices.IndexOf(currentDefaultSub) + 1  // +1 for "(none)" at index 0
+            ? subChoices.IndexOf(currentDefaultSub) + 1 // +1 for "(none)" at index 0
             : 0;
-        if (currentSubIdx < 0) currentSubIdx = 0;
+        if (currentSubIdx < 0)
+            currentSubIdx = 0;
 
         var defSubIdx = RadioList.Show(subItems, currentSubIdx, ct);
         string? defaultSubscription = defSubIdx > 0 ? subChoices[defSubIdx - 1] : null;
@@ -169,16 +186,29 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         System.Console.WriteLine();
 
         var formats = new[] { "column", "json", "json-pretty", "text" };
-        var formatDetails = new[] { "aligned columns (default)", "compact JSON", "indented JSON", "one field per line" };
-        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf) ? cf : "column";
-        var currentFmtIdx = Array.IndexOf(formats, currentFormat);
-        if (currentFmtIdx < 0) currentFmtIdx = 0;
-
-        var formatItems = formats.Select((f, i) =>
+        var formatDetails = new[]
         {
-            var marker = f == currentFormat ? " [current]" : "";
-            return (f + marker, formatDetails[i]);
-        }).ToArray();
+            "aligned columns (default)",
+            "compact JSON",
+            "indented JSON",
+            "one field per line",
+        };
+        var currentFormat = existing.GlobalDefaults.TryGetValue("format", out var cf)
+            ? cf
+            : "column";
+        var currentFmtIdx = Array.IndexOf(formats, currentFormat);
+        if (currentFmtIdx < 0)
+            currentFmtIdx = 0;
+
+        var formatItems = formats
+            .Select(
+                (f, i) =>
+                {
+                    var marker = f == currentFormat ? " [current]" : "";
+                    return (f + marker, formatDetails[i]);
+                }
+            )
+            .ToArray();
 
         var fmtIdx = RadioList.Show(formatItems, currentFmtIdx, ct);
         var defaultFormat = formats[fmtIdx];

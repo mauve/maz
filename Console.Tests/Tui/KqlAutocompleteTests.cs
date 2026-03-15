@@ -13,8 +13,8 @@ public class KqlAutocompleteTests
     private static SchemaProvider EmptySchema() =>
         new(new LogsQueryClient(new NullCredential()), null, null);
 
-    private static async Task<List<string>> Complete(string prefix, string query = "")
-        => await KqlAutocomplete.GetCompletionsAsync(prefix, query, EmptySchema());
+    private static async Task<List<string>> Complete(string prefix, string query = "") =>
+        await KqlAutocomplete.GetCompletionsAsync(prefix, query, EmptySchema());
 
     // ── Edge cases ────────────────────────────────────────────────────────────
 
@@ -38,8 +38,10 @@ public class KqlAutocompleteTests
         // A prefix equal to a completion's full text has length == completion, so
         // the filter `c.Length > prefix.Length` rejects it.
         var results = await Complete("where");
-        Assert.IsFalse(results.Contains("where", StringComparer.OrdinalIgnoreCase),
-            "Exact match should not appear — only longer completions qualify");
+        Assert.IsFalse(
+            results.Contains("where", StringComparer.OrdinalIgnoreCase),
+            "Exact match should not appear — only longer completions qualify"
+        );
     }
 
     // ── Keyword matching ──────────────────────────────────────────────────────
@@ -92,8 +94,11 @@ public class KqlAutocompleteTests
     public async Task GetCompletions_ProjectHyphenPrefix_MatchesProjectAway()
     {
         var results = await Complete("project-aw");
-        CollectionAssert.Contains(results, "project-away",
-            "Hyphenated prefix should match hyphenated keyword");
+        CollectionAssert.Contains(
+            results,
+            "project-away",
+            "Hyphenated prefix should match hyphenated keyword"
+        );
     }
 
     [TestMethod]
@@ -107,8 +112,10 @@ public class KqlAutocompleteTests
     public async Task GetCompletions_ProjectPrefix_MatchesAllProjectVariants()
     {
         var results = await Complete("project-");
-        Assert.IsTrue(results.Count >= 3,
-            $"Expected at least project-away/rename/reorder, got: {string.Join(", ", results)}");
+        Assert.IsTrue(
+            results.Count >= 3,
+            $"Expected at least project-away/rename/reorder, got: {string.Join(", ", results)}"
+        );
         CollectionAssert.Contains(results, "project-away");
         CollectionAssert.Contains(results, "project-rename");
         CollectionAssert.Contains(results, "project-reorder");
@@ -139,8 +146,11 @@ public class KqlAutocompleteTests
         // keyword list, so just check "where" is in results and at a low index.
         var results = await Complete("wher");
         Assert.IsTrue(results.Count > 0);
-        Assert.AreEqual("where", results[0],
-            "Exact-case match should sort before case-insensitive matches");
+        Assert.AreEqual(
+            "where",
+            results[0],
+            "Exact-case match should sort before case-insensitive matches"
+        );
     }
 
     [TestMethod]
@@ -158,7 +168,8 @@ public class KqlAutocompleteTests
             if (prevExact == currExact)
                 Assert.IsTrue(
                     string.Compare(prev, curr, StringComparison.OrdinalIgnoreCase) <= 0,
-                    $"Expected '{prev}' before '{curr}' alphabetically");
+                    $"Expected '{prev}' before '{curr}' alphabetically"
+                );
         }
     }
 
@@ -260,11 +271,13 @@ public class KqlAutocompleteTests
     private sealed class NullCredential : Azure.Core.TokenCredential
     {
         public override Azure.Core.AccessToken GetToken(
-            Azure.Core.TokenRequestContext r, CancellationToken ct) =>
-            new("", DateTimeOffset.MaxValue);
+            Azure.Core.TokenRequestContext r,
+            CancellationToken ct
+        ) => new("", DateTimeOffset.MaxValue);
 
         public override ValueTask<Azure.Core.AccessToken> GetTokenAsync(
-            Azure.Core.TokenRequestContext r, CancellationToken ct) =>
-            ValueTask.FromResult(new Azure.Core.AccessToken("", DateTimeOffset.MaxValue));
+            Azure.Core.TokenRequestContext r,
+            CancellationToken ct
+        ) => ValueTask.FromResult(new Azure.Core.AccessToken("", DateTimeOffset.MaxValue));
     }
 }

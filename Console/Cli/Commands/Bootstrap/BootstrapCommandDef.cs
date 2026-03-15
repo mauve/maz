@@ -15,7 +15,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     : CommandDef
 {
     public override string Name => "bootstrap";
-    public override string Description => "Interactive onboarding wizard — completions, tutorial, and animated demos.";
+    public override string Description =>
+        "Interactive onboarding wizard — completions, tutorial, and animated demos.";
 
     private readonly AuthOptionPack _auth = auth;
     private readonly InteractiveOptionPack _interactive = interactive;
@@ -25,7 +26,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     private readonly record struct WizardStep(
         string Title,
         Func<int, Task<List<string>>> GetContentLines,
-        string? DemoTag = null);
+        string? DemoTag = null
+    );
 
     // ── Entry point ────────────────────────────────────────────────────────────
 
@@ -51,8 +53,11 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         await PromptConfigureAsync(ct);
 
         System.Console.WriteLine(
-            "  " + Ansi.Green("✓") + " You're all set. Run "
-            + Ansi.Yellow("`maz --help-commands`") + " to explore all commands."
+            "  "
+                + Ansi.Green("✓")
+                + " You're all set. Run "
+                + Ansi.Yellow("`maz --help-commands`")
+                + " to explore all commands."
         );
         System.Console.WriteLine();
         return 0;
@@ -61,26 +66,39 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     // ── Wizard loop ────────────────────────────────────────────────────────────
 
     private static List<WizardStep> BuildWizardSteps(
-        string shell, bool completionsSetup, List<string> sections)
+        string shell,
+        bool completionsSetup,
+        List<string> sections
+    )
     {
         var steps = new List<WizardStep>();
 
-        steps.Add(new WizardStep(
-            "Welcome to maz",
-            async w =>
-            {
-                // Capture logo + completions text into lines (shimmer skipped via cancelled CT).
-                var sw = new StringWriter();
-                var old = System.Console.Out;
-                System.Console.SetOut(sw);
-                try
+        steps.Add(
+            new WizardStep(
+                "Welcome to maz",
+                async w =>
                 {
-                    await RenderWelcomeContentAsync(shell, completionsSetup, w,
-                        new CancellationToken(canceled: true));
+                    // Capture logo + completions text into lines (shimmer skipped via cancelled CT).
+                    var sw = new StringWriter();
+                    var old = System.Console.Out;
+                    System.Console.SetOut(sw);
+                    try
+                    {
+                        await RenderWelcomeContentAsync(
+                            shell,
+                            completionsSetup,
+                            w,
+                            new CancellationToken(canceled: true)
+                        );
+                    }
+                    finally
+                    {
+                        System.Console.SetOut(old);
+                    }
+                    return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
                 }
-                finally { System.Console.SetOut(old); }
-                return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
-            }));
+            )
+        );
 
         foreach (var section in sections)
         {
@@ -90,10 +108,13 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             var title = titleLine is not null ? titleLine[3..].Trim() : "";
             var demoTag = ExtractDemoTag(s);
 
-            steps.Add(new WizardStep(
-                title,
-                w => Task.FromResult(BootstrapMarkdownRenderer.RenderToLines(s, w)),
-                demoTag));
+            steps.Add(
+                new WizardStep(
+                    title,
+                    w => Task.FromResult(BootstrapMarkdownRenderer.RenderToLines(s, w)),
+                    demoTag
+                )
+            );
         }
 
         return steps;
@@ -106,7 +127,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         CancellationTokenSource? stepCts = null;
         Task? demoTask = null;
-        int currentWidth = 0, currentHeight = 0;
+        int currentWidth = 0,
+            currentHeight = 0;
 
         // Enter alternate screen buffer and hide cursor.
         System.Console.TreatControlCAsInput = true;
@@ -122,7 +144,11 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                     await stepCts.CancelAsync();
                     if (demoTask != null)
                     {
-                        try { await demoTask; } catch (OperationCanceledException) { }
+                        try
+                        {
+                            await demoTask;
+                        }
+                        catch (OperationCanceledException) { }
                         demoTask = null;
                     }
                     stepCts.Dispose();
@@ -138,7 +164,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 var step = steps[i];
                 var demoLines = GetDemoHeight(step.DemoTag);
                 var nextLabel = i >= total - 1 ? "done " : "next ";
-                var navAnsi = $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
+                var navAnsi =
+                    $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
 
                 // Clear screen.
                 System.Console.Write("\x1b[2J");
@@ -171,7 +198,10 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                     var demoStartRow = h - demoLines; // 1-indexed row of first demo line
                     stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                     var token = stepCts.Token;
-                    demoTask = Task.Run(() => PlayDemoAsync(tag, demoStartRow, token), CancellationToken.None);
+                    demoTask = Task.Run(
+                        () => PlayDemoAsync(tag, demoStartRow, token),
+                        CancellationToken.None
+                    );
                 }
             }
 
@@ -196,17 +226,21 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
                 var key = System.Console.ReadKey(intercept: true);
 
-                bool forward  = IsForwardKey(key);
+                bool forward = IsForwardKey(key);
                 bool backward = IsBackwardKey(key);
-                bool quit     = IsQuitKey(key);
+                bool quit = IsQuitKey(key);
 
                 bool exiting = quit || (forward && index >= total - 1);
-                bool moved   = !exiting && ((forward && index < total - 1) || (backward && index > 0));
+                bool moved =
+                    !exiting && ((forward && index < total - 1) || (backward && index > 0));
 
-                if (!exiting && !moved) continue;
+                if (!exiting && !moved)
+                    continue;
 
-                if (moved) index = forward ? index + 1 : index - 1;
-                if (exiting) break;
+                if (moved)
+                    index = forward ? index + 1 : index - 1;
+                if (exiting)
+                    break;
 
                 await DrawStepAsync(index);
             }
@@ -218,7 +252,11 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             {
                 await stepCts.CancelAsync();
                 if (demoTask != null)
-                    try { await demoTask; } catch (OperationCanceledException) { }
+                    try
+                    {
+                        await demoTask;
+                    }
+                    catch (OperationCanceledException) { }
                 stepCts.Dispose();
             }
 
@@ -231,7 +269,11 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     // ── Step renderers ─────────────────────────────────────────────────────────
 
     private static async Task RenderWelcomeContentAsync(
-        string shell, bool completionsSetup, int contentWidth, CancellationToken ct)
+        string shell,
+        bool completionsSetup,
+        int contentWidth,
+        CancellationToken ct
+    )
     {
         await BootstrapAnimator.PlayWelcomeLogoAsync(contentWidth, ct);
 
@@ -260,8 +302,10 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("FISH_VERSION")))
             return "fish";
         var shellEnv = Environment.GetEnvironmentVariable("SHELL") ?? "";
-        if (shellEnv.Contains("zsh",  StringComparison.OrdinalIgnoreCase)) return "zsh";
-        if (shellEnv.Contains("fish", StringComparison.OrdinalIgnoreCase)) return "fish";
+        if (shellEnv.Contains("zsh", StringComparison.OrdinalIgnoreCase))
+            return "zsh";
+        if (shellEnv.Contains("fish", StringComparison.OrdinalIgnoreCase))
+            return "fish";
         return "bash";
     }
 
@@ -273,20 +317,31 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             return shell switch
             {
                 "fish" => File.Exists(
-                    Path.Combine(home, ".config", "fish", "completions", "maz.fish")),
+                    Path.Combine(home, ".config", "fish", "completions", "maz.fish")
+                ),
                 "zsh" => FileContainsCompletionSetup(Path.Combine(home, ".zshrc")),
                 _ => FileContainsCompletionSetup(Path.Combine(home, ".bashrc"))
-                     || File.Exists("/etc/bash_completion.d/maz"),
+                    || File.Exists("/etc/bash_completion.d/maz"),
             };
         }
-        catch { return false; }
+        catch
+        {
+            return false;
+        }
     }
 
     private static bool FileContainsCompletionSetup(string path)
     {
-        if (!File.Exists(path)) return false;
-        try { return File.ReadAllText(path).Contains("maz completion", StringComparison.Ordinal); }
-        catch { return false; }
+        if (!File.Exists(path))
+            return false;
+        try
+        {
+            return File.ReadAllText(path).Contains("maz completion", StringComparison.Ordinal);
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     private static void PrintCompletionCommands(string shell)
@@ -295,7 +350,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         {
             case "fish":
                 System.Console.WriteLine(
-                    "    " + Ansi.Yellow("maz completion fish >> ~/.config/fish/completions/maz.fish")
+                    "    "
+                        + Ansi.Yellow("maz completion fish >> ~/.config/fish/completions/maz.fish")
                 );
                 break;
             case "zsh":
@@ -304,22 +360,33 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 );
                 break;
             default:
-                System.Console.WriteLine("    " + Ansi.Yellow("maz completion bash >> ~/.bashrc && source ~/.bashrc"));
-                System.Console.WriteLine("    " + Ansi.Yellow("maz completion zsh  >> ~/.zshrc  && source ~/.zshrc"));
-                System.Console.WriteLine("    " + Ansi.Yellow("maz completion fish >> ~/.config/fish/completions/maz.fish"));
+                System.Console.WriteLine(
+                    "    " + Ansi.Yellow("maz completion bash >> ~/.bashrc && source ~/.bashrc")
+                );
+                System.Console.WriteLine(
+                    "    " + Ansi.Yellow("maz completion zsh  >> ~/.zshrc  && source ~/.zshrc")
+                );
+                System.Console.WriteLine(
+                    "    "
+                        + Ansi.Yellow("maz completion fish >> ~/.config/fish/completions/maz.fish")
+                );
                 break;
         }
         System.Console.WriteLine();
-        System.Console.WriteLine("  " + Ansi.Dim("→ Copy the command above and run it in your shell."));
+        System.Console.WriteLine(
+            "  " + Ansi.Dim("→ Copy the command above and run it in your shell.")
+        );
     }
 
     // ── Tutorial helpers ───────────────────────────────────────────────────────
 
     private static async Task<string?> LoadGettingStartedAsync(CancellationToken ct)
     {
-        var stream = typeof(BootstrapCommandDef).Assembly
-            .GetManifestResourceStream("GETTING_STARTED.md");
-        if (stream is null) return null;
+        var stream = typeof(BootstrapCommandDef).Assembly.GetManifestResourceStream(
+            "GETTING_STARTED.md"
+        );
+        if (stream is null)
+            return null;
         using var reader = new StreamReader(stream);
         return await reader.ReadToEndAsync(ct);
     }
@@ -352,10 +419,12 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         const string prefix = "<!-- demo:";
         const string suffix = " -->";
         var idx = section.IndexOf(prefix, StringComparison.Ordinal);
-        if (idx < 0) return null;
+        if (idx < 0)
+            return null;
         var start = idx + prefix.Length;
         var end = section.IndexOf(suffix, start, StringComparison.Ordinal);
-        if (end < 0) return null;
+        if (end < 0)
+            return null;
         return section[start..end].Trim();
     }
 
@@ -363,10 +432,18 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     {
         switch (tag)
         {
-            case "subscriptions":   await BootstrapAnimator.PlaySubscriptionsAsync(startRow, ct);   break;
-            case "resource-groups": await BootstrapAnimator.PlayResourceGroupsAsync(startRow, ct);  break;
-            case "resource-names":  await BootstrapAnimator.PlayResourceNamesAsync(startRow, ct);   break;
-            case "kusto":           await BootstrapAnimator.PlayKustoAsync(startRow, ct);           break;
+            case "subscriptions":
+                await BootstrapAnimator.PlaySubscriptionsAsync(startRow, ct);
+                break;
+            case "resource-groups":
+                await BootstrapAnimator.PlayResourceGroupsAsync(startRow, ct);
+                break;
+            case "resource-names":
+                await BootstrapAnimator.PlayResourceNamesAsync(startRow, ct);
+                break;
+            case "kusto":
+                await BootstrapAnimator.PlayKustoAsync(startRow, ct);
+                break;
         }
     }
 
@@ -375,7 +452,9 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     private async Task PromptConfigureAsync(CancellationToken ct)
     {
         System.Console.Write(
-            "Would you like to run " + Ansi.Yellow("`maz configure`") + " now to set your defaults? (Y/n): "
+            "Would you like to run "
+                + Ansi.Yellow("`maz configure`")
+                + " now to set your defaults? (Y/n): "
         );
         var answer = System.Console.ReadLine()?.Trim().ToLowerInvariant() ?? "";
         if (answer is "n" or "no")
@@ -404,12 +483,13 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         k.Key is ConsoleKey.Q or ConsoleKey.Escape
         || (k.Key == ConsoleKey.C && k.Modifiers.HasFlag(ConsoleModifiers.Control));
 
-    private static int GetDemoHeight(string? tag) => tag switch
-    {
-        "subscriptions"   => BootstrapAnimator.SubscriptionsDemoLines,
-        "resource-groups" => BootstrapAnimator.ResourceGroupsDemoLines,
-        "resource-names"  => BootstrapAnimator.ResourceNamesDemoLines,
-        "kusto"           => BootstrapAnimator.KustoDemoLines,
-        _                 => 0,
-    };
+    private static int GetDemoHeight(string? tag) =>
+        tag switch
+        {
+            "subscriptions" => BootstrapAnimator.SubscriptionsDemoLines,
+            "resource-groups" => BootstrapAnimator.ResourceGroupsDemoLines,
+            "resource-names" => BootstrapAnimator.ResourceNamesDemoLines,
+            "kusto" => BootstrapAnimator.KustoDemoLines,
+            _ => 0,
+        };
 }

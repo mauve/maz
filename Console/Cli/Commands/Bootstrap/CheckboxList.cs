@@ -10,7 +10,8 @@ internal static class CheckboxList
     public static int[] Show(
         (string Label, string Detail)[] items,
         bool[] initialChecked,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var checkedState = (bool[])initialChecked.Clone();
         var cursor = 0;
@@ -59,13 +60,16 @@ internal static class CheckboxList
     }
 
     private static void RenderCheckboxes(
-        (string Label, string Detail)[] items, bool[] checkedState, int cursor)
+        (string Label, string Detail)[] items,
+        bool[] checkedState,
+        int cursor
+    )
     {
         for (var i = 0; i < items.Length; i++)
         {
             var (label, detail) = items[i];
             var box = checkedState[i] ? "[x]" : "[ ]";
-            var line = $"  {box} {label,-24} {detail}";
+            var line = $"  {box} {label, -24} {detail}";
             if (i == cursor)
                 System.Console.WriteLine("\x1b[7m" + line + "\x1b[0m");
             else
@@ -96,7 +100,8 @@ internal static class RadioList
     public static int Show(
         (string Label, string Detail)[] items,
         int initialSelected,
-        CancellationToken ct)
+        CancellationToken ct
+    )
     {
         var selected = Math.Clamp(initialSelected, 0, items.Length - 1);
 
@@ -137,18 +142,17 @@ internal static class RadioList
         return selected;
     }
 
-    private static void RenderRadio(
-        (string Label, string Detail)[] items, int selected)
+    private static void RenderRadio((string Label, string Detail)[] items, int selected)
     {
         for (var i = 0; i < items.Length; i++)
         {
             var (label, detail) = items[i];
             if (i == selected)
                 System.Console.WriteLine(
-                    $"  \x1b[35m❯\x1b[0m \x1b[1m{label,-24}\x1b[0m \x1b[2m{detail}\x1b[0m"
+                    $"  \x1b[35m❯\x1b[0m \x1b[1m{label, -24}\x1b[0m \x1b[2m{detail}\x1b[0m"
                 );
             else
-                System.Console.WriteLine($"    {label,-24} \x1b[2m{detail}\x1b[0m");
+                System.Console.WriteLine($"    {label, -24} \x1b[2m{detail}\x1b[0m");
         }
         System.Console.WriteLine("  \x1b[2m↑↓ to move  Enter to confirm\x1b[0m");
     }
