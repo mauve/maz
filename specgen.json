@@ -11062,5 +11062,141 @@
         "Operations_List"
       ]
     },
+    {
+      "serviceDir": "managednetworkfabric",
+      "displayName": "managednetworkfabric",
+      "apiVersion": "2023-06-15",
+      "description": "Manage Azure Operator Nexus Network Fabric resources for carrier-grade networking",
+      "detailedDescription": "Covers Network Fabric infrastructure including network fabrics, devices, L2/L3 isolation domains, route policies, ACLs, and network-to-network interconnects.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabrics.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkDevices.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L2IsolationDomains.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L3IsolationDomains.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/RoutePolicies.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/AccessControlLists.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpPrefixes.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabricControllers.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkRacks.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTaps.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTapRules.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkPacketBrokers.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGateways.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGatewayRules.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NeighborGroups.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpCommunities.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpExtendedCommunities.json"
+      ],
+      "resourceDescriptions": {
+        "accesscontrollist": "Manage access control lists",
+        "internetgateway": "Manage internet gateways",
+        "internetgatewayrule": "Manage internet gateway rules",
+        "ipcommunity": "Manage IP communities",
+        "ipextendedcommunity": "Manage IP extended communities",
+        "ipprefix": "Manage IP prefixes",
+        "l2isolationdomain": "Manage L2 isolation domains",
+        "l3isolationdomain": "Manage L3 isolation domains",
+        "neighborgroup": "Manage neighbor groups",
+        "networkdevice": "Manage Network Fabric devices",
+        "networkfabric": "Manage Network Fabrics",
+        "networkfabriccontroller": "Manage Network Fabric controllers",
+        "networkpacketbroker": "Manage network packet brokers",
+        "networkrack": "Manage Network Fabric racks",
+        "networktap": "Manage network taps",
+        "networktaprule": "Manage network tap rules",
+        "routepolicy": "Manage route policies"
+      },
+      "resourceDetailedDescriptions": {
+        "networkfabric": "Create and manage Azure Operator Nexus Network Fabrics. Supports commit, validate, and refresh operations.",
+        "l3isolationdomain": "Manage L3 isolation domains for layer-3 network segmentation.",
+        "l2isolationdomain": "Manage L2 isolation domains for layer-2 network segmentation."
+      },
+      "actionRenames": {
+        "NetworkFabrics_Get": "show",
+        "NetworkFabrics_Create": "create",
+        "NetworkFabrics_ListByResourceGroup": "list",
+        "NetworkDevices_Get": "show",
+        "NetworkDevices_Create": "create",
+        "NetworkDevices_ListByResourceGroup": "list",
+        "L2IsolationDomains_Get": "show",
+        "L2IsolationDomains_Create": "create",
+        "L3IsolationDomains_Get": "show",
+        "L3IsolationDomains_Create": "create",
+        "RoutePolicies_Get": "show",
+        "RoutePolicies_Create": "create",
+        "AccessControlLists_Get": "show",
+        "AccessControlLists_Create": "create",
+        "IpPrefixes_Get": "show",
+        "IpPrefixes_Create": "create",
+        "NetworkFabricControllers_Get": "show",
+        "NetworkFabricControllers_Create": "create",
+        "NetworkRacks_Get": "show",
+        "NetworkRacks_Create": "create",
+        "NetworkTaps_Get": "show",
+        "NetworkTaps_Create": "create",
+        "NetworkTapRules_Get": "show",
+        "NetworkTapRules_Create": "create",
+        "NetworkPacketBrokers_Get": "show",
+        "InternetGateways_Get": "show",
+        "InternetGateways_Create": "create",
+        "InternetGatewayRules_Get": "show",
+        "InternetGatewayRules_Create": "create",
+        "NeighborGroups_Get": "show",
+        "NeighborGroups_Create": "create",
+        "IpCommunities_Get": "show",
+        "IpCommunities_Create": "create",
+        "IpExtendedCommunities_Get": "show",
+        "IpExtendedCommunities_Create": "create"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    },
+    {
+      "serviceDir": "hybridnetwork",
+      "displayName": "hybridnetwork",
+      "apiVersion": "2024-04-15",
+      "description": "Manage Azure Hybrid Network functions, publishers, and network service designs",
+      "detailedDescription": "Covers Azure Operator Nexus Hybrid Network resources for deploying network functions (VNF/CNF) from publishers. Includes publishers, network function definitions, and site network services.",
+      "specFiles": [
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunction.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/publisher.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunctionDefinition.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkServiceDesign.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupSchema.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupValues.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/site.json",
+        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/siteNetworkService.json"
+      ],
+      "resourceDescriptions": {
+        "component": "List network function components",
+        "networkfunction": "Manage hybrid network functions",
+        "publisher": "Manage network function publishers",
+        "site": "Manage deployment sites",
+        "sitenetworkservice": "Manage site network services"
+      },
+      "resourceDetailedDescriptions": {
+        "networkfunction": "Deploy and manage VNF/CNF network functions on hybrid infrastructure.",
+        "publisher": "Manage publishers that provide network function definitions and artifacts.",
+        "sitenetworkservice": "Manage site network services that instantiate network service designs."
+      },
+      "actionRenames": {
+        "NetworkFunctions_Get": "show",
+        "NetworkFunctions_CreateOrUpdate": "create",
+        "NetworkFunctions_ListByResourceGroup": "list",
+        "Components_Get": "show",
+        "Publishers_Get": "show",
+        "Publishers_CreateOrUpdate": "create",
+        "Publishers_ListByResourceGroup": "list",
+        "Sites_Get": "show",
+        "Sites_CreateOrUpdate": "create",
+        "SiteNetworkServices_Get": "show",
+        "SiteNetworkServices_CreateOrUpdate": "create",
+        "SiteNetworkServices_ListByResourceGroup": "list"
+      },
+      "exclude": [
+        "Operations_List"
+      ]
+    }
   ]
 }
