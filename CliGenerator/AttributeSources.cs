@@ -40,6 +40,14 @@ internal static class AttributeSources
                 public int Max { get; }
                 public ArityAttribute(int min, int max) { Min = min; Max = max; }
             }
+
+            /// <summary>Declares static CLI option aliases for a non-partial option pack, so the completion-tree generator can include them.</summary>
+            [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+            internal sealed class CliManualOptionsAttribute : Attribute
+            {
+                public string[] Aliases { get; }
+                public CliManualOptionsAttribute(params string[] aliases) { Aliases = aliases; }
+            }
         }
         """;
 }
