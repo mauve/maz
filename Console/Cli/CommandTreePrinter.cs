@@ -99,6 +99,19 @@ internal static class CommandTreePrinter
             + Ansi.Yellow(text.Substring(idx, filter.Length))
             + Ansi.Dim(text[(idx + filter.Length)..]);
     }
+
+    public static void PrintFlat(TextWriter output, Command root, string? filter)
+    {
+        PrintFlatCommand(output, root, root.Name, filter);
+    }
+
+    private static void PrintFlatCommand(TextWriter output, Command cmd, string path, string? filter)
+    {
+        if (filter is null || path.Contains(filter, StringComparison.OrdinalIgnoreCase))
+            output.WriteLine(path);
+        foreach (var sub in cmd.Subcommands.Where(c => !c.Hidden))
+            PrintFlatCommand(output, sub, $"{path} {sub.Name}", filter);
+    }
 }
 
 internal sealed class CommandTreeAction(Command root, Option<string?> option)
@@ -108,6 +121,17 @@ internal sealed class CommandTreeAction(Command root, Option<string?> option)
     {
         var filter = parseResult.GetValue(option);
         CommandTreePrinter.Print(System.Console.Out, root, filter);
+        return 0;
+    }
+}
+
+internal sealed class CommandFlatAction(Command root, Option<string?> option)
+    : SynchronousCommandLineAction
+{
+    public override int Invoke(ParseResult parseResult)
+    {
+        var filter = parseResult.GetValue(option);
+        CommandTreePrinter.PrintFlat(System.Console.Out, root, filter);
         return 0;
     }
 }
