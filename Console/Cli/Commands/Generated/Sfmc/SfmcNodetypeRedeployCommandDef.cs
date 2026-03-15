@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class SfmcNodetypeRedeployCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ServiceFabric/managedClusters/{ClusterName}/nodeTypes/{NodeTypeName}/redeploy";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/managedClusters", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceFabric/managedClusters/{resolvedName}/nodeTypes/{NodeTypeName}/redeploy";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-01", null, ct);
         if (!NoWait)

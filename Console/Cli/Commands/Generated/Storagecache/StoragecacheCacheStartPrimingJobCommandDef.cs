@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -43,7 +44,10 @@ public partial class StoragecacheCacheStartPrimingJobCommandDef(AuthOptionPack a
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.StorageCache/caches/{CacheName}/startPrimingJob";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            CacheName!, ResourceGroup, armClient, "Microsoft.StorageCache/caches", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.StorageCache/caches/{resolvedName}/startPrimingJob";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

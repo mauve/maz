@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -39,7 +40,10 @@ public partial class ManagednetworkfabricNetworkinterfaceCreateCommandDef(AuthOp
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.ManagedNetworkFabric/networkDevices/{NetworkDeviceName}/networkInterfaces/{NetworkInterfaceName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            NetworkDeviceName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkDevices", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkDevices/{resolvedName}/networkInterfaces/{NetworkInterfaceName}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

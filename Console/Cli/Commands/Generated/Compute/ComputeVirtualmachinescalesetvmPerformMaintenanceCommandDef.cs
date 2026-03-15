@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class ComputeVirtualmachinescalesetvmPerformMaintenanceCommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Compute/virtualMachineScaleSets/{VmScaleSetName}/virtualMachines/{InstanceId}/performMaintenance";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachineScaleSets/{resolvedName}/virtualMachines/{InstanceId}/performMaintenance";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-04-01", null, ct);
         if (!NoWait)

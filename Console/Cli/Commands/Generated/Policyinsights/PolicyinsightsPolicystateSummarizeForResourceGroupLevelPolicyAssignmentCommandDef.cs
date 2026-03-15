@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -51,7 +52,10 @@ public partial class PolicyinsightsPolicystateSummarizeForResourceGroupLevelPoli
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourcegroups/{ResourceGroup.RequireResourceGroupName()}/providers/{AuthorizationNamespace}/policyAssignments/{PolicyAssignmentName}/providers/Microsoft.PolicyInsights/policyStates/{PolicyStatesSummaryResource}/summarize";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            AuthorizationNamespace!, ResourceGroup, armClient, "{authorizationNamespace}/policyAssignments", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/policyAssignments/{PolicyAssignmentName}/providers/Microsoft.PolicyInsights/policyStates/{PolicyStatesSummaryResource}/summarize";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-10-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

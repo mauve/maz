@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,10 @@ public partial class PostgresqlhscPrivateendpointconnectionCreateOrUpdateCommand
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/{ClusterName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
+        var armClient = new ArmClient(_auth.GetCredential());
+        var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
+            ClusterName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/serverGroupsv2", ct);
+        var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2022-11-08", null, ct);
         if (!NoWait)
