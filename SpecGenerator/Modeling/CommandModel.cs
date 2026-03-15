@@ -11,7 +11,8 @@ public record ServiceModel(
     string? HostParamName = null,
     string? Description = null,
     string? DetailedDescription = null,
-    DataplaneOptionPackConfig? DataplaneOptionPack = null
+    DataplaneOptionPackConfig? DataplaneOptionPack = null,
+    ResourceOptionPackConfig? ResourceOptionPack = null
 );
 
 /// <summary>Represents a group of operations on the same resource type (e.g. "account").</summary>

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -14,23 +15,21 @@ public partial class KeyvaultmanagementVaultGetDeletedCommandDef(AuthOptionPack 
 {
     public override string Name => "get-deleted";
 
-    public readonly SubscriptionOptionPack Subscription = new();
+    public readonly KeyVaultOptionPack KeyVault = new();
+
     public readonly RenderOptionPack Render = new();
 
     /// <summary>The name of the Azure region.</summary>
     [CliOption("--location", Required = true)]
     public partial string? Location { get; }
 
-    /// <summary>The name of the vault.</summary>
-    [CliOption("--vault-name", Required = true)]
-    public partial string? VaultName { get; }
-
     private readonly AuthOptionPack _auth = auth;
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.KeyVault/locations/{Location}/deletedVaults/{VaultName}";
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var path = keyVaultId;
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-02-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

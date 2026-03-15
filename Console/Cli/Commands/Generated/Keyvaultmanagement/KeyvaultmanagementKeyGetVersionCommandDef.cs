@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -14,12 +15,9 @@ public partial class KeyvaultmanagementKeyGetVersionCommandDef(AuthOptionPack au
 {
     public override string Name => "get-version";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-    public readonly RenderOptionPack Render = new();
+    public readonly KeyVaultOptionPack KeyVault = new();
 
-    /// <summary>The name of the vault which contains the key version to be retrieved.</summary>
-    [CliOption("--vault-name", Required = true)]
-    public partial string? VaultName { get; }
+    public readonly RenderOptionPack Render = new();
 
     /// <summary>The name of the key version to be retrieved.</summary>
     [CliOption("--key-name", Required = true)]
@@ -34,7 +32,8 @@ public partial class KeyvaultmanagementKeyGetVersionCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.KeyVault/vaults/{VaultName}/keys/{KeyName}/versions/{KeyVersion}";
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var path = $"{keyVaultId}/keys/{KeyName}/versions/{KeyVersion}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-02-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

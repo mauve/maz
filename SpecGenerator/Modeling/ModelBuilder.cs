@@ -180,7 +180,8 @@ public sealed class ModelBuilder
             hostParamName,
             _service.Description,
             _service.DetailedDescription,
-            packConfig
+            packConfig,
+            _service.ResourceOptionPack
         );
     }
 

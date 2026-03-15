@@ -22,7 +22,8 @@ public record ServiceConfig(
     string? DetailedDescription = null,
     Dictionary<string, string>? ResourceDescriptions = null,
     Dictionary<string, string>? ResourceDetailedDescriptions = null,
-    DataplaneOptionPackConfig? DataplaneOptionPack = null
+    DataplaneOptionPackConfig? DataplaneOptionPack = null,
+    ResourceOptionPackConfig? ResourceOptionPack = null
 );
 
 /// <summary>
@@ -39,6 +40,22 @@ public record DataplaneOptionPackConfig(
     string FieldName,
     string UrlCliFlag,
     string Scope
+);
+
+/// <summary>
+/// Configures an ARM-resource-backed option pack for RM commands that target a specific named resource.
+/// When set, commands whose URL template contains <see cref="AbsorbedParam"/> will use the named
+/// OptionPack to resolve the ARM resource, replacing the raw subscription/resource-group/name flags.
+/// Commands that do not contain the absorbed param (e.g. list operations) fall back to the standard
+/// ResourceGroupOptionPack behaviour.
+/// </summary>
+/// <param name="ClassName">The C# class name of the option pack (e.g. "KeyVaultOptionPack").</param>
+/// <param name="FieldName">The C# field name in the generated command class (e.g. "KeyVault").</param>
+/// <param name="AbsorbedParam">The URL path parameter replaced by the option pack (e.g. "vaultName").</param>
+public record ResourceOptionPackConfig(
+    string ClassName,
+    string FieldName,
+    string AbsorbedParam
 );
 
 /// <summary>

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -14,12 +15,9 @@ public partial class KeyvaultmanagementSecretListCommandDef(AuthOptionPack auth)
 {
     public override string Name => "list";
 
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-    public readonly RenderOptionPack Render = new();
+    public readonly KeyVaultOptionPack KeyVault = new();
 
-    /// <summary>The name of the vault.</summary>
-    [CliOption("--vault-name", Required = true)]
-    public partial string? VaultName { get; }
+    public readonly RenderOptionPack Render = new();
 
     /// <summary>Maximum number of results to return.</summary>
     [CliOption("--top")]
@@ -30,7 +28,8 @@ public partial class KeyvaultmanagementSecretListCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.KeyVault/vaults/{VaultName}/secrets";
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var path = $"{keyVaultId}/secrets";
 
         var allItems = client.GetAllAsync(path, "2026-02-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();
