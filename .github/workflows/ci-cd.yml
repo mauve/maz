@@ -54,12 +54,16 @@ jobs:
           dotnet-version: '10.x'
           dotnet-quality: 'preview'
 
+      - name: Extract version
+        run: echo "VERSION=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
+
       - name: Publish
         run: |
           dotnet publish Console/Console.csproj \
             --self-contained true \
             -r ${{ matrix.rid }} \
             -p:PublishSingleFile=true \
+            -p:InformationalVersion=${{ env.VERSION }} \
             -c Release \
             -o ./publish
 
@@ -78,6 +82,13 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract changelog
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          bash scripts/extract-changelog.sh "$VERSION" > release-notes.md
+
       - uses: actions/download-artifact@v4
         with:
           path: ./artifacts
@@ -86,4 +97,4 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: ./artifacts/*
-          generate_release_notes: true
+          body_path: release-notes.md
