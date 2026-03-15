@@ -23,10 +23,11 @@ public partial class AppConfigurationOptionPack
 
     public override string HelpTitle => "App Configuration Store";
 
-    public readonly SubscriptionOptionPack Subscription = new();
     public readonly ResourceGroupOptionPack ResourceGroup = new();
 
-    protected override SubscriptionOptionPack SubscriptionPack => Subscription;
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
     protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>

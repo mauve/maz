@@ -27,7 +27,7 @@ public partial class BatchApplicationPackageActivateCommandDef(AuthOptionPack au
     public partial string? VersionName { get; }
 
     /// <summary>The format of the application package binary file.</summary>
-    [CliOption("--format", Required = true)]
+    [CliOption("--package-format", Required = true)]
     public partial string? Format { get; }
 
     /// <summary>Supply the full request body as a JSON string (overrides individual options).</summary>

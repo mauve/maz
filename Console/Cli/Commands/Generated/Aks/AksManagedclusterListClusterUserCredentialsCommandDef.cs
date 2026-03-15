@@ -27,7 +27,7 @@ public partial class AksManagedclusterListClusterUserCredentialsCommandDef(AuthO
     public partial string? ServerFqdn { get; }
 
     /// <summary>Only apply to AAD clusters, specifies the format of returned kubeconfig. Format 'azure' will return azure auth-provider kubeconfig; format 'exec' will return exec format kubeconfig, which requires kubelogin binary in the path.</summary>
-    [CliOption("--format")]
+    [CliOption("--kubeconfig-format")]
     public partial string? Format { get; }
 
     private readonly AuthOptionPack _auth = auth;

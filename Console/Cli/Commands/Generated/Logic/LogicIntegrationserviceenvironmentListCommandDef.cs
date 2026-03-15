@@ -17,10 +17,6 @@ public partial class LogicIntegrationserviceenvironmentListCommandDef(AuthOption
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
 
-    /// <summary>The resource group.</summary>
-    [CliOption("--resource-group", Required = true)]
-    public partial string? ParamResourceGroup { get; }
-
     /// <summary>The number of items to be included in the result.</summary>
     [CliOption("--top")]
     public partial string? Top { get; }
@@ -32,7 +28,7 @@ public partial class LogicIntegrationserviceenvironmentListCommandDef(AuthOption
         var client = new AzureRestClient(_auth.GetCredential());
         var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         var path = effectiveRg is not null
-            ? $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ParamResourceGroup}/providers/Microsoft.Logic/integrationServiceEnvironments"
+            ? $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Logic/integrationServiceEnvironments"
             : $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/providers/Microsoft.Logic/integrationServiceEnvironments";
 
         var allItems = client.GetAllAsync(path, "2019-05-01", "value", "nextLink", ct);
