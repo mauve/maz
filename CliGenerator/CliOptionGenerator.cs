@@ -66,6 +66,11 @@ public class CliOptionGenerator : IIncrementalGenerator
         public List<OptionPropModel> Options = [];
         public List<ChildModel> Children = [];
         public bool HasExecuteHandler;
+        /// <summary>
+        /// CLI name returned by the <c>Name</c> property override, if it is a simple string literal.
+        /// Used to detect child commands whose CLI name collides with this command's name.
+        /// </summary>
+        public string? CliName;
     }
 
     sealed class OptionPropModel
@@ -180,6 +185,11 @@ public class CliOptionGenerator : IIncrementalGenerator
         model.HasExecuteHandler = cls.GetMembers("ExecuteAsync")
             .OfType<IMethodSymbol>()
             .Any(static m => m.IsOverride && !m.IsStatic);
+
+        // Extract CLI name from the Name property override (if it's a simple string literal).
+        // Used to detect child commands whose name collides with the parent's name.
+        if (model.IsCommandDef)
+            model.CliName = GetCliNameLiteral(cls);
 
         return model;
     }
@@ -437,6 +447,34 @@ public class CliOptionGenerator : IIncrementalGenerator
             if (b.ToDisplayString() == "Console.Cli.CommandDef")
                 return true;
         return sym.ToDisplayString() == "Console.Cli.CommandDef";
+    }
+
+    /// <summary>
+    /// Returns the string literal value of the <c>Name</c> property override, if it is a
+    /// simple expression-bodied property returning a string literal (e.g. <c>=> "subscription"</c>).
+    /// Returns <c>null</c> for hand-written classes or non-literal overrides.
+    /// </summary>
+    static string? GetCliNameLiteral(INamedTypeSymbol cls)
+    {
+        var nameProp = cls
+            .GetMembers("Name")
+            .OfType<IPropertySymbol>()
+            .FirstOrDefault(static p => p.IsOverride && !p.IsStatic && p.Parameters.Length == 0);
+        if (nameProp == null)
+            return null;
+        foreach (var syntaxRef in nameProp.DeclaringSyntaxReferences)
+        {
+            if (
+                syntaxRef.GetSyntax() is PropertyDeclarationSyntax propDecl
+                && propDecl.ExpressionBody?.Expression
+                    is LiteralExpressionSyntax
+                    {
+                        Token: { RawKind: (int)SyntaxKind.StringLiteralToken } tok
+                    }
+            )
+                return tok.ValueText;
+        }
+        return null;
     }
 
     static bool IsOptionPackType(ITypeSymbol sym)
@@ -899,9 +937,20 @@ public class CliOptionGenerator : IIncrementalGenerator
                     $"        ((global::Console.Cli.OptionPack){child.Name}).AddOptionsTo(cmd);"
                 );
             foreach (var child in childCmds)
-                sb.AppendLine(
-                    $"        if ({child.Name} is not null) cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
-                );
+            {
+                var cliName = FieldToCliName(child.Name);
+                // When a child's CLI name collides with the parent's CLI name, System.CommandLine
+                // throws a duplicate-key error in its token map. Flatten by adding the child's
+                // subcommands directly into the parent instead of wrapping them in a new Command.
+                if (model.CliName != null && cliName == model.CliName)
+                    sb.AppendLine(
+                        $"        {child.Name}?.AddSubcommandsTo(cmd);"
+                    );
+                else
+                    sb.AppendLine(
+                        $"        if ({child.Name} is not null) cmd.Add(((global::Console.Cli.CommandDef){child.Name}).Build());"
+                    );
+            }
             sb.AppendLine("    }");
         }
         else if (childPacks.Count > 0 && model.IsOptionPack)

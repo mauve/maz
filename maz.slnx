@@ -11,4 +11,5 @@
   <Project Path="CliGenerator.Tests/CliGenerator.Tests.csproj" />
   <Project Path="Console.Tests/Console.Tests.csproj" />
   <Project Path="SpecGenerator/SpecGenerator.csproj" />
+  <Project Path="Console.SmokeTests/Console.SmokeTests.csproj" />
 </Solution>
