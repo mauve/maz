@@ -19,3 +19,7 @@ The path forward:
 2. For incompatible packages, evaluate: replace with a leaner HTTP client wrapper, wait for upstream support, or exclude from the published binary
 3. Enable `<PublishTrimmed>true</PublishTrimmed>` incrementally and fix trim warnings before attempting NativeAOT
 4. Enable `<PublishAot>true</PublishAot>` once trimming is clean
+
+## Highlight commands which are hand-written
+
+With over >8100 commands supported it is almost impossible for a user to discover hand-written commands which were added to make everyday operations simpler. We should highlight these commands somehow in the help.
