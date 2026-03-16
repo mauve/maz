@@ -45,6 +45,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     // Schema pane (initialised after _schema is constructed)
     private readonly SchemaPane _schemaPane;
     private HashSet<string> _activeTables = new();
+    private string _lastQueriedText = "";     // for active-table re-detection after schema loads
+    private bool _schemaTablesCached = false; // flipped once, triggers active-table re-detection
 
     public KustoTuiApp(
         LogsQueryClient client,
@@ -144,9 +146,11 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                         outcome.Elapsed,
                         outcome.PartialError
                     );
-                    _activeTables = outcome.ActiveTables is not null
-                        ? new HashSet<string>(outcome.ActiveTables, StringComparer.OrdinalIgnoreCase)
-                        : KqlAutocomplete.FindAllTables(outcome.Query, _schema.GetCachedTables());
+                    _lastQueriedText = outcome.Query;
+                    _activeTables = KqlAutocomplete.FindAllTables(
+                        outcome.Query,
+                        _schema.GetCachedTables()
+                    );
                     _history.Add(
                         new QueryHistoryEntry(
                             outcome.Query,
@@ -195,6 +199,20 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             // Drain completed schema column loads
             if (_schemaPane.DrainLoads())
                 Redraw();
+
+            // Once the table list is fetched, re-detect active tables from the last query
+            if (!_schemaTablesCached && _schema.GetCachedTables().Count > 0)
+            {
+                _schemaTablesCached = true;
+                if (!string.IsNullOrEmpty(_lastQueriedText))
+                {
+                    _activeTables = KqlAutocomplete.FindAllTables(
+                        _lastQueriedText,
+                        _schema.GetCachedTables()
+                    );
+                    Redraw();
+                }
+            }
 
             // Detect window resize
             if (System.Console.WindowWidth != _width || System.Console.WindowHeight != _height)
@@ -465,10 +483,12 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     {
         _editor.SetContent(entry.Query);
         _editor.ClearErrorMarker();
+        EnsureSchemaLoading();
 
         if (entry.IsSuccess && entry.Columns is not null)
         {
             _results.SetResults(entry.Columns, [], entry.Rows!, entry.Elapsed, entry.PartialError);
+            _lastQueriedText = entry.Query;
             _activeTables = KqlAutocomplete.FindAllTables(
                 entry.Query,
                 _schema.GetCachedTables()
@@ -498,6 +518,12 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
     // ── Query execution ───────────────────────────────────────────────────────
 
+    /// <summary>
+    /// Starts a background schema table fetch if the cache is empty.
+    /// Safe to call multiple times — GetTablesAsync caches internally.
+    /// </summary>
+    private void EnsureSchemaLoading() { if (_schema.GetCachedTables().Count == 0) _ = _schema.GetTablesAsync(); }
+
     private void StartQuery()
     {
         if (_queryTask is not null && !_queryTask.IsCompleted)
@@ -515,6 +541,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _lastQueryStartLine = startLine;
         _editor.ClearErrorMarker();
 
+        EnsureSchemaLoading();
         _queryCts?.Cancel();
         _queryCts = new CancellationTokenSource();
         _results.SetLoading(true);
@@ -583,13 +610,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 partialError = errMsg.ReplaceLineEndings(" ").Replace("  ", " ").Trim();
             }
 
-            var activeTables = result.AllTables
-                .Select(t => t.Name)
-                .Where(n => !string.IsNullOrEmpty(n)
-                            && !n.Equals("PrimaryResult", StringComparison.OrdinalIgnoreCase))
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            return QueryOutcome.Ok(query, columns, columnTypes, rows, sw.Elapsed, partialError, activeTables);
+            return QueryOutcome.Ok(query, columns, columnTypes, rows, sw.Elapsed, partialError);
         }
         catch (OperationCanceledException)
         {
@@ -782,7 +803,6 @@ internal sealed record QueryOutcome
     public string Query { get; private init; } = "";
     public IReadOnlyList<string>? Columns { get; private init; }
     public IReadOnlyList<string>? ColumnTypes { get; private init; }
-    public IReadOnlySet<string>? ActiveTables { get; private init; }
     public IReadOnlyList<IReadOnlyDictionary<string, object?>>? Rows { get; private init; }
     public TimeSpan Elapsed { get; private init; }
     public string? ErrorMessage { get; private init; }
@@ -794,8 +814,7 @@ internal sealed record QueryOutcome
         IReadOnlyList<string> columnTypes,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         TimeSpan elapsed,
-        string? partialError = null,
-        IReadOnlySet<string>? activeTables = null
+        string? partialError = null
     ) =>
         new()
         {
@@ -803,7 +822,6 @@ internal sealed record QueryOutcome
             Query = query,
             Columns = columns,
             ColumnTypes = columnTypes,
-            ActiveTables = activeTables,
             Rows = rows,
             Elapsed = elapsed,
             PartialError = partialError,
