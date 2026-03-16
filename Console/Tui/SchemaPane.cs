@@ -21,8 +21,9 @@ internal sealed class SchemaPane
 
     // Tree state
     private readonly HashSet<string> _expandedTables = new(StringComparer.OrdinalIgnoreCase);
-    private readonly Dictionary<string, Task<IReadOnlyList<ColumnInfo>>> _pendingLoads =
-        new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<string, Task<IReadOnlyList<ColumnInfo>>> _pendingLoads = new(
+        StringComparer.OrdinalIgnoreCase
+    );
 
     // Visual
     private List<VisualItem> _items = [];
@@ -33,9 +34,18 @@ internal sealed class SchemaPane
     // ── Visual item types ─────────────────────────────────────────────────────
 
     private abstract record VisualItem;
+
     private sealed record TableRow(string Name, bool IsActive, bool IsExpanded) : VisualItem;
-    private sealed record ColumnRow(string ColName, string ColType, bool IsHidden, bool ShowCheckbox) : VisualItem;
+
+    private sealed record ColumnRow(
+        string ColName,
+        string ColType,
+        bool IsHidden,
+        bool ShowCheckbox
+    ) : VisualItem;
+
     private sealed record SeparatorRow() : VisualItem;
+
     private sealed record LoadingRow() : VisualItem;
 
     public SchemaPane(SchemaProvider schema) => _schema = schema;
@@ -137,7 +147,10 @@ internal sealed class SchemaPane
         Rebuild();
         // Move selection to the collapsed table row
         for (int i = 0; i < _items.Count; i++)
-            if (_items[i] is TableRow tr && tr.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase))
+            if (
+                _items[i] is TableRow tr
+                && tr.Name.Equals(tableName, StringComparison.OrdinalIgnoreCase)
+            )
             {
                 _selectedVisualIndex = i;
                 ClampScroll();
@@ -279,7 +292,9 @@ internal sealed class SchemaPane
             {
                 var cols = _schema.GetCachedColumns(table);
                 foreach (var col in cols)
-                    _items.Add(new ColumnRow(col.Name, col.Type, IsHidden: false, ShowCheckbox: false));
+                    _items.Add(
+                        new ColumnRow(col.Name, col.Type, IsHidden: false, ShowCheckbox: false)
+                    );
             }
         }
 
@@ -307,9 +322,17 @@ internal sealed class SchemaPane
         if (!IsSelectable(_items[_selectedVisualIndex]))
         {
             for (int i = _selectedVisualIndex + 1; i < _items.Count; i++)
-                if (IsSelectable(_items[i])) { _selectedVisualIndex = i; return; }
+                if (IsSelectable(_items[i]))
+                {
+                    _selectedVisualIndex = i;
+                    return;
+                }
             for (int i = _selectedVisualIndex - 1; i >= 0; i--)
-                if (IsSelectable(_items[i])) { _selectedVisualIndex = i; return; }
+                if (IsSelectable(_items[i]))
+                {
+                    _selectedVisualIndex = i;
+                    return;
+                }
         }
     }
 
@@ -348,12 +371,19 @@ internal sealed class SchemaPane
                 {
                     // "  [x] Name  type"  or  "  [ ] Name  type"
                     int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
-                    var namePart = col.ColName.Length > nameMaxLen
-                        ? col.ColName[..nameMaxLen]
-                        : col.ColName.PadRight(nameMaxLen);
-                    var typePart = typeMaxLen > 0
-                        ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
-                        : "";
+                    var namePart =
+                        col.ColName.Length > nameMaxLen
+                            ? col.ColName[..nameMaxLen]
+                            : col.ColName.PadRight(nameMaxLen);
+                    var typePart =
+                        typeMaxLen > 0
+                            ? " "
+                                + (
+                                    col.ColType.Length > typeMaxLen
+                                        ? col.ColType[..typeMaxLen]
+                                        : col.ColType
+                                )
+                            : "";
                     var checkbox = col.IsHidden ? "[ ] " : "[x] ";
                     line = $"  {checkbox}{namePart}{typePart}";
                 }
@@ -361,12 +391,19 @@ internal sealed class SchemaPane
                 {
                     // "    Name  type"  (no checkbox, schema-only column)
                     int nameMaxLen = Math.Max(0, width - 4 - typePartLen); // "    " = 4
-                    var namePart = col.ColName.Length > nameMaxLen
-                        ? col.ColName[..nameMaxLen]
-                        : col.ColName.PadRight(nameMaxLen);
-                    var typePart = typeMaxLen > 0
-                        ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
-                        : "";
+                    var namePart =
+                        col.ColName.Length > nameMaxLen
+                            ? col.ColName[..nameMaxLen]
+                            : col.ColName.PadRight(nameMaxLen);
+                    var typePart =
+                        typeMaxLen > 0
+                            ? " "
+                                + (
+                                    col.ColType.Length > typeMaxLen
+                                        ? col.ColType[..typeMaxLen]
+                                        : col.ColType
+                                )
+                            : "";
                     line = $"    {namePart}{typePart}";
                 }
                 if (col.IsHidden)

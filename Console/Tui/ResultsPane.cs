@@ -220,16 +220,21 @@ internal sealed class ResultsPane
         var colName = vis[_selectedCol];
         int origIdx = -1;
         for (int i = 0; i < _columns.Count; i++)
-            if (_columns[i] == colName) { origIdx = i; break; }
+            if (_columns[i] == colName)
+            {
+                origIdx = i;
+                break;
+            }
         var colType = origIdx >= 0 && origIdx < _columnTypes.Count ? _columnTypes[origIdx] : "";
-        var cellValue = _selectedRow < _rows.Count
-            ? _rows[_selectedRow].GetValueOrDefault(colName)
-            : null;
+        var cellValue =
+            _selectedRow < _rows.Count ? _rows[_selectedRow].GetValueOrDefault(colName) : null;
         return (colName, colType, cellValue);
     }
 
     public IReadOnlyList<string> GetColumns() => _columns;
+
     public IReadOnlyList<string> GetColumnTypes() => _columnTypes;
+
     public IReadOnlySet<string> GetHiddenColumns() => _hiddenColumns;
 
     public void ToggleColumnVisibility(string colName)
@@ -419,8 +424,8 @@ internal sealed class ResultsPane
         int[] colWidths = ComputeColumnWidths(width, visibleCols);
         MoveTo(top + 2, left);
         var headerCells = visibleCols
-            .Select((c, i) =>
-                i == _selectedCol && focused ? Ansi.Color(c, "\x1b[1;4m") : Ansi.Bold(c)
+            .Select(
+                (c, i) => i == _selectedCol && focused ? Ansi.Color(c, "\x1b[1;4m") : Ansi.Bold(c)
             )
             .ToList();
         RenderRow(headerCells, colWidths, width);
@@ -710,8 +715,17 @@ internal sealed class ResultsPane
         bool inEscape = false;
         foreach (char c in text)
         {
-            if (c == '\x1b') { inEscape = true; continue; }
-            if (inEscape) { if (char.IsLetter(c)) inEscape = false; continue; }
+            if (c == '\x1b')
+            {
+                inEscape = true;
+                continue;
+            }
+            if (inEscape)
+            {
+                if (char.IsLetter(c))
+                    inEscape = false;
+                continue;
+            }
             sb.Append(c);
         }
         return sb.ToString();
