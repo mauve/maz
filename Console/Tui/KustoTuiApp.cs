@@ -42,8 +42,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     // Context menu items parallel to _results.ShowContextMenu labels
     private List<(string label, Action action)> _contextMenuItems = [];
 
-    // Schema pane
-    private readonly SchemaPane _schemaPane = new();
+    // Schema pane (initialised after _schema is constructed)
+    private readonly SchemaPane _schemaPane;
     private HashSet<string> _activeTables = new();
 
     public KustoTuiApp(
@@ -58,6 +58,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _workspaceId = workspaceId;
         _resourceId = resourceId;
         _schema = new SchemaProvider(client, workspaceId, resourceId);
+        _schemaPane = new SchemaPane(_schema);
         _editor = new EditorPane(initialQuery ?? "");
         _results = new ResultsPane();
 
@@ -190,6 +191,10 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 }
                 Redraw();
             }
+
+            // Drain completed schema column loads
+            if (_schemaPane.DrainLoads())
+                Redraw();
 
             // Detect window resize
             if (System.Console.WindowWidth != _width || System.Console.WindowHeight != _height)
@@ -375,7 +380,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             return;
         }
 
-        // ── Schema-pane focus: navigate list, Space/Enter toggles column ─────
+        // ── Schema-pane focus: navigate tree, expand/collapse, toggle columns ─
         if (_focusedPane == Focus.Schema)
         {
             switch (key.Key)
@@ -386,9 +391,15 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 case ConsoleKey.DownArrow:
                     _schemaPane.MoveDown();
                     return;
+                case ConsoleKey.RightArrow:
+                    _schemaPane.ExpandSelected();
+                    return;
+                case ConsoleKey.LeftArrow:
+                    _schemaPane.CollapseSelected();
+                    return;
                 case ConsoleKey.Enter:
                 case ConsoleKey.Spacebar:
-                    var colName = _schemaPane.GetSelectedColumnName();
+                    var colName = _schemaPane.ToggleOrExpand();
                     if (colName is not null)
                         _results.ToggleColumnVisibility(colName);
                     return;
@@ -684,7 +695,6 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         // Refresh schema pane state
         _schemaPane.UpdateColumns(
             _results.GetColumns(),
-            _results.GetColumnTypes(),
             _results.GetHiddenColumns()
         );
         _schemaPane.UpdateTables(_schema.GetCachedTables(), _activeTables);
@@ -723,7 +733,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 "  ↑↓←→ Cell  │  Enter Menu  │  PgUp/Dn Page  │  Ctrl+PgUp/Dn Always scroll  │  F2 / Esc  Edit  │  F3 Schema  ";
         else if (_focusedPane == Focus.Schema)
             bar =
-                "  ↑↓ Navigate  │  Space/Enter Toggle  │  F3 / Esc  Back to editor  ";
+                "  ↑↓ Navigate  │  ←▶ Collapse/Expand  │  Space/Enter Toggle/Expand  │  F3 / Esc  Back  ";
         else
             bar =
                 "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F3 Schema  │  F7/F8 History  │  Esc Exit  ";
