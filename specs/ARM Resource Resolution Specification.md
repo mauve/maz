@@ -27,7 +27,7 @@ The --resource-name option is just provisional, it may be called something else 
 - R3: subscriptionId/resourceGroup/resourceName
 - R4: any valid ARM Resource ID
 - R5: subscriptionId//resourceName (missing resource group) *(out of scope — no resolution rules defined)*
-- R6: Azure Portal URL *(out of scope — no resolution rules defined)*
+- R6: Azure Portal URL (e.g. `https://portal.azure.com/#@tenant/resource/subscriptions/.../Overview`)
 
 ### Configuration
 
@@ -62,6 +62,12 @@ Before resolution starts, the caller must specify the resource type(s) to resolv
 `→ (SUB, RG, RN)` means resolution succeeds with that triple.
 
 Steps within each case are tried in order; the first match terminates resolution.
+
+**Pre-processing — R6 (Azure Portal URL):** If `--resource-name` is an Azure Portal URL
+(starts with `https://portal.azure.com/#`), extract the ARM resource ID as follows:
+strip the `#@{tenant}/resource` prefix, then strip the trailing blade segment (any
+unpaired path segment after the last `/{type}/{name}` pair). The result is a valid
+ARM resource ID; treat it as R4 and continue.
 
 **Global — CFG1 scoping:** All Azure Resource Graph searches are constrained to the
 subscriptions and resource groups listed in CFG1, if configured.
