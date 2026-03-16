@@ -88,17 +88,13 @@ public static class ResourceNameResolver
 
         var resourceName = parsed.ResourceNameSegment;
 
-        if (effectiveRg is not null)
-        {
-            // Both sub and RG known — no ARM lookup needed
-            if (effectiveSub is null)
-                throw new InvocationException("--subscription-id is required.");
+        // Always resolve the subscription hint to a real GUID (handles display names, /s/... etc.)
+        var sub = await SubscriptionOptionPack.ResolveAsync(armClient, effectiveSub);
 
-            return (NormalizeSubId(effectiveSub), effectiveRg, resourceName);
-        }
+        if (effectiveRg is not null)
+            return (sub.Id.Name, effectiveRg, resourceName);
 
         // RG unknown — ARM lookup: search all RGs in the subscription
-        var sub = await SubscriptionOptionPack.ResolveAsync(armClient, effectiveSub);
 
         var matches = new List<(string Rg, string Name)>();
         var filter = $"resourceType eq '{resourceType}' and name eq '{resourceName}'";
@@ -114,7 +110,7 @@ public static class ResourceNameResolver
         return matches.Count switch
         {
             0 => throw new InvocationException(
-                $"Resource '{resourceName}' of type '{resourceType}' not found in subscription '{sub.Data?.DisplayName ?? sub.Id.Name}'."
+                $"Resource '{resourceName}' of type '{resourceType}' not found in subscription '{sub.Id.Name}'."
             ),
             1 => (sub.Id.Name, matches[0].Rg, matches[0].Name),
             _ => throw new InvocationException(
@@ -125,19 +121,5 @@ public static class ResourceNameResolver
                     )
             ),
         };
-    }
-
-    /// <summary>
-    /// Extracts a bare subscription GUID from a hint string.
-    /// Converts "/subscriptions/{guid}" → "{guid}"; passes other values through unchanged.
-    /// </summary>
-    private static string NormalizeSubId(string hint)
-    {
-        if (hint.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
-        {
-            var parts = hint.Split('/');
-            return parts.Length > 2 ? parts[2] : hint;
-        }
-        return hint;
     }
 }
