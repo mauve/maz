@@ -146,7 +146,7 @@ public class EditorPaneTests
         var pane = EditorWith("whe");
         Assert.IsFalse(pane.IsAutocompleteVisible);
 
-        pane.ShowAutocomplete(["where", "while"]);
+        pane.ShowAutocomplete([new CompletionItem("where"), new CompletionItem("while")]);
         Assert.IsTrue(pane.IsAutocompleteVisible);
 
         Assert.IsTrue(pane.DismissAutocomplete(), "First dismiss should return true");
@@ -161,7 +161,7 @@ public class EditorPaneTests
     public void AutocompleteAccept_ReplacesWordAtCursor()
     {
         var pane = EditorWith("T | whe");
-        pane.ShowAutocomplete(["where"]);
+        pane.ShowAutocomplete([new CompletionItem("where")]);
         pane.AutocompleteAccept();
 
         Assert.AreEqual(
@@ -176,7 +176,7 @@ public class EditorPaneTests
     public void AutocompleteAccept_HyphenatedKeyword_ReplacesCorrectly()
     {
         var pane = EditorWith("T | project-aw");
-        pane.ShowAutocomplete(["project-away"]);
+        pane.ShowAutocomplete([new CompletionItem("project-away")]);
         pane.AutocompleteAccept();
 
         Assert.AreEqual(
@@ -190,7 +190,7 @@ public class EditorPaneTests
     public void HandleKey_TypingChar_DismissesAutocomplete()
     {
         var pane = EditorWith("whe");
-        pane.ShowAutocomplete(["where"]);
+        pane.ShowAutocomplete([new CompletionItem("where")]);
         Assert.IsTrue(pane.IsAutocompleteVisible);
 
         pane.HandleKey(new ConsoleKeyInfo('r', ConsoleKey.R, false, false, false));

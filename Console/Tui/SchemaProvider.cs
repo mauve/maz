@@ -16,7 +16,9 @@ internal sealed class SchemaProvider(
 )
 {
     private List<string>? _tablesCache;
-    private readonly ConcurrentDictionary<string, List<string>> _columnsCache = new();
+    private readonly ConcurrentDictionary<string, List<ColumnInfo>> _columnsCache = new();
+
+    public IReadOnlyList<string> GetCachedTables() => (IReadOnlyList<string>?)_tablesCache ?? [];
 
     public async Task<IReadOnlyList<string>> GetTablesAsync(CancellationToken ct = default)
     {
@@ -83,7 +85,7 @@ internal sealed class SchemaProvider(
         }
     }
 
-    public async Task<IReadOnlyList<string>> GetColumnsAsync(
+    public async Task<IReadOnlyList<ColumnInfo>> GetColumnsAsync(
         string tableName,
         CancellationToken ct = default
     )
@@ -94,18 +96,23 @@ internal sealed class SchemaProvider(
         try
         {
             var result = await QueryAsync($"{tableName} | getschema", TimeSpan.FromSeconds(8), ct);
-            var columns = new List<string>();
+            var columns = new List<ColumnInfo>();
             int colIndex = -1;
+            int typeIndex = -1;
             for (int i = 0; i < result.Table.Columns.Count; i++)
+            {
                 if (result.Table.Columns[i].Name == "ColumnName")
-                {
                     colIndex = i;
-                    break;
-                }
+                if (result.Table.Columns[i].Name == "ColumnType")
+                    typeIndex = i;
+            }
             if (colIndex >= 0)
                 foreach (var row in result.Table.Rows)
                     if (row[colIndex] is string col && !string.IsNullOrEmpty(col))
-                        columns.Add(col);
+                    {
+                        var type = typeIndex >= 0 && row[typeIndex] is string t ? t : "";
+                        columns.Add(new ColumnInfo(col, type));
+                    }
             _columnsCache[tableName] = columns;
             return columns;
         }

@@ -6,6 +6,7 @@ namespace Console.Tui;
 internal sealed class ResultsPane
 {
     private IReadOnlyList<string> _columns = [];
+    private IReadOnlyList<string> _columnTypes = [];
     private IReadOnlyList<IReadOnlyDictionary<string, object?>> _rows = [];
     private int _scrollOffset;
     private string _workspaceName = "";
@@ -19,6 +20,25 @@ internal sealed class ResultsPane
     private string? _partialError;
     private string? _historyBadge;
     private bool _isHistoryMode;
+
+    // Cell selection state
+    private int _selectedRow = 0;
+    private int _selectedCol = 0;
+    private HashSet<string> _hiddenColumns = new();
+    private Dictionary<string, int> _manualWidths = new();
+
+    // Saved render dimensions for context menu positioning
+    private int _renderTop;
+    private int _renderLeft;
+    private int _renderWidth;
+    private int _renderHeight;
+
+    // Context menu state
+    private bool _contextMenuVisible;
+    private int _contextMenuIndex;
+    private List<string> _contextMenuLabels = [];
+
+    public bool IsContextMenuVisible => _contextMenuVisible;
 
     private static readonly string[] SpinnerFrames =
     [
@@ -36,15 +56,19 @@ internal sealed class ResultsPane
 
     public void SetResults(
         IReadOnlyList<string> columns,
+        IReadOnlyList<string> columnTypes,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         TimeSpan elapsed,
         string? partialError = null
     )
     {
         _columns = columns;
+        _columnTypes = columnTypes;
         _rows = rows;
         _lastElapsed = elapsed;
         _scrollOffset = 0;
+        _selectedRow = 0;
+        _selectedCol = 0;
         _isLoading = false;
         _errorMessage = null;
         _partialError = partialError is not null
@@ -117,6 +141,141 @@ internal sealed class ResultsPane
     public void PageDown(int pageSize) =>
         _scrollOffset = Math.Min(Math.Max(0, _rows.Count - 1), _scrollOffset + pageSize);
 
+    // ── Cell selection ────────────────────────────────────────────────────────
+
+    /// <summary>Called when focus switches to results; resets selection to the first visible cell.</summary>
+    public void InitSelection()
+    {
+        _selectedRow = _scrollOffset;
+        _selectedCol = 0;
+    }
+
+    public void MoveSelectionUp()
+    {
+        if (_selectedRow > 0)
+            _selectedRow--;
+        ClampScroll();
+    }
+
+    public void MoveSelectionDown()
+    {
+        if (_selectedRow < _rows.Count - 1)
+            _selectedRow++;
+        ClampScroll();
+    }
+
+    public void MoveSelectionLeft()
+    {
+        if (_selectedCol > 0)
+            _selectedCol--;
+    }
+
+    public void MoveSelectionRight()
+    {
+        var vis = GetVisibleColumns();
+        if (_selectedCol < vis.Count - 1)
+            _selectedCol++;
+    }
+
+    private void ClampScroll()
+    {
+        int dataRows = Math.Max(1, _renderHeight - 4);
+        if (_selectedRow < _scrollOffset)
+            _scrollOffset = _selectedRow;
+        if (_selectedRow >= _scrollOffset + dataRows)
+            _scrollOffset = _selectedRow - dataRows + 1;
+    }
+
+    public void FitSelectedColumnToContents(int paneHeight)
+    {
+        var vis = GetVisibleColumns();
+        if (_selectedCol >= vis.Count)
+            return;
+        var colName = vis[_selectedCol];
+        int maxLen = colName.Length;
+        foreach (var row in _rows)
+        {
+            var len = Ansi.VisibleLength(FormatValue(row.GetValueOrDefault(colName)));
+            if (len > maxLen)
+                maxLen = len;
+        }
+        _manualWidths[colName] = maxLen;
+    }
+
+    public void HideSelectedColumn()
+    {
+        var vis = GetVisibleColumns();
+        if (_selectedCol >= vis.Count)
+            return;
+        _hiddenColumns.Add(vis[_selectedCol]);
+        var newVis = GetVisibleColumns();
+        _selectedCol = Math.Min(_selectedCol, Math.Max(0, newVis.Count - 1));
+    }
+
+    public (string colName, string colType, object? cellValue) GetSelectedInfo()
+    {
+        var vis = GetVisibleColumns();
+        if (vis.Count == 0 || _selectedCol >= vis.Count)
+            return ("", "", null);
+        var colName = vis[_selectedCol];
+        int origIdx = -1;
+        for (int i = 0; i < _columns.Count; i++)
+            if (_columns[i] == colName) { origIdx = i; break; }
+        var colType = origIdx >= 0 && origIdx < _columnTypes.Count ? _columnTypes[origIdx] : "";
+        var cellValue = _selectedRow < _rows.Count
+            ? _rows[_selectedRow].GetValueOrDefault(colName)
+            : null;
+        return (colName, colType, cellValue);
+    }
+
+    public IReadOnlyList<string> GetColumns() => _columns;
+    public IReadOnlyList<string> GetColumnTypes() => _columnTypes;
+    public IReadOnlySet<string> GetHiddenColumns() => _hiddenColumns;
+
+    public void ToggleColumnVisibility(string colName)
+    {
+        if (!_hiddenColumns.Remove(colName))
+            _hiddenColumns.Add(colName);
+        var vis = GetVisibleColumns();
+        _selectedCol = Math.Min(_selectedCol, Math.Max(0, vis.Count - 1));
+    }
+
+    private List<string> GetVisibleColumns() =>
+        _columns.Where(c => !_hiddenColumns.Contains(c)).ToList();
+
+    // ── Context menu ──────────────────────────────────────────────────────────
+
+    public void ShowContextMenu(List<string> labels)
+    {
+        _contextMenuLabels = labels;
+        _contextMenuIndex = 0;
+        _contextMenuVisible = true;
+    }
+
+    public void DismissContextMenu() => _contextMenuVisible = false;
+
+    public void ContextMenuUp()
+    {
+        if (_contextMenuIndex > 0)
+            _contextMenuIndex--;
+    }
+
+    public void ContextMenuDown()
+    {
+        if (_contextMenuIndex < _contextMenuLabels.Count - 1)
+            _contextMenuIndex++;
+    }
+
+    /// <summary>Returns selected index and dismisses, or null if not visible.</summary>
+    public int? AcceptContextMenuItem()
+    {
+        if (!_contextMenuVisible)
+            return null;
+        var idx = _contextMenuIndex;
+        _contextMenuVisible = false;
+        return idx;
+    }
+
     // Layout (top/left are 0-indexed screen row/col):
     //   top+0 : title bar
     //   top+1 : separator ────
@@ -125,6 +284,11 @@ internal sealed class ResultsPane
     //   top+4+: data rows
     public void Render(int top, int left, int width, int height, bool focused = false)
     {
+        _renderTop = top;
+        _renderLeft = left;
+        _renderWidth = width;
+        _renderHeight = height;
+
         if (height < 2)
             return;
 
@@ -145,7 +309,6 @@ internal sealed class ResultsPane
         string styledTitle;
         if (_isHistoryMode)
         {
-            // Dim title when browsing history to make it visually distinct
             styledTitle = focused ? Ansi.Color(title, "\x1b[7;2m") : Ansi.Dim(title);
         }
         else
@@ -236,10 +399,31 @@ internal sealed class ResultsPane
         if (height < 5)
             return;
 
+        var visibleCols = GetVisibleColumns();
+        if (visibleCols.Count == 0)
+        {
+            MoveTo(top + 2, left);
+            WriteCell("  All columns hidden.", width);
+            for (int r = 3; r < height; r++)
+            {
+                MoveTo(top + r, left);
+                ClearLine(width);
+            }
+            return;
+        }
+
+        // Clamp selected col to visible range
+        _selectedCol = Math.Min(_selectedCol, visibleCols.Count - 1);
+
         // ── Column headers ──
-        int[] colWidths = ComputeColumnWidths(width);
+        int[] colWidths = ComputeColumnWidths(width, visibleCols);
         MoveTo(top + 2, left);
-        RenderRow(_columns.Select(c => Ansi.Bold(c)).ToList(), colWidths, width);
+        var headerCells = visibleCols
+            .Select((c, i) =>
+                i == _selectedCol && focused ? Ansi.Color(c, "\x1b[1;4m") : Ansi.Bold(c)
+            )
+            .ToList();
+        RenderRow(headerCells, colWidths, width);
 
         // ── Header separator ──
         MoveTo(top + 3, left);
@@ -263,12 +447,14 @@ internal sealed class ResultsPane
             int rowIndex = _scrollOffset + r;
             if (rowIndex < _rows.Count)
             {
+                int highlightCol = (focused && rowIndex == _selectedRow) ? _selectedCol : -1;
                 RenderRow(
-                    _columns
+                    visibleCols
                         .Select(c => FormatValue(_rows[rowIndex].GetValueOrDefault(c)))
                         .ToList(),
                     colWidths,
-                    width
+                    width,
+                    highlightCol
                 );
             }
             else if (_partialError is not null && rowIndex == _rows.Count)
@@ -281,9 +467,47 @@ internal sealed class ResultsPane
                 ClearLine(width);
             }
         }
+
+        // ── Context menu overlay ──
+        if (_contextMenuVisible && focused)
+            RenderContextMenu(colWidths, visibleCols, top, dataRows);
     }
 
-    private static void RenderRow(List<string> cells, int[] colWidths, int totalWidth)
+    private void RenderContextMenu(int[] colWidths, List<string> visibleCols, int top, int dataRows)
+    {
+        // Position below the selected data row
+        int dataRowScreenRow = top + 4 + (_selectedRow - _scrollOffset);
+        int popupRow = dataRowScreenRow + 1;
+
+        // Compute x offset of the selected column
+        int colOffset = _renderLeft;
+        for (int i = 0; i < _selectedCol && i < colWidths.Length; i++)
+            colOffset += colWidths[i] + 1; // +1 for separator char
+
+        const int PopupWidth = 36;
+        int popupLeft = Math.Min(colOffset, Math.Max(0, _renderLeft + _renderWidth - PopupWidth));
+
+        int maxItems = Math.Min(8, _contextMenuLabels.Count);
+        for (int i = 0; i < maxItems; i++)
+        {
+            int screenRow = popupRow + i;
+            if (screenRow >= top + _renderHeight)
+                break;
+            MoveTo(screenRow, popupLeft);
+            var label = " " + _contextMenuLabels[i];
+            label = label.Length > PopupWidth ? label[..PopupWidth] : label.PadRight(PopupWidth);
+            System.Console.Write(
+                i == _contextMenuIndex ? Ansi.Color(label, "\x1b[7m") : Ansi.Dim(label)
+            );
+        }
+    }
+
+    private static void RenderRow(
+        List<string> cells,
+        int[] colWidths,
+        int totalWidth,
+        int highlightCol = -1
+    )
     {
         var sb = new System.Text.StringBuilder();
         for (int ci = 0; ci < colWidths.Length && ci < cells.Count; ci++)
@@ -293,7 +517,19 @@ internal sealed class ResultsPane
             var cell = cells[ci];
             var visLen = Ansi.VisibleLength(cell);
             int w = colWidths[ci];
-            if (visLen >= w)
+
+            if (ci == highlightCol)
+            {
+                // Strip ANSI codes and apply reverse-video highlight
+                var plain = StripAnsi(cell);
+                string cellStr;
+                if (plain.Length >= w)
+                    cellStr = plain[..(w - 1)] + "…";
+                else
+                    cellStr = plain + new string(' ', w - plain.Length);
+                sb.Append($"\x1b[7m{cellStr}\x1b[0m");
+            }
+            else if (visLen >= w)
             {
                 sb.Append(TruncateAnsi(cell, w - 1));
                 sb.Append('…');
@@ -320,20 +556,26 @@ internal sealed class ResultsPane
             _ => v.ToString() ?? "",
         };
 
-    private int[] ComputeColumnWidths(int totalWidth)
+    private int[] ComputeColumnWidths(int totalWidth, List<string> visibleCols)
     {
-        if (_columns.Count == 0)
+        if (visibleCols.Count == 0)
             return [];
-        int separators = _columns.Count - 1;
-        int available = Math.Max(_columns.Count * 5, totalWidth - separators);
+        int separators = visibleCols.Count - 1;
+        int available = Math.Max(visibleCols.Count * 5, totalWidth - separators);
 
-        var natural = new int[_columns.Count];
-        for (int i = 0; i < _columns.Count; i++)
+        var natural = new int[visibleCols.Count];
+        for (int i = 0; i < visibleCols.Count; i++)
         {
-            natural[i] = Math.Max(_columns[i].Length, 5);
+            var col = visibleCols[i];
+            if (_manualWidths.TryGetValue(col, out var manual))
+            {
+                natural[i] = manual; // no cap for manually set widths
+                continue;
+            }
+            natural[i] = Math.Max(col.Length, 5);
             foreach (var row in _rows.Take(50))
             {
-                var len = Ansi.VisibleLength(FormatValue(row.GetValueOrDefault(_columns[i])));
+                var len = Ansi.VisibleLength(FormatValue(row.GetValueOrDefault(col)));
                 if (len > natural[i])
                     natural[i] = len;
             }
@@ -347,19 +589,22 @@ internal sealed class ResultsPane
             if (extra > 0)
             {
                 int totalNatural = natural.Sum();
-                for (int i = 0; i < natural.Length; i++)
-                    natural[i] += (int)((double)natural[i] / totalNatural * extra);
-                // Rounding residual goes to the last column
-                int residual = available - natural.Sum();
-                if (residual > 0)
-                    natural[^1] += residual;
+                if (totalNatural > 0)
+                {
+                    for (int i = 0; i < natural.Length; i++)
+                        natural[i] += (int)((double)natural[i] / totalNatural * extra);
+                    // Rounding residual goes to the last column
+                    int residual = available - natural.Sum();
+                    if (residual > 0)
+                        natural[^1] += residual;
+                }
             }
             return natural;
         }
 
         int total = natural.Sum();
-        var widths = new int[_columns.Count];
-        for (int i = 0; i < _columns.Count; i++)
+        var widths = new int[visibleCols.Count];
+        for (int i = 0; i < visibleCols.Count; i++)
             widths[i] = Math.Max(5, (int)((double)natural[i] / total * available));
         return widths;
     }
@@ -456,6 +701,19 @@ internal sealed class ResultsPane
         }
         if (vis > 0)
             sb.Append("\x1b[0m");
+        return sb.ToString();
+    }
+
+    private static string StripAnsi(string text)
+    {
+        var sb = new System.Text.StringBuilder();
+        bool inEscape = false;
+        foreach (char c in text)
+        {
+            if (c == '\x1b') { inEscape = true; continue; }
+            if (inEscape) { if (char.IsLetter(c)) inEscape = false; continue; }
+            sb.Append(c);
+        }
         return sb.ToString();
     }
 
