@@ -18,7 +18,7 @@ The --resource-name option is just provisional, it may be called something else 
    1. The name of a resource group
    2. Can also be supplied via AZURE_RESOURCE_GROUP
 3. --resource-name (may also have other name)
-   1. Either the resource-name, or a the 
+   1. Either the resource-name alone, or a combined path in one of the formats above (R1–R6)
 
 ### Allowed Input formats:
 
@@ -26,8 +26,8 @@ The --resource-name option is just provisional, it may be called something else 
 - R2: resourceGroup/resourceName
 - R3: subscriptionId/resourceGroup/resourceName
 - R4: any valid ARM Resource ID
-- R5: subscriptionId//resourceName (missing resource group)
-- R6: Azure Portal URL
+- R5: subscriptionId//resourceName (missing resource group) *(out of scope — no resolution rules defined)*
+- R6: Azure Portal URL *(out of scope — no resolution rules defined)*
 
 ### Configuration
 
@@ -55,24 +55,65 @@ This means in SUB1 all resource groups may be searched, in SUB2 limit to group1 
 
 ## Resolution Rules
 
-Before resolution starts, the caller must specify which resource type to resolve for (e.g. `Microsoft.Compute/virtualMachine`), multiple types can be applied
+Before resolution starts, the caller must specify the resource type(s) to resolve
+(e.g. `Microsoft.Compute/virtualMachine`).
 
-1. If --resource-name contains all parts, that is (subscription, resource group and resource name), then those take precedence over anything else and resolution ends immediately.
-2. If --resource-name contains only resource group RG and resource name RN, then continue as follows:
-   1. If subscription is specified using --subscription-id SUBOPT, the result is (SUBOPT, RG, RN)
-   2. If env variable AZURE_SUBSCRIPTION_ID is specified, the result is (AZURE_SUBSCRIPTION_ID, RG, RN)
-   4. If resource group RG is can be found in configuration, then the subscription from configuration should be used (CFGSUB, RG, RN)
-      1. If multiple subscriptions match, abort with error
-   5. Use the Azure Resource Graph to find the correction subscription
-      1. If multiple subscriptions match, abort with error
-3. If --resource-name contains only resource name RN, then continue as follows:
-   1. If --resource-group RG and --subscription SUB is specified, then the result is (SUB, RG, RN)
-   2. If --resource-group RG is specified but no --subscription SUB, then continue at step 2.1. above
-   3. If --subscription SUB is specified but no --resource-group, continue as follows:
-      1. If AZURE_RESOURCE_GROUP is specified, the result is (SUB, AZURE_RESOURCE_GROUP, RN)
-      2. Use the Azure Resource Graph to find the correct resource group
-         1. If multiple groups match, abort with error
+`SUB`, `RG`, and `RN` denote subscription, resource group, and resource name.
+`→ (SUB, RG, RN)` means resolution succeeds with that triple.
 
-## Special considerations for Data Plane URL resolution
+Steps within each case are tried in order; the first match terminates resolution.
 
-To resolve a data plane URL we want to do the same thing, except before we start we will verify if the option (e.g. --data-plane-url) matches the expected format and use that directly (e.g. a GUID for workspace ID). The data plane URL option can be forced to go into ARM Resource Resolution mode by prefixing the value to the --data-plane-url option with /{type}/, e.g. /kv/ for keyvaults.
+**Global — CFG1 scoping:** All Azure Resource Graph searches are constrained to the
+subscriptions and resource groups listed in CFG1, if configured.
+
+**Global — Conflict resolution:** When `--resource-name` is in a combined format
+(R2, R3, or R4) and also embeds a subscription or resource group, the embedded
+value takes precedence over the corresponding `--subscription-id`,
+`--resource-group`, or environment variable. No error is raised.
+
+### Case 1 — Full resource identity (R3, R4)
+
+`--resource-name` supplies subscription, resource group, and resource name.
+
+→ Use the embedded values directly. Resolution ends immediately.
+
+### Case 2 — Resource group + name (R2)
+
+`--resource-name` supplies resource group `RG` and resource name `RN`.
+
+1. `--subscription-id SUB` is set → `(SUB, RG, RN)`
+2. `AZURE_SUBSCRIPTION_ID=SUB` is set → `(SUB, RG, RN)`
+3. `RG` is found in CFG1 → `(CFGSUB, RG, RN)`
+   - If multiple CFG1 subscriptions contain `RG`, abort with error.
+4. Query Azure Resource Graph to locate the subscription containing `RG`.
+   - If multiple subscriptions match, abort with error.
+
+### Case 3 — Bare name only (R1)
+
+`--resource-name` supplies only resource name `RN`.
+
+1. `--resource-group RG` and `--subscription-id SUB` are both set → `(SUB, RG, RN)`
+2. `--resource-group RG` is set, no subscription → apply Case 2 steps 1–4 using `RG`.
+3. `--subscription-id SUB` is set, no resource group:
+   1. `AZURE_RESOURCE_GROUP=RG` is set → `(SUB, RG, RN)`
+   2. Query Azure Resource Graph (within `SUB`) to find the resource group for `RN`.
+      - If multiple resource groups match, abort with error.
+4. Neither `--subscription-id`, `--resource-group`, nor any environment variable is set:
+   Query Azure Resource Graph across all accessible subscriptions to find both
+   the subscription and resource group for `RN`.
+   - If multiple resources match, abort with error.
+
+## Data Plane URL Resolution
+
+Some commands accept a data plane option (e.g. `--data-plane-url`) instead of
+`--resource-name`. Resolution proceeds as follows:
+
+1. **Direct format match.** If the value already matches the expected data plane
+   format (e.g. a URI, a GUID for a workspace ID), use it directly — no ARM
+   lookup is performed.
+
+2. **Forced ARM resolution.** If the value is prefixed with `/{type}/`
+   (e.g. `/kv/my-vault` for a Key Vault), strip the prefix and treat the
+   remainder as a `--resource-name` value, then apply the standard
+   [Resolution Rules](#resolution-rules) to obtain the ARM resource, from which
+   the data plane URL is derived.

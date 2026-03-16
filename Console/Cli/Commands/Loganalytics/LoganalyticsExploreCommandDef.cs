@@ -168,7 +168,7 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
         return matches.Count switch
         {
             0 => throw new InvocationException(
-                $"Resource '{name}' not found in subscription '{sub.Data?.DisplayName ?? sub.Id.Name}'."
+                $"Resource '{name}' not found in subscription '{sub.Id.Name}'."
             ),
             1 => matches[0],
             _ => throw new InvocationException(
