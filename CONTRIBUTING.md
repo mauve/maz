@@ -115,12 +115,24 @@ The generator writes files into `Console/Cli/Commands/Generated/<service>/` and 
 - The `CliGenerator` source generator emits `AddGeneratedChildren` with null-safe access so uninitialized (null) fields become stubs automatically.
 - Passing `targetService = null` builds the full tree — triggered by `maz --help`, `maz --help-commands`, or any args that don't start with a known service name.
 
-Cold-start times (published binary, no warmup):
+## Performance requirements
 
-| Invocation | Time |
-|---|---|
-| `maz storage account list --help` | ~50 ms |
-| `maz --help` (full tree) | ~400 ms |
+Budgets apply to the **published self-contained binary** (ReadyToRun, linux-x64). Run against `./publish/maz` built with:
+
+```sh
+dotnet publish Console/Console.csproj --self-contained true -r linux-x64 \
+  -p:PublishSingleFile=true -c Release -o ./publish
+```
+
+| Scenario | Command | Budget | Notes |
+|---|---|---|---|
+| suggest-request | `maz "[suggest:10]" "maz stor"` | **<50ms** | primary SLA |
+| targeted command | `maz storage account list --help` | <100ms | |
+| full tree | `maz --help` | <600ms | |
+
+Budgets are defined for **native Linux** (bare metal or a Linux VM). Under WSL, cold-start .NET process creation adds ~10–15 ms of overhead that is outside our control, so WSL measurements will consistently read higher — this is expected and not a regression.
+
+To measure and profile against these budgets, run the `/perf-analyzer` agent. It runs a timing loop (20 warmup, 50 measured runs) for each scenario and automatically captures a `dotnet-trace` CPU profile for any scenario that exceeds its budget.
 
 ## Making a release
 
