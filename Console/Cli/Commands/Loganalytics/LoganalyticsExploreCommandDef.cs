@@ -55,14 +55,25 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
                 "Either --workspace-id or --resource-id must be specified."
             );
 
-        var armClient = new ArmClient(_auth.GetCredential());
+        var credential = _auth.GetCredential();
+        var armClient = new ArmClient(credential);
 
         string? resolvedWorkspaceId = null;
+        string? workspaceArmId = null;
         if (WorkspaceId is not null)
         {
-            resolvedWorkspaceId = Guid.TryParse(WorkspaceId, out _)
-                ? WorkspaceId
-                : await ResolveWorkspaceCustomerIdAsync(WorkspaceId, armClient, ct);
+            if (Guid.TryParse(WorkspaceId, out _))
+            {
+                resolvedWorkspaceId = WorkspaceId;
+            }
+            else
+            {
+                (resolvedWorkspaceId, workspaceArmId) = await ResolveWorkspaceCustomerIdAsync(
+                    WorkspaceId,
+                    armClient,
+                    ct
+                );
+            }
         }
 
         string? resolvedResourceId = null;
@@ -74,21 +85,24 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
             )
                 ? ResourceId
                 : await ResolveResourceArmIdAsync(ResourceId, armClient, ct);
+            workspaceArmId ??= resolvedResourceId;
         }
 
-        var client = new LogsQueryClient(_auth.GetCredential());
+        var client = new LogsQueryClient(credential);
         await using var app = new KustoTuiApp(
             client,
             resolvedWorkspaceId,
             resolvedResourceId,
             InitialQuery,
-            HistorySize
+            HistorySize,
+            credential,
+            workspaceArmId
         );
         await app.RunAsync(ct);
         return 0;
     }
 
-    private async Task<string> ResolveWorkspaceCustomerIdAsync(
+    private async Task<(string customerId, string armPath)> ResolveWorkspaceCustomerIdAsync(
         string workspaceRef,
         ArmClient armClient,
         CancellationToken ct
@@ -113,7 +127,7 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
                 $"Could not read customerId for workspace '{name}' in resource group '{rg}'."
             );
 
-        return customerId;
+        return (customerId, path);
     }
 
     private async Task<string> ResolveResourceArmIdAsync(

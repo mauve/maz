@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
+using Console.Cli.Http;
 
 namespace Console.Tui;
 
@@ -12,7 +14,9 @@ namespace Console.Tui;
 internal sealed class SchemaProvider(
     LogsQueryClient client,
     string? workspaceId,
-    string? resourceId
+    string? resourceId,
+    TokenCredential? credential = null,
+    string? workspaceArmId = null
 )
 {
     private List<string>? _tablesCache;
@@ -28,15 +32,49 @@ internal sealed class SchemaProvider(
         if (_tablesCache is not null)
             return _tablesCache;
 
-        // Fast path: Usage table lists every ingested DataType (= table name).
-        // Falls back to union * for workspaces that have no recent billable data.
-        var tables = await TryGetTablesViaUsageAsync(ct);
+        // Preferred: ARM tables API lists every table regardless of plan (including DCE/DCR
+        // custom tables on Basic/Auxiliary plans that never appear in the Usage table).
+        // Falls back to KQL discovery when no ARM path is available (GUID-only workspace).
+        var tables = await TryGetTablesViaArmAsync(ct);
+        if (tables.Count == 0)
+            tables = await TryGetTablesViaUsageAsync(ct);
         if (tables.Count == 0)
             tables = await TryGetTablesViaUnionAsync(ct);
 
         // Always cache — even an empty result — so repeated Tab presses don't re-run queries.
         _tablesCache = tables;
         return _tablesCache;
+    }
+
+    private async Task<List<string>> TryGetTablesViaArmAsync(CancellationToken ct)
+    {
+        if (credential is null || workspaceArmId is null)
+            return [];
+        try
+        {
+            var restClient = new AzureRestClient(credential);
+            var json = await restClient.SendAsync(
+                HttpMethod.Get,
+                $"{workspaceArmId}/tables",
+                "2023-09-01",
+                null,
+                ct
+            );
+            var tables = new List<string>();
+            if (json?["value"] is JsonArray arr)
+                foreach (var item in arr)
+                {
+                    var name = item?["name"]?.GetValue<string>();
+                    if (!string.IsNullOrEmpty(name))
+                        tables.Add(name);
+                }
+            tables.Sort(StringComparer.OrdinalIgnoreCase);
+            return tables;
+        }
+        catch
+        {
+            return [];
+        }
     }
 
     private async Task<List<string>> TryGetTablesViaUsageAsync(CancellationToken ct)

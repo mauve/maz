@@ -53,13 +53,15 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         string? workspaceId,
         string? resourceId,
         string? initialQuery,
-        int historySize = 100
+        int historySize = 100,
+        TokenCredential? credential = null,
+        string? workspaceArmId = null
     )
     {
         _client = client;
         _workspaceId = workspaceId;
         _resourceId = resourceId;
-        _schema = new SchemaProvider(client, workspaceId, resourceId);
+        _schema = new SchemaProvider(client, workspaceId, resourceId, credential, workspaceArmId);
         _schemaPane = new SchemaPane(_schema);
         _editor = new EditorPane(initialQuery ?? "");
         _results = new ResultsPane();
