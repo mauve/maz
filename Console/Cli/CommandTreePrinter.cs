@@ -65,7 +65,10 @@ internal static class CommandTreePrinter
                         output.WriteLine($"{continuation}{styledSegment}");
                 }
             }
-            PrintChildren(output, child, prefix + childPrefix, filter);
+            // When a node itself matches the filter, show all its descendants without further
+            // filtering — otherwise the children of a matching parent are all stripped out.
+            var childFilter = filter is not null && Matches(child, filter) ? null : filter;
+            PrintChildren(output, child, prefix + childPrefix, childFilter);
         }
     }
 
