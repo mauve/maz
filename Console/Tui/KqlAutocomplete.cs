@@ -2,7 +2,11 @@ namespace Console.Tui;
 
 internal record ColumnInfo(string Name, string Type);
 
-internal record CompletionItem(string InsertText, string? TypeLabel = null, int[]? MatchIndices = null)
+internal record CompletionItem(
+    string InsertText,
+    string? TypeLabel = null,
+    int[]? MatchIndices = null
+)
 {
     public string Display => TypeLabel is not null ? $"{InsertText} ({TypeLabel})" : InsertText;
 }
@@ -135,9 +139,10 @@ internal static class KqlAutocomplete
             IReadOnlyList<ColumnInfo> columns = firstTable is not null
                 ? await schema.GetColumnsAsync(firstTable, ct)
                 : [];
-            schemaCompletions = columns.Select(c =>
-                new CompletionItem(c.Name, string.IsNullOrEmpty(c.Type) ? null : c.Type)
-            );
+            schemaCompletions = columns.Select(c => new CompletionItem(
+                c.Name,
+                string.IsNullOrEmpty(c.Type) ? null : c.Type
+            ));
         }
         else
         {
@@ -161,7 +166,8 @@ internal static class KqlAutocomplete
                 .DistinctBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                 .OrderBy(c =>
                     // Exact-case prefix → case-insensitive prefix → subsequence
-                    c.InsertText.StartsWith(prefix, StringComparison.Ordinal) ? 0
+                    c.InsertText.StartsWith(prefix, StringComparison.Ordinal)
+                        ? 0
                     : c.InsertText.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) ? 1
                     : 2
                 )
@@ -285,17 +291,29 @@ internal static class KqlAutocomplete
             // Skip string literals
             if (inString)
             {
-                if (c == '\\') { i += 2; continue; }
-                if (c == stringChar) inString = false;
+                if (c == '\\')
+                {
+                    i += 2;
+                    continue;
+                }
+                if (c == stringChar)
+                    inString = false;
                 i++;
                 continue;
             }
-            if (c == '"' || c == '\'') { inString = true; stringChar = c; i++; continue; }
+            if (c == '"' || c == '\'')
+            {
+                inString = true;
+                stringChar = c;
+                i++;
+                continue;
+            }
 
             // Skip line comments
             if (c == '/' && i + 1 < query.Length && query[i + 1] == '/')
             {
-                while (i < query.Length && query[i] != '\n') i++;
+                while (i < query.Length && query[i] != '\n')
+                    i++;
                 continue;
             }
 

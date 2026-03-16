@@ -45,7 +45,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     // Schema pane (initialised after _schema is constructed)
     private readonly SchemaPane _schemaPane;
     private HashSet<string> _activeTables = new();
-    private string _lastQueriedText = "";     // for active-table re-detection after schema loads
+    private string _lastQueriedText = ""; // for active-table re-detection after schema loads
     private bool _schemaTablesCached = false; // flipped once, triggers active-table re-detection
 
     public KustoTuiApp(
@@ -489,10 +489,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         {
             _results.SetResults(entry.Columns, [], entry.Rows!, entry.Elapsed, entry.PartialError);
             _lastQueriedText = entry.Query;
-            _activeTables = KqlAutocomplete.FindAllTables(
-                entry.Query,
-                _schema.GetCachedTables()
-            );
+            _activeTables = KqlAutocomplete.FindAllTables(entry.Query, _schema.GetCachedTables());
         }
         else if (entry.ErrorMessage is not null)
             _results.SetError(entry.ErrorMessage);
@@ -522,7 +519,11 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     /// Starts a background schema table fetch if the cache is empty.
     /// Safe to call multiple times — GetTablesAsync caches internally.
     /// </summary>
-    private void EnsureSchemaLoading() { if (_schema.GetCachedTables().Count == 0) _ = _schema.GetTablesAsync(); }
+    private void EnsureSchemaLoading()
+    {
+        if (_schema.GetCachedTables().Count == 0)
+            _ = _schema.GetTablesAsync();
+    }
 
     private void StartQuery()
     {
@@ -631,8 +632,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             return;
 
         bool isNumeric = colType is "int" or "long" or "real" or "decimal";
-        bool isStringOrNumeric =
-            isNumeric || colType is "string" or "dynamic" or "guid" or "bool";
+        bool isStringOrNumeric = isNumeric || colType is "string" or "dynamic" or "guid" or "bool";
 
         _contextMenuItems =
         [
@@ -659,9 +659,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                     ($"{fn}({colName})", () => AppendToActiveQuery($"| summarize {f}({cn})"))
                 );
             }
-            _contextMenuItems.Add(
-                ("count()", () => AppendToActiveQuery("| summarize count()"))
-            );
+            _contextMenuItems.Add(("count()", () => AppendToActiveQuery("| summarize count()")));
         }
 
         _results.ShowContextMenu(_contextMenuItems.Select(i => i.label).ToList());
@@ -705,9 +703,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _splitRow = Math.Clamp(_height * 60 / 100, 4, _height - 6);
 
         // Schema sidebar only when terminal is wide enough
-        int schemaPaneWidth = _width >= 80
-            ? Math.Max(28, Math.Min(36, _width * 27 / 100))
-            : 0;
+        int schemaPaneWidth = _width >= 80 ? Math.Max(28, Math.Min(36, _width * 27 / 100)) : 0;
         // If terminal too narrow to show sidebar, redirect schema focus to editor
         if (schemaPaneWidth == 0 && _focusedPane == Focus.Schema)
             _focusedPane = Focus.Editor;

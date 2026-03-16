@@ -232,10 +232,7 @@ public class KqlAutocompleteTests
     public void FindAllTables_TableNameInString_NotCounted()
     {
         // "SecurityEvent" inside a string literal should not be detected
-        var found = KqlAutocomplete.FindAllTables(
-            "print \"SecurityEvent\"",
-            SampleTables
-        );
+        var found = KqlAutocomplete.FindAllTables("print \"SecurityEvent\"", SampleTables);
         Assert.AreEqual(0, found.Count);
     }
 

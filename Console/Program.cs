@@ -29,7 +29,8 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
 bool needsFullTree = args.Any(a =>
     a is "--help-commands" or "--help-commands-flat"
     || a.StartsWith("--help-commands=", StringComparison.Ordinal)
-    || a.StartsWith("--help-commands-flat=", StringComparison.Ordinal));
+    || a.StartsWith("--help-commands-flat=", StringComparison.Ordinal)
+);
 
 // System.CommandLine won't consume a known subcommand name as the ZeroOrOne value for
 // --help-commands / --help-commands-flat, routing it as a subcommand instead and losing

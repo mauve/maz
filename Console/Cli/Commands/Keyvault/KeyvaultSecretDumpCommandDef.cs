@@ -1,8 +1,8 @@
+using System.Text.Json.Nodes;
 using Azure.ResourceManager;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
-using System.Text.Json.Nodes;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -30,8 +30,15 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(_auth.GetCredential(), KvScope);
 
         var secretNames = new List<string>();
-        await foreach (var item in client.GetAllAsync(
-            $"{vaultUri}secrets", ApiVersion, "value", "nextLink", ct))
+        await foreach (
+            var item in client.GetAllAsync(
+                $"{vaultUri}secrets",
+                ApiVersion,
+                "value",
+                "nextLink",
+                ct
+            )
+        )
         {
             if (item is JsonNode node && node["id"]?.GetValue<string>() is string id)
             {
@@ -48,7 +55,12 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
             try
             {
                 var response = await client.SendAsync(
-                    HttpMethod.Get, $"{vaultUri}secrets/{name}", ApiVersion, null, ct);
+                    HttpMethod.Get,
+                    $"{vaultUri}secrets/{name}",
+                    ApiVersion,
+                    null,
+                    ct
+                );
 
                 // Extract version from the response id (last path segment)
                 var responseId = response["id"]?.GetValue<string>() ?? "";
@@ -79,7 +91,9 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
                 if (response["contentType"]?.GetValue<string>() is string ct2 && ct2.Length > 0)
                     extraParts.Add($"content-type: {ct2}");
                 if (response["tags"]?.AsObject() is { Count: > 0 } tags)
-                    extraParts.Add("tags: " + string.Join(", ", tags.Select(t => $"{t.Key}={t.Value}")));
+                    extraParts.Add(
+                        "tags: " + string.Join(", ", tags.Select(t => $"{t.Key}={t.Value}"))
+                    );
                 if (extraParts.Count > 0)
                     writer.WriteLine("  " + Ansi.Dim(string.Join("  ", extraParts)));
 

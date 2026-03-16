@@ -26,5 +26,6 @@ internal readonly struct CompletionNode
 
     public string Name { get; }
     public string[] Options { get; }
-    public CompletionNode[] Children => _eager ?? _factory?.Invoke() ?? Array.Empty<CompletionNode>();
+    public CompletionNode[] Children =>
+        _eager ?? _factory?.Invoke() ?? Array.Empty<CompletionNode>();
 }

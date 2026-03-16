@@ -1168,22 +1168,19 @@ public class CliOptionGenerator : IIncrementalGenerator
         // Root is built eagerly with all immediate children (service-level nodes).
         // Each service node carries a lazy factory for its subtree: the subtree is only
         // allocated when the completion handler actually walks into that service.
-        sb.AppendLine(
-            "    internal static readonly global::Console.Cli.CompletionNode Root ="
-        );
+        sb.AppendLine("    internal static readonly global::Console.Cli.CompletionNode Root =");
         sb.AppendLine($"        new({Quote(root.CliName)},");
         sb.AppendLine($"            {InlineOptions(root.Options)},");
-        sb.AppendLine(
-            "            new global::Console.Cli.CompletionNode[]"
-        );
+        sb.AppendLine("            new global::Console.Cli.CompletionNode[]");
         sb.AppendLine("            {");
 
         for (int si = 0; si < root.Children.Count; si++)
         {
             var svc = root.Children[si];
-            string factory = svc.Children.Count == 0
-                ? "global::System.Array.Empty<global::Console.Cli.CompletionNode>()"
-                : $"Build_S{si}";
+            string factory =
+                svc.Children.Count == 0
+                    ? "global::System.Array.Empty<global::Console.Cli.CompletionNode>()"
+                    : $"Build_S{si}";
             sb.AppendLine(
                 $"                new({Quote(svc.CliName)}, {InlineOptions(svc.Options)}, {factory}),"
             );
@@ -1214,22 +1211,16 @@ public class CliOptionGenerator : IIncrementalGenerator
 
             string mk = $"S{si}";
 
-            sb.AppendLine(
-                $"    private static global::Console.Cli.CompletionNode[] Build_{mk}()"
-            );
+            sb.AppendLine($"    private static global::Console.Cli.CompletionNode[] Build_{mk}()");
             sb.AppendLine("    {");
-            sb.AppendLine(
-                $"        var n = new global::Console.Cli.CompletionNode[{subN}];"
-            );
+            sb.AppendLine($"        var n = new global::Console.Cli.CompletionNode[{subN}];");
 
             int numChunks = (subN + ChunkSize - 1) / ChunkSize;
             for (int c = 0; c < numChunks; c++)
                 sb.AppendLine($"        BuildSub_{mk}_{c}(n);");
 
             // Return the direct children of svc from the local array.
-            sb.Append(
-                "        return new global::Console.Cli.CompletionNode[] {"
-            );
+            sb.Append("        return new global::Console.Cli.CompletionNode[] {");
             sb.Append(string.Join(", ", svc.Children.Select(ch => $"n[{localIdx[ch]}]")));
             sb.AppendLine("};");
             sb.AppendLine("    }");
@@ -1263,10 +1254,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                     {
                         sb.Append("new[] {");
                         sb.Append(
-                            string.Join(
-                                ", ",
-                                node.Children.Select(ch => $"n[{localIdx[ch]}]")
-                            )
+                            string.Join(", ", node.Children.Select(ch => $"n[{localIdx[ch]}]"))
                         );
                         sb.Append('}');
                     }

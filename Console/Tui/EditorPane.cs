@@ -529,9 +529,9 @@ internal sealed class EditorPane
         {
             bool isMatch = matchSet.Contains(i);
             if (selected)
-                sb.Append(isMatch ? "\x1b[7;4m" : "\x1b[7m");   // reverse+underline vs plain reverse
+                sb.Append(isMatch ? "\x1b[7;4m" : "\x1b[7m"); // reverse+underline vs plain reverse
             else
-                sb.Append(isMatch ? "\x1b[0m" : "\x1b[2m");      // normal weight vs dim
+                sb.Append(isMatch ? "\x1b[0m" : "\x1b[2m"); // normal weight vs dim
             sb.Append(item.InsertText[i]);
         }
 

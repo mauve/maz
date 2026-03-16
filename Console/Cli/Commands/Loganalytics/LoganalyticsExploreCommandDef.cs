@@ -1,6 +1,6 @@
 using Azure.Identity;
-using Azure.ResourceManager;
 using Azure.Monitor.Query;
+using Azure.ResourceManager;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Tui;
@@ -124,28 +124,23 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
     {
         var parsed = ResourceIdentifierParser.Parse(resourceRef);
 
-        var effectiveSub =
-            parsed.SubscriptionSegment is not null
-                ? ResourceIdentifierParser.NormalizeSubscriptionSegment(parsed.SubscriptionSegment)
-                : ResourceGroup.Subscription.SubscriptionId
-                    ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        var effectiveSub = parsed.SubscriptionSegment is not null
+            ? ResourceIdentifierParser.NormalizeSubscriptionSegment(parsed.SubscriptionSegment)
+            : ResourceGroup.Subscription.SubscriptionId
+                ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
 
-        var effectiveRg =
-            parsed.ResourceGroupSegment is not null
-                ? ResourceIdentifierParser.NormalizeResourceGroupSegment(
-                    parsed.ResourceGroupSegment
-                )
-                : ResourceGroup.ResourceGroupName
-                    ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+        var effectiveRg = parsed.ResourceGroupSegment is not null
+            ? ResourceIdentifierParser.NormalizeResourceGroupSegment(parsed.ResourceGroupSegment)
+            : ResourceGroup.ResourceGroupName
+                ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
 
         var name = parsed.ResourceNameSegment;
 
         var sub = await SubscriptionOptionPack.ResolveAsync(armClient, effectiveSub);
 
-        var filter =
-            effectiveRg is not null
-                ? $"name eq '{name}' and resourceGroup eq '{effectiveRg}'"
-                : $"name eq '{name}'";
+        var filter = effectiveRg is not null
+            ? $"name eq '{name}' and resourceGroup eq '{effectiveRg}'"
+            : $"name eq '{name}'";
 
         var matches = new List<string>();
         await foreach (
