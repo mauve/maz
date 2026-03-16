@@ -34,7 +34,7 @@ internal sealed class SchemaPane
 
     private abstract record VisualItem;
     private sealed record TableRow(string Name, bool IsActive, bool IsExpanded) : VisualItem;
-    private sealed record ColumnRow(string ColName, string ColType, bool IsHidden) : VisualItem;
+    private sealed record ColumnRow(string ColName, string ColType, bool IsHidden, bool ShowCheckbox) : VisualItem;
     private sealed record SeparatorRow() : VisualItem;
     private sealed record LoadingRow() : VisualItem;
 
@@ -166,11 +166,8 @@ internal sealed class SchemaPane
                 }
                 Rebuild();
                 return null;
-            case ColumnRow col:
-                // Only result columns (under active tables) can be toggled
-                return _hiddenColumns.Contains(col.ColName) || IsResultColumn(col.ColName)
-                    ? col.ColName
-                    : null;
+            case ColumnRow { ShowCheckbox: true } col:
+                return col.ColName;
             default:
                 return null;
         }
@@ -209,9 +206,6 @@ internal sealed class SchemaPane
     }
 
     // ── Private helpers ───────────────────────────────────────────────────────
-
-    private bool IsResultColumn(string colName) =>
-        _resultColumns.Any(c => string.Equals(c, colName, StringComparison.OrdinalIgnoreCase));
 
     private void EnsureLoading(string tableName)
     {
@@ -260,7 +254,7 @@ internal sealed class SchemaPane
                 var colName = _resultColumns[i];
                 var colType = i < _resultColumnTypes.Count ? _resultColumnTypes[i] : "";
                 bool isHidden = _hiddenColumns.Contains(colName);
-                _items.Add(new ColumnRow(colName, colType, isHidden));
+                _items.Add(new ColumnRow(colName, colType, isHidden, ShowCheckbox: true));
             }
         }
 
@@ -285,7 +279,7 @@ internal sealed class SchemaPane
             {
                 var cols = _schema.GetCachedColumns(table);
                 foreach (var col in cols)
-                    _items.Add(new ColumnRow(col.Name, col.Type, IsHidden: false));
+                    _items.Add(new ColumnRow(col.Name, col.Type, IsHidden: false, ShowCheckbox: false));
             }
         }
 
@@ -347,18 +341,34 @@ internal sealed class SchemaPane
             }
             case ColumnRow col:
             {
-                // "  [x] Name  type"  or  "  [ ] Name  type"
                 int typeMaxLen = col.ColType.Length > 0 ? Math.Min(col.ColType.Length, 8) : 0;
                 int typePartLen = typeMaxLen > 0 ? typeMaxLen + 1 : 0;
-                int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
-                var namePart = col.ColName.Length > nameMaxLen
-                    ? col.ColName[..nameMaxLen]
-                    : col.ColName.PadRight(nameMaxLen);
-                var typePart = typeMaxLen > 0
-                    ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
-                    : "";
-                var checkbox = col.IsHidden ? "[ ] " : "[x] ";
-                var line = $"  {checkbox}{namePart}{typePart}";
+                string line;
+                if (col.ShowCheckbox)
+                {
+                    // "  [x] Name  type"  or  "  [ ] Name  type"
+                    int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
+                    var namePart = col.ColName.Length > nameMaxLen
+                        ? col.ColName[..nameMaxLen]
+                        : col.ColName.PadRight(nameMaxLen);
+                    var typePart = typeMaxLen > 0
+                        ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
+                        : "";
+                    var checkbox = col.IsHidden ? "[ ] " : "[x] ";
+                    line = $"  {checkbox}{namePart}{typePart}";
+                }
+                else
+                {
+                    // "    Name  type"  (no checkbox, schema-only column)
+                    int nameMaxLen = Math.Max(0, width - 4 - typePartLen); // "    " = 4
+                    var namePart = col.ColName.Length > nameMaxLen
+                        ? col.ColName[..nameMaxLen]
+                        : col.ColName.PadRight(nameMaxLen);
+                    var typePart = typeMaxLen > 0
+                        ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
+                        : "";
+                    line = $"    {namePart}{typePart}";
+                }
                 if (col.IsHidden)
                     WriteCell(selected ? Ansi.Color(line, "\x1b[2;7m") : Ansi.Dim(line), width);
                 else
