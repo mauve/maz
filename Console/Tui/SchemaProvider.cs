@@ -20,6 +20,9 @@ internal sealed class SchemaProvider(
 
     public IReadOnlyList<string> GetCachedTables() => (IReadOnlyList<string>?)_tablesCache ?? [];
 
+    public IReadOnlyList<ColumnInfo> GetCachedColumns(string tableName) =>
+        _columnsCache.TryGetValue(tableName, out var cols) ? cols : [];
+
     public async Task<IReadOnlyList<string>> GetTablesAsync(CancellationToken ct = default)
     {
         if (_tablesCache is not null)
