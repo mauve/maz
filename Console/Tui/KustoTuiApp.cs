@@ -716,6 +716,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         // Refresh schema pane state
         _schemaPane.UpdateColumns(
             _results.GetColumns(),
+            _results.GetColumnTypes(),
             _results.GetHiddenColumns()
         );
         _schemaPane.UpdateTables(_schema.GetCachedTables(), _activeTables);
