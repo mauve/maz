@@ -4,8 +4,9 @@ namespace Console.Tui;
 
 /// <summary>
 /// Schema sidebar showing a collapsible tree of tables and their columns.
-/// Active tables appear first and are expanded automatically.
-/// Columns can be hidden/shown via Space/Enter when focused.
+/// Active tables appear first (separated by a line) and show result columns.
+/// Inactive tables show schema columns, loaded lazily on expand.
+/// Columns in the result can be hidden/shown via Space/Enter when focused.
 /// </summary>
 internal sealed class SchemaPane
 {
@@ -13,7 +14,7 @@ internal sealed class SchemaPane
 
     // Data refreshed from KustoTuiApp
     private IReadOnlyList<string> _resultColumns = [];
-    private HashSet<string> _resultColumnsSet = new(StringComparer.OrdinalIgnoreCase);
+    private IReadOnlyList<string> _resultColumnTypes = [];
     private IReadOnlySet<string> _hiddenColumns = new HashSet<string>();
     private IReadOnlyList<string> _allTables = [];
     private IReadOnlySet<string> _activeTables = new HashSet<string>();
@@ -33,17 +34,22 @@ internal sealed class SchemaPane
 
     private abstract record VisualItem;
     private sealed record TableRow(string Name, bool IsActive, bool IsExpanded) : VisualItem;
-    private sealed record ColumnRow(string ColName, string ColType, bool InResult, bool IsHidden) : VisualItem;
+    private sealed record ColumnRow(string ColName, string ColType, bool IsHidden) : VisualItem;
+    private sealed record SeparatorRow() : VisualItem;
     private sealed record LoadingRow() : VisualItem;
 
     public SchemaPane(SchemaProvider schema) => _schema = schema;
 
     // ── Public update API ─────────────────────────────────────────────────────
 
-    public void UpdateColumns(IReadOnlyList<string> columns, IReadOnlySet<string> hiddenColumns)
+    public void UpdateColumns(
+        IReadOnlyList<string> columns,
+        IReadOnlyList<string> columnTypes,
+        IReadOnlySet<string> hiddenColumns
+    )
     {
         _resultColumns = columns;
-        _resultColumnsSet = new HashSet<string>(columns, StringComparer.OrdinalIgnoreCase);
+        _resultColumnTypes = columnTypes;
         _hiddenColumns = hiddenColumns;
         Rebuild();
     }
@@ -52,23 +58,15 @@ internal sealed class SchemaPane
     {
         _allTables = tables;
         _activeTables = activeTables;
-        // Auto-expand active tables and start loading their columns
-        foreach (var t in tables.Where(t => activeTables.Contains(t)))
-        {
-            _expandedTables.Add(t);
-            EnsureLoading(t);
-        }
-        // Also ensure active tables appear even if not yet in the full table list
+        // Auto-expand active tables (they show result columns — no schema loading needed)
         foreach (var t in activeTables)
-        {
             _expandedTables.Add(t);
-            EnsureLoading(t);
-        }
         Rebuild();
     }
 
     /// <summary>
-    /// Drains completed column-load tasks. Returns true if any completed (caller should redraw).
+    /// Drains completed column-load tasks for inactive tables.
+    /// Returns true if any completed (caller should redraw).
     /// </summary>
     public bool DrainLoads()
     {
@@ -117,7 +115,8 @@ internal sealed class SchemaPane
         if (_items[_selectedVisualIndex] is TableRow { IsExpanded: false } t)
         {
             _expandedTables.Add(t.Name);
-            EnsureLoading(t.Name);
+            if (!_activeTables.Contains(t.Name))
+                EnsureLoading(t.Name);
             Rebuild();
         }
     }
@@ -148,8 +147,7 @@ internal sealed class SchemaPane
 
     /// <summary>
     /// Toggles expand/collapse for a table row, or returns the column name to toggle
-    /// visibility for a column row that is part of the current result. Returns null
-    /// when the action was handled internally.
+    /// visibility for a result column row. Returns null when handled internally.
     /// </summary>
     public string? ToggleOrExpand()
     {
@@ -163,12 +161,16 @@ internal sealed class SchemaPane
                 else
                 {
                     _expandedTables.Add(t.Name);
-                    EnsureLoading(t.Name);
+                    if (!_activeTables.Contains(t.Name))
+                        EnsureLoading(t.Name);
                 }
                 Rebuild();
                 return null;
-            case ColumnRow { InResult: true } col:
-                return col.ColName;
+            case ColumnRow col:
+                // Only result columns (under active tables) can be toggled
+                return _hiddenColumns.Contains(col.ColName) || IsResultColumn(col.ColName)
+                    ? col.ColName
+                    : null;
             default:
                 return null;
         }
@@ -208,12 +210,15 @@ internal sealed class SchemaPane
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
+    private bool IsResultColumn(string colName) =>
+        _resultColumns.Any(c => string.Equals(c, colName, StringComparison.OrdinalIgnoreCase));
+
     private void EnsureLoading(string tableName)
     {
         if (_schema.GetCachedColumns(tableName).Count > 0)
-            return; // already in cache
+            return;
         if (_pendingLoads.ContainsKey(tableName))
-            return; // already in flight
+            return;
         _pendingLoads[tableName] = _schema.GetColumnsAsync(tableName);
     }
 
@@ -221,27 +226,53 @@ internal sealed class SchemaPane
     {
         _items = [];
 
-        // Active tables in the result that may not yet be in the full schema cache
-        var extraActive = _activeTables
-            .Where(t => !_allTables.Contains(t, StringComparer.OrdinalIgnoreCase))
-            .OrderBy(t => t, StringComparer.OrdinalIgnoreCase);
-
-        List<string> sorted =
+        // Active tables: those in _activeTables, plus any in _allTables that match.
+        // Extra active = active tables not yet in the full schema list.
+        List<string> activeTables =
         [
             .. _allTables
                 .Where(t => _activeTables.Contains(t))
                 .OrderBy(t => t, StringComparer.OrdinalIgnoreCase),
-            .. extraActive,
+            .. _activeTables
+                .Where(t => !_allTables.Contains(t, StringComparer.OrdinalIgnoreCase))
+                .OrderBy(t => t, StringComparer.OrdinalIgnoreCase),
+        ];
+
+        List<string> inactiveTables =
+        [
             .. _allTables
                 .Where(t => !_activeTables.Contains(t))
                 .OrderBy(t => t, StringComparer.OrdinalIgnoreCase),
         ];
 
-        foreach (var table in sorted)
+        // ── Active section ────────────────────────────────────────────────────
+        foreach (var table in activeTables)
         {
-            bool isActive = _activeTables.Contains(table);
             bool isExpanded = _expandedTables.Contains(table);
-            _items.Add(new TableRow(table, isActive, isExpanded));
+            _items.Add(new TableRow(table, IsActive: true, isExpanded));
+
+            if (!isExpanded || _resultColumns.Count == 0)
+                continue;
+
+            // Active tables show the columns that came back in the result, not schema columns
+            for (int i = 0; i < _resultColumns.Count; i++)
+            {
+                var colName = _resultColumns[i];
+                var colType = i < _resultColumnTypes.Count ? _resultColumnTypes[i] : "";
+                bool isHidden = _hiddenColumns.Contains(colName);
+                _items.Add(new ColumnRow(colName, colType, isHidden));
+            }
+        }
+
+        // ── Separator ─────────────────────────────────────────────────────────
+        if (activeTables.Count > 0 && inactiveTables.Count > 0)
+            _items.Add(new SeparatorRow());
+
+        // ── Inactive section ──────────────────────────────────────────────────
+        foreach (var table in inactiveTables)
+        {
+            bool isExpanded = _expandedTables.Contains(table);
+            _items.Add(new TableRow(table, IsActive: false, isExpanded));
 
             if (!isExpanded)
                 continue;
@@ -254,11 +285,7 @@ internal sealed class SchemaPane
             {
                 var cols = _schema.GetCachedColumns(table);
                 foreach (var col in cols)
-                {
-                    bool inResult = _resultColumnsSet.Contains(col.Name);
-                    bool isHidden = inResult && _hiddenColumns.Contains(col.Name);
-                    _items.Add(new ColumnRow(col.Name, col.Type, inResult, isHidden));
-                }
+                    _items.Add(new ColumnRow(col.Name, col.Type, IsHidden: false));
             }
         }
 
@@ -320,32 +347,27 @@ internal sealed class SchemaPane
             }
             case ColumnRow col:
             {
-                // Result columns: "  [x] Name  type"
-                // Schema-only columns: "    Name  type"
-                int prefixLen = col.InResult ? 7 : 4; // "  [x] " = 7, "    " = 4
+                // "  [x] Name  type"  or  "  [ ] Name  type"
                 int typeMaxLen = col.ColType.Length > 0 ? Math.Min(col.ColType.Length, 8) : 0;
                 int typePartLen = typeMaxLen > 0 ? typeMaxLen + 1 : 0;
-                int nameMaxLen = Math.Max(0, width - prefixLen - typePartLen);
+                int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
                 var namePart = col.ColName.Length > nameMaxLen
                     ? col.ColName[..nameMaxLen]
                     : col.ColName.PadRight(nameMaxLen);
                 var typePart = typeMaxLen > 0
                     ? " " + (col.ColType.Length > typeMaxLen ? col.ColType[..typeMaxLen] : col.ColType)
                     : "";
-                string line;
-                if (col.InResult)
-                {
-                    var checkbox = col.IsHidden ? "[ ] " : "[x] ";
-                    line = $"  {checkbox}{namePart}{typePart}";
-                }
-                else
-                {
-                    line = $"    {namePart}{typePart}";
-                }
+                var checkbox = col.IsHidden ? "[ ] " : "[x] ";
+                var line = $"  {checkbox}{namePart}{typePart}";
                 if (col.IsHidden)
                     WriteCell(selected ? Ansi.Color(line, "\x1b[2;7m") : Ansi.Dim(line), width);
                 else
                     WriteCell(selected ? Ansi.Color(line, "\x1b[7m") : line, width);
+                break;
+            }
+            case SeparatorRow:
+            {
+                System.Console.Write(Ansi.Dim(new string('─', width)));
                 break;
             }
             case LoadingRow:
