@@ -23,6 +23,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
     {
         Editor,
         Results,
+        Schema,
     }
 
     private bool _running;
@@ -33,10 +34,17 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
     private Task<QueryOutcome>? _queryTask;
     private CancellationTokenSource? _queryCts;
-    private Task<List<string>>? _autocompleteTask;
+    private Task<List<CompletionItem>>? _autocompleteTask;
 
     private int _lastQueryStartLine; // absolute editor line where the last submitted query began
     private string? _savedDraft; // saved editor text while browsing history
+
+    // Context menu items parallel to _results.ShowContextMenu labels
+    private List<(string label, Action action)> _contextMenuItems = [];
+
+    // Schema pane
+    private readonly SchemaPane _schemaPane = new();
+    private HashSet<string> _activeTables = new();
 
     public KustoTuiApp(
         LogsQueryClient client,
@@ -101,14 +109,21 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             {
                 var completions = await at;
                 _autocompleteTask = null;
-                if (completions.Count == 1)
+                if (_editor.IsAutocompleteVisible)
                 {
-                    _editor.ShowAutocomplete(completions);
-                    _editor.AutocompleteAccept();
-                }
-                else if (completions.Count > 1)
-                {
-                    _editor.ShowAutocomplete(completions);
+                    if (completions.Count == 1)
+                    {
+                        _editor.ShowAutocomplete(completions);
+                        _editor.AutocompleteAccept();
+                    }
+                    else if (completions.Count > 1)
+                    {
+                        _editor.ShowAutocomplete(completions);
+                    }
+                    else
+                    {
+                        _editor.DismissAutocomplete();
+                    }
                 }
                 Redraw();
             }
@@ -123,10 +138,14 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 {
                     _results.SetResults(
                         outcome.Columns!,
+                        outcome.ColumnTypes ?? [],
                         outcome.Rows!,
                         outcome.Elapsed,
                         outcome.PartialError
                     );
+                    _activeTables = outcome.ActiveTables is not null
+                        ? new HashSet<string>(outcome.ActiveTables, StringComparer.OrdinalIgnoreCase)
+                        : KqlAutocomplete.FindAllTables(outcome.Query, _schema.GetCachedTables());
                     _history.Add(
                         new QueryHistoryEntry(
                             outcome.Query,
@@ -194,6 +213,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 Redraw();
                 await Task.Delay(80, ct);
             }
+            else if (_autocompleteTask is { IsCompleted: false })
+            {
+                // Tick the autocomplete loading spinner
+                _editor.TickAutocompleteSpinner();
+                Redraw();
+                await Task.Delay(80, ct);
+            }
             else
             {
                 await Task.Delay(30, ct);
@@ -229,6 +255,16 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         {
             _focusedPane = _focusedPane == Focus.Editor ? Focus.Results : Focus.Editor;
             _editor.DismissAutocomplete();
+            if (_focusedPane == Focus.Results)
+                _results.InitSelection();
+            return;
+        }
+
+        // F3: toggle focus on schema sidebar
+        if (key.Key == ConsoleKey.F3)
+        {
+            _focusedPane = _focusedPane == Focus.Schema ? Focus.Editor : Focus.Schema;
+            _editor.DismissAutocomplete();
             return;
         }
 
@@ -244,9 +280,14 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             return;
         }
 
-        // Escape: layered dismiss — autocomplete → history browse → results focus → exit
+        // Escape: layered dismiss — context menu → autocomplete → history browse → results/schema focus → exit
         if (key.Key == ConsoleKey.Escape)
         {
+            if (_results.IsContextMenuVisible)
+            {
+                _results.DismissContextMenu();
+                return;
+            }
             if (_editor.DismissAutocomplete())
                 return;
             if (_history.IsBrowsing)
@@ -254,7 +295,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 ExitHistoryBrowse(restore: true);
                 return;
             }
-            if (_focusedPane == Focus.Results)
+            if (_focusedPane is Focus.Results or Focus.Schema)
             {
                 _focusedPane = Focus.Editor;
                 return;
@@ -281,22 +322,75 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             }
         }
 
-        // ── Results-pane focus: navigation keys scroll the table ──────────────
+        // ── Results-pane focus: context menu or cell navigation ───────────────
         if (_focusedPane == Focus.Results)
         {
+            if (_results.IsContextMenuVisible)
+            {
+                switch (key.Key)
+                {
+                    case ConsoleKey.UpArrow:
+                        _results.ContextMenuUp();
+                        return;
+                    case ConsoleKey.DownArrow:
+                        _results.ContextMenuDown();
+                        return;
+                    case ConsoleKey.Enter:
+                    case ConsoleKey.Spacebar:
+                        var idx = _results.AcceptContextMenuItem();
+                        if (idx.HasValue)
+                            ExecuteContextAction(idx.Value);
+                        return;
+                    case ConsoleKey.Escape:
+                        _results.DismissContextMenu();
+                        return;
+                }
+                return;
+            }
+
             switch (key.Key)
             {
                 case ConsoleKey.UpArrow:
-                    _results.ScrollUp();
+                    _results.MoveSelectionUp();
                     return;
                 case ConsoleKey.DownArrow:
-                    _results.ScrollDown();
+                    _results.MoveSelectionDown();
+                    return;
+                case ConsoleKey.LeftArrow:
+                    _results.MoveSelectionLeft();
+                    return;
+                case ConsoleKey.RightArrow:
+                    _results.MoveSelectionRight();
+                    return;
+                case ConsoleKey.Enter:
+                    BuildAndShowContextMenu();
                     return;
                 case ConsoleKey.PageUp:
                     _results.PageUp(ResultsPageSize);
                     return;
                 case ConsoleKey.PageDown:
                     _results.PageDown(ResultsPageSize);
+                    return;
+            }
+            return;
+        }
+
+        // ── Schema-pane focus: navigate list, Space/Enter toggles column ─────
+        if (_focusedPane == Focus.Schema)
+        {
+            switch (key.Key)
+            {
+                case ConsoleKey.UpArrow:
+                    _schemaPane.MoveUp();
+                    return;
+                case ConsoleKey.DownArrow:
+                    _schemaPane.MoveDown();
+                    return;
+                case ConsoleKey.Enter:
+                case ConsoleKey.Spacebar:
+                    var colName = _schemaPane.GetSelectedColumnName();
+                    if (colName is not null)
+                        _results.ToggleColumnVisibility(colName);
                     return;
             }
             return;
@@ -362,7 +456,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         _editor.ClearErrorMarker();
 
         if (entry.IsSuccess && entry.Columns is not null)
-            _results.SetResults(entry.Columns, entry.Rows!, entry.Elapsed, entry.PartialError);
+        {
+            _results.SetResults(entry.Columns, [], entry.Rows!, entry.Elapsed, entry.PartialError);
+            _activeTables = KqlAutocomplete.FindAllTables(
+                entry.Query,
+                _schema.GetCachedTables()
+            );
+        }
         else if (entry.ErrorMessage is not null)
             _results.SetError(entry.ErrorMessage);
         else
@@ -419,6 +519,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         if (string.IsNullOrEmpty(prefix))
             return;
 
+        _editor.ShowAutocompleteLoading();
         _autocompleteTask = KqlAutocomplete.GetCompletionsAsync(prefix, _editor.GetText(), _schema);
     }
 
@@ -450,6 +551,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
             sw.Stop();
             var columns = result.Table.Columns.Select(c => c.Name).ToList();
+            var columnTypes = result.Table.Columns.Select(c => c.Type.ToString()).ToList();
             var rows = result
                 .Table.Rows.Select(row =>
                 {
@@ -470,7 +572,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
                 partialError = errMsg.ReplaceLineEndings(" ").Replace("  ", " ").Trim();
             }
 
-            return QueryOutcome.Ok(query, columns, rows, sw.Elapsed, partialError);
+            var activeTables = result.AllTables
+                .Select(t => t.Name)
+                .Where(n => !string.IsNullOrEmpty(n)
+                            && !n.Equals("PrimaryResult", StringComparison.OrdinalIgnoreCase))
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            return QueryOutcome.Ok(query, columns, columnTypes, rows, sw.Elapsed, partialError, activeTables);
         }
         catch (OperationCanceledException)
         {
@@ -480,6 +588,77 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         {
             return QueryOutcome.Fail(query, ex.Message);
         }
+    }
+
+    // ── Context menu ──────────────────────────────────────────────────────────
+
+    private void BuildAndShowContextMenu()
+    {
+        var (colName, colType, cellValue) = _results.GetSelectedInfo();
+        if (string.IsNullOrEmpty(colName))
+            return;
+
+        bool isNumeric = colType is "int" or "long" or "real" or "decimal";
+        bool isStringOrNumeric =
+            isNumeric || colType is "string" or "dynamic" or "guid" or "bool";
+
+        _contextMenuItems =
+        [
+            ("Fit to contents", () => _results.FitSelectedColumnToContents(_splitRow)),
+            ("Hide column", () => _results.HideSelectedColumn()),
+        ];
+
+        if (isStringOrNumeric && cellValue is not null)
+        {
+            var filterValue = FormatFilterValue(cellValue, colType);
+            var whereClause = $"| where {colName} == {filterValue}";
+            _contextMenuItems.Add(
+                ($"Where {colName} == {filterValue}", () => AppendToActiveQuery(whereClause))
+            );
+        }
+
+        if (isNumeric)
+        {
+            foreach (var fn in new[] { "sum", "avg", "min", "max" })
+            {
+                var f = fn;
+                var cn = colName;
+                _contextMenuItems.Add(
+                    ($"{fn}({colName})", () => AppendToActiveQuery($"| summarize {f}({cn})"))
+                );
+            }
+            _contextMenuItems.Add(
+                ("count()", () => AppendToActiveQuery("| summarize count()"))
+            );
+        }
+
+        _results.ShowContextMenu(_contextMenuItems.Select(i => i.label).ToList());
+    }
+
+    private void ExecuteContextAction(int idx)
+    {
+        if (idx >= 0 && idx < _contextMenuItems.Count)
+            _contextMenuItems[idx].action();
+    }
+
+    private void AppendToActiveQuery(string clause)
+    {
+        var (text, _) = _editor.GetActiveQueryInfo();
+        _editor.ReplaceActiveQuery(text.TrimEnd() + "\n" + clause);
+        _focusedPane = Focus.Editor;
+    }
+
+    private static string FormatFilterValue(object? value, string colType)
+    {
+        if (value is null)
+            return "null";
+        if (value is DateTimeOffset dt)
+            return $"datetime('{dt:yyyy-MM-dd HH:mm:ss}')";
+        return colType switch
+        {
+            "string" or "dynamic" or "guid" => $"\"{value}\"",
+            _ => value.ToString() ?? "null",
+        };
     }
 
     // ── Rendering ─────────────────────────────────────────────────────────────
@@ -493,19 +672,44 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
         _splitRow = Math.Clamp(_height * 60 / 100, 4, _height - 6);
 
+        // Schema sidebar only when terminal is wide enough
+        int schemaPaneWidth = _width >= 80
+            ? Math.Max(28, Math.Min(36, _width * 27 / 100))
+            : 0;
+        // If terminal too narrow to show sidebar, redirect schema focus to editor
+        if (schemaPaneWidth == 0 && _focusedPane == Focus.Schema)
+            _focusedPane = Focus.Editor;
+        int editorWidth = _width - schemaPaneWidth;
+
+        // Refresh schema pane state
+        _schemaPane.UpdateColumns(
+            _results.GetColumns(),
+            _results.GetColumnTypes(),
+            _results.GetHiddenColumns()
+        );
+        _schemaPane.UpdateTables(_schema.GetCachedTables(), _activeTables);
+
         _results.Render(0, 0, _width, _splitRow, _focusedPane == Focus.Results);
-        _editor.Render(_splitRow, 0, _width, _height - _splitRow - 1);
+        _editor.Render(_splitRow, 0, editorWidth, _height - _splitRow - 1);
+        if (schemaPaneWidth > 0)
+            _schemaPane.Render(
+                _splitRow,
+                editorWidth,
+                schemaPaneWidth,
+                _height - _splitRow - 1,
+                _focusedPane == Focus.Schema
+            );
         DrawStatusBar(_height - 1);
 
         if (_focusedPane == Focus.Editor)
         {
             var (curRow, curCol) = _editor.GetCursorScreenPosition(_splitRow);
             curRow = Math.Clamp(curRow, 0, _height - 2);
-            curCol = Math.Clamp(curCol, 0, _width - 1);
+            curCol = Math.Clamp(curCol, 0, editorWidth - 1);
             System.Console.Write($"\x1b[{curRow + 1};{curCol + 1}H");
             System.Console.Write("\x1b[?25h");
         }
-        // Results focused or history browsing: leave cursor hidden
+        // Results / schema focused or history browsing: leave cursor hidden
     }
 
     private void DrawStatusBar(int row)
@@ -516,10 +720,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
             bar = "  F7 Older  │  F8 Newer  │  F5 Run this query  │  Esc Discard  ";
         else if (_focusedPane == Focus.Results)
             bar =
-                "  ↑↓ Scroll  │  PgUp/Dn Page  │  Ctrl+PgUp/Dn Always scroll  │  F2 / Esc  Edit query  ";
+                "  ↑↓←→ Cell  │  Enter Menu  │  PgUp/Dn Page  │  Ctrl+PgUp/Dn Always scroll  │  F2 / Esc  Edit  │  F3 Schema  ";
+        else if (_focusedPane == Focus.Schema)
+            bar =
+                "  ↑↓ Navigate  │  Space/Enter Toggle  │  F3 / Esc  Back to editor  ";
         else
             bar =
-                "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F7/F8 History  │  Esc Exit  ";
+                "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F3 Schema  │  F7/F8 History  │  Esc Exit  ";
         System.Console.Write(Ansi.Color(bar.PadRight(_width), "\x1b[7m"));
     }
 
@@ -564,6 +771,8 @@ internal sealed record QueryOutcome
     public bool IsSuccess { get; private init; }
     public string Query { get; private init; } = "";
     public IReadOnlyList<string>? Columns { get; private init; }
+    public IReadOnlyList<string>? ColumnTypes { get; private init; }
+    public IReadOnlySet<string>? ActiveTables { get; private init; }
     public IReadOnlyList<IReadOnlyDictionary<string, object?>>? Rows { get; private init; }
     public TimeSpan Elapsed { get; private init; }
     public string? ErrorMessage { get; private init; }
@@ -572,15 +781,19 @@ internal sealed record QueryOutcome
     public static QueryOutcome Ok(
         string query,
         IReadOnlyList<string> columns,
+        IReadOnlyList<string> columnTypes,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         TimeSpan elapsed,
-        string? partialError = null
+        string? partialError = null,
+        IReadOnlySet<string>? activeTables = null
     ) =>
         new()
         {
             IsSuccess = true,
             Query = query,
             Columns = columns,
+            ColumnTypes = columnTypes,
+            ActiveTables = activeTables,
             Rows = rows,
             Elapsed = elapsed,
             PartialError = partialError,

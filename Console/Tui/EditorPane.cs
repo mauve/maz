@@ -12,9 +12,25 @@ internal sealed class EditorPane
     private int? _errorMarkerLine;
 
     // Autocomplete state
-    private List<string> _completions = [];
+    private List<CompletionItem> _completions = [];
     private int _completionIndex;
     private bool _autocompleteVisible;
+    private bool _autocompleteLoading;
+    private int _autocompleteSpinnerFrame;
+
+    private static readonly string[] SpinnerFrames =
+    [
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏",
+    ];
 
     public bool IsAutocompleteVisible => _autocompleteVisible;
 
@@ -37,6 +53,7 @@ internal sealed class EditorPane
         _cursorCol = _lines[_cursorLine].Length;
         _scrollOffset = 0;
         _autocompleteVisible = false;
+        _autocompleteLoading = false;
         _errorMarkerLine = null;
     }
 
@@ -82,6 +99,21 @@ internal sealed class EditorPane
         return (string.Join("\n", _lines[start..(end + 1)]), start);
     }
 
+    /// <summary>Replace the active query block with new text and move cursor to end of replacement.</summary>
+    public void ReplaceActiveQuery(string newText)
+    {
+        var (start, end) = GetActiveQueryRange();
+        var newLines = newText.Split('\n').ToList();
+        if (newLines.Count == 0)
+            newLines = [""];
+        _lines.RemoveRange(start, end - start + 1);
+        _lines.InsertRange(start, newLines);
+        _cursorLine = start + newLines.Count - 1;
+        _cursorCol = _lines[_cursorLine].Length;
+        _autocompleteVisible = false;
+        _autocompleteLoading = false;
+    }
+
     // ── Word / completion helpers ─────────────────────────────────────────────
 
     public string GetWordAtCursor()
@@ -101,11 +133,20 @@ internal sealed class EditorPane
         return line[start.._cursorCol];
     }
 
-    public void ShowAutocomplete(List<string> completions)
+    /// <summary>Show loading throbber in the autocomplete popup while schema is being fetched.</summary>
+    public void ShowAutocompleteLoading()
+    {
+        _autocompleteLoading = true;
+        _autocompleteVisible = true;
+        _completions = [];
+    }
+
+    public void ShowAutocomplete(List<CompletionItem> completions)
     {
         _completions = completions;
         _completionIndex = 0;
         _autocompleteVisible = true;
+        _autocompleteLoading = false;
     }
 
     public bool DismissAutocomplete()
@@ -113,8 +154,11 @@ internal sealed class EditorPane
         if (!_autocompleteVisible)
             return false;
         _autocompleteVisible = false;
+        _autocompleteLoading = false;
         return true;
     }
+
+    public void TickAutocompleteSpinner() => _autocompleteSpinnerFrame++;
 
     public void AutocompleteUp()
     {
@@ -133,12 +177,13 @@ internal sealed class EditorPane
         if (!_autocompleteVisible || _completionIndex >= _completions.Count)
             return;
         var word = GetWordAtCursor();
-        var completion = _completions[_completionIndex];
+        var completion = _completions[_completionIndex].InsertText;
         var line = _lines[_cursorLine];
         int wordStart = _cursorCol - word.Length;
         _lines[_cursorLine] = line[..wordStart] + completion + line[_cursorCol..];
         _cursorCol = wordStart + completion.Length;
         _autocompleteVisible = false;
+        _autocompleteLoading = false;
     }
 
     /// <summary>Format the active query block in-place (pipe-per-line).</summary>
@@ -162,6 +207,7 @@ internal sealed class EditorPane
     public void HandleKey(ConsoleKeyInfo key)
     {
         _autocompleteVisible = false;
+        _autocompleteLoading = false;
         switch (key.Key)
         {
             case ConsoleKey.LeftArrow:
@@ -379,7 +425,7 @@ internal sealed class EditorPane
         }
 
         // ── Autocomplete popup ──
-        if (_autocompleteVisible && _completions.Count > 0)
+        if (_autocompleteVisible && (_completions.Count > 0 || _autocompleteLoading))
             RenderAutocomplete(top, left, width);
     }
 
@@ -427,26 +473,77 @@ internal sealed class EditorPane
     {
         int cursorScreenRow = paneTop + 2 + (_cursorLine - _scrollOffset);
 
-        const int PopupWidth = 32;
+        const int PopupWidth = 38;
         int popupLeft = left + 2 + Math.Min(_cursorCol, Math.Max(0, width - 2 - PopupWidth));
-        int maxItems = Math.Min(8, _completions.Count);
 
+        if (_autocompleteLoading)
+        {
+            MoveTo(cursorScreenRow + 1, popupLeft);
+            var spinner = SpinnerFrames[_autocompleteSpinnerFrame % SpinnerFrames.Length];
+            var text = (" " + spinner + " loading…").PadRight(PopupWidth);
+            if (text.Length > PopupWidth)
+                text = text[..PopupWidth];
+            System.Console.Write(Ansi.Dim(text));
+            return;
+        }
+
+        int maxItems = Math.Min(8, _completions.Count);
         for (int i = 0; i < maxItems; i++)
         {
             MoveTo(cursorScreenRow + 1 + i, popupLeft);
             var item = _completions[i];
             bool selected = i == _completionIndex;
-
-            var text = (" " + item).PadRight(PopupWidth);
-            if (text.Length > PopupWidth)
-                text = text[..PopupWidth];
-
-            System.Console.Write(
-                selected
-                    ? Ansi.Color(text, "\x1b[7m") // reverse video for selection
-                    : Ansi.Dim(text)
-            );
+            var content = BuildPopupItemContent(item, selected);
+            var visLen = Ansi.VisibleLength(content);
+            if (visLen >= PopupWidth)
+            {
+                System.Console.Write(ResultsPane.TruncateAnsi(content, PopupWidth));
+            }
+            else
+            {
+                System.Console.Write(content);
+                var padding = new string(' ', PopupWidth - visLen);
+                System.Console.Write(selected ? $"\x1b[7m{padding}\x1b[0m" : padding);
+            }
         }
+    }
+
+    /// <summary>
+    /// Builds the ANSI-highlighted string for one popup row.
+    /// Matched characters are rendered bright/normal; others are dim.
+    /// For the selected row (reverse video), matched characters additionally get underline.
+    /// </summary>
+    private static string BuildPopupItemContent(CompletionItem item, bool selected)
+    {
+        var matchSet = item.MatchIndices is not null
+            ? new HashSet<int>(item.MatchIndices)
+            : new HashSet<int>();
+
+        var sb = new System.Text.StringBuilder();
+
+        // Leading space
+        sb.Append(selected ? "\x1b[7m " : "\x1b[2m ");
+
+        // InsertText: per-character formatting
+        for (int i = 0; i < item.InsertText.Length; i++)
+        {
+            bool isMatch = matchSet.Contains(i);
+            if (selected)
+                sb.Append(isMatch ? "\x1b[7;4m" : "\x1b[7m");   // reverse+underline vs plain reverse
+            else
+                sb.Append(isMatch ? "\x1b[0m" : "\x1b[2m");      // normal weight vs dim
+            sb.Append(item.InsertText[i]);
+        }
+
+        // Type label — always dim/secondary
+        if (item.TypeLabel is not null)
+        {
+            sb.Append(selected ? "\x1b[7;2m" : "\x1b[2m");
+            sb.Append($" ({item.TypeLabel})");
+        }
+
+        sb.Append("\x1b[0m");
+        return sb.ToString();
     }
 
     private static void MoveTo(int row, int col) =>

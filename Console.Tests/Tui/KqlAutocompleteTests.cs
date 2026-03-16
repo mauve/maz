@@ -14,7 +14,9 @@ public class KqlAutocompleteTests
         new(new LogsQueryClient(new NullCredential()), null, null);
 
     private static async Task<List<string>> Complete(string prefix, string query = "") =>
-        await KqlAutocomplete.GetCompletionsAsync(prefix, query, EmptySchema());
+        (await KqlAutocomplete.GetCompletionsAsync(prefix, query, EmptySchema()))
+            .Select(c => c.InsertText)
+            .ToList();
 
     // ── Edge cases ────────────────────────────────────────────────────────────
 
@@ -189,6 +191,167 @@ public class KqlAutocompleteTests
         var results = await Complete("to");
         var distinct = results.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         Assert.AreEqual(distinct.Count, results.Count, "Completions must not contain duplicates");
+    }
+
+    // ── FindAllTables ─────────────────────────────────────────────────────────
+
+    private static readonly string[] SampleTables = ["SecurityEvent", "Heartbeat", "Syslog"];
+
+    [TestMethod]
+    public void FindAllTables_SingleTable_Found()
+    {
+        var found = KqlAutocomplete.FindAllTables("SecurityEvent | where Level == 1", SampleTables);
+        CollectionAssert.Contains(found.ToList(), "SecurityEvent");
+        Assert.AreEqual(1, found.Count);
+    }
+
+    [TestMethod]
+    public void FindAllTables_UnionQuery_FindsMultiple()
+    {
+        var found = KqlAutocomplete.FindAllTables(
+            "union SecurityEvent, Heartbeat | where TimeGenerated > ago(1d)",
+            SampleTables
+        );
+        Assert.AreEqual(2, found.Count);
+        CollectionAssert.Contains(found.ToList(), "SecurityEvent");
+        CollectionAssert.Contains(found.ToList(), "Heartbeat");
+    }
+
+    [TestMethod]
+    public void FindAllTables_JoinQuery_FindsBothTables()
+    {
+        var found = KqlAutocomplete.FindAllTables(
+            "SecurityEvent | join kind=inner (Syslog | where Facility == \"kern\") on Computer",
+            SampleTables
+        );
+        CollectionAssert.Contains(found.ToList(), "SecurityEvent");
+        CollectionAssert.Contains(found.ToList(), "Syslog");
+    }
+
+    [TestMethod]
+    public void FindAllTables_TableNameInString_NotCounted()
+    {
+        // "SecurityEvent" inside a string literal should not be detected
+        var found = KqlAutocomplete.FindAllTables(
+            "print \"SecurityEvent\"",
+            SampleTables
+        );
+        Assert.AreEqual(0, found.Count);
+    }
+
+    [TestMethod]
+    public void FindAllTables_TableNameInComment_NotCounted()
+    {
+        var found = KqlAutocomplete.FindAllTables(
+            "Heartbeat // SecurityEvent is another table\n| where Computer != \"\"",
+            SampleTables
+        );
+        var list = found.ToList();
+        CollectionAssert.Contains(list, "Heartbeat");
+        CollectionAssert.DoesNotContain(list, "SecurityEvent");
+    }
+
+    [TestMethod]
+    public void FindAllTables_CaseInsensitive()
+    {
+        var found = KqlAutocomplete.FindAllTables("securityevent | take 10", SampleTables);
+        CollectionAssert.Contains(found.ToList(), "SecurityEvent");
+    }
+
+    [TestMethod]
+    public void FindAllTables_NoKnownTable_ReturnsEmpty()
+    {
+        var found = KqlAutocomplete.FindAllTables("print 'hello'", SampleTables);
+        Assert.AreEqual(0, found.Count);
+    }
+
+    // ── Fuzzy / subsequence matching ─────────────────────────────────────────
+
+    [TestMethod]
+    public async Task GetCompletions_SubsequenceMatch_FindsSummarize()
+    {
+        // "smrz" is a subsequence of "summarize"
+        var results = await Complete("smrz");
+        CollectionAssert.Contains(results, "summarize");
+    }
+
+    [TestMethod]
+    public async Task GetCompletions_SubsequenceMatch_FindsWhere()
+    {
+        // "whr" is a subsequence of "where"
+        var results = await Complete("whr");
+        CollectionAssert.Contains(results, "where");
+    }
+
+    [TestMethod]
+    public async Task GetCompletions_SubsequenceMatch_PrefixSortedBeforeFuzzy()
+    {
+        // "whe" is a prefix of "where", so "where" should appear before any pure-subsequence match
+        var results = await Complete("whe");
+        var whereIdx = results.IndexOf("where");
+        Assert.IsTrue(whereIdx >= 0, "'where' should be in results");
+        // No result appearing before 'where' should be a non-prefix match
+        for (int i = 0; i < whereIdx; i++)
+            Assert.IsTrue(
+                results[i].StartsWith("whe", StringComparison.OrdinalIgnoreCase),
+                $"'{results[i]}' before 'where' should be a prefix match"
+            );
+    }
+
+    [TestMethod]
+    public void IsSubsequenceMatch_ValidSubsequence_ReturnsTrue()
+    {
+        Assert.IsTrue(KqlAutocomplete.IsSubsequenceMatch("summarize", "smrz"));
+        Assert.IsTrue(KqlAutocomplete.IsSubsequenceMatch("where", "whr"));
+        Assert.IsTrue(KqlAutocomplete.IsSubsequenceMatch("project", "prj"));
+    }
+
+    [TestMethod]
+    public void IsSubsequenceMatch_CaseInsensitive_ReturnsTrue()
+    {
+        Assert.IsTrue(KqlAutocomplete.IsSubsequenceMatch("Where", "WHR"));
+    }
+
+    [TestMethod]
+    public void IsSubsequenceMatch_NotASubsequence_ReturnsFalse()
+    {
+        Assert.IsFalse(KqlAutocomplete.IsSubsequenceMatch("where", "xyz"));
+        Assert.IsFalse(KqlAutocomplete.IsSubsequenceMatch("abc", "abcd")); // pattern longer than text
+    }
+
+    private static readonly int[] ExpectedPrefixIndices = [0, 1, 2];
+    private static readonly int[] ExpectedSubseqIndices = [0, 1, 3];
+
+    [TestMethod]
+    public void ComputeMatchIndices_PrefixMatch_ReturnsLeadingIndices()
+    {
+        var indices = KqlAutocomplete.ComputeMatchIndices("where", "whe");
+        CollectionAssert.AreEqual(ExpectedPrefixIndices, indices);
+    }
+
+    [TestMethod]
+    public void ComputeMatchIndices_SubsequenceMatch_ReturnsCorrectPositions()
+    {
+        // "whr" matches w(0) h(1) r(3) in "where"
+        var indices = KqlAutocomplete.ComputeMatchIndices("where", "whr");
+        CollectionAssert.AreEqual(ExpectedSubseqIndices, indices);
+    }
+
+    [TestMethod]
+    public void ComputeMatchIndices_NoMatch_ReturnsEmpty()
+    {
+        var indices = KqlAutocomplete.ComputeMatchIndices("where", "xyz");
+        Assert.AreEqual(0, indices.Length);
+    }
+
+    [TestMethod]
+    public async Task GetCompletions_ItemsHaveMatchIndices()
+    {
+        var raw = await KqlAutocomplete.GetCompletionsAsync("whr", "", EmptySchema());
+        var whereItem = raw.FirstOrDefault(c => c.InsertText == "where");
+        Assert.IsNotNull(whereItem, "'where' should be in results for 'whr'");
+        Assert.IsNotNull(whereItem.MatchIndices, "MatchIndices should be set");
+        Assert.IsTrue(whereItem.MatchIndices!.Length > 0, "MatchIndices should not be empty");
     }
 
     // ── Context: pipe detection ───────────────────────────────────────────────
