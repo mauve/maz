@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Nodes;
 using Azure.ResourceManager;
 
 namespace Console.Rendering;
@@ -59,7 +60,7 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
         }
 
         var formatterOptions = options.FormatterOptions ?? new ValueFormatterOptions();
-        var columns = DiscoverColumns(typeof(T));
+        var columns = DiscoverColumns(typeof(T), collected[0]);
         if (columns.Count == 0)
         {
             output.WriteLine("(no results)");
@@ -173,8 +174,19 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
 
     private record ColumnDef(string PropertyPath, string DisplayName, Func<object, object?> Getter);
 
-    private static List<ColumnDef> DiscoverColumns(Type type)
+    private static List<ColumnDef> DiscoverColumns(Type type) =>
+        DiscoverColumns(type, sample: null);
+
+    /// <summary>
+    /// Discovers columns either via reflection (for strongly-typed objects and ArmResources)
+    /// or by inspecting a sample <see cref="JsonObject"/> for scalar top-level keys.
+    /// </summary>
+    private static List<ColumnDef> DiscoverColumns(Type type, object? sample)
     {
+        // JsonNode / JsonObject: discover columns from the JSON keys
+        if (typeof(JsonNode).IsAssignableFrom(type) && sample is JsonObject sampleObj)
+            return DiscoverJsonColumns(sampleObj);
+
         // For ArmResource types, use the .Data property
         var dataType = type;
         Func<object, object?> dataGetter = o => o;
@@ -206,6 +218,30 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
                         var data = getter(o);
                         return data == null ? null : p.GetValue(data);
                     }
+                )
+            );
+        }
+        return columns;
+    }
+
+    /// <summary>
+    /// Discovers columns from a <see cref="JsonObject"/> sample by picking top-level
+    /// scalar (string, number, boolean) properties.
+    /// </summary>
+    private static List<ColumnDef> DiscoverJsonColumns(JsonObject sample)
+    {
+        var columns = new List<ColumnDef>();
+        foreach (var (key, node) in sample)
+        {
+            if (node is null or JsonObject or JsonArray)
+                continue; // skip nulls, nested objects and arrays
+
+            var k = key;
+            columns.Add(
+                new ColumnDef(
+                    k,
+                    ToDisplayName(k),
+                    o => (o as JsonObject)?[k]?.ToString()
                 )
             );
         }
