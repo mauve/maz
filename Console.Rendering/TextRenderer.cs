@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Text.Json.Nodes;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Models;
 
@@ -50,18 +51,37 @@ internal class TextItemRenderer(
         if (dataValue == null)
             return Task.CompletedTask;
 
+        // JsonNode: render JSON properties directly instead of using reflection
+        if (dataValue is JsonObject jsonObj)
+        {
+            var entries = new List<(string Label, string Value)>();
+            foreach (var (key, node) in jsonObj)
+            {
+                if (node is null)
+                    continue;
+                var formatted = ValueFormatter.Format(node.ToString(), fmtOpts);
+                entries.Add((key, ApplyAnsi(formatted)));
+            }
+            if (entries.Count > 0)
+                DefinitionList.Write(output, entries);
+            output.WriteLine();
+            return Task.CompletedTask;
+        }
+
         var dataType = dataValue.GetType();
         var properties = dataType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 
-        var entries = new List<(string Label, string Value)>();
-        foreach (var prop in properties)
         {
-            if (TryFormatField(dataType, prop, dataValue, out var formattedValue))
-                entries.Add((prop.Name, formattedValue!));
-        }
+            var entries = new List<(string Label, string Value)>();
+            foreach (var prop in properties)
+            {
+                if (TryFormatField(dataType, prop, dataValue, out var formattedValue))
+                    entries.Add((prop.Name, formattedValue!));
+            }
 
-        if (entries.Count > 0)
-            DefinitionList.Write(output, entries);
+            if (entries.Count > 0)
+                DefinitionList.Write(output, entries);
+        }
 
         output.WriteLine();
         return Task.CompletedTask;
