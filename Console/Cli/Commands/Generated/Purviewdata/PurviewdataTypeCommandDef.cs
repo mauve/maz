@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataTypeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "type";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataTypeGetBusinessMetadataDefByGuidCommandDef GetBusinessMetadataDefByGuid = new(auth);
     public readonly PurviewdataTypeGetBusinessMetadataDefByNameCommandDef GetBusinessMetadataDefByName = new(auth);
     public readonly PurviewdataTypeGetClassificationDefByGuidCommandDef GetClassificationDefByGuid = new(auth);

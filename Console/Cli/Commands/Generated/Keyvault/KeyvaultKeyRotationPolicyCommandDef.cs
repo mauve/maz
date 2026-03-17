@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultKeyRotationPolicyCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "rotation-policy";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultKeyRotationPolicyShowCommandDef Show = new(auth);
     public readonly KeyvaultKeyRotationPolicyUpdateCommandDef Update = new(auth);
 }

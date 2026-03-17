@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DigitaltwinsdataDigitaltwinmodelCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "digitaltwinmodel";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DigitaltwinsdataDigitaltwinmodelListCommandDef List = new(auth);
     public readonly DigitaltwinsdataDigitaltwinmodelCreateCommandDef Create = new(auth);
     public readonly DigitaltwinsdataDigitaltwinmodelShowCommandDef Show = new(auth);

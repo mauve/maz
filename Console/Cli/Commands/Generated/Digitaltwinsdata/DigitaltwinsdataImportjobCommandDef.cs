@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DigitaltwinsdataImportjobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "importjob";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DigitaltwinsdataImportjobListCommandDef List = new(auth);
     public readonly DigitaltwinsdataImportjobGetByIdCommandDef GetById = new(auth);
     public readonly DigitaltwinsdataImportjobAddCommandDef Add = new(auth);

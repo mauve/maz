@@ -8,6 +8,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataRemoveuserfromallgroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "removeuserfromallgroup";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataRemoveuserfromallgroupRemoveAllCommandDef RemoveAll = new(auth);
 }

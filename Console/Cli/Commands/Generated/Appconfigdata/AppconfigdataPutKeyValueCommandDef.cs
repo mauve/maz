@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataPutKeyValueCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "put-key-value";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataPutKeyValueSetCommandDef Set = new(auth);
 }

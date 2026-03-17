@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "webpubsubdata";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataAddConnectionToGroupCommandDef AddConnectionToGroup = new(auth);
     public readonly WebpubsubdataAddUserToGroupCommandDef AddUserToGroup = new(auth);
     public readonly WebpubsubdataAddconnectionstogroupCommandDef Addconnectionstogroup = new(auth);

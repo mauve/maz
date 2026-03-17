@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataAddUserToGroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "add-user-to-group";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataAddUserToGroupAddCommandDef Add = new(auth);
 }

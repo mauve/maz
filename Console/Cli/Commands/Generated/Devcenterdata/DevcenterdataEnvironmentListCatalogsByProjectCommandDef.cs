@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DevcenterdataEnvironmentListCatalogsByProjectCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-catalogs-by-project";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly DevCenterOptionPack DevCenter = new();
 
@@ -28,7 +28,7 @@ public partial class DevcenterdataEnvironmentListCatalogsByProjectCommandDef(Aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://devcenter.azure.com/.default");
         var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

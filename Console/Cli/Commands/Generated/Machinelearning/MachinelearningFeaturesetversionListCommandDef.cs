@@ -65,7 +65,7 @@ public partial class MachinelearningFeaturesetversionListCommandDef(AuthOptionPa
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);

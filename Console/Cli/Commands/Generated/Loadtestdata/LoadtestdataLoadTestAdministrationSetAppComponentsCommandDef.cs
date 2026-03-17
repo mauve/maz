@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LoadtestdataLoadTestAdministrationSetAppComponentsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "set-app-components";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly LoadTestingOptionPack LoadTest = new();
 
@@ -28,7 +28,7 @@ public partial class LoadtestdataLoadTestAdministrationSetAppComponentsCommandDe
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://cnt-prod.loadtesting.azure.com/.default");
         var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

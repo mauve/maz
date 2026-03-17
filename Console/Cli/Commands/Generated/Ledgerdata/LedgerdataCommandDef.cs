@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "ledgerdata";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataCreateLedgerEntryCommandDef CreateLedgerEntry = new(auth);
     public readonly LedgerdataCreateOrUpdateUserCommandDef CreateOrUpdateUser = new(auth);
     public readonly LedgerdataDeleteUserCommandDef DeleteUser = new(auth);

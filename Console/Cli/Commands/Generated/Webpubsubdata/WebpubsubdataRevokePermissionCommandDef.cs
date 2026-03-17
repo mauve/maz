@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataRevokePermissionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "revoke-permission";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataRevokePermissionRevokeCommandDef Revoke = new(auth);
 }

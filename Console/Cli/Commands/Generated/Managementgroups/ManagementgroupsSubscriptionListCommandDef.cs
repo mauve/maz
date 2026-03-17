@@ -28,7 +28,7 @@ public partial class ManagementgroupsSubscriptionListCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Management/managementGroups/{GroupId}/subscriptions";

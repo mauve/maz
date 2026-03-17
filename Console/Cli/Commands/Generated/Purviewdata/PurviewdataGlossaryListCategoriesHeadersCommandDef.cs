@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataGlossaryListCategoriesHeadersCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-categories-headers";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly PurviewOptionPack Purview = new();
 
@@ -40,7 +40,7 @@ public partial class PurviewdataGlossaryListCategoriesHeadersCommandDef(AuthOpti
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://purview.azure.net/.default");
         var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

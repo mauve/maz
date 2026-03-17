@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataNodeGetNodeExtensionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-node-extension";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly BatchAccountOptionPack BatchAccount = new();
 
@@ -43,7 +43,7 @@ public partial class BatchdataNodeGetNodeExtensionCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://batch.core.windows.net/.default");
         var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

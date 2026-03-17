@@ -14,8 +14,8 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultSecretDeletedRecoverCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "recover";
-    protected override bool IsDataPlane => true;
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDataPlane => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly KeyVaultOptionPack KeyVault = new();
 
@@ -29,7 +29,7 @@ public partial class KeyvaultSecretDeletedRecoverCommandDef(AuthOptionPack auth)
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://vault.azure.net/.default");
         var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

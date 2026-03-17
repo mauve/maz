@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultSettingCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "setting";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultSettingListCommandDef List = new(auth);
     public readonly KeyvaultSettingShowCommandDef Show = new(auth);
     public readonly KeyvaultSettingUpdateCommandDef Update = new(auth);

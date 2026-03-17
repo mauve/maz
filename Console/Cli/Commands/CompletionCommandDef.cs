@@ -1,4 +1,4 @@
-using System.CommandLine;
+using Console.Cli.Parsing;
 
 namespace Console.Cli.Commands;
 
@@ -11,11 +11,10 @@ public partial class CompletionCommandDef : CommandDef
 {
     public override string Name => "completion";
 
-    internal override Command Build()
+    /// <summary>Hide the "Authentication" group for this command.</summary>
+    internal CompletionCommandDef()
     {
-        var cmd = base.Build();
-        HiddenGroupRegistry.HideGroup(cmd, "Authentication");
-        return cmd;
+        HiddenHelpGroups = ["Authentication"];
     }
 
     public override string? DetailedDescription =>
@@ -35,10 +34,16 @@ public partial class CompletionCommandDef : CommandDef
               maz completion pwsh | Invoke-Expression
             """;
 
-    public readonly System.CommandLine.Argument<string> Shell = new("shell")
+    public readonly CliArgument<string> Shell = new()
     {
+        Name = "shell",
         Description = "Target shell: bash, zsh, fish, pwsh",
     };
+
+    internal override IEnumerable<CliArgument<string>> EnumerateArguments()
+    {
+        yield return Shell;
+    }
 
     protected override Task<int> ExecuteAsync(CancellationToken ct)
     {

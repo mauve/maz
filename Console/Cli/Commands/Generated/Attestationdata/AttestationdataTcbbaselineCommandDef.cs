@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AttestationdataTcbbaselineCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "tcbbaseline";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AttestationdataTcbbaselineShowCommandDef Show = new(auth);
 }

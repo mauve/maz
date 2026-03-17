@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DigitaltwinsdataDeletejobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deletejob";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DigitaltwinsdataDeletejobListCommandDef List = new(auth);
     public readonly DigitaltwinsdataDeletejobCreateCommandDef Create = new(auth);
     public readonly DigitaltwinsdataDeletejobShowCommandDef Show = new(auth);

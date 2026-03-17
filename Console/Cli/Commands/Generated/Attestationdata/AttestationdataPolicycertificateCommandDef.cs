@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AttestationdataPolicycertificateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "policycertificate";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AttestationdataPolicycertificateShowCommandDef Show = new(auth);
     public readonly AttestationdataPolicycertificateAddCommandDef Add = new(auth);
     public readonly AttestationdataPolicycertificateRemoveCommandDef Remove = new(auth);

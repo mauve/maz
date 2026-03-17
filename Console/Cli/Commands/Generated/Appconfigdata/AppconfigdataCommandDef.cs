@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "appconfigdata";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataCreateSnapshotCommandDef CreateSnapshot = new(auth);
     public readonly AppconfigdataDeleteKeyValueCommandDef DeleteKeyValue = new(auth);
     public readonly AppconfigdataDeleteLockCommandDef DeleteLock = new(auth);

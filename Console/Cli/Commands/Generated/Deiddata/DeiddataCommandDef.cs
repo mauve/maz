@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deiddata";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DeiddataCancelJobCommandDef CancelJob = new(auth);
     public readonly DeiddataDeidentifyTextCommandDef DeidentifyText = new(auth);
     public readonly DeiddataDeidentifydocumentCommandDef Deidentifydocument = new(auth);

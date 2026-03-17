@@ -8,6 +8,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DevcenterdataOperationstatusCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "operationstatus";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DevcenterdataOperationstatusGetCommandDef Get = new(auth);
 }

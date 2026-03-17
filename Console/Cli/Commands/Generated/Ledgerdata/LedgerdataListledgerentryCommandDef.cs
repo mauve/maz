@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataListledgerentryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "listledgerentry";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataListledgerentryListCommandDef List = new(auth);
 }

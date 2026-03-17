@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class MarketplacePrivateStoreCollectionsToSubscriptionsMappingCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "collections-to-subscriptions-mapping";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly RenderOptionPack Render = new();
 
@@ -25,7 +25,7 @@ public partial class MarketplacePrivateStoreCollectionsToSubscriptionsMappingCom
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Marketplace/privateStores/{PrivateStoreId}/collectionsToSubscriptionsMapping";

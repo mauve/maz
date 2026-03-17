@@ -480,7 +480,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         }
 
         System.Console.WriteLine();
-        await ConfigureCommandDef.RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(ParseResult), ct);
+        await ConfigureCommandDef.RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(), ct);
         System.Console.WriteLine();
     }
 

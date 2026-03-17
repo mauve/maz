@@ -1,15 +1,13 @@
-using System.CommandLine;
-
 namespace Console.Cli;
 
 internal static class FuzzyCommandMatcher
 {
     private const int MaxResults = 5;
 
-    public static IReadOnlyList<(int Score, Command Cmd)> FindMatches(Command parent, string token)
+    public static IReadOnlyList<(int Score, CommandDef Cmd)> FindMatches(CommandDef parent, string token)
     {
         return parent
-            .Subcommands.Where(c => !c.Hidden)
+            .EnumerateChildren()
             .Select(c => (Score: Score(token, c.Name), Cmd: c))
             .Where(x => x.Score > 0)
             .OrderByDescending(x => x.Score)

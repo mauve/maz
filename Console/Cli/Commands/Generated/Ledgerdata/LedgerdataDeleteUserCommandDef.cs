@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataDeleteUserCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete-user";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataDeleteUserDeleteCommandDef Delete = new(auth);
 }

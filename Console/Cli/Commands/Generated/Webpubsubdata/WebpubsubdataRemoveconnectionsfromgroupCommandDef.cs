@@ -8,6 +8,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataRemoveconnectionsfromgroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "removeconnectionsfromgroup";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataRemoveconnectionsfromgroupShowCommandDef Show = new(auth);
 }

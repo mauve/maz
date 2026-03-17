@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class ServicebusdataListentityCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "listentity";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly ServicebusdataListentityListCommandDef List = new(auth);
 }

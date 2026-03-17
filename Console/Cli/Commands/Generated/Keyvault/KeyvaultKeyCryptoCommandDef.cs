@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultKeyCryptoCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "crypto";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultKeyCryptoDecryptCommandDef Decrypt = new(auth);
     public readonly KeyvaultKeyCryptoEncryptCommandDef Encrypt = new(auth);
     public readonly KeyvaultKeyCryptoReleaseCommandDef Release = new(auth);

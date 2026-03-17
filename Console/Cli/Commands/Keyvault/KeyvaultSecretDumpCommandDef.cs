@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "dump";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly KeyVaultOptionPack KeyVault = new();
 
@@ -25,7 +25,7 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
         var vaultUri = await KeyVault.ResolveDataplaneRefAsync(armClient, ct);

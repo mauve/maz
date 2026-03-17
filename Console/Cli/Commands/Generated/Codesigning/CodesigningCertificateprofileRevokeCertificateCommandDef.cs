@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class CodesigningCertificateprofileRevokeCertificateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "revoke-certificate";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly StorageAccountOptionPack StorageAccount = new();
     public readonly RenderOptionPack Render = new();
@@ -47,7 +47,7 @@ public partial class CodesigningCertificateprofileRevokeCertificateCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));

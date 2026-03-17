@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataTaskCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "task";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataTaskCreateTaskCollectionCommandDef CreateTaskCollection = new(auth);
     public readonly BatchdataTaskListCommandDef List = new(auth);
     public readonly BatchdataTaskCreateCommandDef Create = new(auth);

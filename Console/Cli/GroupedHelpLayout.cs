@@ -1,101 +1,94 @@
-using System.CommandLine;
-using System.CommandLine.Help;
+using Console.Cli.Parsing;
 using Console.Rendering;
 
 namespace Console.Cli;
 
 internal static class GroupedHelpLayout
 {
-    public static IEnumerable<Func<HelpContext, bool>> Create(HelpContext _)
+    /// <summary>Render help for a command to the given output.</summary>
+    public static void Render(TextWriter output, CommandDef cmd, bool showAdvanced = false,
+        List<CommandDef>? commandPath = null)
     {
-        yield return WriteUsageSection;
-        yield return WriteArgumentsSection;
-        yield return ctx => WriteGroupedOptions(ctx, showAdvanced: false);
-        yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: false);
-        yield return DescriptionSection;
-        yield return RemarksSection;
+        WriteUsageSection(output, cmd, commandPath);
+        WriteArgumentsSection(output, cmd);
+        WriteGroupedOptions(output, cmd, showAdvanced, commandPath);
+        WriteSubcommandsSection(output, cmd, showDetailedDescriptions: showAdvanced);
+        WriteDescriptionSection(output, cmd);
+        WriteRemarksSection(output, cmd);
     }
 
-    public static IEnumerable<Func<HelpContext, bool>> CreateWithAdvanced(HelpContext _)
+    private static void WriteUsageSection(TextWriter output, CommandDef cmd,
+        List<CommandDef>? commandPath)
     {
-        yield return WriteUsageSection;
-        yield return WriteArgumentsSection;
-        yield return ctx => WriteGroupedOptions(ctx, showAdvanced: true);
-        yield return ctx => WriteSubcommandsSection(ctx, showDetailedDescriptions: true);
-        yield return DescriptionSection;
-        yield return RemarksSection;
-    }
+        var names = commandPath is not null
+            ? commandPath.Select(c => c.Name).ToList()
+            : [cmd.Name];
+        var baseLine = string.Join(" ", names);
 
-    private static bool WriteUsageSection(HelpContext ctx)
-    {
-        var cmd = ctx.Command;
-        var ancestors = Ancestors(cmd).ToList();
-        ancestors.Reverse();
-        var baseLine = string.Join(" ", ancestors.Select(a => a.Name).Append(cmd.Name));
+        var allOpts = commandPath is not null
+            ? cmd.EnumerateAllOptionsWithRecursive(commandPath)
+            : cmd.EnumerateAllOptions();
+        bool hasOptions = allOpts.Any(o => !o.Hidden);
+        bool hasSubcommands = cmd.EnumerateChildren().Any();
 
-        bool hasOptions = AllOptions(cmd).Any(o => !o.Hidden);
-        bool hasSubcommands = cmd.Subcommands.Any(c => !c.Hidden);
-
-        ctx.Output.WriteLine();
-        ctx.Output.WriteLine(Ansi.Header("Usage:"));
+        output.WriteLine();
+        output.WriteLine(Ansi.Header("Usage:"));
 
         if (hasOptions)
-            ctx.Output.WriteLine($"  {baseLine} [options]");
+            output.WriteLine($"  {baseLine} [options]");
         if (hasSubcommands)
-            ctx.Output.WriteLine($"  {baseLine} [command]");
+            output.WriteLine($"  {baseLine} [command]");
         if (!hasOptions && !hasSubcommands)
-            ctx.Output.WriteLine($"  {baseLine}");
-
-        return true;
+            output.WriteLine($"  {baseLine}");
     }
 
-    private static bool WriteArgumentsSection(HelpContext ctx)
+    private static void WriteArgumentsSection(TextWriter output, CommandDef cmd)
     {
-        var args = ctx
-            .Command.Arguments.Where(a => !a.Hidden && !string.IsNullOrEmpty(a.Name))
-            .ToList();
+        var args = cmd.EnumerateArguments().Where(a => !a.Hidden).ToList();
         if (args.Count == 0)
-            return false;
+            return;
 
-        ctx.Output.WriteLine();
-        ctx.Output.WriteLine(Ansi.Header("Arguments:"));
+        output.WriteLine();
+        output.WriteLine(Ansi.Header("Arguments:"));
 
-        var nameWidth = args.Max(a => a.Name.Length + 2); // +2 for < >
+        var nameWidth = args.Max(a => a.Name.Length + 2);
         foreach (var arg in args)
         {
             var label = $"<{arg.Name}>";
             var padded = label.PadRight(nameWidth);
             var desc = arg.Description ?? "";
-            ctx.Output.WriteLine(
+            output.WriteLine(
                 string.IsNullOrEmpty(desc)
                     ? $"  {Ansi.White(label)}"
                     : $"  {Ansi.White(padded)}  {Ansi.Dim(desc)}"
             );
         }
-
-        return true;
     }
 
-    private static bool WriteGroupedOptions(HelpContext ctx, bool showAdvanced)
+    private static void WriteGroupedOptions(TextWriter output, CommandDef cmd, bool showAdvanced,
+        List<CommandDef>? commandPath)
     {
-        // Collect all non-hidden options: command-local first, then recursive from ancestors.
-        var all = AllOptions(ctx.Command).Where(o => !o.Hidden).ToList();
+        var allOpts = commandPath is not null
+            ? cmd.EnumerateAllOptionsWithRecursive(commandPath).ToList()
+            : cmd.EnumerateAllOptions().ToList();
+
+        var all = allOpts.Where(o => !o.Hidden).ToList();
         if (all.Count == 0)
-            return false;
+            return;
 
         var visible = showAdvanced
             ? all
-            : all.Where(o => !AdvancedOptionRegistry.IsAdvanced(o)).ToList();
-        bool hasAdvanced = all.Any(o => AdvancedOptionRegistry.IsAdvanced(o));
+            : all.Where(o => !o.IsAdvanced).ToList();
+        bool hasAdvanced = all.Any(o => o.IsAdvanced);
 
-        // Partition into ungrouped (no OptionPack tag) and ordered groups.
-        var ungrouped = new List<Option>();
-        var groupList = new List<(OptionGroupInfo Info, List<Option> Options)>();
+        // Partition into ungrouped and ordered groups.
+        var ungrouped = new List<CliOption>();
+        var groupList = new List<(OptionGroupInfo Info, List<CliOption> Options)>();
         var groupIndex = new Dictionary<OptionGroupInfo, int>();
 
         foreach (var opt in visible)
         {
-            var info = HelpGroupRegistry.GetGroup(opt);
+            var info = opt.HelpGroup;
             if (info is null)
             {
                 ungrouped.Add(opt);
@@ -106,56 +99,50 @@ internal static class GroupedHelpLayout
                 {
                     idx = groupList.Count;
                     groupIndex[info] = idx;
-                    groupList.Add((info, new List<Option>()));
+                    groupList.Add((info, new List<CliOption>()));
                 }
                 groupList[idx].Options.Add(opt);
             }
         }
 
         if (ungrouped.Count == 0 && groupList.Count == 0)
-            return false;
+            return;
 
-        // Ungrouped (typically just --help)
         if (ungrouped.Count > 0)
-            WriteSection(ctx, "Options:", null, ungrouped);
+            WriteSection(output, "Options:", null, ungrouped);
 
         foreach (var (info, options) in groupList)
         {
-            if (!HiddenGroupRegistry.IsGroupHidden(ctx.Command, info.Title))
-                WriteSection(ctx, info.Title + ":", info.Description, options);
+            if (cmd.HiddenHelpGroups?.Contains(info.Title) == true)
+                continue;
+            WriteSection(output, info.Title + ":", info.Description, options);
         }
 
         if (!showAdvanced && hasAdvanced)
         {
-            ctx.Output.WriteLine();
-            ctx.Output.WriteLine(Ansi.Dim("  Use --help-more to show advanced options."));
+            output.WriteLine();
+            output.WriteLine(Ansi.Dim("  Use --help-more to show advanced options."));
         }
-
-        return true;
     }
 
     private static void WriteSection(
-        HelpContext ctx,
+        TextWriter output,
         string heading,
         string? description,
-        List<Option> options
+        List<CliOption> options
     )
     {
-        ctx.Output.WriteLine();
-        ctx.Output.WriteLine(Ansi.Header(heading));
+        output.WriteLine();
+        output.WriteLine(Ansi.Header(heading));
         if (!string.IsNullOrWhiteSpace(description))
-            ctx.Output.WriteLine($"  {Ansi.Dim(description)}");
+            output.WriteLine($"  {Ansi.Dim(description)}");
 
         var rows = options
             .Select(o =>
             {
-                var rawAliases = Enumerable.Concat([o.Name], o.Aliases).ToList();
-                var aliases = SplitAliasesWithValueHint(
-                    rawAliases,
-                    o is Option<bool>,
-                    o.AllowMultipleArgumentsPerToken
-                );
-                var meta = OptionMetadataRegistry.Get(o);
+                var rawAliases = o.AllNames.ToList();
+                var aliases = SplitAliasesWithValueHint(rawAliases, o.IsBool, o.AllowMultipleArgumentsPerToken);
+                var meta = o.Metadata;
                 var metadata = new List<string>();
                 if (o.Required)
                     metadata.Add("[required]");
@@ -176,22 +163,16 @@ internal static class GroupedHelpLayout
         foreach (var (aliases, main, metadata) in rows)
         {
             foreach (var alias in aliases)
-                ctx.Output.WriteLine($"  {alias}");
+                output.WriteLine($"  {alias}");
 
             if (!string.IsNullOrEmpty(main))
-                ctx.Output.WriteLine($"{descIndent}{Ansi.Dim(Ansi.StyleOptionDescription(main))}");
+                output.WriteLine($"{descIndent}{Ansi.Dim(Ansi.StyleOptionDescription(main))}");
 
             foreach (var meta in metadata)
-                ctx.Output.WriteLine($"{metaIndent}{Ansi.StyleOptionDescription(meta)}");
+                output.WriteLine($"{metaIndent}{Ansi.StyleOptionDescription(meta)}");
         }
     }
 
-    /// <summary>
-    /// Formats a list of raw aliases and appends the appropriate value indicator to the last alias.
-    /// Bool options: --foo + --no-foo compacted to --[no-]foo [true|false].
-    /// Multi-value options: last alias gets [value...].
-    /// Single-value options: last alias gets [value].
-    /// </summary>
     private static List<string> SplitAliasesWithValueHint(
         List<string> rawAliases,
         bool isBool,
@@ -200,7 +181,6 @@ internal static class GroupedHelpLayout
     {
         if (isBool)
         {
-            // Compact: --foo + --no-foo → --[no-]foo [true|false]
             var noSet = rawAliases
                 .Where(a => a.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
                 .ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -208,7 +188,7 @@ internal static class GroupedHelpLayout
             foreach (var alias in rawAliases)
             {
                 if (alias.StartsWith("--no-", StringComparison.OrdinalIgnoreCase))
-                    continue; // emitted as part of the main alias below
+                    continue;
                 if (
                     alias.StartsWith("--", StringComparison.Ordinal)
                     && noSet.Contains("--no-" + alias[2..])
@@ -222,43 +202,41 @@ internal static class GroupedHelpLayout
             return result;
         }
 
-        // Non-bool: always add value indicator
         var aliases = rawAliases.Select(Ansi.White).ToList();
         if (aliases.Count > 0)
             aliases[^1] += " " + Ansi.Cyan(isMultiValue ? "[value...]" : "[value]");
         return aliases;
     }
 
-    private static bool DescriptionSection(HelpContext ctx)
+    private static void WriteDescriptionSection(TextWriter output, CommandDef cmd)
     {
-        var description = ctx.Command.Description;
+        var description = cmd.Description;
         if (string.IsNullOrWhiteSpace(description))
-            return false;
-        ctx.Output.WriteLine();
-        ctx.Output.WriteLine(Ansi.Header("Description:"));
-        ctx.Output.WriteLine($"  {description}");
-        return true;
+            return;
+        output.WriteLine();
+        output.WriteLine(Ansi.Header("Description:"));
+        output.WriteLine($"  {description}");
     }
 
-    private static bool RemarksSection(HelpContext ctx)
+    private static void WriteRemarksSection(TextWriter output, CommandDef cmd)
     {
-        var text = RemarksRegistry.Get(ctx.Command);
+        var text = cmd.DetailedDescription;
         if (string.IsNullOrWhiteSpace(text))
-            return false;
-        ctx.Output.WriteLine();
+            return;
+        output.WriteLine();
         foreach (var line in text.Split('\n'))
-            ctx.Output.WriteLine(line.Length > 0 ? $"  {line.TrimEnd()}" : "");
-        return true;
+            output.WriteLine(line.Length > 0 ? $"  {line.TrimEnd()}" : "");
     }
 
-    private static bool WriteSubcommandsSection(HelpContext ctx, bool showDetailedDescriptions)
+    private static void WriteSubcommandsSection(TextWriter output, CommandDef cmd,
+        bool showDetailedDescriptions)
     {
-        var commands = ctx.Command.Subcommands.Where(c => !c.Hidden).ToList();
+        var commands = cmd.EnumerateChildren().ToList();
         if (commands.Count == 0)
-            return false;
+            return;
 
-        ctx.Output.WriteLine();
-        ctx.Output.WriteLine(Ansi.Header("Commands:"));
+        output.WriteLine();
+        output.WriteLine(Ansi.Header("Commands:"));
 
         bool hasAnyDetailedDescriptions = false;
 
@@ -266,7 +244,7 @@ internal static class GroupedHelpLayout
             .Select(command =>
             {
                 var name = Ansi.White(command.Name);
-                var displayName = DataPlaneRegistry.IsDataPlane(command)
+                var displayName = command.IsDataPlane
                     ? name + Ansi.LightRed("*")
                     : name;
                 var desc = command.Description ?? "";
@@ -279,9 +257,9 @@ internal static class GroupedHelpLayout
         foreach (var row in rows)
         {
             var padding = new string(' ', firstWidth - Ansi.VisibleLength(row.displayName));
-            ctx.Output.WriteLine($"  {row.displayName}{padding}  {row.desc}");
+            output.WriteLine($"  {row.displayName}{padding}  {row.desc}");
 
-            var detail = RemarksRegistry.Get(row.command);
+            var detail = row.command.DetailedDescription;
             if (string.IsNullOrWhiteSpace(detail))
                 continue;
 
@@ -294,41 +272,18 @@ internal static class GroupedHelpLayout
             {
                 if (line.Length == 0)
                 {
-                    ctx.Output.WriteLine();
+                    output.WriteLine();
                     continue;
                 }
 
-                ctx.Output.WriteLine($"    {Ansi.Dim(line.TrimEnd())}");
+                output.WriteLine($"    {Ansi.Dim(line.TrimEnd())}");
             }
         }
 
         if (!showDetailedDescriptions && hasAnyDetailedDescriptions)
         {
-            ctx.Output.WriteLine();
-            ctx.Output.WriteLine(Ansi.Dim("  Use --help-more to show detailed descriptions."));
-        }
-
-        return true;
-    }
-
-    private static IEnumerable<Option> AllOptions(Command cmd)
-    {
-        foreach (var opt in cmd.Options)
-            yield return opt;
-
-        foreach (var ancestor in Ancestors(cmd))
-        foreach (var opt in ancestor.Options)
-            if (opt.Recursive)
-                yield return opt;
-    }
-
-    private static IEnumerable<Command> Ancestors(Command cmd)
-    {
-        foreach (var parent in cmd.Parents.OfType<Command>())
-        {
-            yield return parent;
-            foreach (var anc in Ancestors(parent))
-                yield return anc;
+            output.WriteLine();
+            output.WriteLine(Ansi.Dim("  Use --help-more to show detailed descriptions."));
         }
     }
 }

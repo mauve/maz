@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultRoleassignmentCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "roleassignment";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultRoleassignmentListCommandDef List = new(auth);
     public readonly KeyvaultRoleassignmentShowCommandDef Show = new(auth);
     public readonly KeyvaultRoleassignmentCreateCommandDef Create = new(auth);

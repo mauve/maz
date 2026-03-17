@@ -8,7 +8,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataNodeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "node";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataNodeListNodesCommandDef ListNodes = new(auth);
     public readonly BatchdataNodeGetNodeCommandDef GetNode = new(auth);
     public readonly BatchdataNodeDeallocateNodeCommandDef DeallocateNode = new(auth);

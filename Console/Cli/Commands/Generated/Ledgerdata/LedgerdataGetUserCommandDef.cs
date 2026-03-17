@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataGetUserCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-user";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataGetUserShowCommandDef Show = new(auth);
 }

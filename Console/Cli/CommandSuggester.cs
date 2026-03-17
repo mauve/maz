@@ -1,5 +1,4 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
+using Console.Cli.Parsing;
 using Console.Rendering;
 
 namespace Console.Cli;
@@ -10,7 +9,7 @@ internal static class CommandSuggester
     /// Returns the first unmatched non-option token from the parse result,
     /// or null if there is no unknown command situation.
     /// </summary>
-    public static string? GetUnknownToken(ParseResult result)
+    public static string? GetUnknownToken(CliParseResult result)
     {
         foreach (var token in result.UnmatchedTokens)
         {
@@ -25,24 +24,25 @@ internal static class CommandSuggester
     /// or -1 if there are no matches and the caller should fall through to default error handling.
     /// </summary>
     public static int TrySuggest(
-        ParseResult result,
+        CliParseResult result,
         string[] originalArgs,
         bool interactive,
         TextWriter stderr,
-        Func<string?> readLine
+        Func<string?> readLine,
+        CommandDef rootDef
     )
     {
         var token = GetUnknownToken(result);
         if (token is null)
             return -1;
 
-        var parentCommand = result.CommandResult.Command;
+        var parentCommand = result.Command ?? rootDef;
         var matches = FuzzyCommandMatcher.FindMatches(parentCommand, token);
 
         if (matches.Count == 0)
             return -1;
 
-        var rootName = GetRootCommand(result).Name;
+        var rootName = rootDef.Name;
 
         if (interactive)
         {
@@ -56,7 +56,7 @@ internal static class CommandSuggester
                 stderr.Write($"Did you mean '{proposed}'? [Y/n]: ");
                 var response = readLine()?.Trim().ToLowerInvariant() ?? "";
                 if (response == "" || response == "y" || response == "yes")
-                    return ReinvokeWith(result, originalArgs, token, suggestion);
+                    return ReinvokeWith(rootDef, originalArgs, token, suggestion);
 
                 return 1;
             }
@@ -79,7 +79,7 @@ internal static class CommandSuggester
                     && choice >= 1
                     && choice <= matches.Count
                 )
-                    return ReinvokeWith(result, originalArgs, token, matches[choice - 1].Cmd.Name);
+                    return ReinvokeWith(rootDef, originalArgs, token, matches[choice - 1].Cmd.Name);
 
                 return 1;
             }
@@ -109,24 +109,23 @@ internal static class CommandSuggester
     }
 
     private static int ReinvokeWith(
-        ParseResult originalResult,
+        CommandDef rootDef,
         string[] originalArgs,
         string badToken,
         string replacement
     )
     {
         var newArgs = ReplaceFirst(originalArgs, badToken, replacement);
-        var rootCommand = GetRootCommand(originalResult);
-        var result2 = rootCommand.Parse(newArgs);
+        var result2 = CliParser.Parse(newArgs, rootDef);
 
         if (result2.Errors.Count > 0)
         {
             foreach (var error in result2.Errors)
-                System.Console.Error.WriteLine(Ansi.Red(error.Message));
+                System.Console.Error.WriteLine(Ansi.Red(error));
             return 1;
         }
 
-        return result2.Invoke();
+        return result2.Command!.InvokeAsync(CancellationToken.None).GetAwaiter().GetResult();
     }
 
     private static string[] ReplaceFirst(string[] args, string oldToken, string newToken)
@@ -141,13 +140,5 @@ internal static class CommandSuggester
             }
         }
         return result;
-    }
-
-    private static Command GetRootCommand(ParseResult result)
-    {
-        SymbolResult current = result.CommandResult;
-        while (current.Parent is not null)
-            current = current.Parent;
-        return ((CommandResult)current).Command;
     }
 }

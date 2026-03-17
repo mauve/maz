@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataGetLedgerEntryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-ledger-entry";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataGetLedgerEntryShowCommandDef Show = new(auth);
 }

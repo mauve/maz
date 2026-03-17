@@ -66,7 +66,7 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new LogsQueryClient(cred);
         QueryTimeRange timeRange = QueryTimeRange.All;
@@ -203,7 +203,7 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
             }
             else
             {
-                var diagLog = DiagnosticOptionPack.GetLog(ParseResult);
+                var diagLog = DiagnosticOptionPack.GetLog();
                 (resolvedId, _) =
                     await LoganalyticsWorkspaceResolver.ResolveWorkspaceCustomerIdAsync(
                         workspaceIdRaw,

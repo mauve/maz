@@ -36,7 +36,7 @@ public partial class CostmanagementBenefitutilizationsummaryListByProfileCommand
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/microsoft.Billing/billingAccounts/{BillingAccountId}/billingProfiles/{BillingProfileId}/providers/Microsoft.CostManagement/benefitUtilizationSummaries";

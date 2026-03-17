@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultRestoreCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "restore";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultRestoreSelectiveCommandDef Selective = new(auth);
     public readonly KeyvaultRestoreStartCommandDef Start = new(auth);
     public readonly KeyvaultRestoreShowStatusCommandDef ShowStatus = new(auth);

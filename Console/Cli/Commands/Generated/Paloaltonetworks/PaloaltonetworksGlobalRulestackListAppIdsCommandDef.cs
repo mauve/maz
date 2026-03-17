@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PaloaltonetworksGlobalRulestackListAppIdsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-app-ids";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly RenderOptionPack Render = new();
 
@@ -37,7 +37,7 @@ public partial class PaloaltonetworksGlobalRulestackListAppIdsCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/PaloAltoNetworks.Cloudngfw/globalRulestacks/{GlobalRulestackName}/listAppIds";

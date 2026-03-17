@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultSecretDeletedCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deleted";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultSecretDeletedListCommandDef List = new(auth);
     public readonly KeyvaultSecretDeletedShowCommandDef Show = new(auth);
     public readonly KeyvaultSecretDeletedPurgeCommandDef Purge = new(auth);

@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataDatasourceCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "datasource";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataDatasourceShowCommandDef Show = new(auth);
     public readonly SearchdataDatasourceCreateOrUpdateCommandDef CreateOrUpdate = new(auth);
     public readonly SearchdataDatasourceDeleteCommandDef Delete = new(auth);

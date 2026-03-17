@@ -1,16 +1,13 @@
-using System.CommandLine;
-using System.CommandLine.Help;
-using System.Linq.Expressions;
-using System.Reflection;
+using System.Diagnostics;
 using Azure.Core;
 using Console;
 using Console.Cli;
+using Console.Cli.Parsing;
 using Console.Cli.Shared;
 using Console.Config;
 using Console.Rendering;
 
 // Register per-type field visibility for the text renderer.
-// Only the token value is shown by default; use --show-all for full metadata.
 TextFieldRegistry.RegisterVisibleFields<AccessToken>("Token");
 
 // Load user config (before command tree is built).
@@ -36,34 +33,88 @@ bool needsFullTree = args.Any(a =>
 // the filter. Rewrite "--help-commands foo" -> "--help-commands=foo" to force consumption.
 args = RewriteHelpCommandsFilter(args);
 
-// First non-option arg that matches a known service is the target service.
-var candidate = args.FirstOrDefault(a => !a.StartsWith('-') && a.Length > 0);
+// First non-option, non-directive arg that matches a known service is the target service.
+var candidate = args.FirstOrDefault(a => !a.StartsWith('-') && !a.StartsWith('[') && a.Length > 0);
 string? targetService =
     needsFullTree ? null
     : candidate is not null && RootCommandDef.KnownServices.Contains(candidate) ? candidate
     : null;
 
 var rootDef = new RootCommandDef(targetService);
-var rootCmd = rootDef.Build();
 
 // Apply [global] option defaults (for non-string types like enums) and [cmd.X] per-command defaults.
-ApplyCommandDefaults(rootCmd, MazConfig.Current);
+ApplyCommandDefaults(rootDef, MazConfig.Current);
 
-var config = new CommandLineConfiguration(rootCmd);
-var result = rootCmd.Parse(args, config);
+var result = CliParser.Parse(args, rootDef);
+
+// Handle directives
+foreach (var directive in result.Directives)
+{
+    switch (directive.Name)
+    {
+        case "debug":
+            System.Console.Error.WriteLine($"Attach debugger to PID {Environment.ProcessId} and press Enter...");
+            System.Console.ReadLine();
+            break;
+        case "suggest":
+            // Already handled above (pre-parse path for performance).
+            // If we get here, it means the directive was mixed in with regular args.
+            if (directive.Value is { } posStr && int.TryParse(posStr, out var suggestPos))
+            {
+                var line = args.Length >= 2 ? args[1] : "";
+                await CliCompletionHandler.HandleAsync(line, suggestPos);
+                return 0;
+            }
+            break;
+    }
+}
+
+// Handle help options before error checking
+if (result.Command is not null)
+{
+    var cmd = result.Command;
+
+    if (cmd._helpOption.WasProvided)
+        return cmd.ShowHelp(showAdvanced: false);
+
+    if (cmd._helpMoreOption.WasProvided)
+        return cmd.ShowHelp(showAdvanced: true);
+
+    if (cmd._helpCommandsOption.WasProvided)
+    {
+        var filter = cmd._helpCommandsOption.Value;
+        if (
+            !System.Console.IsInputRedirected
+            && !System.Console.IsOutputRedirected
+            && Ansi.IsEnabled
+        )
+        {
+            InteractiveCommandTree.Run(rootDef, filter);
+            return 0;
+        }
+        CommandTreePrinter.Print(System.Console.Out, rootDef, filter);
+        return 0;
+    }
+
+    if (cmd._helpCommandsFlatOption.WasProvided)
+    {
+        var filter = cmd._helpCommandsFlatOption.Value;
+        CommandTreePrinter.PrintFlat(System.Console.Out, rootDef, filter);
+        return 0;
+    }
+}
 
 if (result.Errors.Count > 0)
 {
-    var interactive = InteractiveOptionPack.IsEffectivelyInteractive(
-        result.GetValue(InteractiveOptionPack.InteractiveOption)
-    );
+    var interactive = InteractiveOptionPack.IsEffectivelyInteractiveFromTree(result.Command ?? rootDef);
 
     var suggestionResult = CommandSuggester.TrySuggest(
         result,
         args,
         interactive,
         System.Console.Error,
-        System.Console.ReadLine
+        System.Console.ReadLine,
+        rootDef
     );
 
     if (suggestionResult >= 0)
@@ -71,11 +122,15 @@ if (result.Errors.Count > 0)
 
     // No suggestions — fall back to printing raw errors
     foreach (var error in result.Errors)
-        System.Console.Error.WriteLine(Ansi.Red(error.Message));
+        System.Console.Error.WriteLine(Ansi.Red(error));
     return 1;
 }
 
-return result.Invoke();
+// If the matched command has no execute handler, show help
+if (result.Command is { } leafCmd && !leafCmd.HasExecuteHandler)
+    return leafCmd.ShowHelp();
+
+return await result.Command!.InvokeAsync(CancellationToken.None);
 
 static string[] RewriteHelpCommandsFilter(string[] args)
 {
@@ -97,42 +152,34 @@ static string[] RewriteHelpCommandsFilter(string[] args)
     return args;
 }
 
-static IEnumerable<Command> AllCommands(Command root)
+static void ApplyCommandDefaults(CommandDef root, MazConfig mazConfig)
 {
-    yield return root;
-    foreach (var sub in root.Subcommands)
-    foreach (var cmd in AllCommands(sub))
-        yield return cmd;
-}
-
-static void ApplyCommandDefaults(Command root, MazConfig mazConfig)
-{
-    // Apply [global] defaults to all commands for option types not handled by env-var injection
-    // (e.g. enum options like --format which the source generator can't fall back via ??)
     if (mazConfig.GlobalDefaults.Count > 0)
     {
         foreach (var cmd in AllCommands(root))
         {
             foreach (var (key, value) in mazConfig.GlobalDefaults)
             {
-                var opt = cmd.Options.FirstOrDefault(o =>
-                    o.Name.TrimStart('-').Equals(key, StringComparison.OrdinalIgnoreCase)
-                );
-                if (opt is not null)
-                    TrySetDefault(opt, value);
+                foreach (var opt in cmd.EnumerateAllOptions())
+                {
+                    var optKey = opt.Name.TrimStart('-');
+                    if (optKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                    {
+                        TrySetDefault(opt, value);
+                        break;
+                    }
+                }
             }
         }
     }
 
-    // Apply [cmd.X] per-command overrides (take precedence over global defaults)
     if (mazConfig.CommandDefaults.Count > 0)
     {
-        foreach (var sub in root.Subcommands)
-            ApplyDefaultsRecursive(sub, "", mazConfig);
+        ApplyDefaultsRecursive(root, "", mazConfig);
     }
 }
 
-static void ApplyDefaultsRecursive(Command cmd, string parentPath, MazConfig mazConfig)
+static void ApplyDefaultsRecursive(CommandDef cmd, string parentPath, MazConfig mazConfig)
 {
     var path = parentPath.Length > 0 ? $"{parentPath} {cmd.Name}" : cmd.Name;
 
@@ -140,64 +187,34 @@ static void ApplyDefaultsRecursive(Command cmd, string parentPath, MazConfig maz
     {
         foreach (var (key, value) in defaults)
         {
-            var opt = cmd.Options.FirstOrDefault(o =>
-                o.Name.TrimStart('-').Equals(key, StringComparison.OrdinalIgnoreCase)
-            );
-            if (opt is not null)
-                TrySetDefault(opt, value);
+            foreach (var opt in cmd.EnumerateAllOptions())
+            {
+                var optKey = opt.Name.TrimStart('-');
+                if (optKey.Equals(key, StringComparison.OrdinalIgnoreCase))
+                {
+                    TrySetDefault(opt, value);
+                    break;
+                }
+            }
         }
     }
 
-    foreach (var sub in cmd.Subcommands)
+    foreach (var sub in cmd.EnumerateChildren())
         ApplyDefaultsRecursive(sub, path, mazConfig);
 }
 
-static void TrySetDefault(Option opt, string value)
+static IEnumerable<CommandDef> AllCommands(CommandDef root)
 {
-    var genericArg = opt.GetType().GetGenericArguments().FirstOrDefault();
-    if (genericArg is null)
-        return;
+    yield return root;
+    foreach (var sub in root.EnumerateChildren())
+    foreach (var cmd in AllCommands(sub))
+        yield return cmd;
+}
 
-    // Parse the string value to the target option type
-    object? parsed;
-
-    if (genericArg == typeof(string))
-    {
-        parsed = value;
-    }
-    else if (genericArg == typeof(bool))
-    {
-        if (!bool.TryParse(value, out var bv))
-            return;
-        parsed = bv;
-    }
-    else if (genericArg.IsEnum)
-    {
-        if (!Enum.TryParse(genericArg, value, ignoreCase: true, out parsed))
-            return;
-    }
-    else if (Nullable.GetUnderlyingType(genericArg) is { } underlying && underlying.IsEnum)
-    {
-        if (!Enum.TryParse(underlying, value, ignoreCase: true, out var ev))
-            return;
-        parsed = ev;
-    }
-    else
-    {
-        return;
-    }
-
-    // Set DefaultValueFactory via reflection (Option<T>.DefaultValueFactory = Func<ArgumentResult, T>)
-    var dfProp = opt.GetType().GetProperty("DefaultValueFactory");
-    if (dfProp is null)
-        return;
-
-    // Build a Func<ArgumentResult, T> that returns the parsed value, using expression trees
-    // so we don't need to reference ArgumentResult directly.
-    var argResultType = dfProp.PropertyType.GetGenericArguments()[0];
-    var paramExpr = Expression.Parameter(argResultType, "_");
-    var valueExpr = Expression.Constant(parsed, genericArg);
-    var funcType = typeof(Func<,>).MakeGenericType(argResultType, genericArg);
-    var factory = Expression.Lambda(funcType, valueExpr, paramExpr).Compile();
-    dfProp.SetValue(opt, factory);
+static void TrySetDefault(Console.Cli.Parsing.CliOption opt, string value)
+{
+    // For now, just try to parse the value. If the option has a custom parser, it will use it.
+    opt.TryParse(value);
+    // Reset WasProvided since this is a default, not user input
+    opt.WasProvided = false;
 }

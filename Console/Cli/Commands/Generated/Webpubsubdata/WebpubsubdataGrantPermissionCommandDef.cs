@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataGrantPermissionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "grant-permission";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataGrantPermissionGrantCommandDef Grant = new(auth);
 }

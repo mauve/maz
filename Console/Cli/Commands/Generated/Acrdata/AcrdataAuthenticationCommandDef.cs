@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AcrdataAuthenticationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "authentication";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AcrdataAuthenticationExchangeAadTokenCommandDef ExchangeAadToken = new(auth);
     public readonly AcrdataAuthenticationExchangeRefreshTokenCommandDef ExchangeRefreshToken = new(auth);
 }

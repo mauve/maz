@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultSecretVersionsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "versions";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultSecretVersionsListCommandDef List = new(auth);
 }

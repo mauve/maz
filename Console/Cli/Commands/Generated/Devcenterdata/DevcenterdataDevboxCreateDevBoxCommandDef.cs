@@ -14,8 +14,8 @@ namespace Console.Cli.Commands.Generated;
 public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create-dev-box";
-    protected override bool IsDataPlane => true;
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDataPlane => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly DevCenterOptionPack DevCenter = new();
 
@@ -57,7 +57,7 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://devcenter.azure.com/.default");
         var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

@@ -30,7 +30,7 @@ public static class ResourceCommandEmitter
             {
                 w.Line($"public override string Name => \"{resource.CliName}\";");
                 if (isDataPlane)
-                    w.Line("protected override bool IsDataPlane => true;");
+                    w.Line("protected internal override bool IsDataPlane => true;");
 
                 foreach (var op in resource.Operations)
                 {

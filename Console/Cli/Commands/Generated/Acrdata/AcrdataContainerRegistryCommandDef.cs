@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AcrdataContainerRegistryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "container-registry";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AcrdataContainerRegistryShowCommandDef Show = new(auth);
     public readonly AcrdataContainerRegistryDeleteRepositoryCommandDef DeleteRepository = new(auth);
     public readonly AcrdataContainerRegistryUpdateCommandDef Update = new(auth);

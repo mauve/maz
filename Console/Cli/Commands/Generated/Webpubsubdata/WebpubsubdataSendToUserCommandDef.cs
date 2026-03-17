@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataSendToUserCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "send-to-user";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataSendToUserSendCommandDef Send = new(auth);
 }

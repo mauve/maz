@@ -55,7 +55,7 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
                 "Either --workspace-id or --resource-id must be specified."
             );
 
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var credential = cred;
         var armClient = new ArmClient(credential);

@@ -44,7 +44,7 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
 
         // 1. Resolve registry login server

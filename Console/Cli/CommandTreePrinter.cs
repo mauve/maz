@@ -1,20 +1,18 @@
-using System.CommandLine;
-using System.CommandLine.Invocation;
 using Console.Rendering;
 
 namespace Console.Cli;
 
 internal static class CommandTreePrinter
 {
-    public static void Print(TextWriter output, Command root, string? filter)
+    public static void Print(TextWriter output, CommandDef root, string? filter)
     {
         output.WriteLine(Ansi.White(root.Name));
         PrintChildren(output, root, prefix: "", filter);
     }
 
-    private static void PrintChildren(TextWriter output, Command cmd, string prefix, string? filter)
+    private static void PrintChildren(TextWriter output, CommandDef cmd, string prefix, string? filter)
     {
-        var children = cmd.Subcommands.Where(c => !c.Hidden).ToList();
+        var children = cmd.EnumerateChildren().ToList();
 
         if (filter is not null)
             children = children.Where(c => HasMatch(c, filter)).ToList();
@@ -29,14 +27,12 @@ internal static class CommandTreePrinter
             var baseName = filter is null
                 ? Ansi.White(child.Name)
                 : HighlightName(child.Name, filter);
-            var name = DataPlaneRegistry.IsDataPlane(child)
+            var name = child.IsDataPlane
                 ? baseName + Ansi.LightRed("*")
                 : baseName;
 
             var linePrefix = $"{prefix}{connector}";
-            var descIndent = Ansi.VisibleLength(linePrefix) + Ansi.VisibleLength(name) + 2; // +2 for "  " separator
-            // Keep tree-line characters from prefix; for non-last items place │ at the connector
-            // column so the vertical line continues down to the next sibling
+            var descIndent = Ansi.VisibleLength(linePrefix) + Ansi.VisibleLength(name) + 2;
             var continuationConnector = isLast
                 ? new string(' ', Ansi.VisibleLength(connector))
                 : "│" + new string(' ', Ansi.VisibleLength(connector) - 1);
@@ -65,14 +61,12 @@ internal static class CommandTreePrinter
                         output.WriteLine($"{continuation}{styledSegment}");
                 }
             }
-            // When a node itself matches the filter, show all its descendants without further
-            // filtering — otherwise the children of a matching parent are all stripped out.
             var childFilter = filter is not null && Matches(child, filter) ? null : filter;
             PrintChildren(output, child, prefix + childPrefix, childFilter);
         }
     }
 
-    private static bool Matches(Command cmd, string filter) =>
+    private static bool Matches(CommandDef cmd, string filter) =>
         cmd.Name.Contains(filter, StringComparison.OrdinalIgnoreCase)
         || (
             !string.IsNullOrWhiteSpace(cmd.Description)
@@ -80,8 +74,8 @@ internal static class CommandTreePrinter
         )
         || cmd.Aliases.Any(a => a.Contains(filter, StringComparison.OrdinalIgnoreCase));
 
-    private static bool HasMatch(Command cmd, string filter) =>
-        Matches(cmd, filter) || cmd.Subcommands.Any(c => HasMatch(c, filter));
+    private static bool HasMatch(CommandDef cmd, string filter) =>
+        Matches(cmd, filter) || cmd.EnumerateChildren().Any(c => HasMatch(c, filter));
 
     private static string HighlightName(string text, string filter)
     {
@@ -103,54 +97,21 @@ internal static class CommandTreePrinter
             + Ansi.Dim(text[(idx + filter.Length)..]);
     }
 
-    public static void PrintFlat(TextWriter output, Command root, string? filter)
+    public static void PrintFlat(TextWriter output, CommandDef root, string? filter)
     {
         PrintFlatCommand(output, root, root.Name, filter);
     }
 
     private static void PrintFlatCommand(
         TextWriter output,
-        Command cmd,
+        CommandDef cmd,
         string path,
         string? filter
     )
     {
         if (filter is null || path.Contains(filter, StringComparison.OrdinalIgnoreCase))
             output.WriteLine(path);
-        foreach (var sub in cmd.Subcommands.Where(c => !c.Hidden))
+        foreach (var sub in cmd.EnumerateChildren())
             PrintFlatCommand(output, sub, $"{path} {sub.Name}", filter);
-    }
-}
-
-internal sealed class CommandTreeAction(Command root, Option<string?> option)
-    : SynchronousCommandLineAction
-{
-    public override int Invoke(ParseResult parseResult)
-    {
-        var filter = parseResult.GetValue(option);
-
-        if (
-            !System.Console.IsInputRedirected
-            && !System.Console.IsOutputRedirected
-            && Rendering.Ansi.IsEnabled
-        )
-        {
-            InteractiveCommandTree.Run(root, filter);
-            return 0;
-        }
-
-        CommandTreePrinter.Print(System.Console.Out, root, filter);
-        return 0;
-    }
-}
-
-internal sealed class CommandFlatAction(Command root, Option<string?> option)
-    : SynchronousCommandLineAction
-{
-    public override int Invoke(ParseResult parseResult)
-    {
-        var filter = parseResult.GetValue(option);
-        CommandTreePrinter.PrintFlat(System.Console.Out, root, filter);
-        return 0;
     }
 }

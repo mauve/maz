@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataClosegroupconnectionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "closegroupconnection";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataClosegroupconnectionCloseAllCommandDef CloseAll = new(auth);
 }

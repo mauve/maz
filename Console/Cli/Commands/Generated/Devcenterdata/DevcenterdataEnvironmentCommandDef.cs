@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DevcenterdataEnvironmentCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "environment";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DevcenterdataEnvironmentListCatalogsByProjectCommandDef ListCatalogsByProject = new(auth);
     public readonly DevcenterdataEnvironmentGetCatalogCommandDef GetCatalog = new(auth);
     public readonly DevcenterdataEnvironmentListEnvironmentDefinitionsByCatalogCommandDef ListEnvironmentDefinitionsByCatalog = new(auth);

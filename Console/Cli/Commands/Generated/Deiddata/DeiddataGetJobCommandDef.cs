@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataGetJobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-job";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DeiddataGetJobShowCommandDef Show = new(auth);
 }

@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataGlossaryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "glossary";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataGlossaryListCommandDef List = new(auth);
     public readonly PurviewdataGlossaryCreateCommandDef Create = new(auth);
     public readonly PurviewdataGlossaryGetCommandDef Get = new(auth);
