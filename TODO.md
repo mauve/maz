@@ -28,10 +28,10 @@ With over >8100 commands supported it is almost impossible for a user to discove
 
 This seems like a thing we had to add because of System.CommandLine. Let's see if we can remove it, lots of allocs happening is my feeling.
 
-## Implement `az acr login`
-
-This is currently missing
-
 ## Fix filtering in `--help-commands`
 
 Searching for `acr` for example does matches "across" which appears in many places in the documentation.
+
+## Implement --verbose and --debug
+
+We need to see network traffic or similar stuff sometimes.
