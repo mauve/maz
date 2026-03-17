@@ -16,9 +16,6 @@ public partial class KeyvaultSecretUpdateCommandDef(AuthOptionPack auth) : Comma
     public override string Name => "update";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--vault-url")]
-    public partial string? VaultUrl { get; }
-
     public readonly KeyVaultOptionPack KeyVault = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class KeyvaultSecretUpdateCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{keyVaultBaseUrl}/secrets/{SecretName}/{SecretVersion}";
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/secrets/{SecretName}/{SecretVersion}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "7.5", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

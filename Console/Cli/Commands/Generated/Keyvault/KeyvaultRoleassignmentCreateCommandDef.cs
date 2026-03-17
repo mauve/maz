@@ -17,9 +17,6 @@ public partial class KeyvaultRoleassignmentCreateCommandDef(AuthOptionPack auth)
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--vault-url")]
-    public partial string? VaultUrl { get; }
-
     public readonly KeyVaultOptionPack KeyVault = new();
 
     public readonly RenderOptionPack Render = new();
@@ -49,8 +46,8 @@ public partial class KeyvaultRoleassignmentCreateCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{keyVaultBaseUrl}/{Scope}/providers/Microsoft.Authorization/roleAssignments/{RoleAssignmentName}";
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/{Scope}/providers/Microsoft.Authorization/roleAssignments/{RoleAssignmentName}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

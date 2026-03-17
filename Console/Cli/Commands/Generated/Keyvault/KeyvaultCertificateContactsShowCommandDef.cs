@@ -16,9 +16,6 @@ public partial class KeyvaultCertificateContactsShowCommandDef(AuthOptionPack au
     public override string Name => "show";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--vault-url")]
-    public partial string? VaultUrl { get; }
-
     public readonly KeyVaultOptionPack KeyVault = new();
 
     public readonly RenderOptionPack Render = new();
@@ -28,8 +25,8 @@ public partial class KeyvaultCertificateContactsShowCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var keyVaultBaseUrl = VaultUrl ?? (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{keyVaultBaseUrl}/certificates/contacts";
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/certificates/contacts";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "7.5", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

@@ -16,9 +16,6 @@ public partial class AcrdataContainerRegistryCheckDockerV2SupportCommandDef(Auth
     public override string Name => "check-docker-v2-support";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--acr-url")]
-    public partial string? AcrUrl { get; }
-
     public readonly ContainerRegistryOptionPack Acr = new();
 
     public readonly RenderOptionPack Render = new();
@@ -28,8 +25,8 @@ public partial class AcrdataContainerRegistryCheckDockerV2SupportCommandDef(Auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://containerregistry.azure.net/.default");
-        var acrBaseUrl = AcrUrl ?? (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{acrBaseUrl}/v2/";
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/v2/";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-07-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

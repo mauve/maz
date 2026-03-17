@@ -28,17 +28,14 @@ public record ServiceConfig(
 
 /// <summary>
 /// Configures the dataplane option pack class used for data-plane services.
-/// When not specified, data-plane services detected via x-ms-parameterized-host
-/// default to the KeyVaultOptionPack.
+/// All data-plane services must have an explicit config in specgen.json.
 /// </summary>
 /// <param name="ClassName">The C# class name of the option pack (e.g. "EventHubOptionPack").</param>
 /// <param name="FieldName">The C# field name in the generated command class (e.g. "EventHub").</param>
-/// <param name="UrlCliFlag">The CLI flag for the explicit base URL override (e.g. "--eventhub-url").</param>
 /// <param name="Scope">The OAuth2 scope for the data-plane endpoint (e.g. "https://eventhubs.azure.net/.default").</param>
 public record DataplaneOptionPackConfig(
     string ClassName,
     string FieldName,
-    string UrlCliFlag,
     string Scope
 );
 

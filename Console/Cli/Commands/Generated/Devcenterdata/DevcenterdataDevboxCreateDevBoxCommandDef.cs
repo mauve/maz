@@ -17,9 +17,6 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--dev-center-url")]
-    public partial string? DevCenterUrl { get; }
-
     public readonly DevCenterOptionPack DevCenter = new();
 
     public readonly RenderOptionPack Render = new();
@@ -61,8 +58,8 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var devCenterBaseUrl = DevCenterUrl ?? (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{devCenterBaseUrl}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

@@ -16,9 +16,6 @@ public partial class DeiddataListjobListCommandDef(AuthOptionPack auth) : Comman
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--deid-url")]
-    public partial string? DeidUrl { get; }
-
     public readonly HealthDataAIDeidOptionPack DeidService = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class DeiddataListjobListCommandDef(AuthOptionPack auth) : Comman
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://deid.azure.net/.default");
-        var deidServiceBaseUrl = DeidUrl ?? (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{deidServiceBaseUrl}/jobs";
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/jobs";
 
         var allItems = client.GetAllAsync(path, "2024-11-15", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

@@ -68,11 +68,13 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
             }
             else
             {
-                (resolvedWorkspaceId, workspaceArmId) = await ResolveWorkspaceCustomerIdAsync(
-                    WorkspaceId,
-                    armClient,
-                    ct
-                );
+                (resolvedWorkspaceId, workspaceArmId) =
+                    await LoganalyticsWorkspaceResolver.ResolveWorkspaceCustomerIdAsync(
+                        WorkspaceId,
+                        ResourceGroup,
+                        _auth,
+                        ct
+                    );
             }
         }
 
@@ -100,34 +102,6 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
         );
         await app.RunAsync(ct);
         return 0;
-    }
-
-    private async Task<(string customerId, string armPath)> ResolveWorkspaceCustomerIdAsync(
-        string workspaceRef,
-        ArmClient armClient,
-        CancellationToken ct
-    )
-    {
-        var (sub, rg, name) = await ResourceNameResolver.ResolveAsync(
-            workspaceRef,
-            ResourceGroup,
-            armClient,
-            "Microsoft.OperationalInsights/workspaces",
-            ct
-        );
-
-        var restClient = new AzureRestClient(_auth.GetCredential());
-        var path =
-            $"/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.OperationalInsights/workspaces/{name}";
-        var json = await restClient.SendAsync(HttpMethod.Get, path, "2025-07-01", null, ct);
-        var customerId = json?["properties"]?["customerId"]?.GetValue<string>();
-
-        if (customerId is null)
-            throw new InvocationException(
-                $"Could not read customerId for workspace '{name}' in resource group '{rg}'."
-            );
-
-        return (customerId, path);
     }
 
     private async Task<string> ResolveResourceArmIdAsync(

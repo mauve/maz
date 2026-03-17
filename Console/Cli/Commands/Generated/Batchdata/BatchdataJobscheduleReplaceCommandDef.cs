@@ -17,9 +17,6 @@ public partial class BatchdataJobscheduleReplaceCommandDef(AuthOptionPack auth) 
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--batch-url")]
-    public partial string? BatchUrl { get; }
-
     public readonly BatchAccountOptionPack BatchAccount = new();
 
     public readonly RenderOptionPack Render = new();
@@ -69,8 +66,8 @@ public partial class BatchdataJobscheduleReplaceCommandDef(AuthOptionPack auth) 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://batch.core.windows.net/.default");
-        var batchAccountBaseUrl = BatchUrl ?? (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{batchAccountBaseUrl}/jobschedules/{JobScheduleId}";
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/jobschedules/{JobScheduleId}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

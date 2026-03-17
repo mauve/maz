@@ -17,9 +17,6 @@ public partial class SearchdataDatasourceCreateOrUpdateCommandDef(AuthOptionPack
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--search-url")]
-    public partial string? SearchUrl { get; }
-
     public readonly SearchServiceOptionPack SearchService = new();
 
     public readonly RenderOptionPack Render = new();
@@ -49,8 +46,8 @@ public partial class SearchdataDatasourceCreateOrUpdateCommandDef(AuthOptionPack
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://search.azure.com/.default");
-        var searchServiceBaseUrl = SearchUrl ?? (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{searchServiceBaseUrl}/datasources('{DataSourceName}')";
+        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/datasources('{DataSourceName}')";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

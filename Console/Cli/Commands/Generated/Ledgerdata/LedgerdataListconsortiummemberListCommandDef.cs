@@ -16,9 +16,6 @@ public partial class LedgerdataListconsortiummemberListCommandDef(AuthOptionPack
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--ledger-url")]
-    public partial string? LedgerUrl { get; }
-
     public readonly ConfidentialLedgerOptionPack Ledger = new();
 
     public readonly RenderOptionPack Render = new();
@@ -28,8 +25,8 @@ public partial class LedgerdataListconsortiummemberListCommandDef(AuthOptionPack
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var ledgerBaseUrl = LedgerUrl ?? (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{ledgerBaseUrl}/app/governance/members";
+        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/app/governance/members";
 
         var allItems = client.GetAllAsync(path, "2022-05-13", "members", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

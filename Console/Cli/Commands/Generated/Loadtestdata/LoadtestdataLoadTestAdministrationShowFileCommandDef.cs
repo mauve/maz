@@ -15,9 +15,6 @@ public partial class LoadtestdataLoadTestAdministrationShowFileCommandDef(AuthOp
     public override string Name => "show-file";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--load-test-url")]
-    public partial string? LoadTestUrl { get; }
-
     public readonly LoadTestingOptionPack LoadTest = new();
 
     public readonly RenderOptionPack Render = new();
@@ -35,8 +32,8 @@ public partial class LoadtestdataLoadTestAdministrationShowFileCommandDef(AuthOp
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var loadTestBaseUrl = LoadTestUrl ?? (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{loadTestBaseUrl}/tests/{TestId}/files/{FileName}";
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/tests/{TestId}/files/{FileName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-11-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

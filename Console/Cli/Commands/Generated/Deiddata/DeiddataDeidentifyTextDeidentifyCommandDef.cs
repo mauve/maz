@@ -17,9 +17,6 @@ public partial class DeiddataDeidentifyTextDeidentifyCommandDef(AuthOptionPack a
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--deid-url")]
-    public partial string? DeidUrl { get; }
-
     public readonly HealthDataAIDeidOptionPack DeidService = new();
 
     public readonly RenderOptionPack Render = new();
@@ -37,8 +34,8 @@ public partial class DeiddataDeidentifyTextDeidentifyCommandDef(AuthOptionPack a
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://deid.azure.net/.default");
-        var deidServiceBaseUrl = DeidUrl ?? (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{deidServiceBaseUrl}/deid";
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/deid";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

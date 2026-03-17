@@ -15,9 +15,6 @@ public partial class AttestationdataPolicyShowCommandDef(AuthOptionPack auth) : 
     public override string Name => "show";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--attestation-url")]
-    public partial string? AttestationUrl { get; }
-
     public readonly AttestationOptionPack AttestationProvider = new();
 
     public readonly RenderOptionPack Render = new();
@@ -31,8 +28,8 @@ public partial class AttestationdataPolicyShowCommandDef(AuthOptionPack auth) : 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://attest.azure.net/.default");
-        var attestationProviderBaseUrl = AttestationUrl ?? (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{attestationProviderBaseUrl}/policies/{AttestationType}";
+        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/policies/{AttestationType}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

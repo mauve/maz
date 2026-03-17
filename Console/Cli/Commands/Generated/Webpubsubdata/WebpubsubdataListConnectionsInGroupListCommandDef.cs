@@ -15,9 +15,6 @@ public partial class WebpubsubdataListConnectionsInGroupListCommandDef(AuthOptio
     public override string Name => "list";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--web-pubsub-url")]
-    public partial string? WebPubsubUrl { get; }
-
     public readonly WebPubSubOptionPack WebPubSub = new();
 
     public readonly RenderOptionPack Render = new();
@@ -47,8 +44,8 @@ public partial class WebpubsubdataListConnectionsInGroupListCommandDef(AuthOptio
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://webpubsub.azure.com/.default");
-        var webPubSubBaseUrl = WebPubsubUrl ?? (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{webPubSubBaseUrl}/api/hubs/{Hub}/groups/{Group}/connections";
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/api/hubs/{Hub}/groups/{Group}/connections";
 
         var allItems = client.GetAllAsync(path, "2024-12-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

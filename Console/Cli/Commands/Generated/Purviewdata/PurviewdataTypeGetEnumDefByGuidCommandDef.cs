@@ -16,9 +16,6 @@ public partial class PurviewdataTypeGetEnumDefByGuidCommandDef(AuthOptionPack au
     public override string Name => "get-enum-def-by-guid";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--purview-url")]
-    public partial string? PurviewUrl { get; }
-
     public readonly PurviewOptionPack Purview = new();
 
     public readonly RenderOptionPack Render = new();
@@ -32,8 +29,8 @@ public partial class PurviewdataTypeGetEnumDefByGuidCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://purview.azure.net/.default");
-        var purviewBaseUrl = PurviewUrl ?? (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{purviewBaseUrl}/atlas/v2/types/enumdef/guid/{Guid}";
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/atlas/v2/types/enumdef/guid/{Guid}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

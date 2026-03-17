@@ -16,9 +16,6 @@ public partial class SearchdataIndexShowStatisticsCommandDef(AuthOptionPack auth
     public override string Name => "show-statistics";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--search-url")]
-    public partial string? SearchUrl { get; }
-
     public readonly SearchServiceOptionPack SearchService = new();
 
     public readonly RenderOptionPack Render = new();
@@ -32,8 +29,8 @@ public partial class SearchdataIndexShowStatisticsCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://search.azure.com/.default");
-        var searchServiceBaseUrl = SearchUrl ?? (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{searchServiceBaseUrl}/indexes('{IndexName}')/search.stats";
+        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/indexes('{IndexName}')/search.stats";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

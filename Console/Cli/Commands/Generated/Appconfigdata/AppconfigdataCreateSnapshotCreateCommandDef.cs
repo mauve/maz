@@ -16,9 +16,6 @@ public partial class AppconfigdataCreateSnapshotCreateCommandDef(AuthOptionPack 
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--appconfig-url")]
-    public partial string? AppconfigUrl { get; }
-
     public readonly AppConfigurationOptionPack AppConfig = new();
 
     public readonly RenderOptionPack Render = new();
@@ -44,8 +41,8 @@ public partial class AppconfigdataCreateSnapshotCreateCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://azconfig.io/.default");
-        var appConfigBaseUrl = AppconfigUrl ?? (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{appConfigBaseUrl}/snapshots/{ParamName}";
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/snapshots/{ParamName}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

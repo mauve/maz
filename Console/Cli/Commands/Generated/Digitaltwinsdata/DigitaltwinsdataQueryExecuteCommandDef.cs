@@ -17,9 +17,6 @@ public partial class DigitaltwinsdataQueryExecuteCommandDef(AuthOptionPack auth)
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--digital-twins-url")]
-    public partial string? DigitalTwinsUrl { get; }
-
     public readonly DigitalTwinsOptionPack DigitalTwins = new();
 
     public readonly RenderOptionPack Render = new();
@@ -29,8 +26,8 @@ public partial class DigitaltwinsdataQueryExecuteCommandDef(AuthOptionPack auth)
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var digitalTwinsBaseUrl = DigitalTwinsUrl ?? (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{digitalTwinsBaseUrl}/query";
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/query";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-10-31", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

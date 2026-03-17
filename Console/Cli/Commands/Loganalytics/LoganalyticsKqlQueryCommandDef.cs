@@ -15,13 +15,20 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
     public override string Name => "query";
     public override string[] Aliases => ["q"];
 
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+
     /// <summary>The KQL query to execute.</summary>
     [CliOption("--query", "-q", Required = true)]
     public partial string Query { get; }
 
-    /// <summary>The workspace ID to query against.</summary>
-    [CliOption("--workspace-id", "--workspace")]
-    public partial Guid? WorkspaceId { get; }
+    /// <summary>The workspace name, customerId GUID, or hierarchical ref (rg/name) to query against.</summary>
+    [CliOption(
+        "--workspace-id",
+        "--workspace",
+        CompletionProviderType = typeof(LogAnalyticsWorkspaceCompletionProvider),
+        CompletionOptionPacks = [typeof(AuthOptionPack)]
+    )]
+    public partial string? WorkspaceId { get; }
 
     /// <summary>The resource ID to query against.</summary>
     [CliOption("--resource-id", "--resource")]
@@ -182,17 +189,34 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
             IncludeVisualization = VisualizationOutput != null,
         };
 
-        var workspaceId = WorkspaceId;
+        var workspaceIdRaw = WorkspaceId;
         var resourceId = ResourceId;
 
-        if (workspaceId != null)
+        if (workspaceIdRaw != null)
+        {
+            string resolvedId;
+            if (Guid.TryParse(workspaceIdRaw, out _))
+            {
+                resolvedId = workspaceIdRaw;
+            }
+            else
+            {
+                (resolvedId, _) =
+                    await LoganalyticsWorkspaceResolver.ResolveWorkspaceCustomerIdAsync(
+                        workspaceIdRaw,
+                        ResourceGroup,
+                        _auth,
+                        ct
+                    );
+            }
             return await client.QueryWorkspaceAsync(
-                workspaceId.ToString(),
+                resolvedId,
                 queryText,
                 timeRange,
                 opts,
                 ct
             );
+        }
 
         if (resourceId != null)
             return await client.QueryResourceAsync(new(resourceId), queryText, timeRange, opts, ct);

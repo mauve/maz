@@ -17,9 +17,6 @@ public partial class ServicebusdataEntityDeleteCommandDef(AuthOptionPack auth) :
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--servicebus-url")]
-    public partial string? ServicebusUrl { get; }
-
     public readonly ServiceBusOptionPack ServiceBus = new();
 
     public readonly RenderOptionPack Render = new();
@@ -33,8 +30,8 @@ public partial class ServicebusdataEntityDeleteCommandDef(AuthOptionPack auth) :
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://servicebus.azure.net/.default");
-        var serviceBusBaseUrl = ServicebusUrl ?? (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{serviceBusBaseUrl}/{EntityName}";
+        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/{EntityName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2021-05", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
