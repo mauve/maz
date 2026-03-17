@@ -81,7 +81,8 @@ public static class OperationCommandEmitter
         w.Line("using Console.Cli.Http;");
         w.Line("using Console.Cli.Shared;");
         w.Line("using Console.Rendering;");
-        if (isDataPlane || usesResourcePack || usesResourceNameResolver)
+        if (isDataPlane || usesResourcePack || usesResourceNameResolver
+            || usesSubscription || usesResourceGroup || isMergedList || usesStorageAccount)
             w.Line("using Azure.ResourceManager;");
         w.Line();
         w.Line($"namespace {ns};");
@@ -267,6 +268,24 @@ public static class OperationCommandEmitter
                             );
                         }
 
+                        // Resolve subscription ID (supports display-name shorthands like /s/prod)
+                        if (
+                            !isDataPlane
+                            && !usesResourcePack
+                            && !usesResourceNameResolver
+                            && (usesSubscription || usesResourceGroup || isMergedList || usesStorageAccount)
+                        )
+                        {
+                            var subPack = usesStorageAccount
+                                ? "StorageAccount.Subscription"
+                                : usesResourceGroup || isMergedList
+                                    ? "ResourceGroup.Subscription"
+                                    : "Subscription";
+                            w.Line(
+                                $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));"
+                            );
+                        }
+
                         // Build path
                         if (isDataPlane)
                             EmitDataPlanePathBuilder(w, op, "dataplaneRef");
@@ -421,7 +440,7 @@ public static class OperationCommandEmitter
         {
             expr = expr.Replace(
                     "{subscriptionId}",
-                    "{StorageAccount.Subscription.RequireSubscriptionId()}",
+                    "{subscriptionId}",
                     StringComparison.OrdinalIgnoreCase
                 )
                 .Replace(
@@ -437,12 +456,10 @@ public static class OperationCommandEmitter
         }
         else
         {
-            // Replace known absorbed params with option-pack calls
+            // subscriptionId is pre-resolved to a GUID variable above; just normalize casing
             expr = expr.Replace(
                     "{subscriptionId}",
-                    usesResourceGroup ? "{ResourceGroup.Subscription.RequireSubscriptionId()}"
-                        : usesSubscription ? "{Subscription.RequireSubscriptionId()}"
-                        : "{subscriptionId}"
+                    "{subscriptionId}"
                 )
                 .Replace(
                     "{resourceGroupName}",
@@ -478,7 +495,7 @@ public static class OperationCommandEmitter
     {
         var expr = urlTemplate.Replace(
             "{subscriptionId}",
-            "{ResourceGroup.Subscription.RequireSubscriptionId()}",
+            "{subscriptionId}",
             StringComparison.OrdinalIgnoreCase
         );
 

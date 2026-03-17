@@ -31,13 +31,67 @@ public partial class SubscriptionOptionPack : OptionPack
         if (string.IsNullOrWhiteSpace(id))
             throw new InvocationException("--subscription-id is required.");
 
-        if (id.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
+        return ExtractSubscriptionGuid(id)
+            ?? throw new InvocationException(
+                $"Cannot resolve subscription '{id}' without an ARM client. "
+                + "Use a GUID, /subscriptions/{{guid}}, or /s/name:guid format."
+            );
+    }
+
+    /// <summary>
+    /// Async version of <see cref="RequireSubscriptionId"/> that can resolve display-name
+    /// shorthands (e.g. /s/prod) via an ARM client call.
+    /// </summary>
+    public async Task<string> RequireSubscriptionIdAsync(ArmClient armClient)
+    {
+        var (value, _) = GetWithSource();
+        if (string.IsNullOrWhiteSpace(value))
+            throw new InvocationException("--subscription-id is required.");
+
+        // Fast path: formats that can be resolved without an ARM call
+        var quick = ExtractSubscriptionGuid(value);
+        if (quick is not null)
+            return quick;
+
+        // Slow path: resolve display name via ARM
+        var sub = await ResolveAsync(armClient, value);
+        var subId = sub.Id.Name;
+
+        if (IsDisallowedSubscriptionId(subId))
+            throw new InvocationException(
+                $"Subscription '{subId}' is not allowed by the maz configuration."
+            );
+
+        return subId;
+    }
+
+    /// <summary>
+    /// Extracts a plain subscription GUID from the known synchronous formats.
+    /// Returns null when async resolution (display-name lookup) is required.
+    /// </summary>
+    private static string? ExtractSubscriptionGuid(string hint)
+    {
+        if (hint.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
         {
-            var parts = id.Split('/');
-            return parts.Length > 2 ? parts[2] : id;
+            var parts = hint.Split('/');
+            return parts.Length > 2 ? parts[2] : null;
         }
 
-        return id;
+        if (hint.StartsWith("/s/", StringComparison.OrdinalIgnoreCase))
+        {
+            var token = hint[3..];
+            var colonIdx = token.IndexOf(':');
+            if (colonIdx >= 0)
+                return token[(colonIdx + 1)..]; // /s/name:guid → guid
+            if (Guid.TryParse(token, out _))
+                return token; // /s/guid → guid
+            return null; // /s/displayName → needs async resolution
+        }
+
+        if (Guid.TryParse(hint, out var guid))
+            return guid.ToString();
+
+        return null; // plain display name → needs async resolution
     }
 
     /// <summary>
