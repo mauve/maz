@@ -13,14 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/registry-name
 ///   /s/{sub}/rg/registry-name
 ///   /subscriptions/{guid}/rg/registry-name
-///   /cr/registry-name
-/// </summary>
+///   /arm/registry-name
+///</summary>
 public partial class ContainerRegistryOptionPack
     : DataplaneResourceOptionPack<ContainerRegistryResource, Uri>
 {
-    public const string ShortPathPrefix = "/cr/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Container Registry";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

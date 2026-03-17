@@ -13,13 +13,9 @@ namespace Console.Cli.Shared;
 ///   sub/rg/account-name
 ///   /s/{sub}/rg/account-name
 ///   /subscriptions/{guid}/rg/account-name
-///   /sa/account-name
-/// </summary>
+///</summary>
 public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAccountResource>
 {
-    public const string ShortPathPrefix = "/sa/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Storage Account";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
@@ -50,8 +46,6 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
     {
         var raw =
             StorageAccountName ?? throw new InvocationException("--storage-account is required.");
-        if (raw.StartsWith(ShortPathPrefix, StringComparison.OrdinalIgnoreCase))
-            raw = raw[ShortPathPrefix.Length..];
         return ResourceIdentifierParser.Parse(raw).ResourceNameSegment;
     }
 

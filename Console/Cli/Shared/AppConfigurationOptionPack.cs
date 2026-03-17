@@ -13,14 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/store-name
 ///   /s/{sub}/rg/store-name
 ///   /subscriptions/{guid}/rg/store-name
-///   /ac/store-name
-/// </summary>
+///   /arm/store-name
+///</summary>
 public partial class AppConfigurationOptionPack
     : DataplaneResourceOptionPack<AppConfigurationStoreResource, Uri>
 {
-    public const string ShortPathPrefix = "/ac/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "App Configuration Store";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

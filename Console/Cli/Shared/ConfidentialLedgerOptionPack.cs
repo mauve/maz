@@ -10,13 +10,11 @@ namespace Console.Cli.Shared;
 ///   ledger-name
 ///   rg/ledger-name
 ///   sub/rg/ledger-name
-///   /cl/ledger-name
-/// </summary>
+///   /arm/ledger-name
+///</summary>
 public partial class ConfidentialLedgerOptionPack
     : DataplaneResourceOptionPack<ConfidentialLedgerResource, Uri>
 {
-    public const string ShortPathPrefix = "/cl/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Confidential Ledger";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

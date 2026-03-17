@@ -13,7 +13,6 @@ namespace Console.Cli.Shared;
 ///   {sub}/{rg}/{name}
 ///   /s/{sub}/{rg}/{name}
 ///   /subscriptions/{guid}/{rg}/{name}
-///   /{type-prefix}/{name}  (e.g. /kv/myvault — prefix defined by the subclass)
 ///
 /// Combined subscription/resource-group segments override the standalone
 /// --subscription-id / --resource-group options; specifying both forms causes
@@ -44,18 +43,18 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     protected abstract string? RawResourceValue { get; }
 
     /// <summary>
-    /// The short path prefix recognised for this resource type (e.g. "/kv/").
+    /// The short path prefix recognised for this resource type.
     /// Used in help text and stripped from the raw value before parsing.
+    /// Default is empty (no prefix). Data-plane subclasses override to "/arm/".
     /// </summary>
-    public abstract string ResourceShortPathPrefix { get; }
+    public virtual string ResourceShortPathPrefix => "";
 
     // -----------------------------------------------------------------------
     // Help text
     // -----------------------------------------------------------------------
 
     public override string HelpSectionDescription =>
-        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}} | "
-        + $"{ResourceShortPathPrefix}{{name}}. "
+        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}}. "
         + $"{{sub}} can be a GUID, display name, /subscriptions/{{guid}}, or /s/{{guid}}. "
         + $"Combined form overrides --subscription-id and --resource-group. "
         + $"Note: subscription display names containing '/' are not supported in the combined format.";

@@ -13,13 +13,10 @@ namespace Console.Cli.Shared;
 ///   sub/rg/account-name
 ///   /s/{sub}/rg/account-name
 ///   /subscriptions/{guid}/rg/account-name
-///   /ba/account-name
-/// </summary>
+///   /arm/account-name
+///</summary>
 public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchAccountResource, Uri>
 {
-    public const string ShortPathPrefix = "/ba/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Batch Account";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

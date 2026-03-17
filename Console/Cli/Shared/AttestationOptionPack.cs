@@ -10,13 +10,11 @@ namespace Console.Cli.Shared;
 ///   provider-name
 ///   rg/provider-name
 ///   sub/rg/provider-name
-///   /atp/provider-name
-/// </summary>
+///   /arm/provider-name
+///</summary>
 public partial class AttestationOptionPack
     : DataplaneResourceOptionPack<AttestationProviderResource, Uri>
 {
-    public const string ShortPathPrefix = "/atp/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Attestation Provider";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

@@ -10,13 +10,11 @@ namespace Console.Cli.Shared;
 ///   service-name
 ///   rg/service-name
 ///   sub/rg/service-name
-///   /deid/service-name
-/// </summary>
+///   /arm/service-name
+///</summary>
 public partial class HealthDataAIDeidOptionPack
     : DataplaneResourceOptionPack<DeidServiceResource, Uri>
 {
-    public const string ShortPathPrefix = "/deid/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "De-identification Service";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

@@ -10,12 +10,10 @@ namespace Console.Cli.Shared;
 ///   service-name
 ///   rg/service-name
 ///   sub/rg/service-name
-///   /wps/service-name
-/// </summary>
+///   /arm/service-name
+///</summary>
 public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSubResource, Uri>
 {
-    public const string ShortPathPrefix = "/wps/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Web PubSub";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

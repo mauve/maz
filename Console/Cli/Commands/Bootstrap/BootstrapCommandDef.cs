@@ -178,24 +178,34 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 WizardUi.MoveTo(h);
                 WizardUi.RenderBottomBorder(navAnsi, boxWidth);
 
-                // Content area: rows 2..contentAreaEnd.
-                // Leave demoLines rows above the bottom border for the demo animation.
-                var contentAreaEnd = demoLines > 0 ? h - demoLines - 1 : h - 1;
-                var maxContentLines = Math.Max(0, contentAreaEnd - 1); // rows 2..contentAreaEnd
+                // Content area: rows 2..(h-1).
+                // When a demo is present, reserve demoLines + 1 (separator) rows so
+                // content doesn't overflow into the demo area.
+                var maxContentRows = demoLines > 0 ? h - 2 - demoLines - 1 : h - 2;
+                maxContentRows = Math.Max(0, maxContentRows);
                 var contentWidth = boxWidth - 2;
 
                 var contentLines = await step.GetContentLines(contentWidth);
-                for (var r = 0; r < Math.Min(contentLines.Count, maxContentLines); r++)
+                var renderedCount = Math.Min(contentLines.Count, maxContentRows);
+                for (var r = 0; r < renderedCount; r++)
                 {
                     WizardUi.MoveTo(2 + r);
                     System.Console.Write("\x1b[2K");
                     System.Console.Write(contentLines[r]);
                 }
 
-                // Start demo loop if this step has one.
+                // Start demo loop if this step has one — placed right after content
+                // with a single separator line in between (not bottom-aligned).
                 if (demoLines > 0 && step.DemoTag is { } tag)
                 {
-                    var demoStartRow = h - demoLines; // 1-indexed row of first demo line
+                    var separatorRow = 2 + renderedCount;
+                    WizardUi.MoveTo(separatorRow);
+                    System.Console.Write("\x1b[2K");
+                    System.Console.Write(
+                        "  " + Ansi.Dim(new string('─', Math.Max(0, boxWidth - 4)))
+                    );
+
+                    var demoStartRow = separatorRow + 1;
                     stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                     var token = stepCts.Token;
                     demoTask = Task.Run(
