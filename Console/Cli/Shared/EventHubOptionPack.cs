@@ -13,14 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/namespace-name
 ///   /s/{sub}/rg/namespace-name
 ///   /subscriptions/{guid}/rg/namespace-name
-///   /ehn/namespace-name
-/// </summary>
+///   /arm/namespace-name
+///</summary>
 public partial class EventHubOptionPack
     : DataplaneResourceOptionPack<EventHubsNamespaceResource, Uri>
 {
-    public const string ShortPathPrefix = "/ehn/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Event Hubs Namespace";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

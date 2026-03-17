@@ -13,17 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/vault-name
 ///   /s/{sub}/rg/vault-name
 ///   /subscriptions/{guid}/rg/vault-name
-///   /kv/vault-name
-/// </summary>
+///   /arm/vault-name
+///   https://vault-name.vault.azure.net
+///</summary>
 public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultResource, Uri>
 {
-    // -----------------------------------------------------------------------
-    // Short-path prefix
-    // -----------------------------------------------------------------------
-
-    public const string ShortPathPrefix = "/kv/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     // -----------------------------------------------------------------------
     // Help
     // -----------------------------------------------------------------------
@@ -64,6 +58,9 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
     // -----------------------------------------------------------------------
     // Dataplane
     // -----------------------------------------------------------------------
+
+    protected override Uri? TryParseDirectRef(string raw) =>
+        raw.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? new Uri(raw) : null;
 
     protected override Uri GetDataplaneRef(KeyVaultResource resource) =>
         new(resource.Data.Properties.VaultUri!.ToString());

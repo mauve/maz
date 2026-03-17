@@ -13,14 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/namespace-name
 ///   /s/{sub}/rg/namespace-name
 ///   /subscriptions/{guid}/rg/namespace-name
-///   /sbn/namespace-name
-/// </summary>
+///   /arm/namespace-name
+///</summary>
 public partial class ServiceBusOptionPack
     : DataplaneResourceOptionPack<ServiceBusNamespaceResource, Uri>
 {
-    public const string ShortPathPrefix = "/sbn/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Service Bus Namespace";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

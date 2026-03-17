@@ -10,12 +10,10 @@ namespace Console.Cli.Shared;
 ///   account-name
 ///   rg/account-name
 ///   sub/rg/account-name
-///   /pv/account-name
-/// </summary>
+///   /arm/account-name
+///</summary>
 public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAccountResource, Uri>
 {
-    public const string ShortPathPrefix = "/pv/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Purview";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

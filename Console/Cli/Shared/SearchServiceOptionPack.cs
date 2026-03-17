@@ -13,14 +13,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/service-name
 ///   /s/{sub}/rg/service-name
 ///   /subscriptions/{guid}/rg/service-name
-///   /ss/service-name
-/// </summary>
+///   /arm/service-name
+///</summary>
 public partial class SearchServiceOptionPack
     : DataplaneResourceOptionPack<SearchServiceResource, Uri>
 {
-    public const string ShortPathPrefix = "/ss/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
     public override string HelpTitle => "Search Service";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

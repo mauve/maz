@@ -10,12 +10,10 @@ namespace Console.Cli.Shared;
 ///   devcenter-name
 ///   rg/devcenter-name
 ///   sub/rg/devcenter-name
-///   /dc/devcenter-name
-/// </summary>
+///   /arm/devcenter-name
+///</summary>
 public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenterResource, Uri>
 {
-    public const string ShortPathPrefix = "/dc/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Dev Center";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

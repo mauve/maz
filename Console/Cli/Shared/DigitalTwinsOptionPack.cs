@@ -10,13 +10,11 @@ namespace Console.Cli.Shared;
 ///   instance-name
 ///   rg/instance-name
 ///   sub/rg/instance-name
-///   /dt/instance-name
-/// </summary>
+///   /arm/instance-name
+///</summary>
 public partial class DigitalTwinsOptionPack
     : DataplaneResourceOptionPack<DigitalTwinsDescriptionResource, Uri>
 {
-    public const string ShortPathPrefix = "/dt/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Digital Twins";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();

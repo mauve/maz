@@ -10,12 +10,10 @@ namespace Console.Cli.Shared;
 ///   resource-name
 ///   rg/resource-name
 ///   sub/rg/resource-name
-///   /lt/resource-name
-/// </summary>
+///   /arm/resource-name
+///</summary>
 public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTestingResource, Uri>
 {
-    public const string ShortPathPrefix = "/lt/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
     public override string HelpTitle => "Load Testing";
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
