@@ -16,9 +16,6 @@ public partial class BatchdataPoolShowCommandDef(AuthOptionPack auth) : CommandD
     public override string Name => "show";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--batch-url")]
-    public partial string? BatchUrl { get; }
-
     public readonly BatchAccountOptionPack BatchAccount = new();
 
     public readonly RenderOptionPack Render = new();
@@ -44,8 +41,8 @@ public partial class BatchdataPoolShowCommandDef(AuthOptionPack auth) : CommandD
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://batch.core.windows.net/.default");
-        var batchAccountBaseUrl = BatchUrl ?? (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{batchAccountBaseUrl}/pools/{PoolId}";
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/pools/{PoolId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

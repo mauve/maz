@@ -16,9 +16,6 @@ public partial class AppconfigdataDeleteLockDeleteCommandDef(AuthOptionPack auth
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--appconfig-url")]
-    public partial string? AppconfigUrl { get; }
-
     public readonly AppConfigurationOptionPack AppConfig = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class AppconfigdataDeleteLockDeleteCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://azconfig.io/.default");
-        var appConfigBaseUrl = AppconfigUrl ?? (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{appConfigBaseUrl}/locks/{Key}";
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/locks/{Key}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

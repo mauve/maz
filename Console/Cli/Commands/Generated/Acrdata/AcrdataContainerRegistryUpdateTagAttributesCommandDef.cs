@@ -16,9 +16,6 @@ public partial class AcrdataContainerRegistryUpdateTagAttributesCommandDef(AuthO
     public override string Name => "update-tag-attributes";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--acr-url")]
-    public partial string? AcrUrl { get; }
-
     public readonly ContainerRegistryOptionPack Acr = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class AcrdataContainerRegistryUpdateTagAttributesCommandDef(AuthO
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://containerregistry.azure.net/.default");
-        var acrBaseUrl = AcrUrl ?? (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{acrBaseUrl}/acr/v1/{ParamName}/_tags/{Reference}";
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/acr/v1/{ParamName}/_tags/{Reference}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2021-07-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

@@ -16,9 +16,6 @@ public partial class LedgerdataCreateOrUpdateUserCreateOrUpdateCommandDef(AuthOp
     public override string Name => "create-or-update";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--ledger-url")]
-    public partial string? LedgerUrl { get; }
-
     public readonly ConfidentialLedgerOptionPack Ledger = new();
 
     public readonly RenderOptionPack Render = new();
@@ -40,8 +37,8 @@ public partial class LedgerdataCreateOrUpdateUserCreateOrUpdateCommandDef(AuthOp
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var ledgerBaseUrl = LedgerUrl ?? (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{ledgerBaseUrl}/app/users/{UserId}";
+        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/app/users/{UserId}";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

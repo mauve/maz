@@ -17,9 +17,6 @@ public partial class LoadtestdataLoadTestRunDeleteCommandDef(AuthOptionPack auth
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--load-test-url")]
-    public partial string? LoadTestUrl { get; }
-
     public readonly LoadTestingOptionPack LoadTest = new();
 
     public readonly RenderOptionPack Render = new();
@@ -33,8 +30,8 @@ public partial class LoadtestdataLoadTestRunDeleteCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var loadTestBaseUrl = LoadTestUrl ?? (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{loadTestBaseUrl}/test-runs/{TestRunId}";
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/test-runs/{TestRunId}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2022-11-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

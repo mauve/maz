@@ -16,9 +16,6 @@ public partial class WebpubsubdataRemoveconnectionfromallgroupShowCommandDef(Aut
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--web-pubsub-url")]
-    public partial string? WebPubsubUrl { get; }
-
     public readonly WebPubSubOptionPack WebPubSub = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class WebpubsubdataRemoveconnectionfromallgroupShowCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://webpubsub.azure.com/.default");
-        var webPubSubBaseUrl = WebPubsubUrl ?? (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{webPubSubBaseUrl}/api/hubs/{Hub}/connections/{ConnectionId}/groups";
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/api/hubs/{Hub}/connections/{ConnectionId}/groups";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-12-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

@@ -97,10 +97,6 @@ public static class OperationCommandEmitter
                 $"/// <remarks>{EscapeXml(op.DetailedDescription.Replace("\n", " ").Replace("\r", ""))}</remarks>"
             );
 
-        // Derive property and variable names for the dataplane pack
-        var urlPropName = isDataPlane ? FlagToPropName(dataplanePackConfig!.UrlCliFlag) : null;
-        var baseUrlVar = isDataPlane ? FieldToBaseUrlVar(dataplanePackConfig!.FieldName) : null;
-
         w.Block(
             $"public partial class {op.ClassName}(AuthOptionPack auth) : CommandDef",
             () =>
@@ -114,12 +110,8 @@ public static class OperationCommandEmitter
 
                 if (isDataPlane)
                 {
-                    // Data-plane: explicit URL flag overrides ARM-resolved endpoint
-                    w.Line($"[CliOption(\"{dataplanePackConfig!.UrlCliFlag}\")]");
-                    w.Line($"public partial string? {urlPropName} {{ get; }}");
-                    w.Line();
                     w.Line(
-                        $"public readonly {dataplanePackConfig.ClassName} {dataplanePackConfig.FieldName} = new();"
+                        $"public readonly {dataplanePackConfig!.ClassName} {dataplanePackConfig.FieldName} = new();"
                     );
                     w.Line();
                 }
@@ -252,7 +244,7 @@ public static class OperationCommandEmitter
 
                         if (isDataPlane)
                             w.Line(
-                                $"var {baseUrlVar} = {urlPropName} ?? (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');"
+                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');"
                             );
 
                         if (usesResourcePack)
@@ -277,7 +269,7 @@ public static class OperationCommandEmitter
 
                         // Build path
                         if (isDataPlane)
-                            EmitDataPlanePathBuilder(w, op, baseUrlVar!);
+                            EmitDataPlanePathBuilder(w, op, "dataplaneRef");
                         else if (usesResourcePack)
                             EmitResourcePackPathBuilder(w, op, resourcePackConfig!, armIdVar!);
                         else
@@ -367,19 +359,6 @@ public static class OperationCommandEmitter
         // Emit: var path = $"{baseUrlVar}/keys/{KeyName}/...";
         w.Line($"var path = $\"{{{baseUrlVar}}}{expr}\";");
     }
-
-    /// <summary>Converts a CLI flag like "--vault-url" to a C# property name "VaultUrl".</summary>
-    private static string FlagToPropName(string cliFlag)
-    {
-        var stripped = cliFlag.TrimStart('-');
-        return string.Concat(
-            stripped.Split('-').Select(s => s.Length > 0 ? char.ToUpper(s[0]) + s[1..] : "")
-        );
-    }
-
-    /// <summary>Converts a field name like "KeyVault" to a local variable name "keyVaultBaseUrl".</summary>
-    private static string FieldToBaseUrlVar(string fieldName) =>
-        char.ToLower(fieldName[0]) + fieldName[1..] + "BaseUrl";
 
     private static void EmitPathBuilder(
         CodeWriter w,

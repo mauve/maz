@@ -15,9 +15,6 @@ public partial class AppconfigdataUpdateSnapshotUpdateCommandDef(AuthOptionPack 
     public override string Name => "update";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--appconfig-url")]
-    public partial string? AppconfigUrl { get; }
-
     public readonly AppConfigurationOptionPack AppConfig = new();
 
     public readonly RenderOptionPack Render = new();
@@ -31,8 +28,8 @@ public partial class AppconfigdataUpdateSnapshotUpdateCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://azconfig.io/.default");
-        var appConfigBaseUrl = AppconfigUrl ?? (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{appConfigBaseUrl}/snapshots/{ParamName}";
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/snapshots/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2024-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

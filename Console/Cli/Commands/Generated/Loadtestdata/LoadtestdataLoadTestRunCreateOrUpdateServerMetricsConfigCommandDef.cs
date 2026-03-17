@@ -15,9 +15,6 @@ public partial class LoadtestdataLoadTestRunCreateOrUpdateServerMetricsConfigCom
     public override string Name => "create-or-update-server-metrics-config";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--load-test-url")]
-    public partial string? LoadTestUrl { get; }
-
     public readonly LoadTestingOptionPack LoadTest = new();
 
     public readonly RenderOptionPack Render = new();
@@ -31,8 +28,8 @@ public partial class LoadtestdataLoadTestRunCreateOrUpdateServerMetricsConfigCom
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var loadTestBaseUrl = LoadTestUrl ?? (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{loadTestBaseUrl}/test-runs/{TestRunId}/server-metrics-config";
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/test-runs/{TestRunId}/server-metrics-config";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2022-11-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

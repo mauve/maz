@@ -16,9 +16,6 @@ public partial class DevcenterdataOperationstatusGetCommandDef(AuthOptionPack au
     public override string Name => "get";
     protected override bool IsDataPlane => true;
 
-    [CliOption("--dev-center-url")]
-    public partial string? DevCenterUrl { get; }
-
     public readonly DevCenterOptionPack DevCenter = new();
 
     public readonly RenderOptionPack Render = new();
@@ -36,8 +33,8 @@ public partial class DevcenterdataOperationstatusGetCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var devCenterBaseUrl = DevCenterUrl ?? (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{devCenterBaseUrl}/projects/{ProjectName}/operationstatuses/{OperationId}";
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/projects/{ProjectName}/operationstatuses/{OperationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-02-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

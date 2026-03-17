@@ -17,9 +17,6 @@ public partial class AcrdataContainerRegistryBlobMountBlobCommandDef(AuthOptionP
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--acr-url")]
-    public partial string? AcrUrl { get; }
-
     public readonly ContainerRegistryOptionPack Acr = new();
 
     public readonly RenderOptionPack Render = new();
@@ -41,8 +38,8 @@ public partial class AcrdataContainerRegistryBlobMountBlobCommandDef(AuthOptionP
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://containerregistry.azure.net/.default");
-        var acrBaseUrl = AcrUrl ?? (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{acrBaseUrl}/v2/{ParamName}/blobs/uploads/";
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/v2/{ParamName}/blobs/uploads/";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-07-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

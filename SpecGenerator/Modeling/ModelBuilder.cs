@@ -164,16 +164,8 @@ public sealed class ModelBuilder
         // Pass 6: Build ResourceGroupModels, applying subgroup config
         var resources = BuildResourceGroups(operationsByResource, serviceClassName);
 
-        // Resolve dataplane pack config: explicit config wins; fall back to KV defaults when
-        // spec has x-ms-parameterized-host but no explicit config was provided.
+        // All data-plane services must have explicit dataplaneOptionPack config in specgen.json.
         DataplaneOptionPackConfig? packConfig = _service.DataplaneOptionPack;
-        if (packConfig is null && isDataPlane)
-            packConfig = new DataplaneOptionPackConfig(
-                "KeyVaultOptionPack",
-                "KeyVault",
-                "--vault-url",
-                "https://vault.azure.net/.default"
-            );
 
         return new ServiceModel(
             _service.DisplayName,

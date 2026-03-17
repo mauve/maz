@@ -17,9 +17,6 @@ public partial class PurviewdataGlossaryCreateTermCommandDef(AuthOptionPack auth
     protected override bool IsDataPlane => true;
     protected override bool IsDestructive => true;
 
-    [CliOption("--purview-url")]
-    public partial string? PurviewUrl { get; }
-
     public readonly PurviewOptionPack Purview = new();
 
     public readonly RenderOptionPack Render = new();
@@ -33,8 +30,8 @@ public partial class PurviewdataGlossaryCreateTermCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential(), "https://purview.azure.net/.default");
-        var purviewBaseUrl = PurviewUrl ?? (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
-        var path = $"{purviewBaseUrl}/atlas/v2/glossary/term";
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var path = $"{dataplaneRef}/atlas/v2/glossary/term";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-09-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
