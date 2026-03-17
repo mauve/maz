@@ -1,3 +1,4 @@
+using System.CommandLine;
 using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
@@ -13,30 +14,29 @@ namespace Console.Cli.Shared;
 ///   {sub}/{rg}/{name}
 ///   /s/{sub}/{rg}/{name}
 ///   /subscriptions/{guid}/{rg}/{name}
-///   /{type-prefix}/{name}  (e.g. /kv/myvault — prefix defined by the subclass)
+///   /subscriptions/{guid}/resourceGroups/{rg}/providers/{ns}/{type}/{name}  (full ARM resource ID)
+///   https://portal.azure.com/#...  (portal URL — ARM resource ID extracted automatically)
 ///
 /// Combined subscription/resource-group segments override the standalone
-/// --subscription-id / --resource-group options; specifying both forms causes
-/// an error.
-///
-/// Note: subscription display names containing "/" are not supported in the
-/// combined format (they would be misinterpreted as path separators).
+/// --subscription-id / --resource-group options (with a warning).
 /// </summary>
 public abstract class ArmResourceOptionPack<TResource> : OptionPack
 {
     // -----------------------------------------------------------------------
-    // Abstract members — subclass supplies the concrete option-pack fields
+    // Concrete sub/rg fields — shared by all subclasses (no more boilerplate)
     // -----------------------------------------------------------------------
 
-    /// <summary>
-    /// The <see cref="SubscriptionOptionPack"/> field declared on the concrete subclass.
-    /// </summary>
-    protected abstract SubscriptionOptionPack SubscriptionPack { get; }
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
 
-    /// <summary>
-    /// The <see cref="ResourceGroupOptionPack"/> field declared on the concrete subclass.
-    /// </summary>
-    protected abstract ResourceGroupOptionPack ResourceGroupPack { get; }
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    // Wire the child pack's options into this pack's command (without the source generator).
+    protected override void AddChildPacksTo(Command cmd) =>
+        ((OptionPack)ResourceGroup).AddOptionsTo(cmd);
+
+    // -----------------------------------------------------------------------
+    // Abstract members — subclass supplies the resource-specific details
+    // -----------------------------------------------------------------------
 
     /// <summary>
     /// The raw string value typed by the user (the [CliOption]-decorated property on the subclass).
@@ -44,21 +44,20 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     protected abstract string? RawResourceValue { get; }
 
     /// <summary>
-    /// The short path prefix recognised for this resource type (e.g. "/kv/").
-    /// Used in help text and stripped from the raw value before parsing.
+    /// The ARM resource type string, e.g. "Microsoft.KeyVault/vaults".
+    /// Used for ARG queries when subscription/resource-group are unknown.
     /// </summary>
-    public abstract string ResourceShortPathPrefix { get; }
+    public abstract string ArmResourceType { get; }
 
     // -----------------------------------------------------------------------
     // Help text
     // -----------------------------------------------------------------------
 
     public override string HelpSectionDescription =>
-        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}} | "
-        + $"{ResourceShortPathPrefix}{{name}}. "
+        $"Accepts: {{name}} | {{rg}}/{{name}} | {{sub}}/{{rg}}/{{name}} | portal-URL. "
         + $"{{sub}} can be a GUID, display name, /subscriptions/{{guid}}, or /s/{{guid}}. "
-        + $"Combined form overrides --subscription-id and --resource-group. "
-        + $"Note: subscription display names containing '/' are not supported in the combined format.";
+        + $"Combined form overrides --subscription-id and --resource-group (with warning). "
+        + $"Prefix with /arm/ in dataplane commands to force ARM lookup.";
 
     // -----------------------------------------------------------------------
     // Resolution
@@ -69,8 +68,28 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     /// </summary>
     public Task<TResource> ResolveResourceAsync(ArmClient armClient, CancellationToken ct = default)
     {
-        var (sub, rg, name) = ParseAndValidateSegments();
-        return GetResourceCoreAsync(armClient, sub, rg, name, ct);
+        var raw = RawResourceValue ?? throw new InvocationException("Resource name is required.");
+        return ResolveResourceByRawAsync(raw, armClient, ct);
+    }
+
+    /// <summary>
+    /// Resolves the ARM resource using an explicit raw value (e.g. with /arm/ prefix stripped).
+    /// </summary>
+    internal async Task<TResource> ResolveResourceByRawAsync(
+        string raw,
+        ArmClient armClient,
+        CancellationToken ct
+    )
+    {
+        var (subId, rgName, name) = await ResourceNameResolver.ResolveAsync(
+            rawValue: raw,
+            explicitSubscriptionId: ResourceGroup.Subscription.SubscriptionId,
+            explicitResourceGroupName: ResourceGroup.GetWithSource().Value,
+            armClient: armClient,
+            resourceType: ArmResourceType,
+            ct: ct
+        );
+        return await GetResourceCoreAsync(armClient, subId, rgName, name, ct);
     }
 
     /// <summary>
@@ -85,13 +104,12 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     );
 
     /// <summary>
-    /// Template method: fetch the specific ARM resource. Called with already-resolved
-    /// subscription/resource-group hints (strings, not yet resolved to ARM objects).
+    /// Template method: fetch the specific ARM resource using already-resolved (non-null) identifiers.
     /// </summary>
     protected abstract Task<TResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSubscription,
-        string? resolvedResourceGroup,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
         string resourceName,
         CancellationToken ct
     );
@@ -104,56 +122,6 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         ArmClient armClient,
         string? hint
     ) => SubscriptionOptionPack.ResolveAsync(armClient, hint);
-
-    // -----------------------------------------------------------------------
-    // Parsing
-    // -----------------------------------------------------------------------
-
-    private (string? sub, string? rg, string name) ParseAndValidateSegments()
-    {
-        var rawValue =
-            RawResourceValue ?? throw new InvocationException("Resource name is required.");
-
-        // Strip the resource-type short prefix (e.g. /kv/) before parsing.
-        var shortPrefix = ResourceShortPathPrefix;
-        if (
-            !string.IsNullOrEmpty(shortPrefix)
-            && rawValue.StartsWith(shortPrefix, StringComparison.OrdinalIgnoreCase)
-        )
-        {
-            rawValue = rawValue[shortPrefix.Length..];
-        }
-
-        var parsed = ResourceIdentifierParser.Parse(rawValue);
-
-        bool combinedHasSub = parsed.SubscriptionSegment is not null;
-        bool combinedHasRg = parsed.ResourceGroupSegment is not null;
-        bool explicitSub = SubscriptionPack.SubscriptionId is not null;
-        bool explicitRg = ResourceGroupPack.ResourceGroupName is not null;
-
-        if (combinedHasSub && explicitSub)
-            throw new InvocationException(
-                "Ambiguous: the combined value contains a subscription segment AND --subscription-id was also specified."
-            );
-        if (combinedHasRg && explicitRg)
-            throw new InvocationException(
-                "Ambiguous: the combined value contains a resource-group segment AND --resource-group was also specified."
-            );
-
-        // If the combined form supplied a subscription, normalise it;
-        // otherwise fall through to what --subscription-id / env provides (may be null → default).
-        var effectiveSub = combinedHasSub
-            ? ResourceIdentifierParser.NormalizeSubscriptionSegment(parsed.SubscriptionSegment)
-            : SubscriptionPack.SubscriptionId
-                ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
-
-        var effectiveRg = combinedHasRg
-            ? ResourceIdentifierParser.NormalizeResourceGroupSegment(parsed.ResourceGroupSegment)
-            : ResourceGroupPack.ResourceGroupName
-                ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
-
-        return (effectiveSub, effectiveRg, parsed.ResourceNameSegment);
-    }
 }
 
 // ---------------------------------------------------------------------------

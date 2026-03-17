@@ -41,6 +41,30 @@ public sealed class MazConfig
     public IReadOnlyDictionary<string, string> GlobalDefaults { get; init; } =
         FrozenDictionary<string, string>.Empty;
 
+    // [global] — typed convenience properties
+
+    /// <summary>
+    /// Default subscription ID from <c>[global] defaultSubscriptionId</c> (preferred)
+    /// or backward-compatible <c>[global] subscription-id</c>.
+    /// </summary>
+    public string? DefaultSubscriptionId =>
+        GlobalDefaults.TryGetValue("defaultSubscriptionId", out var v)
+            ? v
+            : GlobalDefaults.TryGetValue("subscription-id", out var v2)
+                ? v2
+                : null;
+
+    /// <summary>
+    /// Default resource group from <c>[global] defaultResourceGroup</c> (preferred)
+    /// or backward-compatible <c>[global] resource-group</c>.
+    /// </summary>
+    public string? DefaultResourceGroup =>
+        GlobalDefaults.TryGetValue("defaultResourceGroup", out var v)
+            ? v
+            : GlobalDefaults.TryGetValue("resource-group", out var v2)
+                ? v2
+                : null;
+
     // [cmd.X] — command path → option name → value
 
     /// <summary>Per-command default values. Key is the full command path (e.g. "storage account list").</summary>
@@ -49,6 +73,14 @@ public sealed class MazConfig
         IReadOnlyDictionary<string, string>
     > CommandDefaults { get; init; } =
         FrozenDictionary<string, IReadOnlyDictionary<string, string>>.Empty;
+
+    // [resolution.*] — CFG1: per-subscription scoping filters
+
+    /// <summary>
+    /// Per-subscription resource resolution filters (CFG1).
+    /// When non-empty, subscription discovery is scoped to these subscriptions and optionally their resource groups.
+    /// </summary>
+    public IReadOnlyList<ResolutionFilterEntry> ResolutionFilter { get; init; } = [];
 
     /// <summary>
     /// Initializes <see cref="Current"/> from the config file.
@@ -103,33 +135,6 @@ public sealed class MazConfig
         return Path.Combine(configBase, ".maz", "user-config.ini");
     }
 
-    /// <summary>
-    /// Sets environment variables for each <c>[global]</c> key that has a known mapping,
-    /// only when the environment variable is not already set.
-    /// </summary>
-    public void InjectEnvironmentDefaults()
-    {
-        if (GlobalDefaults.Count == 0)
-            return;
-
-        var mapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-        {
-            ["subscription-id"] = "AZURE_SUBSCRIPTION_ID",
-            ["resource-group"] = "AZURE_RESOURCE_GROUP",
-            ["format"] = "MAZ_FORMAT",
-            ["require-confirmation"] = "MAZ_REQUIRE_CONFIRMATION",
-        };
-
-        foreach (var (key, value) in GlobalDefaults)
-        {
-            if (!mapping.TryGetValue(key, out var envVar))
-                continue;
-            if (Environment.GetEnvironmentVariable(envVar) is not null)
-                continue;
-            Environment.SetEnvironmentVariable(envVar, value);
-        }
-    }
-
     private static MazConfig FromSections(Dictionary<string, Dictionary<string, string>> sections)
     {
         static IReadOnlyList<string> ParseList(
@@ -149,12 +154,35 @@ public sealed class MazConfig
             StringComparer.OrdinalIgnoreCase
         );
 
+        var resolutionFilter = new List<ResolutionFilterEntry>();
+
         foreach (var (sectionName, sectionData) in sections)
         {
-            if (!sectionName.StartsWith("cmd.", StringComparison.OrdinalIgnoreCase))
+            if (sectionName.StartsWith("cmd.", StringComparison.OrdinalIgnoreCase))
+            {
+                var cmdPath = sectionName[4..].Trim();
+                cmdDefaults[cmdPath] = sectionData.ToFrozenDictionary(
+                    StringComparer.OrdinalIgnoreCase
+                );
                 continue;
-            var cmdPath = sectionName[4..].Trim();
-            cmdDefaults[cmdPath] = sectionData.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+            }
+
+            if (sectionName.StartsWith("resolution.", StringComparison.OrdinalIgnoreCase))
+            {
+                var subId = sectionName[11..].Trim();
+                if (string.IsNullOrWhiteSpace(subId))
+                    continue;
+
+                IReadOnlyList<string> rgs = [];
+                if (sectionData.TryGetValue("resource-groups", out var rgVal))
+                    rgs = rgVal
+                        .Split(',')
+                        .Select(x => x.Trim())
+                        .Where(x => x.Length > 0)
+                        .ToList();
+
+                resolutionFilter.Add(new ResolutionFilterEntry(subId, rgs));
+            }
         }
 
         IReadOnlyDictionary<string, string> globalDefaults = sections.TryGetValue(
@@ -174,6 +202,7 @@ public sealed class MazConfig
             DisallowedResourceIds = ParseList(sections, "disallow", "resource-ids"),
             GlobalDefaults = globalDefaults,
             CommandDefaults = cmdDefaults.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase),
+            ResolutionFilter = resolutionFilter,
         };
     }
 }

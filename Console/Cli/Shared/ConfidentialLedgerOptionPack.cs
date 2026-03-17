@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ConfidentialLedger;
 
@@ -10,20 +11,12 @@ namespace Console.Cli.Shared;
 ///   ledger-name
 ///   rg/ledger-name
 ///   sub/rg/ledger-name
-///   /cl/ledger-name
 /// </summary>
 public partial class ConfidentialLedgerOptionPack
     : DataplaneResourceOptionPack<ConfidentialLedgerResource, Uri>
 {
-    public const string ShortPathPrefix = "/cl/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
+    public override string ArmResourceType => "Microsoft.ConfidentialLedger/ledgers";
     public override string HelpTitle => "Confidential Ledger";
-
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
-
-    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
-    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Confidential Ledger name, or combined format: [sub/]rg/ledger-name.</summary>
     [CliOption(
@@ -44,43 +37,17 @@ public partial class ConfidentialLedgerOptionPack
 
     protected override async Task<ConfidentialLedgerResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
-        string name,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
+        string resourceName,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetConfidentialLedgerAsync(name, ct);
-        }
-
-        var matches = new List<ConfidentialLedgerResource>();
-        await foreach (var ledger in sub.GetConfidentialLedgersAsync(cancellationToken: ct))
-        {
-            if (ledger.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(ledger);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Confidential Ledger '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} ledgers:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var sub = armClient.GetSubscriptionResource(
+            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
+        );
+        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
+        return await rg.Value.GetConfidentialLedgerAsync(resourceName, ct);
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

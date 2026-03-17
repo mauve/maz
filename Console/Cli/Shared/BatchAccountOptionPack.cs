@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Batch;
 
@@ -13,21 +14,11 @@ namespace Console.Cli.Shared;
 ///   sub/rg/account-name
 ///   /s/{sub}/rg/account-name
 ///   /subscriptions/{guid}/rg/account-name
-///   /ba/account-name
 /// </summary>
 public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchAccountResource, Uri>
 {
-    public const string ShortPathPrefix = "/ba/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
+    public override string ArmResourceType => "Microsoft.Batch/batchAccounts";
     public override string HelpTitle => "Batch Account";
-
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-
-    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
-
-    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
-    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
     /// Batch account name, or combined format: [sub/]rg/account-name (see section description).
@@ -50,43 +41,17 @@ public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchA
 
     protected override async Task<BatchAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
-        string name,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
+        string resourceName,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetBatchAccountAsync(name, ct);
-        }
-
-        var matches = new List<BatchAccountResource>();
-        await foreach (var account in sub.GetBatchAccountsAsync(cancellationToken: ct))
-        {
-            if (account.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(account);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Batch account '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var sub = armClient.GetSubscriptionResource(
+            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
+        );
+        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
+        return await rg.Value.GetBatchAccountAsync(resourceName, ct);
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

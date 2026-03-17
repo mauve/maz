@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ContainerRegistry;
 
@@ -13,22 +14,12 @@ namespace Console.Cli.Shared;
 ///   sub/rg/registry-name
 ///   /s/{sub}/rg/registry-name
 ///   /subscriptions/{guid}/rg/registry-name
-///   /cr/registry-name
 /// </summary>
 public partial class ContainerRegistryOptionPack
     : DataplaneResourceOptionPack<ContainerRegistryResource, Uri>
 {
-    public const string ShortPathPrefix = "/cr/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
+    public override string ArmResourceType => "Microsoft.ContainerRegistry/registries";
     public override string HelpTitle => "Container Registry";
-
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-
-    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
-
-    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
-    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
     /// Container registry name, or combined format: [sub/]rg/registry-name (see section description).
@@ -51,43 +42,17 @@ public partial class ContainerRegistryOptionPack
 
     protected override async Task<ContainerRegistryResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
-        string name,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
+        string resourceName,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetContainerRegistryAsync(name, ct);
-        }
-
-        var matches = new List<ContainerRegistryResource>();
-        await foreach (var reg in sub.GetContainerRegistriesAsync(cancellationToken: ct))
-        {
-            if (reg.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(reg);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Container registry '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} registries:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var sub = armClient.GetSubscriptionResource(
+            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
+        );
+        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
+        return await rg.Value.GetContainerRegistryAsync(resourceName, ct);
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
