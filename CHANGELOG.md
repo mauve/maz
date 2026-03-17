@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-03-17
+### Changed
+- Replace per-resource short prefixes (`/kv/`, `/sa/`, `/cr/`, etc.) with universal `/arm/` prefix on `DataplaneResourceOptionPack`
+- Add direct endpoint URL support via `TryParseDirectRef` hook on dataplane options
+- Update GETTING_STARTED.md to document simplified resource naming
+
+### Fixed
+- Bootstrap wizard demo placement now sits below content with separator line
+
 ## [0.2.0] - 2026-03-17
 ### Changed
 - Remove `--*-url` flags from all data-plane commands (direct URLs now handled via `DataplaneResourceOptionPack`)
