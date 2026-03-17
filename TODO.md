@@ -23,3 +23,7 @@ The path forward:
 ## Highlight commands which are hand-written
 
 With over >8100 commands supported it is almost impossible for a user to discover hand-written commands which were added to make everyday operations simpler. We should highlight these commands somehow in the help.
+
+## Remove all Command and Option registries
+
+This seems like a thing we had to add because of System.CommandLine. Let's see if we can remove it, lots of allocs happening is my feeling.
