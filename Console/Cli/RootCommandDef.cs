@@ -22,6 +22,7 @@ public partial class RootCommandDef : CommandDef
     public readonly GlobalBehaviorOptionPack GlobalBehavior;
 
     public readonly AccountCommandDef Account;
+    public readonly AcrCommandDef Acr;
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
     public readonly CompletionCommandDef Completion;
@@ -37,6 +38,7 @@ public partial class RootCommandDef : CommandDef
         Interactive = new InteractiveOptionPack();
         GlobalBehavior = new GlobalBehaviorOptionPack();
         Account = new AccountCommandDef(Auth);
+        Acr = new AcrCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
         Completion = new CompletionCommandDef();
