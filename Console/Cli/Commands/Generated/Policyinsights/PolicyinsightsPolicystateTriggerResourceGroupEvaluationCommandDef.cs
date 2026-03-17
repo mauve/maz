@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,8 @@ public partial class PolicyinsightsPolicystateTriggerResourceGroupEvaluationComm
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.PolicyInsights/policyStates/latest/triggerEvaluation";
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.PolicyInsights/policyStates/latest/triggerEvaluation";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-10-01", null, ct);
         if (!NoWait)

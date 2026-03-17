@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,8 @@ public partial class CognitiveservicesRaiExternalSafetyProviderDeleteCommandDef(
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.CognitiveServices/raiExternalSafetyProviders/{SafetyProviderName}";
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.CognitiveServices/raiExternalSafetyProviders/{SafetyProviderName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-12-01", null, ct);
         if (!NoWait)

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -22,7 +23,8 @@ public partial class GuestconfigurationAssignmentListCommandDef(AuthOptionPack a
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments";
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments";
 
         var allItems = client.GetAllAsync(path, "2022-01-25", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

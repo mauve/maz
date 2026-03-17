@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -22,7 +23,8 @@ public partial class PurviewPrivatelinkresourceListByAccountCommandDef(AuthOptio
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Purview/accounts/{StorageAccount.RequireAccountName()}/privateLinkResources";
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Purview/accounts/{StorageAccount.RequireAccountName()}/privateLinkResources";
 
         var allItems = client.GetAllAsync(path, "2021-12-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

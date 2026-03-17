@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -26,7 +27,8 @@ public partial class DatalakeanalyticsStorageaccountListContainersCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DataLakeAnalytics/accounts/{StorageAccount.RequireAccountName()}/storageAccounts/{StorageAccountName}/containers";
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DataLakeAnalytics/accounts/{StorageAccount.RequireAccountName()}/storageAccounts/{StorageAccountName}/containers";
 
         var allItems = client.GetAllAsync(path, "2016-11-01", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();

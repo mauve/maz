@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,8 @@ public partial class StorageAccountAbortHierarchicalNamespaceMigrationCommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourcegroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/aborthnsonmigration";
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourcegroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Storage/storageAccounts/{StorageAccount.RequireAccountName()}/aborthnsonmigration";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-01-01", null, ct);
         if (!NoWait)

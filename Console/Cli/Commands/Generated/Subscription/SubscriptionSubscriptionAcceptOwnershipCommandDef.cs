@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,8 @@ public partial class SubscriptionSubscriptionAcceptOwnershipCommandDef(AuthOptio
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/providers/Microsoft.Subscription/subscriptions/{Subscription.RequireSubscriptionId()}/acceptOwnership";
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/providers/Microsoft.Subscription/subscriptions/{subscriptionId}/acceptOwnership";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2021-10-01", null, ct);
         if (!NoWait)

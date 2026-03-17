@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,8 @@ public partial class BillingInvoiceDownloadBySubscriptionCommandDef(AuthOptionPa
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/providers/Microsoft.Billing/billingAccounts/default/billingSubscriptions/{Subscription.RequireSubscriptionId()}/invoices/{InvoiceName}/download";
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/providers/Microsoft.Billing/billingAccounts/default/billingSubscriptions/{subscriptionId}/invoices/{InvoiceName}/download";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-04-01", null, ct);
         if (!NoWait)
