@@ -47,10 +47,15 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         var sections = content is not null ? SplitSections(content) : new List<string>();
         var steps = BuildWizardSteps(shell, completionsSetup, sections);
 
-        await RunWizardAsync(steps, ct);
+        var completed = await RunWizardAsync(steps, ct);
         System.Console.WriteLine();
 
-        await PromptConfigureAsync(ct);
+        if (completed)
+            await PromptConfigureAsync(ct);
+        else
+            System.Console.WriteLine(
+                "  " + Ansi.Dim("maz configure skipped — exited wizard early.")
+            );
 
         System.Console.WriteLine(
             "  "
@@ -78,25 +83,21 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 "Welcome to maz",
                 async w =>
                 {
-                    // Capture logo + completions text into lines (shimmer skipped via cancelled CT).
+                    // Capture logo + completions text into lines.
                     var sw = new StringWriter();
                     var old = System.Console.Out;
                     System.Console.SetOut(sw);
                     try
                     {
-                        await RenderWelcomeContentAsync(
-                            shell,
-                            completionsSetup,
-                            w,
-                            new CancellationToken(canceled: true)
-                        );
+                        await RenderWelcomeContentAsync(shell, completionsSetup, w);
                     }
                     finally
                     {
                         System.Console.SetOut(old);
                     }
                     return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
-                }
+                },
+                DemoTag: "logo"
             )
         );
 
@@ -120,10 +121,11 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         return steps;
     }
 
-    private static async Task RunWizardAsync(List<WizardStep> steps, CancellationToken ct)
+    private static async Task<bool> RunWizardAsync(List<WizardStep> steps, CancellationToken ct)
     {
         var index = 0;
         var total = steps.Count;
+        var userCompleted = false;
 
         CancellationTokenSource? stepCts = null;
         Task? demoTask = null;
@@ -193,7 +195,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 }
 
                 // Start demo loop if this step has one.
-                if (demoLines > 0 && step.DemoTag is { } tag)
+                if (step.DemoTag is { } tag)
                 {
                     var demoStartRow = h - demoLines; // 1-indexed row of first demo line
                     stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
@@ -240,7 +242,10 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 if (moved)
                     index = forward ? index + 1 : index - 1;
                 if (exiting)
+                {
+                    userCompleted = !quit;
                     break;
+                }
 
                 await DrawStepAsync(index);
             }
@@ -264,18 +269,19 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             System.Console.TreatControlCAsInput = false;
             System.Console.Write("\x1b[?25h\x1b[?1049l");
         }
+
+        return userCompleted;
     }
 
     // ── Step renderers ─────────────────────────────────────────────────────────
 
-    private static async Task RenderWelcomeContentAsync(
+    private static Task RenderWelcomeContentAsync(
         string shell,
         bool completionsSetup,
-        int contentWidth,
-        CancellationToken ct
+        int contentWidth
     )
     {
-        await BootstrapAnimator.PlayWelcomeLogoAsync(contentWidth, ct);
+        BootstrapAnimator.RenderWelcomeLogo(contentWidth);
 
         System.Console.WriteLine();
         System.Console.WriteLine("  " + Ansi.Bold(Ansi.Magenta("Shell Completions")));
@@ -293,6 +299,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             System.Console.WriteLine();
             PrintCompletionCommands(shell);
         }
+
+        return Task.CompletedTask;
     }
 
     // ── Shell completions ──────────────────────────────────────────────────────
@@ -356,15 +364,24 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 break;
             case "zsh":
                 System.Console.WriteLine(
-                    "    " + Ansi.Yellow("maz completion zsh  >> ~/.zshrc  && source ~/.zshrc")
+                    "    "
+                        + Ansi.Yellow(
+                            """echo 'eval "$(maz completion zsh)"'  >> ~/.zshrc  && source ~/.zshrc"""
+                        )
                 );
                 break;
             default:
                 System.Console.WriteLine(
-                    "    " + Ansi.Yellow("maz completion bash >> ~/.bashrc && source ~/.bashrc")
+                    "    "
+                        + Ansi.Yellow(
+                            """echo 'eval "$(maz completion bash)"' >> ~/.bashrc && source ~/.bashrc"""
+                        )
                 );
                 System.Console.WriteLine(
-                    "    " + Ansi.Yellow("maz completion zsh  >> ~/.zshrc  && source ~/.zshrc")
+                    "    "
+                        + Ansi.Yellow(
+                            """echo 'eval "$(maz completion zsh)"'  >> ~/.zshrc  && source ~/.zshrc"""
+                        )
                 );
                 System.Console.WriteLine(
                     "    "
@@ -432,6 +449,9 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     {
         switch (tag)
         {
+            case "logo":
+                await BootstrapAnimator.PlayLogoShimmerAsync(ct);
+                break;
             case "subscriptions":
                 await BootstrapAnimator.PlaySubscriptionsAsync(startRow, ct);
                 break;

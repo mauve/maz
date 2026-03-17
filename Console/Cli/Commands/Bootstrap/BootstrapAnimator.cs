@@ -26,47 +26,24 @@ internal static class BootstrapAnimator
 
     // ── Welcome logo ───────────────────────────────────────────────────────────
 
-    public static async Task PlayWelcomeLogoAsync(int contentWidth, CancellationToken ct)
+    private static readonly string[] LogoLines =
+    [
+        "███╗   ███╗ █████╗ ███████╗",
+        "████╗ ████║██╔══██╗╚══███╔╝",
+        "██╔████╔██║███████║  ███╔╝ ",
+        "██║╚██╔╝██║██╔══██║ ███╔╝  ",
+        "██║ ╚═╝ ██║██║  ██║███████╗",
+        "╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝",
+    ];
+
+    public static void RenderWelcomeLogo(int contentWidth)
     {
-        string[] logoLines =
-        [
-            "███╗   ███╗ █████╗ ███████╗",
-            "████╗ ████║██╔══██╗╚══███╔╝",
-            "██╔████╔██║███████║  ███╔╝ ",
-            "██║╚██╔╝██║██╔══██║ ███╔╝  ",
-            "██║ ╚═╝ ██║██║  ██║███████╗",
-            "╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝",
-        ];
-
-        var logoWidth = logoLines.Max(l => l.Length);
-        logoLines = [.. logoLines.Select(l => l.PadRight(logoWidth))];
-
+        var logoWidth = LogoLines.Max(l => l.Length);
         var logoIndent = Math.Max(2, (contentWidth - logoWidth) / 2);
-        var rightPadLen = Math.Max(0, contentWidth - logoIndent - logoWidth);
         var indentStr = new string(' ', logoIndent);
-        var rightPad = new string(' ', rightPadLen);
 
-        foreach (var line in logoLines)
-            System.Console.Write($"{indentStr}\x1b[35m{line}\x1b[0m{rightPad}\n");
-
-        if (Ansi.IsEnabled && !ct.IsCancellationRequested)
-        {
-            const int bandHalf = 6;
-            var nLines = logoLines.Length;
-
-            for (var x = -bandHalf; x <= logoWidth + bandHalf; x++)
-            {
-                if (ct.IsCancellationRequested)
-                    break;
-                System.Console.Write($"\x1b[{nLines}A");
-                foreach (var line in logoLines)
-                {
-                    var shimLine = RenderWithShimmer(line, x, bandHalf);
-                    System.Console.Write($"\r\x1b[2K{indentStr}{shimLine}{rightPad}\n");
-                }
-                await Task.Delay(22, ct).ConfigureAwait(false);
-            }
-        }
+        foreach (var line in LogoLines)
+            System.Console.Write($"{indentStr}\x1b[35m{line}\x1b[0m\n");
 
         System.Console.WriteLine();
         var tagline =
@@ -74,6 +51,66 @@ internal static class BootstrapAnimator
             + $"  {Ansi.Dim("—")}"
             + $"  {Ansi.Yellow("Tab-complete everything.")}";
         System.Console.WriteLine(new string(' ', logoIndent) + tagline);
+    }
+
+    // logoStartRow is the 1-indexed terminal row where the logo begins (row 2 in the TUI).
+    private const int LogoTuiStartRow = 2;
+    private const int LogoShimmerBandHalf = 10;
+    private const int LogoShimmerSweepDelayMs = 16;
+    private const int LogoShimmerLoopPauseMs = 2200;
+    private const int LogoShimmerInitialPauseMs = 400;
+
+    public static async Task PlayLogoShimmerAsync(CancellationToken ct)
+    {
+        if (!Ansi.IsEnabled)
+            return;
+
+        var logoWidth = LogoLines.Max(l => l.Length);
+        var paddedLines = LogoLines.Select(l => l.PadRight(logoWidth)).ToArray();
+
+        try
+        {
+            await Task.Delay(LogoShimmerInitialPauseMs, ct).ConfigureAwait(false);
+
+            while (!ct.IsCancellationRequested)
+            {
+                var termWidth = WizardUi.GetTermWidth();
+                var contentWidth = termWidth - 3; // matches DrawStepAsync: boxWidth-2 = (w-1)-2
+                var logoIndent = Math.Max(2, (contentWidth - logoWidth) / 2);
+                var indentStr = new string(' ', logoIndent);
+
+                for (var x = -LogoShimmerBandHalf; x <= logoWidth + LogoShimmerBandHalf; x++)
+                {
+                    if (ct.IsCancellationRequested)
+                        break;
+                    for (var row = 0; row < paddedLines.Length; row++)
+                    {
+                        WizardUi.MoveTo(LogoTuiStartRow + row);
+                        var shimLine = RenderWithShimmer(paddedLines[row], x, LogoShimmerBandHalf);
+                        System.Console.Write($"\r\x1b[2K{indentStr}{shimLine}");
+                    }
+                    await Task.Delay(LogoShimmerSweepDelayMs, ct).ConfigureAwait(false);
+                }
+
+                if (ct.IsCancellationRequested)
+                    break;
+
+                await Task.Delay(LogoShimmerLoopPauseMs, ct).ConfigureAwait(false);
+            }
+        }
+        catch (OperationCanceledException) { }
+
+        // Restore plain magenta on exit so the content area looks clean.
+        if (!ct.IsCancellationRequested)
+            return;
+        var w2 = WizardUi.GetTermWidth();
+        var cw2 = w2 - 3;
+        var ind2 = new string(' ', Math.Max(2, (cw2 - logoWidth) / 2));
+        for (var row = 0; row < paddedLines.Length; row++)
+        {
+            WizardUi.MoveTo(LogoTuiStartRow + row);
+            System.Console.Write($"\r\x1b[2K{ind2}\x1b[35m{paddedLines[row]}\x1b[0m");
+        }
     }
 
     // ── Demo animations (absolute-row TUI versions) ────────────────────────────
@@ -342,11 +379,16 @@ internal static class BootstrapAnimator
     private static string ShimmerColor(int dist, int bandHalf) =>
         dist switch
         {
-            0 => "\x1b[1;97m",
-            1 => "\x1b[97m",
-            _ when dist <= bandHalf / 2 => "\x1b[37m",
-            _ when dist <= bandHalf => "\x1b[95m",
-            _ => "\x1b[35m",
+            0 => "\x1b[1;38;5;231m",                          // bold pure white — peak
+            1 => "\x1b[1;97m",                                // bold bright white
+            2 => "\x1b[38;5;255m",                            // near white
+            3 => "\x1b[38;5;252m",                            // light silver
+            _ when dist <= bandHalf * 4 / 10 => "\x1b[38;5;249m", // medium silver
+            _ when dist <= bandHalf * 5 / 10 => "\x1b[38;5;246m", // dim silver
+            _ when dist <= bandHalf * 6 / 10 => "\x1b[38;5;141m", // light purple
+            _ when dist <= bandHalf * 8 / 10 => "\x1b[38;5;99m",  // medium purple
+            _ when dist <= bandHalf => "\x1b[38;5;93m",           // deeper purple
+            _ => "\x1b[35m",                                  // base magenta
         };
 
     // ── Shared animation primitives ────────────────────────────────────────────

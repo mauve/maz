@@ -48,8 +48,8 @@ resource group and resource names case-insensitively.
 
 The configuration file is in INI format, read from (in order of precedence):
 - `MAZ_CONFIG_PATH` environment variable (if set)
-- Windows: `%APPDATA%\.maz\user-config.ini`
-- Linux/macOS: `$XDG_CONFIG_HOME/.maz/user-config.ini` (falls back to `~/.config/.maz/user-config.ini`)
+- Windows: `%APPDATA%\maz\user-config.ini`
+- Linux/macOS: `$XDG_CONFIG_HOME/maz/user-config.ini` (falls back to `~/.config/maz/user-config.ini`)
 
 The file can be bypassed entirely by setting `MAZ_IGNORE_CONFIG_FILE=1`.
 
