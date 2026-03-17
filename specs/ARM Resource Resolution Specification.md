@@ -46,27 +46,16 @@ resource group and resource names case-insensitively.
 
 ### Configuration
 
-The configuration contains:
+The configuration file is in INI format, read from (in order of precedence):
+- `MAZ_CONFIG_PATH` environment variable (if set)
+- Windows: `%APPDATA%\.maz\user-config.ini`
+- Linux/macOS: `$XDG_CONFIG_HOME/.maz/user-config.ini` (falls back to `~/.config/.maz/user-config.ini`)
+
+The file can be bypassed entirely by setting `MAZ_IGNORE_CONFIG_FILE=1`.
 
 #### CFG1: Optional set of subscriptions and resource group names to use for resource resolving
 
-Example below:
-
-```json
-{
-    "resourceResolutionFilter": [
-        {
-            "id": "SUB1"
-        },
-        {
-            "id": "SUB2",
-            "resourceGroups": ["group1", "group2"]
-        }
-    ]
-}
-```
-
-This means in SUB1 all resource groups may be searched, in SUB2 limit to group1 and group2.
+> **Not yet implemented — see GAP-4.** The INI representation is TBD. The logical structure is: a list of subscription IDs where each entry optionally scopes to specific resource groups. For example: SUB1 allows all resource groups; SUB2 limits searches to `group1` and `group2`.
 
 Non-existent subscriptions or resource groups listed in CFG1 are silently skipped
 — ARG simply returns no results from them. The filter is an optimization hint, not
@@ -74,17 +63,63 @@ a strict allowlist; missing entries flow through to the normal "not found" error
 
 #### CFG2: Optional default subscription and resource group
 
-```json
-{
-    "defaultSubscriptionId": "my-guid-or-display-name",
-    "defaultResourceGroup": "my-rg"
-}
+```ini
+[global]
+defaultSubscriptionId = my-guid-or-display-name
+defaultResourceGroup = my-rg
 ```
 
 These accept the same formats as `--subscription-id` and `--resource-group`
 respectively. They behave identically to setting `AZURE_SUBSCRIPTION_ID` and
 `AZURE_RESOURCE_GROUP` — explicit environment variables take precedence over
 these config values, and explicit CLI options take precedence over both.
+
+#### CFG3: Completion suggestions and allowlists/denylists
+
+Controls which resources appear in tab-completion and which are outright blocked.
+
+```ini
+[suggestions]
+; Only these subscriptions appear in --subscription-id completions (empty = all).
+; Accepts GUIDs, display names, /subscriptions/{guid}, or /s/NAME:GUID tokens.
+allowed-subscriptions = SUB1-GUID, Production
+
+; Only these resource groups appear in --resource-group completions (empty = all).
+allowed-resource-groups = my-rg, staging-rg
+
+; These resource IDs are never returned in any suggestion.
+denied-resource-ids = /subscriptions/SUB1/resourceGroups/rg/providers/...
+
+[disallow]
+; These subscriptions are rejected even if explicitly specified on the CLI.
+subscriptions = SUB2-GUID
+
+; These resource groups are rejected even if explicitly specified on the CLI.
+resource-groups = legacy-rg
+
+; These resource IDs are rejected even if explicitly specified on the CLI.
+resource-ids = /subscriptions/SUB1/resourceGroups/rg/providers/...
+```
+
+#### CFG4: Global and per-command option defaults
+
+```ini
+; Applies to all commands (sets AZURE_SUBSCRIPTION_ID / AZURE_RESOURCE_GROUP etc.)
+[global]
+subscription-id = my-default-sub
+resource-group = my-default-rg
+format = json
+require-confirmation = true
+
+; Overrides for a specific command path (the section suffix is the full command path)
+[cmd.storage account list]
+subscription-id = storage-sub
+format = table
+```
+
+Global keys are injected as environment variables (only when the variable is not
+already set). CLI options take precedence over environment variables, which take
+precedence over these config values.
 
 ## Resolution Rules
 
@@ -292,18 +327,19 @@ contextually scoped completions. For example:
 ### Configuration for completion filtering
 
 Two optional configuration lists govern which subscriptions appear in
-`--subscription-id` completions:
+`--subscription-id` completions (see CFG3):
 
-```json
-{
-    "allowedSubscriptions": ["SUB1-GUID", "Production"],
-    "disallowedSubscriptions": ["SUB2-GUID"]
-}
+```ini
+[suggestions]
+allowed-subscriptions = SUB1-GUID, Production
+
+[disallow]
+subscriptions = SUB2-GUID
 ```
 
 Entries may be plain GUIDs, display names, `/subscriptions/{guid}`, or
-`/s/NAME:GUID` tokens. If `allowedSubscriptions` is non-empty, only subscriptions
-matching an entry are suggested. `disallowedSubscriptions` entries are always
+`/s/NAME:GUID` tokens. If `allowed-subscriptions` is non-empty, only subscriptions
+matching an entry are suggested. `subscriptions` under `[disallow]` are always
 excluded regardless of the allow list.
 
 These lists do **not** affect resolution — only what appears in tab-complete
@@ -361,10 +397,11 @@ fallback logic is not implemented. In particular, steps 3b and 4 are not present
 (passed as ARG scope), with per-subscription resource group post-filtering.
 *(Resolution: implemented above.)*
 
-**Current code:** The `MazConfig` class has `allowedSubscriptions` /
-`disallowedSubscriptions` for completion filtering, but no `resourceResolutionFilter`
-property exists. ARG queries are issued without any subscription/resource-group
-scoping from configuration.
+**Current code:** `MazConfig` has no property for CFG1 resolution-time scoping.
+ARG queries are issued without any subscription/resource-group scoping from
+configuration. The INI representation for CFG1 is still TBD — it will need to
+encode a list of subscription IDs each with an optional list of resource groups,
+which doesn't map directly to a flat INI structure.
 
 ---
 
@@ -472,14 +509,17 @@ as typed; ARM itself is case-insensitive. *(Resolution: documented above.)*
 
 ---
 
-### GAP-13: Configuration key names for default subscription and resource group not documented
+### GAP-13: Configuration key names for default subscription and resource group not aligned
 
-**Spec:** Keys are `defaultSubscriptionId` and `defaultResourceGroup` (CFG2).
-Precedence: explicit CLI option > environment variable > CFG2 config.
-*(Resolution: documented above.)*
+**Spec:** Keys are `defaultSubscriptionId` and `defaultResourceGroup` under
+`[global]` in the INI config (CFG2). Precedence: explicit CLI option >
+environment variable > CFG2 config. *(Resolution: documented above.)*
 
-**Current code:** Uses `subscription-id` / `resource-group` as config keys.
-Code will need to be updated to match the new key names.
+**Current code:** `MazConfig.InjectEnvironmentDefaults()` maps `subscription-id`
+and `resource-group` (under `[global]`) to `AZURE_SUBSCRIPTION_ID` and
+`AZURE_RESOURCE_GROUP`. The code will need to be updated to recognise
+`defaultSubscriptionId` / `defaultResourceGroup` as the canonical key names
+(in addition to or instead of the current kebab-case names).
 
 ---
 
@@ -526,6 +566,34 @@ with in-memory filtering. Must be replaced with ARG queries.
 hint, not a strict allowlist. *(Resolution: documented above.)*
 
 **Current code:** Not yet implemented (see GAP-4).
+
+---
+
+### GAP-19: `MazConfig.InjectEnvironmentDefaults()` conflates config and environment provenance
+
+**Spec:** Precedence is: explicit CLI option > environment variable > config file.
+Consumers (option packs, resolvers) should be able to distinguish where a value
+originated so they can report it accurately and apply the correct precedence logic.
+
+**Current code:** `MazConfig.InjectEnvironmentDefaults()` writes config-file values
+directly into the process environment (e.g. sets `AZURE_SUBSCRIPTION_ID` from
+`[global] subscription-id`). After this runs, any code that reads
+`AZURE_SUBSCRIPTION_ID` cannot tell whether the value came from the user's shell
+environment or from the config file. This has several consequences:
+
+- Conflict-resolution warnings (GAP-1) cannot accurately report the source of the
+  ambient subscription/resource-group value.
+- The three-tier precedence rule cannot be enforced correctly — a config-file value
+  is indistinguishable from a genuine environment variable, so the middle tier
+  effectively disappears.
+- Tests and diagnostics that print "value came from environment" will mislead users
+  whose value actually came from the config file.
+
+**Resolution (desired):** Option packs and resolvers should read config defaults
+directly from `MazConfig.Current` rather than relying on environment variable
+injection. `InjectEnvironmentDefaults()` should be removed or replaced with an
+explicit `ValueSource` enum (`Cli`, `Environment`, `Config`) threaded through the
+resolution layer.
 
 ---
 
