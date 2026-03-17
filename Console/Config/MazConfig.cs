@@ -48,22 +48,18 @@ public sealed class MazConfig
     /// or backward-compatible <c>[global] subscription-id</c>.
     /// </summary>
     public string? DefaultSubscriptionId =>
-        GlobalDefaults.TryGetValue("defaultSubscriptionId", out var v)
-            ? v
-            : GlobalDefaults.TryGetValue("subscription-id", out var v2)
-                ? v2
-                : null;
+        GlobalDefaults.TryGetValue("defaultSubscriptionId", out var v) ? v
+        : GlobalDefaults.TryGetValue("subscription-id", out var v2) ? v2
+        : null;
 
     /// <summary>
     /// Default resource group from <c>[global] defaultResourceGroup</c> (preferred)
     /// or backward-compatible <c>[global] resource-group</c>.
     /// </summary>
     public string? DefaultResourceGroup =>
-        GlobalDefaults.TryGetValue("defaultResourceGroup", out var v)
-            ? v
-            : GlobalDefaults.TryGetValue("resource-group", out var v2)
-                ? v2
-                : null;
+        GlobalDefaults.TryGetValue("defaultResourceGroup", out var v) ? v
+        : GlobalDefaults.TryGetValue("resource-group", out var v2) ? v2
+        : null;
 
     // [cmd.X] — command path → option name → value
 
@@ -175,11 +171,7 @@ public sealed class MazConfig
 
                 IReadOnlyList<string> rgs = [];
                 if (sectionData.TryGetValue("resource-groups", out var rgVal))
-                    rgs = rgVal
-                        .Split(',')
-                        .Select(x => x.Trim())
-                        .Where(x => x.Length > 0)
-                        .ToList();
+                    rgs = rgVal.Split(',').Select(x => x.Trim()).Where(x => x.Length > 0).ToList();
 
                 resolutionFilter.Add(new ResolutionFilterEntry(subId, rgs));
             }

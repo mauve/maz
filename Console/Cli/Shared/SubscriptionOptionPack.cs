@@ -111,9 +111,7 @@ public partial class SubscriptionOptionPack : OptionPack
                 // /s/displayName → resolve by display name (GAP-10)
                 await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())
                 {
-                    if (
-                        sub.Data.DisplayName.Equals(token, StringComparison.OrdinalIgnoreCase)
-                    )
+                    if (sub.Data.DisplayName.Equals(token, StringComparison.OrdinalIgnoreCase))
                         return sub;
                 }
                 throw new InvocationException(
