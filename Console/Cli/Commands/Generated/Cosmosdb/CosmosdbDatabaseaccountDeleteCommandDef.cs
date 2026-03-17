@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -27,7 +28,8 @@ public partial class CosmosdbDatabaseaccountDeleteCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DocumentDB/databaseAccounts/{StorageAccount.RequireAccountName()}";
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DocumentDB/databaseAccounts/{StorageAccount.RequireAccountName()}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-10-15", null, ct);
         if (!NoWait)

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -35,7 +36,8 @@ public partial class MarketplaceorderingMarketplaceagreementCancelCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.MarketplaceOrdering/agreements/{PublisherId}/offers/{OfferId}/plans/{PlanId}/cancel";
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements/{PublisherId}/offers/{OfferId}/plans/{PlanId}/cancel";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-01-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

@@ -7,6 +7,7 @@ using Console.Cli.Shared;
 namespace Console.Cli.Commands;
 
 /// <summary>Manage Azure Container Registries.</summary>
+/// <remarks>Manage Azure Container Registries ARM resources.</remarks>
 public partial class AcrCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "acr";
@@ -84,8 +85,7 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
     /// Login server is derived from the registry name as "{name}.azurecr.io"
     /// (custom domains require passing the full hostname directly via --name).
     /// </summary>
-    private async Task<string> ResolveViaArmAsync(
-        string registryName, CancellationToken ct)
+    private async Task<string> ResolveViaArmAsync(string registryName, CancellationToken ct)
     {
         var arg = new ArmArgClient(_auth.GetCredential());
 
@@ -95,7 +95,8 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
         if (subValue is not null)
             subScope = [ExtractSubscriptionGuid(subValue) ?? subValue];
 
-        var kql = "Resources"
+        var kql =
+            "Resources"
             + " | where type =~ 'microsoft.containerregistry/registries'"
             + $" and name =~ '{registryName}'"
             + " | project subscriptionId, resourceGroup, name";
@@ -105,15 +106,17 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
         return results.Count switch
         {
             0 => throw new InvocationException(
-                $"Container registry '{registryName}' not found in any accessible subscription."),
+                $"Container registry '{registryName}' not found in any accessible subscription."
+            ),
             1 => $"{results[0].Name}.azurecr.io",
             _ => throw new InvocationException(
                 $"'{registryName}' was found in multiple locations: "
-                + string.Join(
-                    ", ",
-                    results.Select(r => $"{r.SubscriptionId}/{r.ResourceGroup}")
-                )
-                + " — specify --subscription-id to disambiguate."),
+                    + string.Join(
+                        ", ",
+                        results.Select(r => $"{r.SubscriptionId}/{r.ResourceGroup}")
+                    )
+                    + " — specify --subscription-id to disambiguate."
+            ),
         };
     }
 
@@ -156,45 +159,57 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
         var json = Encoding.UTF8.GetString(Convert.FromBase64String(payload));
         return JsonNode.Parse(json)?["tid"]?.GetValue<string>()
             ?? throw new InvocationException(
-                "Access token does not contain a tenant ID (tid claim).");
+                "Access token does not contain a tenant ID (tid claim)."
+            );
     }
 
     private static readonly HttpClient _http = new();
 
     private static async Task<string> ExchangeForAcrTokenAsync(
-        string loginServer, string tenantId, string accessToken, CancellationToken ct)
+        string loginServer,
+        string tenantId,
+        string accessToken,
+        CancellationToken ct
+    )
     {
-        var content = new FormUrlEncodedContent(new Dictionary<string, string>
-        {
-            ["grant_type"]   = "access_token",
-            ["service"]      = loginServer,
-            ["tenant"]       = tenantId,
-            ["access_token"] = accessToken,
-        });
+        var content = new FormUrlEncodedContent(
+            new Dictionary<string, string>
+            {
+                ["grant_type"] = "access_token",
+                ["service"] = loginServer,
+                ["tenant"] = tenantId,
+                ["access_token"] = accessToken,
+            }
+        );
 
-        var response = await _http.PostAsync(
-            $"https://{loginServer}/oauth2/exchange", content, ct);
+        var response = await _http.PostAsync($"https://{loginServer}/oauth2/exchange", content, ct);
 
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync(ct);
             throw new InvocationException(
                 $"Failed to obtain ACR credentials for '{loginServer}': "
-                + $"HTTP {(int)response.StatusCode}\n{body}");
+                    + $"HTTP {(int)response.StatusCode}\n{body}"
+            );
         }
 
         var respJson = JsonNode.Parse(await response.Content.ReadAsStringAsync(ct));
         return respJson?["refresh_token"]?.GetValue<string>()
             ?? throw new InvocationException(
-                "ACR token exchange succeeded but did not return a refresh_token.");
+                "ACR token exchange succeeded but did not return a refresh_token."
+            );
     }
 
     private static async Task DockerLoginAsync(
-        string loginServer, string password, CancellationToken ct)
+        string loginServer,
+        string password,
+        CancellationToken ct
+    )
     {
         var psi = new ProcessStartInfo(
             "docker",
-            $"login {loginServer} -u 00000000-0000-0000-0000-000000000000 --password-stdin")
+            $"login {loginServer} -u 00000000-0000-0000-0000-000000000000 --password-stdin"
+        )
         {
             RedirectStandardInput = true,
             RedirectStandardOutput = true,
@@ -205,13 +220,15 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
         Process process;
         try
         {
-            process = Process.Start(psi)
+            process =
+                Process.Start(psi)
                 ?? throw new InvocationException("Failed to start docker process.");
         }
         catch (System.ComponentModel.Win32Exception)
         {
             throw new InvocationException(
-                "docker not found. Install Docker Desktop or Docker Engine and ensure it is on PATH.");
+                "docker not found. Install Docker Desktop or Docker Engine and ensure it is on PATH."
+            );
         }
 
         await process.StandardInput.WriteAsync(password);
@@ -229,17 +246,24 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
             // WSL: Docker Desktop is installed but WSL integration is not enabled for this distro.
             // Docker Desktop writes this message to stdout (not stderr).
             var combined = stdout + stderr;
-            if (combined.Contains("could not be found in this WSL", StringComparison.OrdinalIgnoreCase))
+            if (
+                combined.Contains(
+                    "could not be found in this WSL",
+                    StringComparison.OrdinalIgnoreCase
+                )
+            )
                 throw new InvocationException(
                     "docker not found in this WSL distro. To fix this, choose one of:\n\n"
-                    + "  1. Enable WSL integration in Docker Desktop → Settings → Resources → WSL Integration\n"
-                    + "  2. Install Docker Engine directly in this distro: https://docs.docker.com/engine/install/\n"
-                    + "  3. Start Docker Desktop if it is not running");
+                        + "  1. Enable WSL integration in Docker Desktop → Settings → Resources → WSL Integration\n"
+                        + "  2. Install Docker Engine directly in this distro: https://docs.docker.com/engine/install/\n"
+                        + "  3. Start Docker Desktop if it is not running"
+                );
 
             var detail = string.IsNullOrWhiteSpace(stderr) ? stdout : stderr;
             throw new InvocationException(
                 $"docker login failed (exit {process.ExitCode})."
-                + (string.IsNullOrWhiteSpace(detail) ? "" : $"\n{detail.Trim()}"));
+                    + (string.IsNullOrWhiteSpace(detail) ? "" : $"\n{detail.Trim()}")
+            );
         }
     }
 }

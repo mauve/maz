@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -39,7 +40,8 @@ public partial class ComputeLoganalyticExportRequestRateByIntervalCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{Subscription.RequireSubscriptionId()}/providers/Microsoft.Compute/locations/{Location}/logAnalytics/apiAccess/getRequestRateByInterval";
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.Compute/locations/{Location}/logAnalytics/apiAccess/getRequestRateByInterval";
 
         var body = BodyJson is { } rawJson
             ? JsonNode.Parse(rawJson)!.AsObject()

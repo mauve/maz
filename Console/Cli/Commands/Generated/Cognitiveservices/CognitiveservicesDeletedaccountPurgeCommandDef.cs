@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -31,7 +32,8 @@ public partial class CognitiveservicesDeletedaccountPurgeCommandDef(AuthOptionPa
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
-        var path = $"/subscriptions/{StorageAccount.Subscription.RequireSubscriptionId()}/providers/Microsoft.CognitiveServices/locations/{Location}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/deletedAccounts/{StorageAccount.RequireAccountName()}";
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.CognitiveServices/locations/{Location}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/deletedAccounts/{StorageAccount.RequireAccountName()}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-12-01", null, ct);
         if (!NoWait)

@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -22,10 +23,11 @@ public partial class AttestationProviderListCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
         var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         var path = effectiveRg is not null
-            ? $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Attestation/attestationProviders"
-            : $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/providers/Microsoft.Attestation/attestationProviders";
+            ? $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Attestation/attestationProviders"
+            : $"/subscriptions/{subscriptionId}/providers/Microsoft.Attestation/attestationProviders";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-06-01", null, ct);
         await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))

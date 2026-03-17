@@ -5,6 +5,7 @@ using System.Text.Json.Nodes;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 using Console.Rendering;
+using Azure.ResourceManager;
 
 namespace Console.Cli.Commands.Generated;
 
@@ -26,10 +27,11 @@ public partial class HybridcomputeMachineListCommandDef(AuthOptionPack auth) : C
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var client = new AzureRestClient(_auth.GetCredential());
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
         var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         var path = effectiveRg is not null
-            ? $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.HybridCompute/machines"
-            : $"/subscriptions/{ResourceGroup.Subscription.RequireSubscriptionId()}/providers/Microsoft.HybridCompute/machines";
+            ? $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.HybridCompute/machines"
+            : $"/subscriptions/{subscriptionId}/providers/Microsoft.HybridCompute/machines";
 
         var allItems = client.GetAllAsync(path, "2025-01-13", "value", "nextLink", ct);
         var renderer = Render.GetRendererFactory().CreateCollectionRenderer<System.Text.Json.Nodes.JsonNode>();
