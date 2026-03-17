@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.DevCenter;
 
@@ -11,11 +10,17 @@ namespace Console.Cli.Shared;
 ///   devcenter-name
 ///   rg/devcenter-name
 ///   sub/rg/devcenter-name
-/// </summary>
+///   /arm/devcenter-name
+///</summary>
 public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenterResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.DevCenter/devcenters";
     public override string HelpTitle => "Dev Center";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Dev Center name, or combined format: [sub/]rg/devcenter-name.</summary>
     [CliOption(
@@ -36,17 +41,41 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
 
     protected override async Task<DevCenterResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetDevCenterAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetDevCenterAsync(name, ct);
+        }
+
+        var matches = new List<DevCenterResource>();
+        await foreach (var dc in sub.GetDevCentersAsync(cancellationToken: ct))
+        {
+            if (dc.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(dc);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException($"Dev Center '{name}' not found in subscription."),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} dev centers:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

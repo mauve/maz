@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.DigitalTwins;
 
@@ -11,12 +10,18 @@ namespace Console.Cli.Shared;
 ///   instance-name
 ///   rg/instance-name
 ///   sub/rg/instance-name
-/// </summary>
+///   /arm/instance-name
+///</summary>
 public partial class DigitalTwinsOptionPack
     : DataplaneResourceOptionPack<DigitalTwinsDescriptionResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.DigitalTwins/digitalTwinsInstances";
     public override string HelpTitle => "Digital Twins";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Digital Twins instance name, or combined format: [sub/]rg/instance-name.</summary>
     [CliOption(
@@ -37,17 +42,43 @@ public partial class DigitalTwinsOptionPack
 
     protected override async Task<DigitalTwinsDescriptionResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetDigitalTwinsDescriptionAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetDigitalTwinsDescriptionAsync(name, ct);
+        }
+
+        var matches = new List<DigitalTwinsDescriptionResource>();
+        await foreach (var dt in sub.GetDigitalTwinsDescriptionsAsync(cancellationToken: ct))
+        {
+            if (dt.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(dt);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException(
+                $"Digital Twins instance '{name}' not found in subscription."
+            ),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} instances:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.LoadTesting;
 
@@ -11,11 +10,17 @@ namespace Console.Cli.Shared;
 ///   resource-name
 ///   rg/resource-name
 ///   sub/rg/resource-name
-/// </summary>
+///   /arm/resource-name
+///</summary>
 public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTestingResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.LoadTestService/loadTests";
     public override string HelpTitle => "Load Testing";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Load Testing resource name, or combined format: [sub/]rg/resource-name.</summary>
     [CliOption(
@@ -36,17 +41,43 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
 
     protected override async Task<LoadTestingResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetLoadTestingResourceAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetLoadTestingResourceAsync(name, ct);
+        }
+
+        var matches = new List<LoadTestingResource>();
+        await foreach (var lt in sub.GetLoadTestingResourcesAsync(cancellationToken: ct))
+        {
+            if (lt.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(lt);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException(
+                $"Load Testing resource '{name}' not found in subscription."
+            ),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} resources:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

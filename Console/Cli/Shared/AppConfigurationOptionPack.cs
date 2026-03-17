@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.AppConfiguration;
 
@@ -14,12 +13,19 @@ namespace Console.Cli.Shared;
 ///   sub/rg/store-name
 ///   /s/{sub}/rg/store-name
 ///   /subscriptions/{guid}/rg/store-name
-/// </summary>
+///   /arm/store-name
+///</summary>
 public partial class AppConfigurationOptionPack
     : DataplaneResourceOptionPack<AppConfigurationStoreResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.AppConfiguration/configurationStores";
     public override string HelpTitle => "App Configuration Store";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
     /// App Configuration store name, or combined format: [sub/]rg/store-name (see section description).
@@ -42,17 +48,43 @@ public partial class AppConfigurationOptionPack
 
     protected override async Task<AppConfigurationStoreResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetAppConfigurationStoreAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetAppConfigurationStoreAsync(name, ct);
+        }
+
+        var matches = new List<AppConfigurationStoreResource>();
+        await foreach (var store in sub.GetAppConfigurationStoresAsync(cancellationToken: ct))
+        {
+            if (store.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(store);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException(
+                $"App Configuration store '{name}' not found in subscription."
+            ),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} stores:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
