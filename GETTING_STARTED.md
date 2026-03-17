@@ -30,88 +30,72 @@ With a default set, most commands work without specifying it:
 
 ## Resource Names
 
-For resources within a group, `--name` also tab-completes.
-Combined with subscription and resource-group defaults, a command shrinks to:
+For resources within a group, `--name` also tab-completes — and a bare name is
+almost always enough. maz searches your subscription to find the resource
+automatically. Only add `--resource-group` when the same name exists in
+multiple groups.
+
+    maz keyvault secret get --keyvault mysecret-vault    # maz finds the vault
+    maz storage account show --name myaccount            # found across all RGs
+
+`--name` accepts combined forms when you need to pin context inline:
+
+  • `{name}` — auto-discovered across subscription
+  • `{rg}/{name}` — pin the resource group for this call
+  • `{sub}/{rg}/{name}` — pin both subscription and resource group
+  • Full ARM IDs also work everywhere
+
+With subscription-id and resource-group configured as defaults, most commands shrink to:
 
     maz storage account show --name myaccount
 
 <!-- demo:resource-names -->
 
-## ID Shorthand Syntax
+## Data-Plane Commands
 
-Instead of typing full ARM paths, maz accepts compact shorthands for any resource:
+Most `maz` commands are **control-plane**: they call ARM to list, show, or
+manage resources. Some commands are **data-plane**: they call the resource's
+own service endpoint directly (Key Vault APIs, Storage blob APIs, etc.).
 
-| Shorthand | Resource |
-|-----------|----------|
-| `/s/{name}` or `/s/{guid}` | Subscription by name or GUID |
-| `/s/{name}:{guid}` | Subscription — combined form used by tab-completion |
-| `/kv/{name}` | Key Vault |
-| `/sa/{name}` | Storage Account |
-| `/cr/{name}` | Container Registry |
-| `/ehn/{name}` | Event Hub Namespace |
-| `/sbn/{name}` | Service Bus Namespace |
-| `/ss/{name}` | Search Service |
-| `/wps/{name}` | Web PubSub |
-| `/dt/{name}` | Digital Twins |
-| `/ac/{name}` | App Configuration |
-| `/ba/{name}` | Batch Account |
-| `/dc/{name}` | Dev Center |
-| `/lt/{name}` | Load Testing |
-| `/cl/{name}` | Confidential Ledger |
-| `/atp/{name}` | Attestation |
-| `/pv/{name}` | Purview |
-| `/deid/{name}` | Health Data AI De-ID |
+Data-plane options accept either a direct endpoint URL or an ARM shorthand —
+maz resolves the ARM resource and extracts the endpoint automatically:
 
-For subscriptions, `/s/Production` (name only) and `/s/a1b2c3d4-...` (GUID only) are
-equivalent. The `name:guid` form exists solely so tab-completion can display both pieces of
-information in one suggestion — either part alone is enough to identify the subscription.
+    # Direct endpoint URL
+    maz keyvault secret get --keyvault https://myvault.vault.azure.net --name mysecret
 
-Full ARM paths (`/subscriptions/{guid}/resourceGroups/{rg}/providers/.../name`) also work
-anywhere a shorthand is accepted.
+    # /arm/ prefix — maz resolves via ARM (finds endpoint from resource properties)
+    maz keyvault secret get --keyvault /arm/myvault --name mysecret
 
-## Name-Only and Combined Forms
+    # bare name also works — same ARM auto-discovery as regular resource options
+    maz keyvault secret get --keyvault myvault --name mysecret
 
-`--name` accepts several combined forms so you can override context inline:
-
-  • `{name}` — uses subscription/resource-group defaults or flags
-  • `{rg}/{name}` — overrides the resource group for this invocation
-  • `{sub}/{rg}/{name}` — overrides both subscription and resource group
-  • `/s/{sub}/{rg}/{name}` — explicit subscription shorthand form
-  • `/{prefix}/{name}` — type-scoped shorthand (e.g. `/kv/myvault`, `/sa/myaccount`)
-
-With subscription-id and resource-group set as defaults, most commands shrink to:
-
-    maz storage account show --name myaccount
-
-## Endpoint URL ARM Resolution
-
-Data-plane options like `--kv-url` and `--workspace-id` accept not only direct endpoint URLs
-but also the same ARM resource shorthands — maz resolves the ARM resource and derives the
-correct endpoint automatically.
-
-    maz keyvault secret get --kv-url /kv/myvault --name mysecret
-    maz loganalytics query  --workspace-id /ss/myworkspace --query "AzureActivity | limit 10"
-
-This means you never need to look up endpoint URLs manually.
+You never need to look up endpoint URLs manually.
+Data-plane commands are marked with a symbol in `maz --help-commands` output.
 
 ## Interactive KQL Explorer
 
 `maz loganalytics query --interactive` opens a full terminal KQL editor:
 
-  • Multi-line query editor with syntax highlighting
+  • Multi-line editor with syntax highlighting
   • F5 to run, F6 to auto-format, Tab for keyword completion
-  • F7 / F8 to browse history across sessions
-  • Scrollable results pane with F2 to toggle focus
+  • F7 / F8 to browse query history across sessions
+  • F2 / F3 to toggle focus between results and schema sidebar
 
-When a query fails, maz parses the Azure Monitor error response to extract the exact
-line and column of the problem, then renders a caret pointing to it:
-
-    | | summarize count() by ResourceGroup
-      ^ SYN0002: Query could not be parsed at '|'
-
-The cursor is also moved to the error position in the editor so you can fix it immediately.
+When a query fails, maz parses the Azure error response, shows a caret at the
+exact error position, and moves the editor cursor there automatically.
 
 <!-- demo:kusto -->
+
+## Commands
+
+Explore everything maz can do:
+
+    maz --help-commands              # browse the full command tree
+    maz --help-commands keyvault     # filter by keyword
+    maz --help-commands storage
+
+Commands are grouped by Azure service. Data-plane commands are marked separately.
+Use `--help-commands-flat` for a compact single-line-per-command view.
 
 ## History
 

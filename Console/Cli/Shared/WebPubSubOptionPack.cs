@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.WebPubSub;
 
@@ -11,11 +10,17 @@ namespace Console.Cli.Shared;
 ///   service-name
 ///   rg/service-name
 ///   sub/rg/service-name
-/// </summary>
+///   /arm/service-name
+///</summary>
 public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSubResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.SignalRService/webPubSub";
     public override string HelpTitle => "Web PubSub";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Web PubSub service name, or combined format: [sub/]rg/service-name.</summary>
     [CliOption(
@@ -36,17 +41,43 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
 
     protected override async Task<WebPubSubResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetWebPubSubAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetWebPubSubAsync(name, ct);
+        }
+
+        var matches = new List<WebPubSubResource>();
+        await foreach (var svc in sub.GetWebPubSubsAsync(cancellationToken: ct))
+        {
+            if (svc.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(svc);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException(
+                $"Web PubSub service '{name}' not found in subscription."
+            ),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} services:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

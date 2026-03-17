@@ -1,4 +1,3 @@
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.EventHubs;
 
@@ -14,12 +13,19 @@ namespace Console.Cli.Shared;
 ///   sub/rg/namespace-name
 ///   /s/{sub}/rg/namespace-name
 ///   /subscriptions/{guid}/rg/namespace-name
-/// </summary>
+///   /arm/namespace-name
+///</summary>
 public partial class EventHubOptionPack
     : DataplaneResourceOptionPack<EventHubsNamespaceResource, Uri>
 {
-    public override string ArmResourceType => "Microsoft.EventHub/namespaces";
     public override string HelpTitle => "Event Hubs Namespace";
+
+    public readonly ResourceGroupOptionPack ResourceGroup = new();
+
+    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
+
+    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
+    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
     /// Event Hubs namespace name, or combined format: [sub/]rg/namespace-name (see section description).
@@ -42,17 +48,43 @@ public partial class EventHubOptionPack
 
     protected override async Task<EventHubsNamespaceResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string resolvedSubscriptionId,
-        string resolvedResourceGroupName,
-        string resourceName,
+        string? resolvedSub,
+        string? resolvedRg,
+        string name,
         CancellationToken ct
     )
     {
-        var sub = armClient.GetSubscriptionResource(
-            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
-        );
-        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
-        return await rg.Value.GetEventHubsNamespaceAsync(resourceName, ct);
+        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
+
+        if (resolvedRg is not null)
+        {
+            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
+            return await rg.Value.GetEventHubsNamespaceAsync(name, ct);
+        }
+
+        var matches = new List<EventHubsNamespaceResource>();
+        await foreach (var ns in sub.GetEventHubsNamespacesAsync(cancellationToken: ct))
+        {
+            if (ns.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+                matches.Add(ns);
+        }
+
+        return matches.Count switch
+        {
+            0 => throw new InvocationException(
+                $"Event Hubs namespace '{name}' not found in subscription."
+            ),
+            1 => matches[0],
+            _ => throw new InvocationException(
+                $"'{name}' is ambiguous — matched {matches.Count} namespaces:\n"
+                    + string.Join(
+                        "\n",
+                        matches.Select(m =>
+                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
+                        )
+                    )
+            ),
+        };
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
