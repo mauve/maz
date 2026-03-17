@@ -8,7 +8,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataSnapshotCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "snapshot";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataSnapshotListCommandDef List = new(auth);
     public readonly AppconfigdataSnapshotShowCommandDef Show = new(auth);
 }

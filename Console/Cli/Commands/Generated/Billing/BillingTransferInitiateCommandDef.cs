@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BillingTransferInitiateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "initiate";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly RenderOptionPack Render = new();
 
@@ -37,7 +37,7 @@ public partial class BillingTransferInitiateCommandDef(AuthOptionPack auth) : Co
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}/billingProfiles/{BillingProfileName}/invoiceSections/{InvoiceSectionName}/transfers/{TransferName}";

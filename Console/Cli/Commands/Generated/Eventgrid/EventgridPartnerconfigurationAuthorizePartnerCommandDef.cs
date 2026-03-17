@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class EventgridPartnerconfigurationAuthorizePartnerCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "authorize-partner";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
@@ -23,7 +23,7 @@ public partial class EventgridPartnerconfigurationAuthorizePartnerCommandDef(Aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));

@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataDiscoveryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "discovery";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataDiscoveryAutoCompleteCommandDef AutoComplete = new(auth);
     public readonly PurviewdataDiscoveryQueryCommandDef Query = new(auth);
     public readonly PurviewdataDiscoverySuggestCommandDef Suggest = new(auth);

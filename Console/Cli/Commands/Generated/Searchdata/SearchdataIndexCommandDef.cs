@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataIndexCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "index";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataIndexListCommandDef List = new(auth);
     public readonly SearchdataIndexCreateCommandDef Create = new(auth);
     public readonly SearchdataIndexShowCommandDef Show = new(auth);

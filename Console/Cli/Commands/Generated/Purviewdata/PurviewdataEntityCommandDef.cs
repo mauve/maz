@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataEntityCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "entity";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataEntityCreateOrUpdateCommandDef CreateOrUpdate = new(auth);
     public readonly PurviewdataEntityListByGuidsCommandDef ListByGuids = new(auth);
     public readonly PurviewdataEntityBulkCreateOrUpdateCommandDef BulkCreateOrUpdate = new(auth);

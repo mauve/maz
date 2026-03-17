@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataPutLockCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "put-lock";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataPutLockLockCommandDef Lock = new(auth);
 }

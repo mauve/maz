@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataListjobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "listjob";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DeiddataListjobListCommandDef List = new(auth);
 }

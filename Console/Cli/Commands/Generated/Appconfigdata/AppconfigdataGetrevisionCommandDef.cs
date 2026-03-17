@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataGetrevisionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "getrevision";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataGetrevisionListCommandDef List = new(auth);
 }

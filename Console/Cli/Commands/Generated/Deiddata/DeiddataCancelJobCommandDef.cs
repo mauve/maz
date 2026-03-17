@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataCancelJobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "cancel-job";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DeiddataCancelJobCancelCommandDef Cancel = new(auth);
 }

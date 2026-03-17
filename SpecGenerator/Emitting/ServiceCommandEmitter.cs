@@ -29,7 +29,7 @@ public static class ServiceCommandEmitter
             {
                 w.Line($"public override string Name => \"{service.CliName}\";");
                 if (service.IsDataPlane)
-                    w.Line("protected override bool IsDataPlane => true;");
+                    w.Line("protected internal override bool IsDataPlane => true;");
 
                 foreach (var resource in service.Resources)
                 {

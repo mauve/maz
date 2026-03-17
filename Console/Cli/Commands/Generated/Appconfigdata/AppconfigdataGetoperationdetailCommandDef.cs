@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataGetoperationdetailCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "getoperationdetail";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataGetoperationdetailShowCommandDef Show = new(auth);
 }

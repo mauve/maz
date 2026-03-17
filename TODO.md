@@ -11,7 +11,7 @@ NativeAOT requires the binary to be fully trim-compatible: all code paths must b
 Before NativeAOT can work, every dependency must either be trim-compatible or removed. The current blockers are likely:
 
 - **Azure SDK packages** (`Azure.ResourceManager.*`, `Azure.Identity`, etc.) — these use reflection heavily and are not NativeAOT-compatible today
-- **`System.CommandLine`** — reflection-based argument binding; would need the source-generator path or a replacement
+- ~~**`System.CommandLine`**~~ — **Removed.** Replaced with compile-time `CliParser` + `CliOption<T>` types that work directly with the `CommandDef` tree
 - **`Azure.Monitor.Query`** — used for KQL/log queries
 
 The path forward:
@@ -24,9 +24,9 @@ The path forward:
 
 With over >8100 commands supported it is almost impossible for a user to discover hand-written commands which were added to make everyday operations simpler. We should highlight these commands somehow in the help.
 
-## Remove all Command and Option registries
+## ~~Remove all Command and Option registries~~
 
-This seems like a thing we had to add because of System.CommandLine. Let's see if we can remove it, lots of allocs happening is my feeling.
+**Done.** All 7 `ConditionalWeakTable` registries removed. Metadata (IsAdvanced, HelpGroup, OptionMetadata, IsDataPlane, IsDestructive, DetailedDescription) now lives directly on `CliOption` and `CommandDef` properties.
 
 ## Fix filtering in `--help-commands`
 

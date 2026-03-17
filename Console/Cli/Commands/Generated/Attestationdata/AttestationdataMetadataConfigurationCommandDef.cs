@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AttestationdataMetadataConfigurationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "metadata-configuration";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AttestationdataMetadataConfigurationShowCommandDef Show = new(auth);
 }

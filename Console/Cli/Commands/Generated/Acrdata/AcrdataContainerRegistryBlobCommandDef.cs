@@ -8,7 +8,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AcrdataContainerRegistryBlobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "container-registry-blob";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AcrdataContainerRegistryBlobCompleteUploadCommandDef CompleteUpload = new(auth);
     public readonly AcrdataContainerRegistryBlobCancelUploadCommandDef CancelUpload = new(auth);
     public readonly AcrdataContainerRegistryBlobShowCommandDef Show = new(auth);

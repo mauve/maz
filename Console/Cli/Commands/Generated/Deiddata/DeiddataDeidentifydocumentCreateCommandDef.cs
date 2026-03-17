@@ -14,8 +14,8 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataDeidentifydocumentCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
-    protected override bool IsDataPlane => true;
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDataPlane => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly HealthDataAIDeidOptionPack DeidService = new();
 
@@ -65,7 +65,7 @@ public partial class DeiddataDeidentifydocumentCreateCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://deid.azure.net/.default");
         var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

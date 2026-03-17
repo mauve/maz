@@ -8,7 +8,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataKeyValueCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "key-value";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataKeyValueListCommandDef List = new(auth);
     public readonly AppconfigdataKeyValueShowCommandDef Show = new(auth);
 }

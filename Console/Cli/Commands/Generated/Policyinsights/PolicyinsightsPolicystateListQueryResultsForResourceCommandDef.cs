@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PolicyinsightsPolicystateListQueryResultsForResourceCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-query-results-for-resource";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly RenderOptionPack Render = new();
 
@@ -65,7 +65,7 @@ public partial class PolicyinsightsPolicystateListQueryResultsForResourceCommand
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/{ResourceId}/providers/Microsoft.PolicyInsights/policyStates/{PolicyStatesResource}/queryResults";

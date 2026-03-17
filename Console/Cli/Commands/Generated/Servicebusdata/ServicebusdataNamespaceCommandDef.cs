@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class ServicebusdataNamespaceCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "namespace";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly ServicebusdataNamespaceShowCommandDef Show = new(auth);
 }

@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DigitaltwinsdataEventrouteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "eventroute";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DigitaltwinsdataEventrouteListCommandDef List = new(auth);
     public readonly DigitaltwinsdataEventrouteShowCommandDef Show = new(auth);
     public readonly DigitaltwinsdataEventrouteCreateCommandDef Create = new(auth);

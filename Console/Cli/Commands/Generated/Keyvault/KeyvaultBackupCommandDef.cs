@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultBackupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "backup";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultBackupStartCommandDef Start = new(auth);
     public readonly KeyvaultBackupShowStatusCommandDef ShowStatus = new(auth);
 }

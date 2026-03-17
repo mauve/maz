@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LoadtestdataLoadTestRunListMetricDimensionValuesCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-metric-dimension-values";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly LoadTestingOptionPack LoadTest = new();
 
@@ -47,7 +47,7 @@ public partial class LoadtestdataLoadTestRunListMetricDimensionValuesCommandDef(
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://cnt-prod.loadtesting.azure.com/.default");
         var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

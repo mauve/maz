@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataListconsortiummemberCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "listconsortiummember";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataListconsortiummemberListCommandDef List = new(auth);
 }

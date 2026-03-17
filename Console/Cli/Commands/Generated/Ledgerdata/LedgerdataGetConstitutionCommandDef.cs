@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataGetConstitutionCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-constitution";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataGetConstitutionShowCommandDef Show = new(auth);
 }

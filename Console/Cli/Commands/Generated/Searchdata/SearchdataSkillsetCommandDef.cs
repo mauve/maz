@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataSkillsetCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "skillset";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataSkillsetShowCommandDef Show = new(auth);
     public readonly SearchdataSkillsetCreateOrUpdateCommandDef CreateOrUpdate = new(auth);
     public readonly SearchdataSkillsetDeleteCommandDef Delete = new(auth);

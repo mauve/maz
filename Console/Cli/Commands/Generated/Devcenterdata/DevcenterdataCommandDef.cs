@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class DevcenterdataCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "devcenterdata";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DevcenterdataDevCenterCommandDef DevCenter = new(auth);
     public readonly DevcenterdataDevboxCommandDef Devbox = new(auth);
     public readonly DevcenterdataEnvironmentCommandDef Environment = new(auth);

@@ -36,7 +36,7 @@ public partial class CostmanagementBenefitutilizationsummaryListByPlanCommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/microsoft.BillingBenefits/savingsPlanOrders/{SavingsPlanOrderId}/savingsPlans/{SavingsPlanId}/providers/Microsoft.CostManagement/benefitUtilizationSummaries";

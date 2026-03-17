@@ -13,8 +13,8 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataRemoveuserfromallgroupRemoveAllCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "remove-all";
-    protected override bool IsDataPlane => true;
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDataPlane => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly WebPubSubOptionPack WebPubSub = new();
 
@@ -32,7 +32,7 @@ public partial class WebpubsubdataRemoveuserfromallgroupRemoveAllCommandDef(Auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://webpubsub.azure.com/.default");
         var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

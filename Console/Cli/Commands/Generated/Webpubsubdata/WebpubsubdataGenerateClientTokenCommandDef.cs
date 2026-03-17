@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataGenerateClientTokenCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "generate-client-token";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataGenerateClientTokenGenerateCommandDef Generate = new(auth);
 }

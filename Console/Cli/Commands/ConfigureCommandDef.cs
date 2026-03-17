@@ -20,7 +20,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
     private readonly InteractiveOptionPack _interactive = interactive;
 
     protected override Task<int> ExecuteAsync(CancellationToken ct) =>
-        RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(ParseResult), ct);
+        RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(), ct);
 
     internal static async Task<int> RunConfigureAsync(
         AuthOptionPack auth,

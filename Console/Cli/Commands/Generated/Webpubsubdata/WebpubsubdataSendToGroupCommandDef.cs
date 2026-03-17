@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataSendToGroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "send-to-group";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataSendToGroupSendCommandDef Send = new(auth);
 }

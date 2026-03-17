@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class WebpubsubdataListConnectionsInGroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "list-connections-in-group";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly WebpubsubdataListConnectionsInGroupListCommandDef List = new(auth);
 }

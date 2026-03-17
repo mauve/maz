@@ -47,6 +47,5 @@
     <PackageReference Include="Azure.ResourceManager.ServiceBus" />
     <PackageReference Include="Azure.ResourceManager.Storage" />
     <PackageReference Include="Azure.ResourceManager.WebPubSub" />
-    <PackageReference Include="System.CommandLine" />
   </ItemGroup>
 </Project>

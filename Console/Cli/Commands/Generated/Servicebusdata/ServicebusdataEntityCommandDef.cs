@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class ServicebusdataEntityCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "entity";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly ServicebusdataEntityShowCommandDef Show = new(auth);
     public readonly ServicebusdataEntityCreateCommandDef Create = new(auth);
     public readonly ServicebusdataEntityDeleteCommandDef Delete = new(auth);

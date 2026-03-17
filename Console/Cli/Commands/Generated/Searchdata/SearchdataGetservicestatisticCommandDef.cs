@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataGetservicestatisticCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "getservicestatistic";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataGetservicestatisticShowCommandDef Show = new(auth);
 }

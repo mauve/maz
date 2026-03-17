@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataIndexerCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "indexer";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataIndexerResetCommandDef Reset = new(auth);
     public readonly SearchdataIndexerRunCommandDef Run = new(auth);
     public readonly SearchdataIndexerShowCommandDef Show = new(auth);

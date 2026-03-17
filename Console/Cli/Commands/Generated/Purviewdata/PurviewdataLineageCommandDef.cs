@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataLineageCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "lineage";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataLineageGetCommandDef Get = new(auth);
     public readonly PurviewdataLineageGetNextPageCommandDef GetNextPage = new(auth);
 }

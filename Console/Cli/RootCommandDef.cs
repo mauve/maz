@@ -1,7 +1,7 @@
-using System.CommandLine;
 using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Group;
+using Console.Cli.Parsing;
 using Console.Cli.Shared;
 
 namespace Console.Cli;
@@ -46,6 +46,4 @@ public partial class RootCommandDef : CommandDef
         Bootstrap = new BootstrapCommandDef(Auth, Interactive);
         InitGeneratedCommands(targetService);
     }
-
-    protected override Command CreateCommand() => new RootCommand(Description);
 }

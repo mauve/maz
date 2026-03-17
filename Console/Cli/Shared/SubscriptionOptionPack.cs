@@ -100,7 +100,7 @@ public partial class SubscriptionOptionPack : OptionPack
     /// </summary>
     public (string? Value, ValueSource Source) GetWithSource()
     {
-        if (HasParseResult && SubscriptionId is not null)
+        if (_opt_SubscriptionId.WasProvided && SubscriptionId is not null)
             return (SubscriptionId, ValueSource.Cli);
 
         var envVal = Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");

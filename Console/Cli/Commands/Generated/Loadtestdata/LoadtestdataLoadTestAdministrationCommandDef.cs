@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LoadtestdataLoadTestAdministrationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "load-test-administration";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LoadtestdataLoadTestAdministrationListCommandDef List = new(auth);
     public readonly LoadtestdataLoadTestAdministrationShowCommandDef Show = new(auth);
     public readonly LoadtestdataLoadTestAdministrationDeleteCommandDef Delete = new(auth);

@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataCreateOrUpdateUserCreateOrUpdateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create-or-update";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly ConfidentialLedgerOptionPack Ledger = new();
 
@@ -36,7 +36,7 @@ public partial class LedgerdataCreateOrUpdateUserCreateOrUpdateCommandDef(AuthOp
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://confidential-ledger.azure.com/.default");
         var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

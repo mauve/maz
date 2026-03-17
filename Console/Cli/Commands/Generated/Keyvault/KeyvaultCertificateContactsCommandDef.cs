@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class KeyvaultCertificateContactsCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "contacts";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly KeyvaultCertificateContactsShowCommandDef Show = new(auth);
     public readonly KeyvaultCertificateContactsSetCommandDef Set = new(auth);
     public readonly KeyvaultCertificateContactsDeleteCommandDef Delete = new(auth);

@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DeiddataDeidentifydocumentCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "deidentifydocument";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DeiddataDeidentifydocumentCreateCommandDef Create = new(auth);
 }

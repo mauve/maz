@@ -10,6 +10,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class DigitaltwinsdataQueryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "query";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly DigitaltwinsdataQueryExecuteCommandDef Execute = new(auth);
 }

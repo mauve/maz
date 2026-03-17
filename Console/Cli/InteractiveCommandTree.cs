@@ -1,4 +1,3 @@
-using System.CommandLine;
 using Console.Cli.Commands.Bootstrap;
 using Console.Rendering;
 
@@ -6,15 +5,10 @@ namespace Console.Cli;
 
 /// <summary>
 /// Full-screen interactive command-tree browser with live filtering and scrolling.
-/// Layout:
-///   Row 1:      ╔═ Commands ══════╗   (top border)
-///   Row 2..h-2: tree lines        (scrollable viewport)
-///   Row h-1:    ╔═══════════════╗  (prompt border)
-///   Row h:      ║ Type to filter: {input}  ║  (prompt row — no bottom ╚ border needed)
 /// </summary>
 internal static class InteractiveCommandTree
 {
-    public static void Run(Command root, string? initialFilter)
+    public static void Run(CommandDef root, string? initialFilter)
     {
         System.Console.TreatControlCAsInput = true;
         System.Console.Write("\x1b[?1049h\x1b[?25h"); // alt screen, show cursor
@@ -32,7 +26,6 @@ internal static class InteractiveCommandTree
                 var sw = new StringWriter();
                 CommandTreePrinter.Print(sw, root, filter.Length > 0 ? filter : null);
                 lines = [.. sw.ToString().Split('\n').Where(l => l.Length > 0)];
-                // Clamp scroll after filter change
                 var h = WizardUi.GetTermHeight();
                 var viewportRows = Math.Max(1, h - 3);
                 var maxScroll = Math.Max(0, lines.Count - viewportRows);
@@ -47,37 +40,28 @@ internal static class InteractiveCommandTree
                 prevWidth = w;
                 prevHeight = h;
                 var boxWidth = w - 1;
-                var viewportRows = Math.Max(1, h - 3); // rows 2..(h-2)
+                var viewportRows = Math.Max(1, h - 3);
 
-                // Clear screen
                 System.Console.Write("\x1b[2J");
 
-                // Top border (row 1)
                 WizardUi.MoveTo(1);
                 RenderSimpleTopBorder("Commands", boxWidth);
 
-                // Viewport (rows 2..h-2)
                 for (var r = 0; r < viewportRows; r++)
                 {
                     WizardUi.MoveTo(2 + r);
                     System.Console.Write("\x1b[2K");
                     var idx = scrollOffset + r;
                     if (idx < lines.Count)
-                    {
-                        // Truncate to fit (visual width)
-                        var line = lines[idx];
-                        System.Console.Write("  " + line);
-                    }
+                        System.Console.Write("  " + lines[idx]);
                 }
 
-                // Prompt border (row h-1)
                 WizardUi.MoveTo(h - 1);
                 System.Console.Write("\x1b[2K");
                 System.Console.Write(
                     $"\x1b[35m╔{new string('═', Math.Max(0, boxWidth - 2))}╗\x1b[0m"
                 );
 
-                // Prompt row (row h)
                 DrawPrompt(filter, boxWidth, h);
             }
 
@@ -86,7 +70,6 @@ internal static class InteractiveCommandTree
 
             while (true)
             {
-                // Detect resize
                 var w = WizardUi.GetTermWidth();
                 var h = WizardUi.GetTermHeight();
                 if (w != prevWidth || h != prevHeight)
@@ -104,14 +87,12 @@ internal static class InteractiveCommandTree
 
                 var key = System.Console.ReadKey(intercept: true);
 
-                // Quit
                 if (
                     key.Key is ConsoleKey.Escape
                     || (key.Key == ConsoleKey.C && key.Modifiers.HasFlag(ConsoleModifiers.Control))
                 )
                     break;
 
-                // Scroll
                 if (
                     key.Key == ConsoleKey.PageDown
                     && key.Modifiers.HasFlag(ConsoleModifiers.Control)
@@ -142,7 +123,6 @@ internal static class InteractiveCommandTree
                     continue;
                 }
 
-                // Also support plain PageUp/PageDown without Ctrl
                 if (key.Key == ConsoleKey.PageDown)
                 {
                     var viewportRows = Math.Max(1, prevHeight - 3);
@@ -167,7 +147,6 @@ internal static class InteractiveCommandTree
                     continue;
                 }
 
-                // Arrow keys for line-by-line scroll
                 if (
                     key.Key == ConsoleKey.DownArrow
                     && key.Modifiers.HasFlag(ConsoleModifiers.Control)
@@ -195,7 +174,6 @@ internal static class InteractiveCommandTree
                     continue;
                 }
 
-                // Backspace
                 if (key.Key == ConsoleKey.Backspace)
                 {
                     if (filter.Length > 0)
@@ -208,7 +186,6 @@ internal static class InteractiveCommandTree
                     continue;
                 }
 
-                // Clear filter
                 if (key.Key == ConsoleKey.U && key.Modifiers.HasFlag(ConsoleModifiers.Control))
                 {
                     if (filter.Length > 0)
@@ -221,7 +198,6 @@ internal static class InteractiveCommandTree
                     continue;
                 }
 
-                // Printable character
                 if (key.KeyChar >= 32 && key.KeyChar < 127)
                 {
                     filter += key.KeyChar;
@@ -234,7 +210,7 @@ internal static class InteractiveCommandTree
         finally
         {
             System.Console.TreatControlCAsInput = false;
-            System.Console.Write("\x1b[?25h\x1b[?1049l"); // show cursor, leave alt screen
+            System.Console.Write("\x1b[?25h\x1b[?1049l");
         }
     }
 
@@ -263,7 +239,6 @@ internal static class InteractiveCommandTree
                 + $"\x1b[35m║\x1b[0m"
         );
 
-        // Position cursor after the filter text
         WizardUi.MoveTo(h, 2 + 2 + label.Length + filter.Length);
     }
 }

@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataJobCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "job";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataJobListCommandDef List = new(auth);
     public readonly BatchdataJobCreateCommandDef Create = new(auth);
     public readonly BatchdataJobShowCommandDef Show = new(auth);

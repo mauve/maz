@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataJobscheduleCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "jobschedule";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataJobscheduleListCommandDef List = new(auth);
     public readonly BatchdataJobscheduleCreateCommandDef Create = new(auth);
     public readonly BatchdataJobscheduleShowCommandDef Show = new(auth);

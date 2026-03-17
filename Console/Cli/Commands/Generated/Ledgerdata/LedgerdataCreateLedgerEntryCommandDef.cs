@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataCreateLedgerEntryCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create-ledger-entry";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataCreateLedgerEntryCreateCommandDef Create = new(auth);
 }

@@ -14,8 +14,8 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataIndexAnalyzeCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "analyze";
-    protected override bool IsDataPlane => true;
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDataPlane => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly SearchServiceOptionPack SearchService = new();
 
@@ -37,7 +37,7 @@ public partial class SearchdataIndexAnalyzeCommandDef(AuthOptionPack auth) : Com
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://search.azure.com/.default");
         var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');

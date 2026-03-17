@@ -1,5 +1,4 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
+using Console.Cli.Parsing;
 using Console.Config;
 
 namespace Console.Cli.Shared;
@@ -7,71 +6,71 @@ namespace Console.Cli.Shared;
 [CliManualOptions("--detailed-errors", "-v", "-vv", "--verbose-body-limit")]
 public class DiagnosticOptionPack : OptionPack
 {
-    /// <summary>
-    /// Static reference so <see cref="CommandDef"/> can read the value from any
-    /// <see cref="ParseResult"/> without needing a pack instance.
-    /// </summary>
-    internal static readonly GlobalOption<bool> DetailedErrorsOption = new(
-        "--detailed-errors",
-        "Show detailed error output including exception type and stack trace."
-    );
-
-    internal static readonly GlobalOption<bool> VerboseOption = new(
-        "-v",
-        "Diagnostic output: credential interactions and HTTP request/response headers."
-    );
-
-    internal static readonly GlobalOption<bool> VeryVerboseOption = new(
-        "-vv",
-        "Like -v but also includes request and response bodies."
-    )
+    internal readonly CliOption<bool> _detailedErrorsOption = new()
     {
+        Name = "--detailed-errors",
+        Aliases = ["--verbose"],
+        Description = "Show detailed error output including exception type and stack trace.",
+        Recursive = true,
+    };
+
+    internal static readonly CliOption<bool> VerboseOption = new()
+    {
+        Name = "-v",
+        Description = "Diagnostic output: credential interactions and HTTP request/response headers.",
+        Recursive = true,
+    };
+
+    internal static readonly CliOption<bool> VeryVerboseOption = new()
+    {
+        Name = "-vv",
+        Description = "Like -v but also includes request and response bodies.",
+        Recursive = true,
         Hidden = true,
     };
 
-    internal static readonly GlobalOption<int> BodyLimitOption = new(
-        "--verbose-body-limit",
-        "Maximum bytes of request/response body to display in diagnostics."
-    )
+    internal static readonly CliOption<int> BodyLimitOption = new()
     {
+        Name = "--verbose-body-limit",
+        Description = "Maximum bytes of request/response body to display in diagnostics.",
+        Recursive = true,
         Hidden = true,
-        DefaultValueFactory = _ => 8192,
+        DefaultValue = 8192,
     };
 
-    public bool DetailedErrors => GetValue(DetailedErrorsOption);
+    public bool DetailedErrors => GetValue(_detailedErrorsOption);
 
     public override string HelpTitle => "Diagnostics";
 
-    protected override void AddManualOptions(Command cmd)
+    internal override IEnumerable<CliOption> EnumerateManualOptions()
     {
-        cmd.Add(DetailedErrorsOption);
-        cmd.Add(VerboseOption);
-        cmd.Add(VeryVerboseOption);
-
-        cmd.Add(BodyLimitOption);
+        yield return _detailedErrorsOption;
+        yield return VerboseOption;
+        yield return VeryVerboseOption;
+        yield return BodyLimitOption;
     }
 
     /// <summary>
-    /// Reads the verbose level from a <see cref="ParseResult"/>.
+    /// Reads the verbose level from the parsed options.
     /// -vv = 2, -v = 1, otherwise 0.
     /// </summary>
-    public static int GetVerboseLevel(ParseResult result)
+    public static int GetVerboseLevel()
     {
-        if (result.GetValue(VeryVerboseOption)) return 2;
-        if (result.GetValue(VerboseOption)) return 1;
+        if (VeryVerboseOption.Value) return 2;
+        if (VerboseOption.Value) return 1;
         return 0;
     }
 
     /// <summary>
-    /// Creates a <see cref="DiagnosticLog"/> from the current parse result and config.
+    /// Creates a <see cref="DiagnosticLog"/> from the current parsed options and config.
     /// </summary>
-    public static DiagnosticLog GetLog(ParseResult result)
+    public static DiagnosticLog GetLog()
     {
-        var level = GetVerboseLevel(result);
+        var level = GetVerboseLevel();
         if (level <= 0) return DiagnosticLog.Null;
 
         var config = MazConfig.Current;
-        var bodyLimit = result.GetValue(BodyLimitOption);
+        var bodyLimit = BodyLimitOption.Value;
         if (bodyLimit <= 0) bodyLimit = 8192;
 
         // Read config overrides (only when CLI didn't explicitly set the limit)

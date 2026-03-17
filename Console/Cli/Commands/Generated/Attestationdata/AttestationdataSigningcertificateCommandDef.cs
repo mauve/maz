@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AttestationdataSigningcertificateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "signingcertificate";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AttestationdataSigningcertificateShowCommandDef Show = new(auth);
 }

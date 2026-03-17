@@ -13,7 +13,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class CostmanagementGenerateBenefitUtilizationSummariesReportGenerateByReservationIdCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "generate-by-reservation-id";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly RenderOptionPack Render = new();
 
@@ -49,7 +49,7 @@ public partial class CostmanagementGenerateBenefitUtilizationSummariesReportGene
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var path = $"/providers/microsoft.Capacity/reservationorders/{ReservationOrderId}/reservations/{ReservationId}/providers/Microsoft.CostManagement/generateBenefitUtilizationSummariesReport";

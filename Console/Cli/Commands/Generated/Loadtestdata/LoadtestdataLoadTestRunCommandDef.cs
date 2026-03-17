@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class LoadtestdataLoadTestRunCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "load-test-run";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LoadtestdataLoadTestRunListCommandDef List = new(auth);
     public readonly LoadtestdataLoadTestRunShowCommandDef Show = new(auth);
     public readonly LoadtestdataLoadTestRunDeleteCommandDef Delete = new(auth);

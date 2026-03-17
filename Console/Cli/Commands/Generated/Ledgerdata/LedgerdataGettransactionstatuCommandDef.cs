@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class LedgerdataGettransactionstatuCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "gettransactionstatu";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly LedgerdataGettransactionstatuShowCommandDef Show = new(auth);
 }

@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataApplicationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "application";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataApplicationListCommandDef List = new(auth);
     public readonly BatchdataApplicationShowCommandDef Show = new(auth);
 }

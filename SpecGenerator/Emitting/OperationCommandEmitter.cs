@@ -104,9 +104,9 @@ public static class OperationCommandEmitter
             {
                 w.Line($"public override string Name => \"{op.CliName}\";");
                 if (isDataPlane)
-                    w.Line("protected override bool IsDataPlane => true;");
+                    w.Line("protected internal override bool IsDataPlane => true;");
                 if (op.HttpMethod is "DELETE" or "PUT" or "POST")
-                    w.Line("protected override bool IsDestructive => true;");
+                    w.Line("protected internal override bool IsDestructive => true;");
                 w.Line();
 
                 if (isDataPlane)
@@ -236,7 +236,7 @@ public static class OperationCommandEmitter
                     "protected override async Task<int> ExecuteAsync(CancellationToken ct)",
                     () =>
                     {
-                        w.Line("var log = DiagnosticOptionPack.GetLog(ParseResult);");
+                        w.Line("var log = DiagnosticOptionPack.GetLog();");
                         w.Line("var cred = _auth.GetCredential(log);");
                         if (isDataPlane)
                             w.Line(

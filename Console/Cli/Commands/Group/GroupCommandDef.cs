@@ -30,7 +30,7 @@ public partial class GroupCommandDef(AuthOptionPack auth) : CommandDef
 public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "create";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly LocationOptionPack Location = new();
@@ -50,7 +50,7 @@ public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
@@ -87,7 +87,7 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
@@ -120,7 +120,7 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
@@ -144,7 +144,7 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
 public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly ConfirmationOptionPack Confirmation = new();
@@ -163,7 +163,7 @@ public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
     {
         Confirmation.RequireConfirmation(_auth.GetInteractive());
 
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);

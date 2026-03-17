@@ -10,7 +10,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class BatchdataPoolCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "pool";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly BatchdataPoolListPoolNodeCountsCommandDef ListPoolNodeCounts = new(auth);
     public readonly BatchdataPoolListCommandDef List = new(auth);
     public readonly BatchdataPoolCreateCommandDef Create = new(auth);

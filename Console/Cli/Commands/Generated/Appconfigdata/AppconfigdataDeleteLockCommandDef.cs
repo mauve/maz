@@ -9,6 +9,6 @@ namespace Console.Cli.Commands.Generated;
 public partial class AppconfigdataDeleteLockCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "delete-lock";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly AppconfigdataDeleteLockDeleteCommandDef Delete = new(auth);
 }

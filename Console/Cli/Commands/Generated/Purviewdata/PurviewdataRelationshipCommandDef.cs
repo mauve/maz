@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class PurviewdataRelationshipCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "relationship";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly PurviewdataRelationshipUpdateCommandDef Update = new(auth);
     public readonly PurviewdataRelationshipCreateCommandDef Create = new(auth);
     public readonly PurviewdataRelationshipGetCommandDef Get = new(auth);

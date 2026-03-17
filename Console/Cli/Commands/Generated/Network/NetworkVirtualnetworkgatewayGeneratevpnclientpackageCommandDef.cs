@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class NetworkVirtualnetworkgatewayGeneratevpnclientpackageCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "generatevpnclientpackage";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
@@ -31,7 +31,7 @@ public partial class NetworkVirtualnetworkgatewayGeneratevpnclientpackageCommand
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);

@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SqlDatabaseImportCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "import";
-    protected override bool IsDestructive => true;
+    protected internal override bool IsDestructive => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
     public readonly RenderOptionPack Render = new();
@@ -59,7 +59,7 @@ public partial class SqlDatabaseImportCommandDef(AuthOptionPack auth) : CommandD
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);

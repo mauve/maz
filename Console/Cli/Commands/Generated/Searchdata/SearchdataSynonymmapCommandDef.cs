@@ -9,7 +9,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class SearchdataSynonymmapCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "synonymmap";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
     public readonly SearchdataSynonymmapShowCommandDef Show = new(auth);
     public readonly SearchdataSynonymmapCreateOrUpdateCommandDef CreateOrUpdate = new(auth);
     public readonly SearchdataSynonymmapDeleteCommandDef Delete = new(auth);

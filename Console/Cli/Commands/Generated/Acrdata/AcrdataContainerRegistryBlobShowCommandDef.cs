@@ -14,7 +14,7 @@ namespace Console.Cli.Commands.Generated;
 public partial class AcrdataContainerRegistryBlobShowCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "show";
-    protected override bool IsDataPlane => true;
+    protected internal override bool IsDataPlane => true;
 
     public readonly ContainerRegistryOptionPack Acr = new();
 
@@ -32,7 +32,7 @@ public partial class AcrdataContainerRegistryBlobShowCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://containerregistry.azure.net/.default");
         var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
