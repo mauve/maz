@@ -58,3 +58,14 @@ case ":${PATH}:" in
     echo ""
     ;;
 esac
+
+# Prompt user to run bootstrap
+echo ""
+if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null)" -ge 8 ]; then
+  bold=$(tput bold)
+  cyan=$(tput setaf 6)
+  reset=$(tput sgr0)
+  echo "${bold}${cyan}Run 'maz bootstrap' to get started.${reset}"
+else
+  echo "Run 'maz bootstrap' to get started."
+fi

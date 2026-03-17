@@ -46,3 +46,11 @@ if ($UserPath -notlike "*$InstallDir*") {
         Write-Host 'PATH updated.'
     }
 }
+
+# Prompt user to run bootstrap
+Write-Host ''
+if ($Host.UI.SupportsVirtualTerminal) {
+    Write-Host "`e[1;36mRun 'maz bootstrap' to get started.`e[0m"
+} else {
+    Write-Host "Run 'maz bootstrap' to get started." -ForegroundColor Cyan
+}
