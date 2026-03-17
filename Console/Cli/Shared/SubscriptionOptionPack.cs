@@ -40,12 +40,30 @@ public partial class SubscriptionOptionPack : OptionPack
         return id;
     }
 
+    /// <summary>
+    /// Returns the effective subscription value together with its source.
+    /// Checks (in order): CLI option → AZURE_SUBSCRIPTION_ID env var → config DefaultSubscriptionId.
+    /// </summary>
+    public (string? Value, ValueSource Source) GetWithSource()
+    {
+        if (HasParseResult && SubscriptionId is not null)
+            return (SubscriptionId, ValueSource.Cli);
+
+        var envVal = Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
+        if (envVal is not null)
+            return (envVal, ValueSource.Environment);
+
+        var configVal = MazConfig.Current.DefaultSubscriptionId;
+        if (configVal is not null)
+            return (configVal, ValueSource.Config);
+
+        return (null, ValueSource.Config);
+    }
+
     public async Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient)
     {
-        var result = await ResolveAsync(
-            armClient,
-            SubscriptionId ?? Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID")
-        );
+        var (value, _) = GetWithSource();
+        var result = await ResolveAsync(armClient, value);
 
         var subId = result.Id.Name;
         if (IsDisallowedSubscriptionId(subId))
@@ -59,6 +77,7 @@ public partial class SubscriptionOptionPack : OptionPack
     /// <summary>
     /// Resolves a subscription from an arbitrary hint string (or null for the default subscription).
     /// Accepts: null → default, "/subscriptions/{guid}", "/s/{x}", plain GUID, or display name.
+    /// For "/s/{x}", if x contains no colon and is not a GUID, it is treated as a display name.
     /// </summary>
     internal static async Task<SubscriptionResource> ResolveAsync(ArmClient armClient, string? hint)
     {
@@ -70,14 +89,37 @@ public partial class SubscriptionOptionPack : OptionPack
 
         if (hint.StartsWith("/s/", StringComparison.OrdinalIgnoreCase))
         {
-            // /s/name:guid  → use the guid, ignore the human-readable name prefix
-            // /s/guid       → use as-is
             var token = hint[3..];
             var colonIdx = token.IndexOf(':');
-            var id = colonIdx >= 0 ? token[(colonIdx + 1)..] : token;
-            return armClient.GetSubscriptionResource(
-                new ResourceIdentifier("/subscriptions/" + id)
-            );
+            if (colonIdx >= 0)
+            {
+                // /s/name:guid  → use the guid
+                var id = token[(colonIdx + 1)..];
+                return armClient.GetSubscriptionResource(
+                    new ResourceIdentifier("/subscriptions/" + id)
+                );
+            }
+            else if (Guid.TryParse(token, out _))
+            {
+                // /s/guid  → use as-is
+                return armClient.GetSubscriptionResource(
+                    new ResourceIdentifier("/subscriptions/" + token)
+                );
+            }
+            else
+            {
+                // /s/displayName → resolve by display name (GAP-10)
+                await foreach (var sub in armClient.GetSubscriptions().GetAllAsync())
+                {
+                    if (
+                        sub.Data.DisplayName.Equals(token, StringComparison.OrdinalIgnoreCase)
+                    )
+                        return sub;
+                }
+                throw new InvocationException(
+                    $"Subscription with display name '{token}' not found."
+                );
+            }
         }
 
         if (Guid.TryParse(hint, out var guid))
@@ -202,7 +244,7 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
             )
                 continue;
 
-            var name = sub.Data.DisplayName ?? "";
+            var name = (sub.Data.DisplayName ?? "").Replace("/", "-"); // GAP-14: strip '/' from display name
             var candidate = $"/s/{name}:{id}";
 
             if (

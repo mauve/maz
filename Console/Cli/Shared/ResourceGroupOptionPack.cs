@@ -1,3 +1,4 @@
+using Azure.Identity;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Console.Config;
@@ -12,14 +13,40 @@ public partial class ResourceGroupOptionPack : OptionPack
     /// The name of the resource group.
     /// Defaults to AZURE_RESOURCE_GROUP.
     /// </summary>
-    [CliOption("--resource-group", "-g")]
+    [CliOption(
+        "--resource-group",
+        "-g",
+        CompletionProviderType = typeof(ResourceGroupCompletionProvider),
+        CompletionOptionPacks = [typeof(AuthOptionPack)]
+    )]
     public partial string? ResourceGroupName { get; }
 
     public override string HelpTitle => "Resource Group";
 
+    /// <summary>
+    /// Returns the effective resource group value together with its source.
+    /// Checks (in order): CLI option → AZURE_RESOURCE_GROUP env var → config DefaultResourceGroup.
+    /// </summary>
+    public (string? Value, ValueSource Source) GetWithSource()
+    {
+        if (ResourceGroupName is not null)
+            return (ResourceGroupName, ValueSource.Cli);
+
+        var envVal = Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+        if (envVal is not null)
+            return (envVal, ValueSource.Environment);
+
+        var configVal = MazConfig.Current.DefaultResourceGroup;
+        if (configVal is not null)
+            return (configVal, ValueSource.Config);
+
+        return (null, ValueSource.Config);
+    }
+
     public string RequireResourceGroupName()
     {
-        var name = ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
+        var (value, _) = GetWithSource();
+        var name = value;
         if (string.IsNullOrWhiteSpace(name))
             throw new InvocationException("--resource-group is required.");
 
@@ -49,4 +76,64 @@ public partial class ResourceGroupOptionPack : OptionPack
 
     public Task<SubscriptionResource> GetSubscriptionAsync(ArmClient armClient) =>
         Subscription.GetSubscriptionAsync(armClient);
+}
+
+/// <summary>
+/// Tab-completion provider for --resource-group.
+/// Scopes results to the subscription specified via --subscription-id when available,
+/// or to CFG1 subscriptions when configured.
+/// </summary>
+internal sealed class ResourceGroupCompletionProvider : ICliCompletionProvider
+{
+    public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
+    {
+        var auth = context.GetOptionPack<AuthOptionPack>();
+        var credential = auth?.GetCredential() ?? new DefaultAzureCredential();
+        var armClient = new ArmClient(credential);
+        var config = MazConfig.Current;
+
+        string? subHint = context.GetOptionPack<SubscriptionOptionPack>()?.SubscriptionId;
+
+        try
+        {
+            if (subHint is not null)
+            {
+                // Explicit --subscription-id: list RGs in that subscription.
+                var sub = await SubscriptionOptionPack.ResolveAsync(armClient, subHint);
+                var results = new List<string>();
+                await foreach (var rg in sub.GetResourceGroups().GetAllAsync())
+                    results.Add(rg.Data.Name);
+                return results;
+            }
+
+            if (config.ResolutionFilter.Count > 0)
+            {
+                // CFG1: list RGs from configured subscriptions.
+                var results = new List<string>();
+                foreach (var entry in config.ResolutionFilter)
+                {
+                    if (entry.ResourceGroups.Count > 0)
+                    {
+                        results.AddRange(entry.ResourceGroups);
+                    }
+                    else
+                    {
+                        var sub = await SubscriptionOptionPack.ResolveAsync(
+                            armClient,
+                            entry.SubscriptionId
+                        );
+                        await foreach (var rg in sub.GetResourceGroups().GetAllAsync())
+                            results.Add(rg.Data.Name);
+                    }
+                }
+                return results.Distinct(StringComparer.OrdinalIgnoreCase);
+            }
+
+            return [];
+        }
+        catch
+        {
+            return [];
+        }
+    }
 }

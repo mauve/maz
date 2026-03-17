@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Search;
 
@@ -13,22 +14,12 @@ namespace Console.Cli.Shared;
 ///   sub/rg/service-name
 ///   /s/{sub}/rg/service-name
 ///   /subscriptions/{guid}/rg/service-name
-///   /ss/service-name
 /// </summary>
 public partial class SearchServiceOptionPack
     : DataplaneResourceOptionPack<SearchServiceResource, Uri>
 {
-    public const string ShortPathPrefix = "/ss/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
-
+    public override string ArmResourceType => "Microsoft.Search/searchServices";
     public override string HelpTitle => "Search Service";
-
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-
-    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
-
-    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
-    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>
     /// Search service name, or combined format: [sub/]rg/service-name (see section description).
@@ -51,43 +42,17 @@ public partial class SearchServiceOptionPack
 
     protected override async Task<SearchServiceResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
-        string name,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
+        string resourceName,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetSearchServiceAsync(name, cancellationToken: ct);
-        }
-
-        var matches = new List<SearchServiceResource>();
-        await foreach (var svc in sub.GetSearchServicesAsync(cancellationToken: ct))
-        {
-            if (svc.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(svc);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Search service '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} services:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var sub = armClient.GetSubscriptionResource(
+            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
+        );
+        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
+        return await rg.Value.GetSearchServiceAsync(resourceName, cancellationToken: ct);
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

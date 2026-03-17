@@ -13,9 +13,8 @@ using Console.Rendering;
 // Only the token value is shown by default; use --show-all for full metadata.
 TextFieldRegistry.RegisterVisibleFields<AccessToken>("Token");
 
-// Load user config and inject [global] defaults as env vars (before command tree is built).
+// Load user config (before command tree is built).
 MazConfig.Initialize();
-MazConfig.Current.InjectEnvironmentDefaults();
 
 if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith(']'))
 {

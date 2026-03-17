@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Attestation;
 
@@ -10,20 +11,12 @@ namespace Console.Cli.Shared;
 ///   provider-name
 ///   rg/provider-name
 ///   sub/rg/provider-name
-///   /atp/provider-name
 /// </summary>
 public partial class AttestationOptionPack
     : DataplaneResourceOptionPack<AttestationProviderResource, Uri>
 {
-    public const string ShortPathPrefix = "/atp/";
-    public override string ResourceShortPathPrefix => ShortPathPrefix;
+    public override string ArmResourceType => "Microsoft.Attestation/attestationProviders";
     public override string HelpTitle => "Attestation Provider";
-
-    public readonly ResourceGroupOptionPack ResourceGroup = new();
-    public SubscriptionOptionPack Subscription => ResourceGroup.Subscription;
-
-    protected override SubscriptionOptionPack SubscriptionPack => ResourceGroup.Subscription;
-    protected override ResourceGroupOptionPack ResourceGroupPack => ResourceGroup;
 
     /// <summary>Attestation provider name, or combined format: [sub/]rg/provider-name.</summary>
     [CliOption(
@@ -44,43 +37,17 @@ public partial class AttestationOptionPack
 
     protected override async Task<AttestationProviderResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
-        string name,
+        string resolvedSubscriptionId,
+        string resolvedResourceGroupName,
+        string resourceName,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetAttestationProviderAsync(name, ct);
-        }
-
-        var matches = new List<AttestationProviderResource>();
-        await foreach (var provider in sub.GetAttestationProvidersAsync(cancellationToken: ct))
-        {
-            if (provider.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(provider);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Attestation provider '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} providers:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var sub = armClient.GetSubscriptionResource(
+            new ResourceIdentifier($"/subscriptions/{resolvedSubscriptionId}")
+        );
+        var rg = await sub.GetResourceGroupAsync(resolvedResourceGroupName, ct);
+        return await rg.Value.GetAttestationProviderAsync(resourceName, ct);
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
