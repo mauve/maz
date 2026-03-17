@@ -183,8 +183,7 @@ public static class ResourceNameResolver
             }
         }
 
-        var argClientResolved =
-            argClient ?? new ArmArgClient(new DefaultAzureCredential());
+        var argClientResolved = argClient ?? new ArmArgClient(new DefaultAzureCredential());
         var config = MazConfig.Current;
 
         // CASE 2: rg known, sub unknown → find the subscription
@@ -225,14 +224,15 @@ public static class ResourceNameResolver
                     $"Resource '{resourceName}' of type '{resourceType}' not found "
                         + $"in resource group '{effectiveRg}' in any accessible subscription."
                 ),
-                1 => (argResults[0].SubscriptionId, argResults[0].ResourceGroup, argResults[0].Name),
+                1 => (
+                    argResults[0].SubscriptionId,
+                    argResults[0].ResourceGroup,
+                    argResults[0].Name
+                ),
                 _ => throw new InvocationException(
                     $"'{resourceName}' in resource group '{effectiveRg}' is ambiguous — "
                         + $"found in {argResults.Count} subscriptions:\n"
-                        + string.Join(
-                            "\n",
-                            argResults.Select(r => $"  {r.SubscriptionId}")
-                        )
+                        + string.Join("\n", argResults.Select(r => $"  {r.SubscriptionId}"))
                 ),
             };
         }
@@ -256,7 +256,11 @@ public static class ResourceNameResolver
                 0 => throw new InvocationException(
                     $"Resource '{resourceName}' of type '{resourceType}' not found in subscription '{effectiveSub}'."
                 ),
-                1 => (argResults[0].SubscriptionId, argResults[0].ResourceGroup, argResults[0].Name),
+                1 => (
+                    argResults[0].SubscriptionId,
+                    argResults[0].ResourceGroup,
+                    argResults[0].Name
+                ),
                 _ => throw new InvocationException(
                     $"'{resourceName}' is ambiguous — matched {argResults.Count} resources:\n"
                         + string.Join(
@@ -271,9 +275,10 @@ public static class ResourceNameResolver
 
         // Neither sub nor rg known: ARG query across all subscriptions (scoped to CFG1 if set)
         {
-            IEnumerable<string>? subScope = config.ResolutionFilter.Count > 0
-                ? config.ResolutionFilter.Select(e => e.SubscriptionId)
-                : null;
+            IEnumerable<string>? subScope =
+                config.ResolutionFilter.Count > 0
+                    ? config.ResolutionFilter.Select(e => e.SubscriptionId)
+                    : null;
 
             var kql =
                 $"Resources | where type =~ '{resourceType}' and name =~ '{resourceName}' "
@@ -286,7 +291,11 @@ public static class ResourceNameResolver
                 0 => throw new InvocationException(
                     $"Resource '{resourceName}' of type '{resourceType}' not found in any accessible subscription."
                 ),
-                1 => (argResults[0].SubscriptionId, argResults[0].ResourceGroup, argResults[0].Name),
+                1 => (
+                    argResults[0].SubscriptionId,
+                    argResults[0].ResourceGroup,
+                    argResults[0].Name
+                ),
                 _ => throw new InvocationException(
                     $"'{resourceName}' is ambiguous — matched {argResults.Count} resources:\n"
                         + string.Join(
