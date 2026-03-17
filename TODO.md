@@ -34,4 +34,14 @@ Searching for `acr` for example does matches "across" which appears in many plac
 
 ## Implement --verbose and --debug
 
-We need to see network traffic or similar stuff sometimes.
+We need to see network traffic or similar stuff sometimes.## Fix column rendering of JsonNode
+
+Quick fix exists, need to verify.
+
+## Add JMESQuery support
+
+(ditto)
+
+## Add default filtering of columns for known types
+
+For common resources we should have a predefined list of "Good to see" columns and only show those.
