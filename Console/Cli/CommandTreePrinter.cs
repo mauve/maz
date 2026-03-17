@@ -128,6 +128,17 @@ internal sealed class CommandTreeAction(Command root, Option<string?> option)
     public override int Invoke(ParseResult parseResult)
     {
         var filter = parseResult.GetValue(option);
+
+        if (
+            !System.Console.IsInputRedirected
+            && !System.Console.IsOutputRedirected
+            && Rendering.Ansi.IsEnabled
+        )
+        {
+            InteractiveCommandTree.Run(root, filter);
+            return 0;
+        }
+
         CommandTreePrinter.Print(System.Console.Out, root, filter);
         return 0;
     }

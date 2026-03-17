@@ -117,7 +117,7 @@ public sealed class MazConfig
         if (OperatingSystem.IsWindows())
         {
             var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-            return Path.Combine(appData, ".maz", "user-config.ini");
+            return Path.Combine(appData, "maz", "user-config.ini");
         }
 
         var xdgConfig = Environment.GetEnvironmentVariable("XDG_CONFIG_HOME");
@@ -128,7 +128,7 @@ public sealed class MazConfig
                 ".config"
             );
 
-        return Path.Combine(configBase, ".maz", "user-config.ini");
+        return Path.Combine(configBase, "maz", "user-config.ini");
     }
 
     private static MazConfig FromSections(Dictionary<string, Dictionary<string, string>> sections)

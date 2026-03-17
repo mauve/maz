@@ -102,8 +102,8 @@ Additional output flags:
 
 | Platform      | Default path                                                                        |
 | ------------- | ----------------------------------------------------------------------------------- |
-| Linux / macOS | `$XDG_CONFIG_HOME/.maz/user-config.ini` (default: `~/.config/.maz/user-config.ini`) |
-| Windows       | `%APPDATA%\.maz\user-config.ini`                                                    |
+| Linux / macOS | `$XDG_CONFIG_HOME/maz/user-config.ini` (default: `~/.config/maz/user-config.ini`) |
+| Windows       | `%APPDATA%\maz\user-config.ini`                                                   |
 
 Override the path: `MAZ_CONFIG_PATH=/path/to/user-config.ini`
 
@@ -112,7 +112,7 @@ Bypass entirely: `MAZ_IGNORE_CONFIG_FILE=1`
 ### Format
 
 ```ini
-; ~/.config/.maz/user-config.ini
+; ~/.config/maz/user-config.ini
 
 [suggestions]
 ; Comma-separated list — only these appear in --subscription-id completions
@@ -197,7 +197,7 @@ maz configure
 ```
 
 ```
-Configuration file: /home/user/.config/.maz/user-config.ini
+Configuration file: /home/user/.config/maz/user-config.ini
 
 Step 1/5: Allowed subscriptions for suggestions
 Fetching your subscriptions...
@@ -229,7 +229,7 @@ Step 5/5: Require confirmation for destructive operations?
 Current: false. Enable? (y/N): y
 → Enabled
 
-Configuration written to /home/user/.config/.maz/user-config.ini
+Configuration written to /home/user/.config/maz/user-config.ini
 ```
 
 `maz configure` requires an interactive terminal. It reads existing config values and shows them as defaults.

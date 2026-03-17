@@ -770,12 +770,8 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         var safeName = new string(
             id.Select(c => char.IsLetterOrDigit(c) || c == '-' ? c : '_').ToArray()
         );
-        var dir = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-            ".maz",
-            "history",
-            "log-analytics-explore"
-        );
+        var configDir = Path.GetDirectoryName(Config.MazConfig.ResolveConfigPath())!;
+        var dir = Path.Combine(configDir, "history", "log-analytics-explore");
         return Path.Combine(dir, safeName + ".json");
     }
 
