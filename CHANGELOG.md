@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-03-17
+### Fixed
+- Restore logo shimmer animation on bootstrap welcome step (lost during worktree-bootstrap merge)
+
 ## [0.3.0] - 2026-03-17
 ### Changed
 - Replace per-resource short prefixes (`/kv/`, `/sa/`, `/cr/`, etc.) with universal `/arm/` prefix on `DataplaneResourceOptionPack`
