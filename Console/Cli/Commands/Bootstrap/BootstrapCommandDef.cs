@@ -87,8 +87,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                         await RenderWelcomeContentAsync(
                             shell,
                             completionsSetup,
-                            w,
-                            new CancellationToken(canceled: true)
+                            w
                         );
                     }
                     finally
@@ -96,7 +95,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                         System.Console.SetOut(old);
                     }
                     return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
-                }
+                },
+                DemoTag: "logo"
             )
         );
 
@@ -194,18 +194,20 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                     System.Console.Write(contentLines[r]);
                 }
 
-                // Start demo loop if this step has one — placed right after content
-                // with a single separator line in between (not bottom-aligned).
-                if (demoLines > 0 && step.DemoTag is { } tag)
+                // Start demo loop if this step has one.
+                if (step.DemoTag is { } tag)
                 {
-                    var separatorRow = 2 + renderedCount;
-                    WizardUi.MoveTo(separatorRow);
-                    System.Console.Write("\x1b[2K");
-                    System.Console.Write(
-                        "  " + Ansi.Dim(new string('─', Math.Max(0, boxWidth - 4)))
-                    );
+                    if (demoLines > 0)
+                    {
+                        var separatorRow = 2 + renderedCount;
+                        WizardUi.MoveTo(separatorRow);
+                        System.Console.Write("\x1b[2K");
+                        System.Console.Write(
+                            "  " + Ansi.Dim(new string('─', Math.Max(0, boxWidth - 4)))
+                        );
+                    }
 
-                    var demoStartRow = separatorRow + 1;
+                    var demoStartRow = demoLines > 0 ? 2 + renderedCount + 1 : h - demoLines;
                     stepCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                     var token = stepCts.Token;
                     demoTask = Task.Run(
@@ -278,14 +280,13 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
     // ── Step renderers ─────────────────────────────────────────────────────────
 
-    private static async Task RenderWelcomeContentAsync(
+    private static Task RenderWelcomeContentAsync(
         string shell,
         bool completionsSetup,
-        int contentWidth,
-        CancellationToken ct
+        int contentWidth
     )
     {
-        await BootstrapAnimator.PlayWelcomeLogoAsync(contentWidth, ct);
+        BootstrapAnimator.RenderWelcomeLogo(contentWidth);
 
         System.Console.WriteLine();
         System.Console.WriteLine("  " + Ansi.Bold(Ansi.Magenta("Shell Completions")));
@@ -303,6 +304,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             System.Console.WriteLine();
             PrintCompletionCommands(shell);
         }
+
+        return Task.CompletedTask;
     }
 
     // ── Shell completions ──────────────────────────────────────────────────────
@@ -442,6 +445,9 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     {
         switch (tag)
         {
+            case "logo":
+                await BootstrapAnimator.PlayLogoShimmerAsync(ct);
+                break;
             case "subscriptions":
                 await BootstrapAnimator.PlaySubscriptionsAsync(startRow, ct);
                 break;
