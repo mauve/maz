@@ -25,7 +25,8 @@ public partial class BillingAccountShowCommandDef(AuthOptionPack auth) : Command
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-04-01", null, ct);

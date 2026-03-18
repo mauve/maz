@@ -34,7 +34,8 @@ public partial class ScvmmVirtualmachineinstanceCreateCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{ResourceUri}/providers/Microsoft.ScVmm/virtualMachineInstances/default";
 
         var body = BodyJson is { } rawJson

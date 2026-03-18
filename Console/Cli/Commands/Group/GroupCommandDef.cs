@@ -51,7 +51,8 @@ public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
     {
         var rendererFactory = Render.GetRendererFactory();
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
         var data = new ResourceGroupData(Location.GetLocation()) { ManagedBy = ManagedBy };
@@ -87,7 +88,8 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
     {
         var rendererFactory = Render.GetRendererFactory();
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
 
         var renderer = rendererFactory.CreateCollectionRenderer<ResourceGroupResource>();
@@ -119,7 +121,8 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
     {
         var rendererFactory = Render.GetRendererFactory();
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
         var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
 
@@ -161,7 +164,8 @@ public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
         Confirmation.RequireConfirmation(_auth.GetInteractive());
 
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
         var rg = await subscription.GetResourceGroupAsync(

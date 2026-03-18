@@ -29,7 +29,8 @@ public partial class PaloaltonetworksPrefixListGlobalRulestackShowCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/PaloAltoNetworks.Cloudngfw/globalRulestacks/{GlobalRulestackName}/prefixlists/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-10-08", null, ct);

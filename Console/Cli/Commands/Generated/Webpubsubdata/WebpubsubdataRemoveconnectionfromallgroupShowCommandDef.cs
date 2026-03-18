@@ -33,8 +33,9 @@ public partial class WebpubsubdataRemoveconnectionfromallgroupShowCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://webpubsub.azure.com/.default");
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/connections/{ConnectionId}/groups";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-12-01", null, ct);

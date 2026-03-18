@@ -35,8 +35,9 @@ public partial class CognitiveservicesProjectconnectionCreateCommandDef(AuthOpti
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.CognitiveServices/accounts/{StorageAccount.RequireAccountName()}/projects/{ProjectName}/connections/{ConnectionName}";
 
         var body = BodyJson is { } rawJson

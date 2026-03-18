@@ -30,7 +30,8 @@ public partial class ServicelinkerLinkerGenerateConfigurationsCommandDef(AuthOpt
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{ResourceUri}/providers/Microsoft.ServiceLinker/linkers/{LinkerName}/generateConfigurations";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-04-01", null, ct);

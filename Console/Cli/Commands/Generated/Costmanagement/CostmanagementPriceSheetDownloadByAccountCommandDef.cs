@@ -34,7 +34,8 @@ public partial class CostmanagementPriceSheetDownloadByAccountCommandDef(AuthOpt
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/microsoft.Billing/billingAccounts/{BillingAccountId}/billingPeriods/{BillingPeriodName}/providers/Microsoft.CostManagement/pricesheets/default/download";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-03-01", null, ct);

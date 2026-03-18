@@ -28,7 +28,8 @@ public partial class HybridaksAgentPoolShowCommandDef(AuthOptionPack auth) : Com
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{ConnectedClusterResourceUri}/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default/agentPools/{AgentPoolName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);

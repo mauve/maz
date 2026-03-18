@@ -22,7 +22,8 @@ public partial class BotserviceBotCheckNameCommandDef(AuthOptionPack auth) : Com
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.BotService/checkNameAvailability";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2022-09-15", null, ct);

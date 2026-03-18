@@ -25,7 +25,8 @@ public partial class ManagementgroupsHierarchysettingListCommandDef(AuthOptionPa
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Management/managementGroups/{GroupId}/settings";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-04-01", null, ct);

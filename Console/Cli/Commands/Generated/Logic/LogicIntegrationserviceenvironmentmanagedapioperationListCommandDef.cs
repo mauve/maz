@@ -35,8 +35,9 @@ public partial class LogicIntegrationserviceenvironmentmanagedapioperationListCo
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ParamResourceGroup}/providers/Microsoft.Logic/integrationServiceEnvironments/{IntegrationServiceEnvironmentName}/managedApis/{ApiName}/apiOperations";
 
         var allItems = client.GetAllAsync(path, "2019-05-01", "value", "nextLink", ct);

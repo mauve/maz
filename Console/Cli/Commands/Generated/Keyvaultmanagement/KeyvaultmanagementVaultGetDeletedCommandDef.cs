@@ -28,8 +28,9 @@ public partial class KeyvaultmanagementVaultGetDeletedCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
         var path = keyVaultId;
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-02-01", null, ct);

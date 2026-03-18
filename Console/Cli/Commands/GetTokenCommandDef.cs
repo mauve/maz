@@ -69,7 +69,8 @@ public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
         );
 
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var result = await _auth.GetCredential(log).GetTokenAsync(requestContext, ct);
+        var cred = _auth.GetCredential(log);
+        var result = await cred.GetTokenAsync(requestContext, ct);
 
         if (Render.Format == null)
         {

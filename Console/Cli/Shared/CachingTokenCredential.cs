@@ -83,6 +83,23 @@ internal sealed class CachingTokenCredential : TokenCredential
         )
             return true;
 
+        // Fallback: when requesting without a TenantId, accept a cached token
+        // that was acquired for the same scopes with a specific tenant (e.g. from
+        // ArmClient's auth-challenge flow). The token is still valid for the scope.
+        if (!key.Contains('\0'))
+        {
+            var suffix = "\0" + key;
+            foreach (var (k, v) in _cache)
+            {
+                if (k.EndsWith(suffix, StringComparison.Ordinal)
+                    && v.ExpiresOn > DateTimeOffset.UtcNow + ExpiryBuffer)
+                {
+                    token = v;
+                    return true;
+                }
+            }
+        }
+
         token = default;
         return false;
     }

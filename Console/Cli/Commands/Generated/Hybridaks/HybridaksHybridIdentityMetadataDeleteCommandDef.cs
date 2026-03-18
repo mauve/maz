@@ -30,7 +30,8 @@ public partial class HybridaksHybridIdentityMetadataDeleteCommandDef(AuthOptionP
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{ConnectedClusterResourceUri}/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default/hybridIdentityMetadata/default";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-01-01", null, ct);

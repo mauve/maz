@@ -25,7 +25,8 @@ public partial class SubscriptionOperationShowCommandDef(AuthOptionPack auth) : 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Subscription/subscriptionOperations/{OperationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-10-01", null, ct);

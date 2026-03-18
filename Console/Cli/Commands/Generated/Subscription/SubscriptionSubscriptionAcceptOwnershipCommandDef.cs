@@ -28,8 +28,9 @@ public partial class SubscriptionSubscriptionAcceptOwnershipCommandDef(AuthOptio
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/providers/Microsoft.Subscription/subscriptions/{subscriptionId}/acceptOwnership";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2021-10-01", null, ct);

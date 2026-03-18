@@ -45,6 +45,7 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var cred = _auth.GetCredential(log);
 
         // 1. Resolve registry login server
         string loginServer;
@@ -65,7 +66,7 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
 
         // 2. Get AAD access token (ARM scope accepted by ACR OAuth2 exchange endpoint)
         var tokenCtx = new TokenRequestContext(["https://management.azure.com/.default"]);
-        var aadToken = await _auth.GetCredential(log).GetTokenAsync(tokenCtx, ct);
+        var aadToken = await cred.GetTokenAsync(tokenCtx, ct);
 
         // 3. Extract tenant ID from JWT payload
         var tenantId = ExtractTenantId(aadToken.Token);

@@ -36,8 +36,9 @@ public partial class BillingInvoiceDownloadBySubscriptionCommandDef(AuthOptionPa
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/providers/Microsoft.Billing/billingAccounts/default/billingSubscriptions/{subscriptionId}/invoices/{InvoiceName}/download";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-04-01", null, ct);

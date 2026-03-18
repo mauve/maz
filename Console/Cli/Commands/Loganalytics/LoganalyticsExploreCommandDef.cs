@@ -56,7 +56,8 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
             );
 
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var credential = _auth.GetCredential(log);
+        var cred = _auth.GetCredential(log);
+        var credential = cred;
         var armClient = new ArmClient(credential);
 
         string? resolvedWorkspaceId = null;

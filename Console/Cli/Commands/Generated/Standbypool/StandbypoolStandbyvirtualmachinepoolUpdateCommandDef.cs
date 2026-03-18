@@ -27,8 +27,9 @@ public partial class StandbypoolStandbyvirtualmachinepoolUpdateCommandDef(AuthOp
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             StandbyVirtualMachinePoolName!, ResourceGroup, armClient, "Microsoft.StandbyPool/standbyVirtualMachinePools", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StandbyPool/standbyVirtualMachinePools/{resolvedName}";

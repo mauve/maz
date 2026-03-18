@@ -35,8 +35,9 @@ public partial class OracleGiminorversionGetCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/providers/Oracle.Database/locations/{Location}/giVersions/{Giversionname}/giMinorVersions/{GiMinorVersionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

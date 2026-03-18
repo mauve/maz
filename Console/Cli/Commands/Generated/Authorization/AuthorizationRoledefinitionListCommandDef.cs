@@ -29,7 +29,8 @@ public partial class AuthorizationRoledefinitionListCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{Scope}/providers/Microsoft.Authorization/roleDefinitions";
 
         var allItems = client.GetAllAsync(path, "2022-04-01", "value", "nextLink", ct);

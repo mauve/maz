@@ -34,8 +34,9 @@ public partial class DigitaltwinsdataDigitaltwinDeleteRelationshipCommandDef(Aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://digitaltwins.azure.net/.default");
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/digitaltwins/{Id}/relationships/{RelationshipId}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2023-10-31", null, ct);

@@ -29,8 +29,9 @@ public partial class PurviewdataTypeGetClassificationDefByNameCommandDef(AuthOpt
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://purview.azure.net/.default");
-        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://purview.azure.net/.default");
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/atlas/v2/types/classificationdef/name/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-09-01", null, ct);
