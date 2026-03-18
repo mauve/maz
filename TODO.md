@@ -45,3 +45,7 @@ Quick fix exists, need to verify.
 ## Add default filtering of columns for known types
 
 For common resources we should have a predefined list of "Good to see" columns and only show those.
+
+## Split generated services into multiple projects to see if it speeds up build time when working locally
+
+(ditto)

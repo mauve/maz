@@ -35,7 +35,12 @@ public sealed class AzureRestClient
     )
     {
         var response = await SendRawAsync(method, path, apiVersion, body, ct);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).\n{errorBody}");
+        }
         var content = await response.Content.ReadAsStringAsync(ct);
         return string.IsNullOrWhiteSpace(content)
             ? JsonValue.Create((object?)null)!
@@ -56,9 +61,18 @@ public sealed class AzureRestClient
     {
         var token = await _credential.GetTokenAsync(new TokenRequestContext([_scope]), ct);
 
-        var url = path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
-            ? $"{path}{(path.Contains('?') ? '&' : '?')}api-version={apiVersion}"
-            : $"{BaseUrl}{path}?api-version={apiVersion}";
+        string url;
+        if (path.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+        {
+            // nextLink URLs from ARM already include api-version; don't duplicate it
+            url = path.Contains("api-version=", StringComparison.OrdinalIgnoreCase)
+                ? path
+                : $"{path}{(path.Contains('?') ? '&' : '?')}api-version={apiVersion}";
+        }
+        else
+        {
+            url = $"{BaseUrl}{path}?api-version={apiVersion}";
+        }
 
         var request = new HttpRequestMessage(method, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
