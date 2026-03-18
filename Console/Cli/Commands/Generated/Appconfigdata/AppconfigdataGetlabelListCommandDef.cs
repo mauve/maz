@@ -35,8 +35,9 @@ public partial class AppconfigdataGetlabelListCommandDef(AuthOptionPack auth) : 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://azconfig.io/.default");
-        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://azconfig.io/.default");
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/labels";
 
         var allItems = client.GetAllAsync(path, "2024-09-01", "items", "@nextLink", ct);

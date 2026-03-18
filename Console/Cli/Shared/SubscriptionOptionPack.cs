@@ -267,7 +267,7 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
     public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
     {
         var auth = context.GetOptionPack<AuthOptionPack>();
-        var credential = auth?.GetCredential() ?? new DefaultAzureCredential();
+        var credential = auth?.GetCredential(DiagnosticLog.Null) ?? new DefaultAzureCredential();
         var armClient = new ArmClient(credential);
         var word = context.WordToComplete;
         var suggestions = new List<string>();

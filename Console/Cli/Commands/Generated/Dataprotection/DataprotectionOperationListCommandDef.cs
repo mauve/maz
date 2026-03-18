@@ -20,7 +20,8 @@ public partial class DataprotectionOperationListCommandDef(AuthOptionPack auth) 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.DataProtection/operations";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

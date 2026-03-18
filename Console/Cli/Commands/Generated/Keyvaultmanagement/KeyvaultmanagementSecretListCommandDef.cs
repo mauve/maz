@@ -27,8 +27,9 @@ public partial class KeyvaultmanagementSecretListCommandDef(AuthOptionPack auth)
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();
         var path = $"{keyVaultId}/secrets";
 
         var allItems = client.GetAllAsync(path, "2026-02-01", "value", "nextLink", ct);

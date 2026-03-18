@@ -37,8 +37,9 @@ public partial class ServicebusdataRuleCreateCommandDef(AuthOptionPack auth) : C
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://servicebus.azure.net/.default");
-        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://servicebus.azure.net/.default");
+        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/{TopicName}/subscriptions/{SubscriptionName}/rules/{RuleName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2021-05", null, ct);

@@ -25,9 +25,11 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+    {
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var vaultUri = await KeyVault.ResolveDataplaneRefAsync(armClient, ct);
-        var client = new AzureRestClient(_auth.GetCredential(), KvScope);
+        var client = new AzureRestClient(_auth.GetCredential(log), KvScope);
 
         var secretNames = new List<string>();
         await foreach (

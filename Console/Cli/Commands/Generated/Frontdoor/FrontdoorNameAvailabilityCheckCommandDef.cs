@@ -33,7 +33,8 @@ public partial class FrontdoorNameAvailabilityCheckCommandDef(AuthOptionPack aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Network/checkFrontDoorNameAvailability";
 
         var body = BodyJson is { } rawJson

@@ -23,8 +23,9 @@ public partial class KeyvaultmanagementVaultUpdateCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();
         var path = keyVaultId;
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2026-02-01", null, ct);

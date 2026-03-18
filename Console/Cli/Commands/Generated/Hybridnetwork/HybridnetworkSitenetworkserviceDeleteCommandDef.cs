@@ -31,8 +31,9 @@ public partial class HybridnetworkSitenetworkserviceDeleteCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             SiteNetworkServiceName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/siteNetworkServices", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/siteNetworkServices/{resolvedName}";
@@ -40,7 +41,7 @@ public partial class HybridnetworkSitenetworkserviceDeleteCommandDef(AuthOptionP
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-04-15", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-15", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-15", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -20,11 +20,12 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
     private readonly InteractiveOptionPack _interactive = interactive;
 
     protected override Task<int> ExecuteAsync(CancellationToken ct) =>
-        RunConfigureAsync(_auth, _interactive, ct);
+        RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(ParseResult), ct);
 
     internal static async Task<int> RunConfigureAsync(
         AuthOptionPack auth,
         InteractiveOptionPack interactive,
+        DiagnosticLog log,
         CancellationToken ct
     )
     {
@@ -50,7 +51,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         System.Console.WriteLine();
         System.Console.WriteLine("  Fetching your subscriptions...");
 
-        var armClient = new ArmClient(auth.GetCredential());
+        var armClient = new ArmClient(auth.GetCredential(log));
         var allSubs = new List<(string Name, string Id)>();
         await foreach (var sub in armClient.GetSubscriptions().GetAllAsync(ct))
         {

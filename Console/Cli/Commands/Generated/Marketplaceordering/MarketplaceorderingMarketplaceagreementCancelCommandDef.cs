@@ -35,8 +35,9 @@ public partial class MarketplaceorderingMarketplaceagreementCancelCommandDef(Aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.MarketplaceOrdering/agreements/{PublisherId}/offers/{OfferId}/plans/{PlanId}/cancel";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-01-01", null, ct);

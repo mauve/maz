@@ -24,7 +24,8 @@ public partial class EventgridTopictypeListEventTypesCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.EventGrid/topicTypes/{TopicTypeName}/eventTypes";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

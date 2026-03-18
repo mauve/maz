@@ -61,6 +61,20 @@ public sealed class MazConfig
         : GlobalDefaults.TryGetValue("resource-group", out var v2) ? v2
         : null;
 
+    /// <summary>
+    /// Maximum bytes of request/response body to include in verbose output.
+    /// From <c>[global] verbose-body-limit</c>. Default 8192.
+    /// </summary>
+    public int VerboseBodyLimit =>
+        GlobalDefaults.TryGetValue("verbose-body-limit", out var v) && int.TryParse(v, out var n) ? n : 8192;
+
+    /// <summary>
+    /// Timestamp format for verbose output: <c>relative</c> (default) or <c>absolute</c>.
+    /// From <c>[global] verbose-timestamp</c>.
+    /// </summary>
+    public string VerboseTimestamp =>
+        GlobalDefaults.TryGetValue("verbose-timestamp", out var v) ? v : "relative";
+
     // [cmd.X] — command path → option name → value
 
     /// <summary>Per-command default values. Key is the full command path (e.g. "storage account list").</summary>

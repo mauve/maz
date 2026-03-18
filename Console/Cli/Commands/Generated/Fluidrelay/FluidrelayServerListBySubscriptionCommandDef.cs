@@ -21,8 +21,9 @@ public partial class FluidrelayServerListBySubscriptionCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.FluidRelay/fluidRelayServers";
 
         var allItems = client.GetAllAsync(path, "2022-06-01", "value", "nextLink", ct);

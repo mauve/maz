@@ -33,7 +33,8 @@ public partial class BillingPermissionCheckAccessByCustomerCommandDef(AuthOption
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}/billingProfiles/{BillingProfileName}/customers/{CustomerName}/checkAccess";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-04-01", null, ct);

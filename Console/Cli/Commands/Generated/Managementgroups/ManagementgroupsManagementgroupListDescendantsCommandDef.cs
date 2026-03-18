@@ -32,7 +32,8 @@ public partial class ManagementgroupsManagementgroupListDescendantsCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Management/managementGroups/{GroupId}/descendants";
 
         var allItems = client.GetAllAsync(path, "2023-04-01", "value", "nextLink", ct);

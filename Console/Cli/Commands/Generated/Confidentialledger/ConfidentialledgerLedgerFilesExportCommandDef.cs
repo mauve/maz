@@ -39,8 +39,9 @@ public partial class ConfidentialledgerLedgerFilesExportCommandDef(AuthOptionPac
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             LedgerName!, ResourceGroup, armClient, "Microsoft.ConfidentialLedger/ledgers", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConfidentialLedger/ledgers/{resolvedName}/filesExport";
@@ -54,7 +55,7 @@ public partial class ConfidentialledgerLedgerFilesExportCommandDef(AuthOptionPac
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-23", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-23", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-23", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

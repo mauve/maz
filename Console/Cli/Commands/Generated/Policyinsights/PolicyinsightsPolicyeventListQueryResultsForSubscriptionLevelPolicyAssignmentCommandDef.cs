@@ -67,8 +67,9 @@ public partial class PolicyinsightsPolicyeventListQueryResultsForSubscriptionLev
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/{AuthorizationNamespace}/policyAssignments/{PolicyAssignmentName}/providers/Microsoft.PolicyInsights/policyEvents/{PolicyEventsResource}/queryResults";
 
         var allItems = client.GetAllAsync(path, "2024-10-01", "value", "@odata.nextLink", ct);

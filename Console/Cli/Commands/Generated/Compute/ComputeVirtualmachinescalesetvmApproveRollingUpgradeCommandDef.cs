@@ -35,8 +35,9 @@ public partial class ComputeVirtualmachinescalesetvmApproveRollingUpgradeCommand
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachineScaleSets/{resolvedName}/virtualMachines/{InstanceId}/approveRollingUpgrade";
@@ -44,7 +45,7 @@ public partial class ComputeVirtualmachinescalesetvmApproveRollingUpgradeCommand
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-04-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-04-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-04-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

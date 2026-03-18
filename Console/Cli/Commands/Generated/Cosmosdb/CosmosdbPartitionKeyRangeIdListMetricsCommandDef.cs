@@ -38,8 +38,9 @@ public partial class CosmosdbPartitionKeyRangeIdListMetricsCommandDef(AuthOption
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DocumentDB/databaseAccounts/{StorageAccount.RequireAccountName()}/databases/{DatabaseRid}/collections/{CollectionRid}/partitionKeyRangeId/{PartitionKeyRangeId}/metrics";
 
         var allItems = client.GetAllAsync(path, "2025-10-15", "value", "nextLink", ct);

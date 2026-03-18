@@ -30,8 +30,9 @@ public partial class MysqlServerUpdateCommandDef(AuthOptionPack auth) : CommandD
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ServerName!, ResourceGroup, armClient, "Microsoft.DBforMySQL/flexibleServers", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMySQL/flexibleServers/{resolvedName}";
@@ -39,7 +40,7 @@ public partial class MysqlServerUpdateCommandDef(AuthOptionPack auth) : CommandD
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-12-30", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-12-30", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-12-30", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -25,7 +25,8 @@ public partial class MarketplacePrivateStoreDeleteCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Marketplace/privateStores/{PrivateStoreId}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2025-01-01", null, ct);

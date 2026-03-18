@@ -31,8 +31,9 @@ public partial class DynatraceMonitorDeleteCommandDef(AuthOptionPack auth) : Com
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Dynatrace.Observability/monitors/{resolvedName}";
@@ -40,7 +41,7 @@ public partial class DynatraceMonitorDeleteCommandDef(AuthOptionPack auth) : Com
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-04-24", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-24", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-24", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -32,7 +32,8 @@ public partial class PolicyinsightsRemediationShowCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/{ManagementGroupsNamespace}/managementGroups/{ManagementGroupId}/providers/Microsoft.PolicyInsights/remediations/{RemediationName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-10-01", null, ct);

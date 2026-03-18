@@ -27,8 +27,9 @@ public partial class AppconfigdataUpdateSnapshotUpdateCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://azconfig.io/.default");
-        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://azconfig.io/.default");
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/snapshots/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2024-09-01", null, ct);

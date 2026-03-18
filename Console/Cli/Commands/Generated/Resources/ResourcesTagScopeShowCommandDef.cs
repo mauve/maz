@@ -23,7 +23,8 @@ public partial class ResourcesTagScopeShowCommandDef(AuthOptionPack auth) : Comm
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.Resources/tags/default";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-04-01", null, ct);

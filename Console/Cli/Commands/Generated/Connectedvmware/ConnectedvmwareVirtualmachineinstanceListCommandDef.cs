@@ -24,7 +24,8 @@ public partial class ConnectedvmwareVirtualmachineinstanceListCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachineInstances";
 
         var allItems = client.GetAllAsync(path, "2023-12-01", "value", "nextLink", ct);

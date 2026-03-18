@@ -29,13 +29,14 @@ public partial class ReservationsReservationMergeCommandDef(AuthOptionPack auth)
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Capacity/reservationOrders/{ReservationOrderId}/merge";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2022-11-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2022-11-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2022-11-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

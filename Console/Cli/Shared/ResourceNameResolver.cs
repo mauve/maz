@@ -43,6 +43,7 @@ public static class ResourceNameResolver
             argClient: null,
             isDestructive: false,
             warningWriter: null,
+            log: DiagnosticLog.Null,
             ct: ct
         );
 
@@ -63,6 +64,7 @@ public static class ResourceNameResolver
         IArgClient? argClient = null,
         bool isDestructive = false,
         TextWriter? warningWriter = null,
+        DiagnosticLog? log = null,
         CancellationToken ct = default
     )
     {
@@ -183,7 +185,7 @@ public static class ResourceNameResolver
             }
         }
 
-        var argClientResolved = argClient ?? new ArmArgClient(new DefaultAzureCredential());
+        var argClientResolved = argClient ?? new ArmArgClient(new DefaultAzureCredential(), log ?? DiagnosticLog.Null);
         var config = MazConfig.Current;
 
         // CASE 2: rg known, sub unknown → find the subscription

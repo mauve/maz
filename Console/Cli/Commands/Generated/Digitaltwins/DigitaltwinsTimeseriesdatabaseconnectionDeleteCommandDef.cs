@@ -39,8 +39,9 @@ public partial class DigitaltwinsTimeseriesdatabaseconnectionDeleteCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ResourceName!, ResourceGroup, armClient, "Microsoft.DigitalTwins/digitalTwinsInstances", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DigitalTwins/digitalTwinsInstances/{resolvedName}/timeSeriesDatabaseConnections/{TimeSeriesDatabaseConnectionName}";
@@ -48,7 +49,7 @@ public partial class DigitaltwinsTimeseriesdatabaseconnectionDeleteCommandDef(Au
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-01-31", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2023-01-31", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2023-01-31", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

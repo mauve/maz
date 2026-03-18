@@ -32,8 +32,9 @@ public partial class KeyvaultmanagementKeyCreateCommandDef(AuthOptionPack auth) 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();
         var path = $"{keyVaultId}/keys/{KeyName}";
 
         var body = BodyJson is { } rawJson

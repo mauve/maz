@@ -32,8 +32,9 @@ public partial class WebpubsubdataRemoveuserfromallgroupRemoveAllCommandDef(Auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://webpubsub.azure.com/.default");
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/users/{UserId}/groups";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-12-01", null, ct);

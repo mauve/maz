@@ -24,7 +24,8 @@ public partial class HybridconnectivitySolutionconfigurationListCommandDef(AuthO
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.HybridConnectivity/solutionConfigurations";
 
         var allItems = client.GetAllAsync(path, "2024-12-01", "value", "nextLink", ct);

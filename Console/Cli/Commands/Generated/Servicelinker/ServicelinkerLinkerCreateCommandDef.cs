@@ -37,7 +37,8 @@ public partial class ServicelinkerLinkerCreateCommandDef(AuthOptionPack auth) : 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.ServiceLinker/linkers/{LinkerName}";
 
         var body = BodyJson is { } rawJson
@@ -48,7 +49,7 @@ public partial class ServicelinkerLinkerCreateCommandDef(AuthOptionPack auth) : 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2024-04-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

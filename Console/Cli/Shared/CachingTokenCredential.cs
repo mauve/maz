@@ -7,12 +7,20 @@ namespace Console.Cli.Shared;
 /// 5 minutes before their expiry, avoiding redundant token acquisitions
 /// within a single process lifetime.
 /// </summary>
-internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCredential
+internal sealed class CachingTokenCredential : TokenCredential
 {
     private static readonly TimeSpan ExpiryBuffer = TimeSpan.FromMinutes(5);
 
+    private readonly TokenCredential _inner;
+    private readonly DiagnosticLog _log;
     private readonly Dictionary<string, AccessToken> _cache = [];
     private readonly SemaphoreSlim _lock = new(1, 1);
+
+    public CachingTokenCredential(TokenCredential inner, DiagnosticLog log)
+    {
+        _inner = inner;
+        _log = log;
+    }
 
     public override AccessToken GetToken(
         TokenRequestContext requestContext,
@@ -21,10 +29,15 @@ internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCrede
     {
         var key = CacheKey(requestContext);
         if (TryGetCached(key, out var cached))
+        {
+            _log.Credential($"Token cache hit for {requestContext.Scopes[0]}");
             return cached;
+        }
 
-        var token = inner.GetToken(requestContext, cancellationToken);
+        _log.Credential($"Token cache miss for {requestContext.Scopes[0]}, acquiring...");
+        var token = _inner.GetToken(requestContext, cancellationToken);
         Store(key, token);
+        _log.Credential($"Token acquired, expires {token.ExpiresOn:yyyy-MM-ddTHH:mm:ssZ}");
         return token;
     }
 
@@ -35,17 +48,25 @@ internal sealed class CachingTokenCredential(TokenCredential inner) : TokenCrede
     {
         var key = CacheKey(requestContext);
         if (TryGetCached(key, out var cached))
+        {
+            _log.Credential($"Token cache hit for {requestContext.Scopes[0]}");
             return cached;
+        }
 
         await _lock.WaitAsync(cancellationToken);
         try
         {
             // Double-check after acquiring the lock
             if (TryGetCached(key, out cached))
+            {
+                _log.Credential($"Token cache hit for {requestContext.Scopes[0]}");
                 return cached;
+            }
 
-            var token = await inner.GetTokenAsync(requestContext, cancellationToken);
+            _log.Credential($"Token cache miss for {requestContext.Scopes[0]}, acquiring...");
+            var token = await _inner.GetTokenAsync(requestContext, cancellationToken);
             Store(key, token);
+            _log.Credential($"Token acquired, expires {token.ExpiresOn:yyyy-MM-ddTHH:mm:ssZ}");
             return token;
         }
         finally

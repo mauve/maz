@@ -25,8 +25,9 @@ public partial class PurviewdataDiscoveryQueryCommandDef(AuthOptionPack auth) : 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://purview.azure.net/.default");
-        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://purview.azure.net/.default");
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/search/query";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-09-01", null, ct);

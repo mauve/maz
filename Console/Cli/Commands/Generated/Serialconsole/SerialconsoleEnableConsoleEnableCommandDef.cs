@@ -27,8 +27,9 @@ public partial class SerialconsoleEnableConsoleEnableCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.SerialConsole/consoleServices/{Default}/enableConsole";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-07-01", null, ct);

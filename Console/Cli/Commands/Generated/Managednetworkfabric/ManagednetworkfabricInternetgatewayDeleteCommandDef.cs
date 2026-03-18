@@ -31,8 +31,9 @@ public partial class ManagednetworkfabricInternetgatewayDeleteCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             InternetGatewayName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/internetGateways", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/internetGateways/{resolvedName}";
@@ -40,7 +41,7 @@ public partial class ManagednetworkfabricInternetgatewayDeleteCommandDef(AuthOpt
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-06-15", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2023-06-15", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2023-06-15", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

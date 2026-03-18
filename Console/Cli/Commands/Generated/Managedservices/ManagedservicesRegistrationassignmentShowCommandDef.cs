@@ -32,7 +32,8 @@ public partial class ManagedservicesRegistrationassignmentShowCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.ManagedServices/registrationAssignments/{RegistrationAssignmentId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-10-01", null, ct);

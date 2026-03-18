@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
 using Azure.Core;
+using Console.Cli.Shared;
 
 namespace Console.Cli.Http;
 
@@ -11,15 +13,18 @@ public sealed class AzureRestClient
     private static readonly HttpClient _http = new();
     private readonly TokenCredential _credential;
     private readonly string _scope;
+    private readonly DiagnosticLog _log;
     private const string ManagementScope = "https://management.azure.com/.default";
     private const string BaseUrl = "https://management.azure.com";
 
     /// <summary>Initializes a new <see cref="AzureRestClient"/> with the given credential.</summary>
     /// <param name="credential">The credential to use for authentication.</param>
+    /// <param name="log">Diagnostic log for runtime diagnostics.</param>
     /// <param name="scope">The OAuth scope to request. Defaults to the ARM management scope.</param>
-    public AzureRestClient(TokenCredential credential, string scope = ManagementScope)
+    public AzureRestClient(TokenCredential credential, DiagnosticLog log, string scope = ManagementScope)
     {
         _credential = credential;
+        _log = log;
         _scope = scope;
     }
 
@@ -86,6 +91,14 @@ public sealed class AzureRestClient
             );
         }
 
-        return await _http.SendAsync(request, ct);
+        _log.HttpRequest(method, url, request);
+        var sw = Stopwatch.StartNew();
+
+        var response = await _http.SendAsync(request, ct);
+
+        sw.Stop();
+        _log.HttpResponse(response, sw.ElapsedMilliseconds);
+
+        return response;
     }
 }

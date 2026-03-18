@@ -28,7 +28,8 @@ public partial class MonitorDatacollectionruleassociationCreateCommandDef(AuthOp
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.Insights/dataCollectionRuleAssociations/{AssociationName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2026-03-01", null, ct);

@@ -29,13 +29,14 @@ public partial class SubscriptionAliaCreateCommandDef(AuthOptionPack auth) : Com
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Subscription/aliases/{AliasName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2021-10-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2021-10-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2021-10-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

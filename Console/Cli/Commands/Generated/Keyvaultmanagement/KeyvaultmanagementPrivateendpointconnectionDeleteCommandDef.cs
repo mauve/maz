@@ -32,14 +32,15 @@ public partial class KeyvaultmanagementPrivateendpointconnectionDeleteCommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();
         var path = $"{keyVaultId}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2026-02-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

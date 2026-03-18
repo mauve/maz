@@ -35,14 +35,15 @@ public partial class KeyvaultmanagementManagedhsmPurgeDeletedCommandDef(AuthOpti
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.KeyVault/locations/{Location}/deletedManagedHSMs/{ParamName}/purge";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2026-02-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

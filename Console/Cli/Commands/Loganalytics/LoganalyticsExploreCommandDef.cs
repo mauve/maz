@@ -55,7 +55,8 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
                 "Either --workspace-id or --resource-id must be specified."
             );
 
-        var credential = _auth.GetCredential();
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var credential = _auth.GetCredential(log);
         var armClient = new ArmClient(credential);
 
         string? resolvedWorkspaceId = null;
@@ -73,6 +74,7 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
                         WorkspaceId,
                         ResourceGroup,
                         _auth,
+                        log,
                         ct
                     );
             }
@@ -158,7 +160,7 @@ internal sealed class LogAnalyticsWorkspaceCompletionProvider : ICliCompletionPr
     public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
     {
         var auth = context.GetOptionPack<AuthOptionPack>();
-        var credential = auth?.GetCredential() ?? new DefaultAzureCredential();
+        var credential = auth?.GetCredential(DiagnosticLog.Null) ?? new DefaultAzureCredential();
         var armClient = new ArmClient(credential);
         var word = context.WordToComplete;
 

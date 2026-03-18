@@ -14,10 +14,11 @@ internal static class LoganalyticsWorkspaceResolver
         string workspaceRef,
         ResourceGroupOptionPack resourceGroup,
         AuthOptionPack auth,
+        DiagnosticLog log,
         CancellationToken ct
     )
     {
-        var credential = auth.GetCredential();
+        var credential = auth.GetCredential(log);
         var armClient = new ArmClient(credential);
 
         var (sub, rg, name) = await ResourceNameResolver.ResolveAsync(
@@ -28,7 +29,7 @@ internal static class LoganalyticsWorkspaceResolver
             ct
         );
 
-        var restClient = new AzureRestClient(credential);
+        var restClient = new AzureRestClient(credential, log);
         var path =
             $"/subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.OperationalInsights/workspaces/{name}";
         var json = await restClient.SendAsync(HttpMethod.Get, path, "2025-07-01", null, ct);

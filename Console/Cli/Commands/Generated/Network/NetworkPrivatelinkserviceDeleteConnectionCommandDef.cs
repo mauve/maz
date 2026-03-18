@@ -35,8 +35,9 @@ public partial class NetworkPrivatelinkserviceDeleteConnectionCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ServiceName!, ResourceGroup, armClient, "Microsoft.Network/privateLinkServices", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/privateLinkServices/{resolvedName}/privateEndpointConnections/{PeConnectionName}";
@@ -44,7 +45,7 @@ public partial class NetworkPrivatelinkserviceDeleteConnectionCommandDef(AuthOpt
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-05-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-05-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

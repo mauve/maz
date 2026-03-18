@@ -20,7 +20,8 @@ public partial class ConfluentOrganizationoperationListCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Confluent/operations";
 
         var allItems = client.GetAllAsync(path, "2024-07-01", "value", "nextLink", ct);

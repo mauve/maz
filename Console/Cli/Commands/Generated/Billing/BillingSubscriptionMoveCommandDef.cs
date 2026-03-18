@@ -33,13 +33,14 @@ public partial class BillingSubscriptionMoveCommandDef(AuthOptionPack auth) : Co
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}/billingSubscriptions/{BillingSubscriptionName}/move";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-04-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-04-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -65,8 +65,9 @@ public partial class DeiddataDeidentifydocumentCreateCommandDef(AuthOptionPack a
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://deid.azure.net/.default");
-        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://deid.azure.net/.default");
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/{ParamName}";
 
         var body = BodyJson is { } rawJson
@@ -90,7 +91,7 @@ public partial class DeiddataDeidentifydocumentCreateCommandDef(AuthOptionPack a
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2024-11-15", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-11-15", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-11-15", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

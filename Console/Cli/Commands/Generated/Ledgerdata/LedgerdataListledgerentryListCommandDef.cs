@@ -36,8 +36,9 @@ public partial class LedgerdataListledgerentryListCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://confidential-ledger.azure.com/.default");
-        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://confidential-ledger.azure.com/.default");
+        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/app/transactions";
 
         var allItems = client.GetAllAsync(path, "2022-05-13", "entries", "nextLink", ct);
