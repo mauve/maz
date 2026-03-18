@@ -2,7 +2,7 @@ using Console.Rendering;
 
 namespace Console.Tui;
 
-/// <summary>Multiline KQL editor with syntax highlighting, autocomplete popup, and multi-query margin.</summary>
+/// <summary>Multiline editor with syntax highlighting, autocomplete popup, and multi-query margin.</summary>
 internal sealed class EditorPane
 {
     private List<string> _lines;
@@ -10,6 +10,8 @@ internal sealed class EditorPane
     private int _cursorCol;
     private int _scrollOffset;
     private int? _errorMarkerLine;
+    private readonly Func<string, string> _highlighter;
+    private readonly string _title;
 
     // Autocomplete state
     private List<CompletionItem> _completions = [];
@@ -34,8 +36,14 @@ internal sealed class EditorPane
 
     public bool IsAutocompleteVisible => _autocompleteVisible;
 
-    public EditorPane(string initialQuery)
+    public EditorPane(
+        string initialQuery,
+        Func<string, string>? highlighter = null,
+        string title = "KQL Query"
+    )
     {
+        _highlighter = highlighter ?? KqlHighlighter.Highlight;
+        _title = title;
         var lines = initialQuery.Split('\n').ToList();
         _lines = lines.Count > 0 ? lines : [""];
         _cursorLine = _lines.Count - 1;
@@ -387,7 +395,7 @@ internal sealed class EditorPane
 
         // ── Title ──
         MoveTo(top, left);
-        WriteCell(Ansi.Bold("  ✏️  KQL Query"), width);
+        WriteCell(Ansi.Bold("  ✏️  " + _title), width);
 
         // ── Separator ──
         MoveTo(top + 1, left);
@@ -405,7 +413,7 @@ internal sealed class EditorPane
                     GetMarginString(lineIndex, activeStart, activeEnd, showActiveMarker)
                 );
                 // Content
-                var highlighted = KqlHighlighter.Highlight(_lines[lineIndex]);
+                var highlighted = _highlighter(_lines[lineIndex]);
                 var vis = Ansi.VisibleLength(highlighted);
                 if (vis >= contentWidth)
                 {
