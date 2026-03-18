@@ -23,8 +23,9 @@ public partial class ViAccountUpdateCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.VideoIndexer/accounts/{StorageAccount.RequireAccountName()}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-04-01", null, ct);

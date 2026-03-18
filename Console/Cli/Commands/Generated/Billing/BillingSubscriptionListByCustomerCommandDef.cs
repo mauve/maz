@@ -65,7 +65,8 @@ public partial class BillingSubscriptionListByCustomerCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}/billingProfiles/{BillingProfileName}/customers/{CustomerName}/billingSubscriptions";
 
         var allItems = client.GetAllAsync(path, "2024-04-01", "value", "nextLink", ct);

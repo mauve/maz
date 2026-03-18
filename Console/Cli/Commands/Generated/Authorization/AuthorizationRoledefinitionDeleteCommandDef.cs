@@ -30,7 +30,8 @@ public partial class AuthorizationRoledefinitionDeleteCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{Scope}/providers/Microsoft.Authorization/roleDefinitions/{RoleDefinitionId}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2022-04-01", null, ct);

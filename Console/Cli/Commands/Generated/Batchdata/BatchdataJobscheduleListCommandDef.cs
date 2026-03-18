@@ -44,8 +44,9 @@ public partial class BatchdataJobscheduleListCommandDef(AuthOptionPack auth) : C
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://batch.core.windows.net/.default");
-        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://batch.core.windows.net/.default");
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobschedules";
 
         var allItems = client.GetAllAsync(path, "2025-06-01", "value", "odata.nextLink", ct);

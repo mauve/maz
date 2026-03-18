@@ -21,7 +21,8 @@ public partial class IdentityOperationListCommandDef(AuthOptionPack auth) : Comm
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.ManagedIdentity/operations";
 
         var allItems = client.GetAllAsync(path, "2024-11-30", "value", "nextLink", ct);

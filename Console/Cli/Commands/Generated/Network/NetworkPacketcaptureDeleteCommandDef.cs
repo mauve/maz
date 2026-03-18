@@ -36,8 +36,9 @@ public partial class NetworkPacketcaptureDeleteCommandDef(AuthOptionPack auth) :
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             NetworkWatcherName!, ResourceGroup, armClient, "Microsoft.Network/networkWatchers", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/networkWatchers/{resolvedName}/packetCaptures/{PacketCaptureName}";

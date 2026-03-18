@@ -44,8 +44,9 @@ public partial class ChaosCapabilityDeleteCommandDef(AuthOptionPack auth) : Comm
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ParentProviderNamespace!, ResourceGroup, armClient, "{parentProviderNamespace}/{parentResourceType}", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{resolvedName}/{ParentResourceType}/{ParentResourceName}/providers/Microsoft.Chaos/targets/{TargetName}/capabilities/{CapabilityName}";

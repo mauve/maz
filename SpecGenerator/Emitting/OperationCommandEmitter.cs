@@ -237,21 +237,22 @@ public static class OperationCommandEmitter
                     () =>
                     {
                         w.Line("var log = DiagnosticOptionPack.GetLog(ParseResult);");
+                        w.Line("var cred = _auth.GetCredential(log);");
                         if (isDataPlane)
                             w.Line(
-                                $"var client = new AzureRestClient(_auth.GetCredential(log), log, \"{dataplanePackConfig!.Scope}\");"
+                                $"var client = new AzureRestClient(cred, log, \"{dataplanePackConfig!.Scope}\");"
                             );
                         else
-                            w.Line("var client = new AzureRestClient(_auth.GetCredential(log), log);");
+                            w.Line("var client = new AzureRestClient(cred, log);");
 
                         if (isDataPlane)
                             w.Line(
-                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');"
+                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');"
                             );
 
                         if (usesResourcePack)
                             w.Line(
-                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();"
+                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();"
                             );
 
                         if (usesResourceNameResolver)
@@ -260,7 +261,7 @@ public static class OperationCommandEmitter
                                 primaryPathParam!.CliFlag == "--format"
                                     ? "ApiFormat"
                                     : primaryPathParam.PropertyName;
-                            w.Line("var armClient = new ArmClient(_auth.GetCredential(log));");
+                            w.Line("var armClient = new ArmClient(cred);");
                             w.Line(
                                 $"var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync("
                             );
@@ -283,7 +284,7 @@ public static class OperationCommandEmitter
                                     ? "ResourceGroup.Subscription"
                                     : "Subscription";
                             w.Line(
-                                $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));"
+                                $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(cred));"
                             );
                         }
 

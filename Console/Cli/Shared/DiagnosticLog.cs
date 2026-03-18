@@ -119,9 +119,9 @@ public sealed class DiagnosticLog
     public void HttpResponse(HttpResponseMessage response, long elapsedMs)
     {
         if (_level == 0) return;
-        _depth++;
         var status = $"{(int)response.StatusCode} {response.ReasonPhrase} ({elapsedMs}ms)";
-        WriteLine(status);
+        WriteLine(Colorize("[http]", Cyan) + " ← " + status);
+        _depth++;
         LogHeaders(response.Headers);
         LogHeaders(response.Content.Headers);
 

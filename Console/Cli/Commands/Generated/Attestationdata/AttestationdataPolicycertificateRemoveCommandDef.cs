@@ -33,8 +33,9 @@ public partial class AttestationdataPolicycertificateRemoveCommandDef(AuthOption
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://attest.azure.net/.default");
-        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://attest.azure.net/.default");
+        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/certificates:remove";
 
         var body = BodyJson is { } rawJson

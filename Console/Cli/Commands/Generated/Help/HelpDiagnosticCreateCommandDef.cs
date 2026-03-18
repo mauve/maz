@@ -34,7 +34,8 @@ public partial class HelpDiagnosticCreateCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{Scope}/providers/Microsoft.Help/diagnostics/{DiagnosticsResourceName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2023-06-01", null, ct);

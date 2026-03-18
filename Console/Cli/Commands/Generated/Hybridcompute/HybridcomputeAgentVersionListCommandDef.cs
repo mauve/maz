@@ -25,7 +25,8 @@ public partial class HybridcomputeAgentVersionListCommandDef(AuthOptionPack auth
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.HybridCompute/osType/{OsType}/agentVersions";
 
         var allItems = client.GetAllAsync(path, "2025-01-13", "value", "nextLink", ct);

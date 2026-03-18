@@ -29,8 +29,9 @@ public partial class WebpubsubdataAddconnectionstogroupAddCommandDef(AuthOptionP
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://webpubsub.azure.com/.default");
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/:addToGroups";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-12-01", null, ct);

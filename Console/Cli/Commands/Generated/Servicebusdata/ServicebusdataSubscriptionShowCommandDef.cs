@@ -37,8 +37,9 @@ public partial class ServicebusdataSubscriptionShowCommandDef(AuthOptionPack aut
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://servicebus.azure.net/.default");
-        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://servicebus.azure.net/.default");
+        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/{TopicName}/subscriptions/{SubscriptionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-05", null, ct);

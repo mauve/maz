@@ -23,8 +23,9 @@ public partial class NetappAccountShowCommandDef(AuthOptionPack auth) : CommandD
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.NetApp/netAppAccounts/{StorageAccount.RequireAccountName()}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-12-01", null, ct);

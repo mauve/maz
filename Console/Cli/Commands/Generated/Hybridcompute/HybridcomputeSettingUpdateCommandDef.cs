@@ -40,8 +40,9 @@ public partial class HybridcomputeSettingUpdateCommandDef(AuthOptionPack auth) :
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             BaseProvider!, ResourceGroup, armClient, "{baseProvider}/{baseResourceType}", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{resolvedName}/{BaseResourceType}/{BaseResourceName}/providers/Microsoft.HybridCompute/settings/{SettingsResourceName}";

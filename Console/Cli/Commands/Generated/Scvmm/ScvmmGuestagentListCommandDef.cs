@@ -25,7 +25,8 @@ public partial class ScvmmGuestagentListCommandDef(AuthOptionPack auth) : Comman
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{ResourceUri}/providers/Microsoft.ScVmm/virtualMachineInstances/default/guestAgents";
 
         var allItems = client.GetAllAsync(path, "2025-03-13", "value", "nextLink", ct);

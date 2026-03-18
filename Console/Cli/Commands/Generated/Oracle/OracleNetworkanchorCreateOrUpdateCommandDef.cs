@@ -32,8 +32,9 @@ public partial class OracleNetworkanchorCreateOrUpdateCommandDef(AuthOptionPack 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             NetworkAnchorName!, ResourceGroup, armClient, "Oracle.Database/networkAnchors", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/networkAnchors/{resolvedName}";

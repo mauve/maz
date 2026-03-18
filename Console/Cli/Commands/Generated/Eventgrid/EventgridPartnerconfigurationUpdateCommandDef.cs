@@ -27,8 +27,9 @@ public partial class EventgridPartnerconfigurationUpdateCommandDef(AuthOptionPac
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.EventGrid/partnerConfigurations/default";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-02-15", null, ct);

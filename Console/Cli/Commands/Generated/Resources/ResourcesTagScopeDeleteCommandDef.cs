@@ -29,7 +29,8 @@ public partial class ResourcesTagScopeDeleteCommandDef(AuthOptionPack auth) : Co
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{Scope}/providers/Microsoft.Resources/tags/default";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-04-01", null, ct);

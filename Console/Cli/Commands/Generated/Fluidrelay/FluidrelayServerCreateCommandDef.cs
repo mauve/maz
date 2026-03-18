@@ -31,8 +31,9 @@ public partial class FluidrelayServerCreateCommandDef(AuthOptionPack auth) : Com
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(cred));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ParamResourceGroup}/providers/Microsoft.FluidRelay/fluidRelayServers/{FluidRelayServerName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2022-06-01", null, ct);

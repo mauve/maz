@@ -33,7 +33,8 @@ public partial class CostmanagementGenerateCostDetailsShowResultCommandDef(AuthO
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/{Scope}/providers/Microsoft.CostManagement/costDetailsOperationResults/{OperationId}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Get, path, "2025-03-01", null, ct);

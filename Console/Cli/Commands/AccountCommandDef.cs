@@ -41,7 +41,8 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
     {
         var rendererFactory = Render.GetRendererFactory();
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
 
         var renderer = rendererFactory.CreateCollectionRenderer<SubscriptionResource>();
         await renderer.RenderAllAsync(
@@ -86,7 +87,8 @@ public partial class AccountListLocationsCommandDef(AuthOptionPack auth) : Comma
     {
         var rendererFactory = Render.GetRendererFactory();
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var armClient = new ArmClient(_auth.GetCredential(log));
+        var cred = _auth.GetCredential(log);
+        var armClient = new ArmClient(cred);
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
 
         var renderer = rendererFactory.CreateCollectionRenderer<LocationExpanded>();

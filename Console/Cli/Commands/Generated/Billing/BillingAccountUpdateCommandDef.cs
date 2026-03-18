@@ -29,7 +29,8 @@ public partial class BillingAccountUpdateCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-04-01", null, ct);

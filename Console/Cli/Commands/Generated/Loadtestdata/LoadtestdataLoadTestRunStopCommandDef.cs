@@ -29,8 +29,9 @@ public partial class LoadtestdataLoadTestRunStopCommandDef(AuthOptionPack auth) 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://cnt-prod.loadtesting.azure.com/.default");
-        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://cnt-prod.loadtesting.azure.com/.default");
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/test-runs/{TestRunId}:stop";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2022-11-01", null, ct);

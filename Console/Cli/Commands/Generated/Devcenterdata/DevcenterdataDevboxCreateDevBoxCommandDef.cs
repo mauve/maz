@@ -58,8 +58,9 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog(ParseResult);
-        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://devcenter.azure.com/.default");
-        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
+        var cred = _auth.GetCredential(log);
+        var client = new AzureRestClient(cred, log, "https://devcenter.azure.com/.default");
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
 
         var body = BodyJson is { } rawJson
