@@ -33,8 +33,9 @@ public partial class DigitaltwinsdataDigitaltwinSendComponentTelemetryCommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://digitaltwins.azure.net/.default");
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/digitaltwins/{Id}/components/{ComponentPath}/telemetry";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-10-31", null, ct);

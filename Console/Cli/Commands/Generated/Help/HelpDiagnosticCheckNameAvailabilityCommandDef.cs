@@ -25,7 +25,8 @@ public partial class HelpDiagnosticCheckNameAvailabilityCommandDef(AuthOptionPac
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.Help/checkNameAvailability";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-06-01", null, ct);

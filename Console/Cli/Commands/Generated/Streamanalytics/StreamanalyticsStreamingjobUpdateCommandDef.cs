@@ -26,8 +26,9 @@ public partial class StreamanalyticsStreamingjobUpdateCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             JobName!, ResourceGroup, armClient, "Microsoft.StreamAnalytics/streamingjobs", ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.StreamAnalytics/streamingjobs/{resolvedName}";

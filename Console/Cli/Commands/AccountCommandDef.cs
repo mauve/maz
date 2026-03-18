@@ -40,7 +40,8 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
 
         var renderer = rendererFactory.CreateCollectionRenderer<SubscriptionResource>();
         await renderer.RenderAllAsync(
@@ -84,7 +85,8 @@ public partial class AccountListLocationsCommandDef(AuthOptionPack auth) : Comma
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
 
         var renderer = rendererFactory.CreateCollectionRenderer<LocationExpanded>();

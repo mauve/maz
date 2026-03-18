@@ -37,8 +37,9 @@ public partial class AcrdataContainerRegistryBlobMountBlobCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://containerregistry.azure.net/.default");
-        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://containerregistry.azure.net/.default");
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/v2/{ParamName}/blobs/uploads/";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-07-01", null, ct);

@@ -36,8 +36,9 @@ public partial class DevcenterdataEnvironmentGetOutputsCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://devcenter.azure.com/.default");
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/projects/{ProjectName}/users/{UserId}/environments/{EnvironmentName}/outputs";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-02-01", null, ct);

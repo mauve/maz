@@ -35,8 +35,9 @@ public partial class PaloaltonetworksLocalruleDeleteCommandDef(AuthOptionPack au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/localRulestacks/{resolvedName}/localRules/{Priority}";
@@ -44,7 +45,7 @@ public partial class PaloaltonetworksLocalruleDeleteCommandDef(AuthOptionPack au
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-10-08", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-10-08", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-10-08", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

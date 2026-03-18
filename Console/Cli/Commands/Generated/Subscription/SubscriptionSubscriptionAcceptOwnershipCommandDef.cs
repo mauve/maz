@@ -27,14 +27,15 @@ public partial class SubscriptionSubscriptionAcceptOwnershipCommandDef(AuthOptio
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/providers/Microsoft.Subscription/subscriptions/{subscriptionId}/acceptOwnership";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2021-10-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2021-10-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2021-10-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

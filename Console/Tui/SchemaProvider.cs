@@ -52,7 +52,7 @@ internal sealed class SchemaProvider(
             return [];
         try
         {
-            var restClient = new AzureRestClient(credential);
+            var restClient = new AzureRestClient(credential, Cli.Shared.DiagnosticLog.Null);
             var json = await restClient.SendAsync(
                 HttpMethod.Get,
                 $"{workspaceArmId}/tables",

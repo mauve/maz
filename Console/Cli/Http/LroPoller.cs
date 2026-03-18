@@ -1,4 +1,5 @@
 using System.Text.Json.Nodes;
+using Console.Cli.Shared;
 
 namespace Console.Cli.Http;
 
@@ -13,6 +14,7 @@ public static class LroPoller
         HttpResponseMessage initial,
         AzureRestClient client,
         string apiVersion,
+        DiagnosticLog log,
         CancellationToken ct
     )
     {
@@ -28,11 +30,14 @@ public static class LroPoller
                 : JsonNode.Parse(body)!;
         }
 
+        log.BeginScope("[http] LRO polling " + pollingUrl);
+
         while (true)
         {
             ct.ThrowIfCancellationRequested();
 
             var retryAfter = GetRetryAfter(initial);
+            log.Trace($"LRO waiting {retryAfter}s (Retry-After)");
             await Task.Delay(TimeSpan.FromSeconds(retryAfter), ct);
 
             var pollResponse = await client.SendRawAsync(
@@ -52,14 +57,20 @@ public static class LroPoller
                 node?["status"]?.GetValue<string>()
                 ?? node?["properties"]?["provisioningState"]?.GetValue<string>();
 
+            log.Trace($"LRO status: {status ?? "(null)"}");
+
             if (string.Equals(status, "Succeeded", StringComparison.OrdinalIgnoreCase))
+            {
+                log.EndScope();
                 return node!;
+            }
 
             if (
                 string.Equals(status, "Failed", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(status, "Canceled", StringComparison.OrdinalIgnoreCase)
             )
             {
+                log.EndScope();
                 var error = node?["error"]?.ToJsonString() ?? status;
                 throw new InvocationException($"LRO operation {status}: {error}");
             }

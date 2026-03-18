@@ -33,7 +33,8 @@ public partial class BillingRoleassignmentDeleteByEnrollmentAccountCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountName}/enrollmentAccounts/{EnrollmentAccountName}/billingRoleAssignments/{BillingRoleAssignmentName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-04-01", null, ct);

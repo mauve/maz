@@ -28,13 +28,14 @@ public partial class HybridaksProvisionedclusterinstanceListAdminKubeconfigComma
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ConnectedClusterResourceUri}/providers/Microsoft.HybridContainerService/provisionedClusterInstances/default/listAdminKubeconfig";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-01-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-01-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-01-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

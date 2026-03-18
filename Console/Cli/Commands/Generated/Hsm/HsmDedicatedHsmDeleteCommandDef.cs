@@ -31,8 +31,9 @@ public partial class HsmDedicatedHsmDeleteCommandDef(AuthOptionPack auth) : Comm
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ParamName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/dedicatedHSMs", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{resolvedName}";
@@ -40,7 +41,7 @@ public partial class HsmDedicatedHsmDeleteCommandDef(AuthOptionPack auth) : Comm
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-03-31", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-03-31", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-03-31", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

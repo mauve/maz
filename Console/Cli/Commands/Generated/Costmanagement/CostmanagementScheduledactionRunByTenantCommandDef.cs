@@ -25,7 +25,8 @@ public partial class CostmanagementScheduledactionRunByTenantCommandDef(AuthOpti
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.CostManagement/scheduledActions/{ParamName}/execute";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-03-01", null, ct);

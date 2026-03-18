@@ -35,8 +35,9 @@ public partial class PolicyinsightsAttestationCreateAtResourceGroupCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             AttestationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/attestations", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/attestations/{resolvedName}";
@@ -49,7 +50,7 @@ public partial class PolicyinsightsAttestationCreateAtResourceGroupCommandDef(Au
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2024-10-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-10-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-10-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

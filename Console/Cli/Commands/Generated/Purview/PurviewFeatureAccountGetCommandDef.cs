@@ -23,8 +23,9 @@ public partial class PurviewFeatureAccountGetCommandDef(AuthOptionPack auth) : C
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Purview/accounts/{StorageAccount.RequireAccountName()}/listFeatures";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-12-01", null, ct);

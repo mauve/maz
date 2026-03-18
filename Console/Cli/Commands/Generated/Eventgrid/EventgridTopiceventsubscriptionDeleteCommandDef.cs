@@ -35,8 +35,9 @@ public partial class EventgridTopiceventsubscriptionDeleteCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             TopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/topics", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/topics/{resolvedName}/eventSubscriptions/{EventSubscriptionName}";
@@ -44,7 +45,7 @@ public partial class EventgridTopiceventsubscriptionDeleteCommandDef(AuthOptionP
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-02-15", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-02-15", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-02-15", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

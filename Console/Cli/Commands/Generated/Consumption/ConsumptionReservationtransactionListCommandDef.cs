@@ -36,7 +36,8 @@ public partial class ConsumptionReservationtransactionListCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Billing/billingAccounts/{BillingAccountId}/providers/Microsoft.Consumption/reservationTransactions";
 
         var allItems = client.GetAllAsync(path, "2024-08-01", "value", "nextLink", ct);

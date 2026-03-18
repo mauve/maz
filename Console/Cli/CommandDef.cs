@@ -3,6 +3,7 @@
 using System.CommandLine;
 using System.CommandLine.Help;
 using System.CommandLine.Invocation;
+using System.CommandLine.Parsing;
 using System.Reflection;
 using Azure.Identity;
 

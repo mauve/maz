@@ -35,8 +35,9 @@ public partial class DataboxJobCancelCommandDef(AuthOptionPack auth) : CommandDe
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             JobName!, ResourceGroup, armClient, "Microsoft.DataBox/jobs", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataBox/jobs/{resolvedName}/cancel";

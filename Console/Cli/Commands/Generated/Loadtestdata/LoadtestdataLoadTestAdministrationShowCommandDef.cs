@@ -27,8 +27,9 @@ public partial class LoadtestdataLoadTestAdministrationShowCommandDef(AuthOption
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://cnt-prod.loadtesting.azure.com/.default");
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/tests/{TestId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-11-01", null, ct);

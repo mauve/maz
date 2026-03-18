@@ -29,7 +29,8 @@ public partial class ResourcegraphResourceQueryCommandDef(AuthOptionPack auth) :
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.ResourceGraph/resources";
 
         var body = BodyJson is { } rawJson

@@ -35,8 +35,9 @@ public partial class InformaticaServerlessruntimeCreateCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Informatica.DataManagement/organizations/{resolvedName}/serverlessRuntimes/{ServerlessRuntimeName}";
@@ -44,7 +45,7 @@ public partial class InformaticaServerlessruntimeCreateCommandDef(AuthOptionPack
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-11-27", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-11-27", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-11-27", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -34,8 +34,9 @@ public partial class WebappSGetNetworkTraceOperationSlotCommandDef(AuthOptionPac
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ParamName!, ResourceGroup, armClient, "microsoft.Web/sites", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/microsoft.Web/sites/{resolvedName}/slots/{Slot}/networkTrace/operationresults/{OperationId}";

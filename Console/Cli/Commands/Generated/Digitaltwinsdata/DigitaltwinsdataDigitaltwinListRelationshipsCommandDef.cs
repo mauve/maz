@@ -32,8 +32,9 @@ public partial class DigitaltwinsdataDigitaltwinListRelationshipsCommandDef(Auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://digitaltwins.azure.net/.default");
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/digitaltwins/{Id}/relationships";
 
         var allItems = client.GetAllAsync(path, "2023-10-31", "value", "nextLink", ct);

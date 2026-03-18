@@ -41,8 +41,9 @@ public partial class BatchdataPoolRemoveNodesCommandDef(AuthOptionPack auth) : C
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://batch.core.windows.net/.default");
-        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://batch.core.windows.net/.default");
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/pools/{PoolId}/removenodes";
 
         var body = BodyJson is { } rawJson

@@ -40,8 +40,9 @@ public partial class WebpubsubdataClosegroupconnectionCloseAllCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://webpubsub.azure.com/.default");
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/groups/{Group}/:closeConnections";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-12-01", null, ct);

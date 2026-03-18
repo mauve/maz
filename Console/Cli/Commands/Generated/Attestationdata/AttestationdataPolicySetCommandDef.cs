@@ -28,8 +28,9 @@ public partial class AttestationdataPolicySetCommandDef(AuthOptionPack auth) : C
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://attest.azure.net/.default");
-        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://attest.azure.net/.default");
+        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/policies/{AttestationType}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-06-01", null, ct);

@@ -26,8 +26,9 @@ public partial class NetappBackuppolicyShowCommandDef(AuthOptionPack auth) : Com
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.NetApp/netAppAccounts/{StorageAccount.RequireAccountName()}/backupPolicies/{BackupPolicyName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-12-01", null, ct);

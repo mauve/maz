@@ -43,8 +43,9 @@ public partial class OracleDbnodeActionCommandDef(AuthOptionPack auth) : Command
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             Cloudvmclustername!, ResourceGroup, armClient, "Oracle.Database/cloudVmClusters", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudVmClusters/{resolvedName}/dbNodes/{Dbnodeocid}/action";
@@ -58,7 +59,7 @@ public partial class OracleDbnodeActionCommandDef(AuthOptionPack auth) : Command
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-09-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-09-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-09-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

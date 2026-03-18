@@ -30,8 +30,9 @@ public partial class RedhatopenshiftPlatformWorkloadIdentityRoleSetShowCommandDe
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.RedHatOpenShift/locations/{Location}/platformWorkloadIdentityRoleSets/{OpenShiftMinorVersion}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-07-25", null, ct);

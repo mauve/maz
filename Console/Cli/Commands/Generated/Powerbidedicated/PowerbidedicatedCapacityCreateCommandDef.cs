@@ -39,8 +39,9 @@ public partial class PowerbidedicatedCapacityCreateCommandDef(AuthOptionPack aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             DedicatedCapacityName!, ResourceGroup, armClient, "Microsoft.PowerBIDedicated/capacities", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PowerBIDedicated/capacities/{resolvedName}";
@@ -57,7 +58,7 @@ public partial class PowerbidedicatedCapacityCreateCommandDef(AuthOptionPack aut
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2021-01-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2021-01-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2021-01-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

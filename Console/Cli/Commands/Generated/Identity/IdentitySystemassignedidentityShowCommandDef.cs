@@ -24,7 +24,8 @@ public partial class IdentitySystemassignedidentityShowCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.ManagedIdentity/identities/default";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-11-30", null, ct);

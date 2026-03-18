@@ -34,8 +34,9 @@ public partial class HealthcareapisFhirserviceUpdateCommandDef(AuthOptionPack au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             WorkspaceName!, ResourceGroup, armClient, "Microsoft.HealthcareApis/workspaces", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthcareApis/workspaces/{resolvedName}/fhirservices/{FhirServiceName}";
@@ -43,7 +44,7 @@ public partial class HealthcareapisFhirserviceUpdateCommandDef(AuthOptionPack au
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-03-31", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2024-03-31", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2024-03-31", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

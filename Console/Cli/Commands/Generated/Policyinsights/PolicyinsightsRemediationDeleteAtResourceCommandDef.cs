@@ -29,7 +29,8 @@ public partial class PolicyinsightsRemediationDeleteAtResourceCommandDef(AuthOpt
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceId}/providers/Microsoft.PolicyInsights/remediations/{RemediationName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-10-01", null, ct);

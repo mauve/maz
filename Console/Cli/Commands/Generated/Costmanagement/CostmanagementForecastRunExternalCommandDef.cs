@@ -45,7 +45,8 @@ public partial class CostmanagementForecastRunExternalCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.CostManagement/{ExternalCloudProviderType}/{ExternalCloudProviderId}/forecast";
 
         var body = BodyJson is { } rawJson

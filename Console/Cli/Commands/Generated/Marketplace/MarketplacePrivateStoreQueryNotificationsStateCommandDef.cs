@@ -25,7 +25,8 @@ public partial class MarketplacePrivateStoreQueryNotificationsStateCommandDef(Au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Marketplace/privateStores/{PrivateStoreId}/queryNotificationsState";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-01-01", null, ct);

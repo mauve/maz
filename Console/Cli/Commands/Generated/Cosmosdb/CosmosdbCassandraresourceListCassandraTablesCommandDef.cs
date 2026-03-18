@@ -26,8 +26,9 @@ public partial class CosmosdbCassandraresourceListCassandraTablesCommandDef(Auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DocumentDB/databaseAccounts/{StorageAccount.RequireAccountName()}/cassandraKeyspaces/{KeyspaceName}/tables";
 
         var allItems = client.GetAllAsync(path, "2025-10-15", "value", "nextLink", ct);

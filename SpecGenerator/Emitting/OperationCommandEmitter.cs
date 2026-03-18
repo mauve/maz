@@ -236,21 +236,22 @@ public static class OperationCommandEmitter
                     "protected override async Task<int> ExecuteAsync(CancellationToken ct)",
                     () =>
                     {
+                        w.Line("var log = DiagnosticOptionPack.GetLog(ParseResult);");
                         if (isDataPlane)
                             w.Line(
-                                $"var client = new AzureRestClient(_auth.GetCredential(), \"{dataplanePackConfig!.Scope}\");"
+                                $"var client = new AzureRestClient(_auth.GetCredential(log), log, \"{dataplanePackConfig!.Scope}\");"
                             );
                         else
-                            w.Line("var client = new AzureRestClient(_auth.GetCredential());");
+                            w.Line("var client = new AzureRestClient(_auth.GetCredential(log), log);");
 
                         if (isDataPlane)
                             w.Line(
-                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');"
+                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');"
                             );
 
                         if (usesResourcePack)
                             w.Line(
-                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(_auth.GetCredential()), ct)).Id.ToString();"
+                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(_auth.GetCredential(log)), ct)).Id.ToString();"
                             );
 
                         if (usesResourceNameResolver)
@@ -259,7 +260,7 @@ public static class OperationCommandEmitter
                                 primaryPathParam!.CliFlag == "--format"
                                     ? "ApiFormat"
                                     : primaryPathParam.PropertyName;
-                            w.Line("var armClient = new ArmClient(_auth.GetCredential());");
+                            w.Line("var armClient = new ArmClient(_auth.GetCredential(log));");
                             w.Line(
                                 $"var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync("
                             );
@@ -282,7 +283,7 @@ public static class OperationCommandEmitter
                                     ? "ResourceGroup.Subscription"
                                     : "Subscription";
                             w.Line(
-                                $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));"
+                                $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));"
                             );
                         }
 
@@ -593,7 +594,7 @@ public static class OperationCommandEmitter
             () =>
             {
                 w.Line(
-                    $"var result = await LroPoller.PollAsync(httpResp, client, \"{op.ApiVersion}\", ct);"
+                    $"var result = await LroPoller.PollAsync(httpResp, client, \"{op.ApiVersion}\", log, ct);"
                 );
                 w.Line(
                     "await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))"

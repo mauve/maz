@@ -38,8 +38,9 @@ public partial class HybridcomputeExtensionMetadataGetCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.HybridCompute/locations/{Location}/publishers/{Publisher}/extensionTypes/{ExtensionType}/versions/{Version}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-01-13", null, ct);

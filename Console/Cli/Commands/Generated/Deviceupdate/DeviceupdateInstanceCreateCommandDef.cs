@@ -35,8 +35,9 @@ public partial class DeviceupdateInstanceCreateCommandDef(AuthOptionPack auth) :
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DeviceUpdate/accounts/{StorageAccount.RequireAccountName()}/instances/{InstanceName}";
 
         var body = BodyJson is { } rawJson
@@ -47,7 +48,7 @@ public partial class DeviceupdateInstanceCreateCommandDef(AuthOptionPack auth) :
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2023-07-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2023-07-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2023-07-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

@@ -50,7 +50,8 @@ public partial class GroupCreateCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
         var data = new ResourceGroupData(Location.GetLocation()) { ManagedBy = ManagedBy };
@@ -85,7 +86,8 @@ public partial class GroupListCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var subscription = await Subscription.GetSubscriptionAsync(armClient);
 
         var renderer = rendererFactory.CreateCollectionRenderer<ResourceGroupResource>();
@@ -116,7 +118,8 @@ public partial class GroupShowCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var rendererFactory = Render.GetRendererFactory();
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
         var renderer = rendererFactory.CreateRendererForType<ResourceGroupResource>();
 
@@ -157,7 +160,8 @@ public partial class GroupDeleteCommandDef(AuthOptionPack auth) : CommandDef
     {
         Confirmation.RequireConfirmation(_auth.GetInteractive());
 
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var subscription = await ResourceGroup.GetSubscriptionAsync(armClient);
 
         var rg = await subscription.GetResourceGroupAsync(

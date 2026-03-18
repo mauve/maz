@@ -28,7 +28,8 @@ public partial class CostmanagementScheduledactionListCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.CostManagement/scheduledActions";
 
         var allItems = client.GetAllAsync(path, "2025-03-01", "value", "nextLink", ct);

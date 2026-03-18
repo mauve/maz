@@ -67,9 +67,17 @@ public partial class AuthOptionPack : OptionPack
     public bool GetInteractive() => Interactive;
 
     private TokenCredential? _credential;
+    private DiagnosticLog? _credentialLog;
 
-    public TokenCredential GetCredential() =>
-        _credential ??= new CachingTokenCredential(BuildCredentialChain());
+    public TokenCredential GetCredential(DiagnosticLog log)
+    {
+        if (_credential is not null && _credentialLog == log)
+            return _credential;
+        log.Credential($"Chain: {string.Join(" → ", AllowedCredentialTypes)}");
+        _credentialLog = log;
+        _credential = new CachingTokenCredential(BuildCredentialChain(), log);
+        return _credential;
+    }
 
     private ChainedTokenCredential BuildCredentialChain()
     {

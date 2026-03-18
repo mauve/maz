@@ -22,8 +22,9 @@ public partial class DynatraceMonitorListBySubscriptionCommandDef(AuthOptionPack
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Dynatrace.Observability/monitors";
 
         var allItems = client.GetAllAsync(path, "2024-04-24", "value", "nextLink", ct);

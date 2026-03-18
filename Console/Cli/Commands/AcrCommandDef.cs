@@ -44,11 +44,13 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+
         // 1. Resolve registry login server
         string loginServer;
         if (RegistryName.StartsWith("/arm/", StringComparison.OrdinalIgnoreCase))
         {
-            loginServer = await ResolveViaArmAsync(RegistryName[5..], ct);
+            loginServer = await ResolveViaArmAsync(RegistryName[5..], log, ct);
         }
         else if (RegistryName.Contains('.'))
         {
@@ -63,7 +65,7 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
 
         // 2. Get AAD access token (ARM scope accepted by ACR OAuth2 exchange endpoint)
         var tokenCtx = new TokenRequestContext(["https://management.azure.com/.default"]);
-        var aadToken = await _auth.GetCredential().GetTokenAsync(tokenCtx, ct);
+        var aadToken = await _auth.GetCredential(log).GetTokenAsync(tokenCtx, ct);
 
         // 3. Extract tenant ID from JWT payload
         var tenantId = ExtractTenantId(aadToken.Token);
@@ -85,9 +87,9 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
     /// Login server is derived from the registry name as "{name}.azurecr.io"
     /// (custom domains require passing the full hostname directly via --name).
     /// </summary>
-    private async Task<string> ResolveViaArmAsync(string registryName, CancellationToken ct)
+    private async Task<string> ResolveViaArmAsync(string registryName, DiagnosticLog log, CancellationToken ct)
     {
-        var arg = new ArmArgClient(_auth.GetCredential());
+        var arg = new ArmArgClient(_auth.GetCredential(log), log);
 
         // Scope to an explicit subscription if a GUID is available without an ARM call
         IEnumerable<string>? subScope = null;

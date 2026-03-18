@@ -35,14 +35,15 @@ public partial class CosmosdbCassandraresourceMigrateCassandraTableToAutoscaleCo
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await StorageAccount.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{StorageAccount.ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.DocumentDB/databaseAccounts/{StorageAccount.RequireAccountName()}/cassandraKeyspaces/{KeyspaceName}/tables/{TableName}/throughputSettings/default/migrateToAutoscale";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-10-15", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-10-15", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-10-15", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

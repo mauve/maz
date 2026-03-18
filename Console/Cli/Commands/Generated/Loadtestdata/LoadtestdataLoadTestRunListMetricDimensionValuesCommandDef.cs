@@ -47,8 +47,9 @@ public partial class LoadtestdataLoadTestRunListMetricDimensionValuesCommandDef(
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://cnt-prod.loadtesting.azure.com/.default");
-        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://cnt-prod.loadtesting.azure.com/.default");
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/test-runs/{TestRunId}/metric-dimensions/{ParamName}/values";
 
         var allItems = client.GetAllAsync(path, "2022-11-01", "value", "nextLink", ct);

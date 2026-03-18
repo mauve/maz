@@ -41,8 +41,9 @@ public partial class KeyvaultRestoreStartCommandDef(AuthOptionPack auth) : Comma
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://vault.azure.net/.default");
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/restore";
 
         var body = BodyJson is { } rawJson
@@ -58,7 +59,7 @@ public partial class KeyvaultRestoreStartCommandDef(AuthOptionPack auth) : Comma
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "7.5", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "7.5", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "7.5", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

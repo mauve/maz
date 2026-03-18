@@ -37,13 +37,14 @@ public partial class CostmanagementGenerateReservationDetailsByAccountCommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/microsoft.Billing/billingAccounts/{BillingAccountId}/providers/Microsoft.CostManagement/generateReservationDetailsReport";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-03-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-03-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-03-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

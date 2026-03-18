@@ -33,7 +33,8 @@ public partial class ConnectedvmwareVirtualmachineinstanceCreateCommandDef(AuthO
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachineInstances/default";
 
         var body = BodyJson is { } rawJson
@@ -44,7 +45,7 @@ public partial class ConnectedvmwareVirtualmachineinstanceCreateCommandDef(AuthO
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2023-12-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2023-12-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2023-12-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

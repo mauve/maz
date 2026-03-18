@@ -45,8 +45,9 @@ public partial class SearchdataIndexCreateOrUpdateCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://search.azure.com/.default");
-        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://search.azure.com/.default");
+        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/indexes('{IndexName}')";
 
         var body = BodyJson is { } rawJson

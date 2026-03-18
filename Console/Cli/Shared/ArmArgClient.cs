@@ -31,9 +31,9 @@ public sealed class ArmArgClient : IArgClient
     private readonly AzureRestClient _rest;
     private const string ArgApiVersion = "2024-04-01";
 
-    public ArmArgClient(TokenCredential credential)
+    public ArmArgClient(TokenCredential credential, DiagnosticLog log)
     {
-        _rest = new AzureRestClient(credential);
+        _rest = new AzureRestClient(credential, log);
     }
 
     public async Task<IReadOnlyList<ArgResource>> QueryAsync(

@@ -23,7 +23,8 @@ public partial class AdvisorRecommendationMetadataListCommandDef(AuthOptionPack 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Advisor/metadata";
 
         var allItems = client.GetAllAsync(path, "2025-01-01", "value", "nextLink", ct);

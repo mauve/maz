@@ -35,8 +35,9 @@ public partial class CdnAfdorigingroupCreateCommandDef(AuthOptionPack auth) : Co
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cdn/profiles/{resolvedName}/originGroups/{OriginGroupName}";
@@ -44,7 +45,7 @@ public partial class CdnAfdorigingroupCreateCommandDef(AuthOptionPack auth) : Co
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-06-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-06-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-06-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

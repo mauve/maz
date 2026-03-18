@@ -57,8 +57,9 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://devcenter.azure.com/.default");
-        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://devcenter.azure.com/.default");
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/projects/{ProjectName}/users/{UserId}/devboxes/{DevBoxName}";
 
         var body = BodyJson is { } rawJson
@@ -72,7 +73,7 @@ public partial class DevcenterdataDevboxCreateDevBoxCommandDef(AuthOptionPack au
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-02-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-02-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-02-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

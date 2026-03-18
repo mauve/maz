@@ -28,8 +28,9 @@ public partial class DeiddataGetJobShowCommandDef(AuthOptionPack auth) : Command
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://deid.azure.net/.default");
-        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://deid.azure.net/.default");
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-11-15", null, ct);

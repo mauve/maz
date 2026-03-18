@@ -24,7 +24,8 @@ public partial class PaloaltonetworksPostruleListCommandDef(AuthOptionPack auth)
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/PaloAltoNetworks.Cloudngfw/globalRulestacks/{GlobalRulestackName}/postRules";
 
         var allItems = client.GetAllAsync(path, "2025-10-08", "value", "nextLink", ct);

@@ -29,7 +29,8 @@ public partial class CostmanagementScheduledactionCreateCommandDef(AuthOptionPac
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{Scope}/providers/Microsoft.CostManagement/scheduledActions/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-03-01", null, ct);

@@ -24,7 +24,8 @@ public partial class HybridaksGetvmskuShowCommandDef(AuthOptionPack auth) : Comm
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{CustomLocationResourceUri}/providers/Microsoft.HybridContainerService/skus/default";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);

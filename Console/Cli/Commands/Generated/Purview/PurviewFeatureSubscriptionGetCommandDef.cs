@@ -27,8 +27,9 @@ public partial class PurviewFeatureSubscriptionGetCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.Purview/locations/{Locations}/listFeatures";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2021-12-01", null, ct);

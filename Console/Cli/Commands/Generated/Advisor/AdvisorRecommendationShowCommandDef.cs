@@ -28,7 +28,8 @@ public partial class AdvisorRecommendationShowCommandDef(AuthOptionPack auth) : 
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{ResourceUri}/providers/Microsoft.Advisor/recommendations/{RecommendationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-01-01", null, ct);

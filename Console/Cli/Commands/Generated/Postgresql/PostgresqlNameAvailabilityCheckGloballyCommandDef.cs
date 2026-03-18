@@ -23,8 +23,9 @@ public partial class PostgresqlNameAvailabilityCheckGloballyCommandDef(AuthOptio
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/providers/Microsoft.DBforPostgreSQL/checkNameAvailability";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-08-01", null, ct);

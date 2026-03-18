@@ -28,7 +28,8 @@ public partial class ConsumptionAggregatedCostShowByPeriodCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Management/managementGroups/{ManagementGroupId}/providers/Microsoft.Billing/billingPeriods/{BillingPeriodName}/providers/Microsoft.Consumption/aggregatedCost";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-08-01", null, ct);

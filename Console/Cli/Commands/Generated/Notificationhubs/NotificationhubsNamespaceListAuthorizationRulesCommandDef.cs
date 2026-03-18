@@ -25,8 +25,9 @@ public partial class NotificationhubsNamespaceListAuthorizationRulesCommandDef(A
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NotificationHubs/namespaces/{resolvedName}/authorizationRules";

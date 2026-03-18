@@ -21,7 +21,8 @@ public partial class ReservationsReservationOrderCalculateCommandDef(AuthOptionP
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Capacity/calculatePrice";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2022-11-01", null, ct);

@@ -20,7 +20,8 @@ public partial class SubscriptionAliaListCommandDef(AuthOptionPack auth) : Comma
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/providers/Microsoft.Subscription/aliases";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-10-01", null, ct);

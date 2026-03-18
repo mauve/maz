@@ -22,8 +22,9 @@ public partial class ElasticMonitorListCommandDef(AuthOptionPack auth) : Command
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var effectiveRg = ResourceGroup.ResourceGroupName ?? Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP");
         var path = effectiveRg is not null
             ? $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Elastic/monitors"

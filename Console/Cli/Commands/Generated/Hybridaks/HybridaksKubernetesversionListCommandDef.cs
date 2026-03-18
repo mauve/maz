@@ -24,7 +24,8 @@ public partial class HybridaksKubernetesversionListCommandDef(AuthOptionPack aut
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var path = $"/{CustomLocationResourceUri}/providers/Microsoft.HybridContainerService/kubernetesVersions";
 
         var allItems = client.GetAllAsync(path, "2024-01-01", "value", "nextLink", ct);

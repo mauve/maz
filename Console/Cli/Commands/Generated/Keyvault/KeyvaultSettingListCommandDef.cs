@@ -24,8 +24,9 @@ public partial class KeyvaultSettingListCommandDef(AuthOptionPack auth) : Comman
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential(), "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential()), ct)).ToString().TrimEnd('/');
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log, "https://vault.azure.net/.default");
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(_auth.GetCredential(log)), ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/settings";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "7.5", null, ct);

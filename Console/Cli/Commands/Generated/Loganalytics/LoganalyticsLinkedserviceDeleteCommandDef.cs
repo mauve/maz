@@ -35,8 +35,9 @@ public partial class LoganalyticsLinkedserviceDeleteCommandDef(AuthOptionPack au
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}/linkedServices/{LinkedServiceName}";
@@ -44,7 +45,7 @@ public partial class LoganalyticsLinkedserviceDeleteCommandDef(AuthOptionPack au
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-07-01", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-07-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-07-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

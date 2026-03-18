@@ -30,8 +30,9 @@ public partial class IothubdpsIotDpsResourceUpdateCommandDef(AuthOptionPack auth
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/provisioningServices/{resolvedName}";
@@ -39,7 +40,7 @@ public partial class IothubdpsIotDpsResourceUpdateCommandDef(AuthOptionPack auth
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2022-12-12", null, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2022-12-12", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2022-12-12", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

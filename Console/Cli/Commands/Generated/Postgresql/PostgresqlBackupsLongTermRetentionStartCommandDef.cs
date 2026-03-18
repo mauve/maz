@@ -39,8 +39,9 @@ public partial class PostgresqlBackupsLongTermRetentionStartCommandDef(AuthOptio
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var armClient = new ArmClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var armClient = new ArmClient(_auth.GetCredential(log));
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
             ServerName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/flexibleServers", ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{resolvedName}/startLtrBackup";
@@ -57,7 +58,7 @@ public partial class PostgresqlBackupsLongTermRetentionStartCommandDef(AuthOptio
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-08-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-08-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-08-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

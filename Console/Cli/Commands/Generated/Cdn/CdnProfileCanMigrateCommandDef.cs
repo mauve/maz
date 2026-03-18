@@ -31,8 +31,9 @@ public partial class CdnProfileCanMigrateCommandDef(AuthOptionPack auth) : Comma
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
-        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential()));
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
+        var subscriptionId = await ResourceGroup.Subscription.RequireSubscriptionIdAsync(new ArmClient(_auth.GetCredential(log)));
         var path = $"/subscriptions/{subscriptionId}/resourceGroups/{ResourceGroup.RequireResourceGroupName()}/providers/Microsoft.Cdn/canMigrate";
 
         var body = BodyJson is { } rawJson
@@ -43,7 +44,7 @@ public partial class CdnProfileCanMigrateCommandDef(AuthOptionPack auth) : Comma
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-06-01", body, ct);
         if (!NoWait)
         {
-            var result = await LroPoller.PollAsync(httpResp, client, "2025-06-01", ct);
+            var result = await LroPoller.PollAsync(httpResp, client, "2025-06-01", log, ct);
             await Render.GetRendererFactory().CreateRendererForType(typeof(System.Text.Json.Nodes.JsonNode))
                 .RenderAsync(System.Console.Out, result, ct);
         }

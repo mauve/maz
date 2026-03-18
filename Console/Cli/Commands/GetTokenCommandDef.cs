@@ -68,7 +68,8 @@ public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
             ProofOfPossessionRequestMethod
         );
 
-        var result = await _auth.GetCredential().GetTokenAsync(requestContext, ct);
+        var log = DiagnosticOptionPack.GetLog(ParseResult);
+        var result = await _auth.GetCredential(log).GetTokenAsync(requestContext, ct);
 
         if (Render.Format == null)
         {
