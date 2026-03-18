@@ -35,6 +35,7 @@ public class DiagnosticOptionPack : OptionPack
     )
     {
         Hidden = true,
+        DefaultValueFactory = _ => 8192,
     };
 
     public bool DetailedErrors => GetValue(DetailedErrorsOption);
@@ -47,7 +48,6 @@ public class DiagnosticOptionPack : OptionPack
         cmd.Add(VerboseOption);
         cmd.Add(VeryVerboseOption);
 
-        BodyLimitOption.SetDefaultValue(8192);
         cmd.Add(BodyLimitOption);
     }
 
