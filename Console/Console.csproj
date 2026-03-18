@@ -47,5 +47,6 @@
     <PackageReference Include="Azure.ResourceManager.ServiceBus" />
     <PackageReference Include="Azure.ResourceManager.Storage" />
     <PackageReference Include="Azure.ResourceManager.WebPubSub" />
+    <PackageReference Include="JmesPath.Net" />
   </ItemGroup>
 </Project>

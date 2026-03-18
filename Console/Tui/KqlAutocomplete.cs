@@ -160,7 +160,7 @@ internal static class KqlAutocomplete
                     c.InsertText.Length > prefix.Length
                     && (
                         c.InsertText.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                        || IsSubsequenceMatch(c.InsertText, prefix)
+                        || FuzzyMatch.IsSubsequenceMatch(c.InsertText, prefix)
                     )
                 )
                 .DistinctBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
@@ -173,44 +173,15 @@ internal static class KqlAutocomplete
                 )
                 .ThenBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                 .Take(20)
-                .Select(c => c with { MatchIndices = ComputeMatchIndices(c.InsertText, prefix) }),
+                .Select(c => c with { MatchIndices = FuzzyMatch.ComputeMatchIndices(c.InsertText, prefix) }),
         ];
     }
 
-    /// <summary>
-    /// Returns true if every character of <paramref name="pattern"/> appears in
-    /// <paramref name="text"/> in order (case-insensitive). This is the standard
-    /// fuzzy/subsequence match used by most code editors.
-    /// </summary>
-    internal static bool IsSubsequenceMatch(string text, string pattern)
-    {
-        int pi = 0;
-        for (int ti = 0; ti < text.Length && pi < pattern.Length; ti++)
-            if (char.ToLowerInvariant(text[ti]) == char.ToLowerInvariant(pattern[pi]))
-                pi++;
-        return pi == pattern.Length;
-    }
+    internal static bool IsSubsequenceMatch(string text, string pattern) =>
+        FuzzyMatch.IsSubsequenceMatch(text, pattern);
 
-    /// <summary>
-    /// Returns the indices in <paramref name="text"/> that matched <paramref name="prefix"/>.
-    /// For a prefix match the indices are 0..prefix.Length-1; for a subsequence match they are
-    /// the positions of the matched characters (used to highlight them in the popup).
-    /// </summary>
-    internal static int[] ComputeMatchIndices(string text, string prefix)
-    {
-        if (text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-            return [.. Enumerable.Range(0, prefix.Length)];
-        // Subsequence: record which positions in text matched
-        var indices = new List<int>();
-        int pi = 0;
-        for (int ti = 0; ti < text.Length && pi < prefix.Length; ti++)
-            if (char.ToLowerInvariant(text[ti]) == char.ToLowerInvariant(prefix[pi]))
-            {
-                indices.Add(ti);
-                pi++;
-            }
-        return pi == prefix.Length ? [.. indices] : [];
-    }
+    internal static int[] ComputeMatchIndices(string text, string prefix) =>
+        FuzzyMatch.ComputeMatchIndices(text, prefix);
 
     /// <summary>
     /// Returns true if the query contains at least one unquoted pipe operator,
