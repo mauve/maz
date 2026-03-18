@@ -1,6 +1,6 @@
-using System.CommandLine;
 using System.Text;
 using Console.Cli;
+using Console.Cli.Parsing;
 
 namespace CliGenerator.Tests;
 
@@ -10,7 +10,7 @@ public class DuplicateCommandOptionsTests
     [TestMethod]
     public void NoCommand_HasDuplicateOptionNamesOrAliases()
     {
-        var root = new RootCommandDef().Build();
+        var root = new RootCommandDef(null);
         var violations = new List<string>();
         CheckCommand(root, "maz", violations);
 
@@ -22,12 +22,12 @@ public class DuplicateCommandOptionsTests
         Assert.Fail(msg.ToString());
     }
 
-    private static void CheckCommand(Command cmd, string path, List<string> violations)
+    private static void CheckCommand(CommandDef cmd, string path, List<string> violations)
     {
         var seen = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var opt in cmd.Options)
+        foreach (var opt in cmd.EnumerateAllOptions())
         {
-            foreach (var alias in opt.Aliases.Prepend(opt.Name))
+            foreach (var alias in opt.AllNames)
             {
                 if (!seen.TryAdd(alias, opt.Name))
                     violations.Add(
@@ -35,7 +35,7 @@ public class DuplicateCommandOptionsTests
                     );
             }
         }
-        foreach (var sub in cmd.Subcommands)
+        foreach (var sub in cmd.EnumerateChildren())
             CheckCommand(sub, $"{path} {sub.Name}", violations);
     }
 }

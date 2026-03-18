@@ -885,6 +885,8 @@ public class CliOptionGenerator : IIncrementalGenerator
                 sb.AppendLine("        IsAdvanced = true,");
             if (opt.IsGlobal)
                 sb.AppendLine("        Recursive = true,");
+            if (!opt.IsRequired && (opt.HasNullableAnnotation || opt.DefaultExpression != null))
+                sb.AppendLine("        ValueIsOptional = true,");
             if (opt.DefaultExpression != null)
                 sb.AppendLine($"        DefaultValueFactory = () => {opt.DefaultExpression},");
             if (opt.CustomParserExpr != null)

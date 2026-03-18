@@ -9,14 +9,12 @@ internal static class CliGeneratorTestHelpers
         using System;
         using System.Collections.Generic;
         using System.ComponentModel;
-        using System.CommandLine;
-        using System.CommandLine.Completions;
 
         namespace Console.Cli
         {
             public static class AdvancedOptionRegistry
             {
-                public static void Register<T>(Option<T> _) { }
+                public static void Register(Parsing.CliOption _) { }
             }
 
             public static class CliCompletionProviderRegistry
@@ -27,34 +25,64 @@ internal static class CliGeneratorTestHelpers
 
             public abstract partial class CommandDef
             {
+                public abstract string Name { get; }
                 protected bool HasParseResult => false;
-                protected T GetValue<T>(Option<T> _) => default!;
-                protected abstract void AddGeneratedOptions(Command cmd);
+                protected T GetValue<T>(Parsing.CliOption<T> _) => default!;
+                internal virtual IEnumerable<Parsing.CliOption> EnumerateOptions() { yield break; }
+                internal virtual IEnumerable<CommandDef> EnumerateChildren() { yield break; }
+                internal virtual IEnumerable<OptionPack> EnumerateOptionPacks() { yield break; }
                 protected virtual bool HasGeneratedChildren => false;
-                protected virtual void AddGeneratedChildren(Command cmd) { }
                 public virtual string Description => string.Empty;
                 public virtual string? DetailedDescription => Remarks;
                 protected virtual string? Remarks => null;
-                public Command Build() => new("test");
             }
 
             public abstract partial class OptionPack
             {
                 protected bool HasParseResult => false;
-                protected T GetValue<T>(Option<T> _) => default!;
-                protected abstract void AddGeneratedOptions(Command cmd);
-                protected virtual void AddChildPacksTo(Command cmd) { }
+                protected T GetValue<T>(Parsing.CliOption<T> _) => default!;
+                internal virtual IEnumerable<Parsing.CliOption> EnumerateOptions() { yield break; }
+                internal virtual IEnumerable<OptionPack> EnumerateChildPacks() { yield break; }
 
-                public void AddOptionsTo(Command cmd)
+                internal IEnumerable<Parsing.CliOption> EnumerateAllOptions()
                 {
-                    AddGeneratedOptions(cmd);
-                    AddChildPacksTo(cmd);
+                    foreach (var child in EnumerateChildPacks())
+                        foreach (var opt in child.EnumerateAllOptions())
+                            yield return opt;
+                    foreach (var opt in EnumerateOptions())
+                        yield return opt;
                 }
             }
 
-            public interface ICompletionProvider
+            public interface ICompletionProvider { }
+        }
+
+        namespace Console.Cli.Parsing
+        {
+            public abstract class CliOption
             {
-                IEnumerable<CompletionItem> GetCompletions(CompletionContext context);
+                public string Name { get; init; }
+                public string[] Aliases { get; init; }
+                public string Description { get; init; }
+                public bool Required { get; init; }
+                public bool Hidden { get; init; }
+                public bool Recursive { get; init; }
+                public bool IsAdvanced { get; init; }
+                public bool AllowMultipleArgumentsPerToken { get; init; }
+                public bool ValueIsOptional { get; init; }
+                public bool Stackable { get; init; }
+                public bool WasProvided { get; set; }
+                public object HelpGroup { get; set; }
+                public object Metadata { get; init; }
+            }
+
+            public sealed class CliOption<T> : CliOption
+            {
+                public T Value { get; set; }
+                public T DefaultValue { get; init; }
+                public Func<string, T> Parser { get; init; }
+                public Func<string, object> ElementParser { get; init; }
+                public Func<T> DefaultValueFactory { get; init; }
             }
         }
         """;
@@ -92,11 +120,6 @@ internal static class CliGeneratorTestHelpers
             .CurrentDomain.GetAssemblies()
             .Where(a => !a.IsDynamic && !string.IsNullOrEmpty(a.Location))
             .Select(a => MetadataReference.CreateFromFile(a.Location))
-            .Append(
-                MetadataReference.CreateFromFile(
-                    typeof(System.CommandLine.Option<>).Assembly.Location
-                )
-            )
             .ToList();
 
         var compilation = CSharpCompilation.Create(

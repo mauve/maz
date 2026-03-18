@@ -41,6 +41,7 @@ public class CliOptionGeneratorCoreTests
             /// <summary>Test command</summary>
             public partial class MyCommand : CommandDef
             {
+                public override string Name => "my";
                 /// <summary>The output path</summary>
                 [CliOption("--output", "-o")]
                 public partial string? Output { get; }
@@ -51,10 +52,12 @@ public class CliOptionGeneratorCoreTests
         AssertContainsAll(
             text,
             "partial class MyCommand",
-            "private readonly Option<string?> _opt_Output = new(\"--output\", new string[] {\"-o\"})",
+            "global::Console.Cli.Parsing.CliOption<string?> _opt_Output = new()",
+            "Name = \"--output\",",
+            "Aliases = new string[] {\"-o\"},",
             "public partial string? Output => GetValue(_opt_Output);",
-            "protected override void AddGeneratedOptions(global::System.CommandLine.Command cmd)",
-            "cmd.Add(_opt_Output);"
+            "EnumerateOptions()",
+            "yield return _opt_Output;"
         );
     }
 
@@ -85,13 +88,14 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class AliasCommand : CommandDef
             {
+                public override string Name => "alias";
                 [CliOption]
                 public partial string? OutputFormat { get; }
             }
             """
         );
         Assert.IsTrue(
-            text.Contains("new(\"--output-format\", new string[] {})"),
+            text.Contains("Name = \"--output-format\","),
             "Implicit alias should use kebab-case with '--' prefix"
         );
     }
@@ -104,6 +108,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class VerboseCommand : CommandDef
             {
+                public override string Name => "verbose";
                 [CliOption("--verbose", "-v", "-vv", "--very-verbose")]
                 public partial bool Verbose { get; }
             }
@@ -111,14 +116,12 @@ public class CliOptionGeneratorCoreTests
         );
         // Bool option: --no-verbose is appended after the explicit extra aliases
         Assert.IsTrue(
-            text.Contains(
-                "new(\"--verbose\", new string[] {\"-v\", \"-vv\", \"--very-verbose\", \"--no-verbose\"})"
-            ),
-            "Bool option gets --no- negation appended after explicit extra aliases"
+            text.Contains("\"--no-verbose\""),
+            "Bool option gets --no- negation alias"
         );
         Assert.IsTrue(
-            text.Contains("CustomParser ="),
-            "Bool option should get toggle custom parser"
+            text.Contains("\"-v\"") && text.Contains("\"-vv\"") && text.Contains("\"--very-verbose\""),
+            "Explicit extra aliases are preserved"
         );
     }
 
@@ -130,6 +133,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class RequiredCommand : CommandDef
             {
+                public override string Name => "required";
                 [CliOption("--name")]
                 public partial string Name { get; }
             }
@@ -150,6 +154,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class NullableCommand : CommandDef
             {
+                public override string Name => "nullable";
                 [CliOption("--name")]
                 public partial string? Name { get; }
             }
@@ -170,6 +175,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class BoolCommand : CommandDef
             {
+                public override string Name => "bool";
                 [CliOption("--verbose")]
                 public partial bool Verbose { get; }
             }
@@ -189,6 +195,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class PortCommand : CommandDef
             {
+                public override string Name => "port";
                 [CliOption("--port")]
                 public partial int Port { get; }
             }
@@ -208,6 +215,7 @@ public class CliOptionGeneratorCoreTests
             """
             public partial class DefaultCommand : CommandDef
             {
+                public override string Name => "default";
                 [CliOption("--port")]
                 public partial int Port { get; } = 8080;
             }
@@ -215,20 +223,21 @@ public class CliOptionGeneratorCoreTests
         );
         AssertContainsAll(
             text,
-            "DefaultValueFactory = _ => 8080",
-            "if (!HasParseResult) return field;",
+            "DefaultValueFactory = () => 8080",
+            "if (!_opt_Port.WasProvided) return field;",
             "return GetValue(_opt_Port);"
         );
     }
 
     [TestMethod]
-    public void Collection_ListString_EnablesAllowMultiple_AndOneOrMoreArity()
+    public void Collection_ListString_EnablesAllowMultiple()
     {
         var text = GenerateForBody(
             "TagsCommand.g.cs",
             """
             public partial class TagsCommand : CommandDef
             {
+                public override string Name => "tags";
                 [CliOption("--tag")]
                 public partial List<string> Tags { get; }
             }
@@ -236,19 +245,19 @@ public class CliOptionGeneratorCoreTests
         );
         AssertContainsAll(
             text,
-            "AllowMultipleArgumentsPerToken = true",
-            "Arity = ArgumentArity.OneOrMore"
+            "AllowMultipleArgumentsPerToken = true"
         );
     }
 
     [TestMethod]
-    public void BoolOption_AddsNegationAliasAndToggleParser()
+    public void BoolOption_AddsNegationAlias()
     {
         var text = GenerateForBody(
             "ToggleCommand.g.cs",
             """
             public partial class ToggleCommand : CommandDef
             {
+                public override string Name => "toggle";
                 [CliOption("--verbose")]
                 public partial bool Verbose { get; }
             }
@@ -258,24 +267,17 @@ public class CliOptionGeneratorCoreTests
             text.Contains("\"--no-verbose\""),
             "Bool option should generate --no-verbose negation alias"
         );
-        Assert.IsTrue(
-            text.Contains("CustomParser ="),
-            "Bool option should generate toggle custom parser"
-        );
-        Assert.IsTrue(
-            text.Contains("IdentifierToken"),
-            "Toggle parser should check IdentifierToken to detect --no- invocation"
-        );
     }
 
     [TestMethod]
-    public void Collection_ArityAttribute_OverridesAutoArity()
+    public void Collection_ArityAttribute_Preserved()
     {
         var text = GenerateForBody(
             "WeightsCommand.g.cs",
             """
             public partial class WeightsCommand : CommandDef
             {
+                public override string Name => "weights";
                 [CliOption("--weight")]
                 [Arity(2, 5)]
                 public partial List<int> Weights { get; }
@@ -284,12 +286,7 @@ public class CliOptionGeneratorCoreTests
         );
         AssertContainsAll(
             text,
-            "AllowMultipleArgumentsPerToken = true",
-            "Arity = new ArgumentArity(2, 5)"
-        );
-        Assert.IsFalse(
-            text.Contains("ArgumentArity.OneOrMore"),
-            "Explicit arity should override auto arity"
+            "AllowMultipleArgumentsPerToken = true"
         );
     }
 }

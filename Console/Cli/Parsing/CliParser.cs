@@ -54,7 +54,7 @@ internal static class CliParser
                     // Peek: is this an option that takes a value?
                     var currentCmd = commandPath[^1];
                     var opt = FindOption(currentCmd, commandPath, token.Raw);
-                    if (opt is not null && !opt.IsBool)
+                    if (opt is not null && !opt.IsBool && !opt.ValueIsOptional)
                         i2++; // consume the value
                 }
                 continue;
@@ -224,11 +224,20 @@ internal static class CliParser
                             if (!matchedOpt.TryParse(tokens[j].Raw))
                                 result.Errors.Add($"Cannot parse '{tokens[j].Raw}' for option '{optName}'.");
                         }
+                        else if (matchedOpt.ValueIsOptional)
+                        {
+                            // Nullable types and options with defaults accept bare flags
+                            matchedOpt.TryParse(null);
+                        }
                         else
                         {
                             result.Errors.Add($"Option '{optName}' requires a value.");
                         }
                     }
+                }
+                else if (TryParseStackedAlias(optName, optionMap))
+                {
+                    // Handled by TryParseStackedAlias
                 }
                 else
                 {
@@ -302,13 +311,46 @@ internal static class CliParser
     }
 
     /// <summary>
+    /// Try to match a token like "-vvv" as a stacked short alias.
+    /// Returns true if it matched and set the value, false otherwise.
+    /// </summary>
+    private static bool TryParseStackedAlias(string token, Dictionary<string, CliOption> optionMap)
+    {
+        // Must be a single-dash token with 2+ repeated chars: -vv, -vvv, etc.
+        if (token.Length < 3 || token[0] != '-' || token[1] == '-')
+            return false;
+
+        var ch = token[1];
+        for (int i = 2; i < token.Length; i++)
+        {
+            if (token[i] != ch)
+                return false;
+        }
+
+        // Look up the single-char alias
+        var alias = $"-{ch}";
+        if (!optionMap.TryGetValue(alias, out var opt) || !opt.Stackable)
+            return false;
+
+        var count = token.Length - 1; // number of repeated chars
+        opt.TryParse(count.ToString());
+        return true;
+    }
+
+    /// <summary>
     /// Build a map from all option names/aliases to their CliOption instance.
+    /// Also validates that Stackable is only used on int options.
     /// </summary>
     private static Dictionary<string, CliOption> BuildOptionMap(List<CliOption> options)
     {
         var map = new Dictionary<string, CliOption>(StringComparer.OrdinalIgnoreCase);
         foreach (var opt in options)
         {
+            if (opt.Stackable && !opt.IsInt)
+                throw new InvalidOperationException(
+                    $"Option '{opt.Name}' is marked Stackable but its type is {opt.ValueTypeName}. " +
+                    "Stackable is only supported on int options.");
+
             foreach (var name in opt.AllNames)
             {
                 map.TryAdd(name, opt);
