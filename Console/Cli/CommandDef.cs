@@ -101,12 +101,14 @@ public abstract partial class CommandDef
     {
         Name = "--help-commands",
         Description = "Show the full command tree. Optionally filter by name, alias, or description.",
+        ValueIsOptional = true,
     };
 
     internal readonly CliOption<string?> _helpCommandsFlatOption = new()
     {
         Name = "--help-commands-flat",
         Description = "Show all commands as a flat list. Optionally filter by name or alias.",
+        ValueIsOptional = true,
     };
 
     // ── Properties ─────────────────────────────────────────────────────

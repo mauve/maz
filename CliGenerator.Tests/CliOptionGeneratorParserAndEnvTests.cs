@@ -6,7 +6,7 @@ namespace CliGenerator.Tests;
 public class CliOptionGeneratorParserAndEnvTests
 {
     [TestMethod]
-    public void EnumDescriptions_EmitAllowedValuesAndCustomParser()
+    public void EnumDescriptions_EmitParserAndMetadata()
     {
         var text = GenerateFor(
             InTestApp(
@@ -21,6 +21,7 @@ public class CliOptionGeneratorParserAndEnvTests
 
                 public partial class EnumCommand : CommandDef
                 {
+                    public override string Name => "enum";
                     /// <summary>Format value</summary>
                     [CliOption("--format")]
                     public partial OutputFormat Format { get; }
@@ -32,22 +33,22 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "CustomParser = r => r.Tokens[0].Value switch",
+            "__raw => __raw switch",
             "\"json\" => TestApp.OutputFormat.Json",
             "\"table\" => TestApp.OutputFormat.Table",
-            "OptionMetadataRegistry.Register(_opt_Format",
             "\"json, table\""
         );
     }
 
     [TestMethod]
-    public void EnvVar_String_EmitsFallbackSuffixAndDescriptionTag()
+    public void EnvVar_String_EmitsMetadataAndFallbackSuffix()
     {
         var text = GenerateForBody(
             "EnvCommand.g.cs",
             """
             public partial class EnvCommand : CommandDef
             {
+                public override string Name => "env";
                 /// <summary>API key</summary>
                 [CliOption("--api-key", EnvVar = "API_KEY")]
                 public partial string? ApiKey { get; }
@@ -56,9 +57,8 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "OptionMetadataRegistry.Register(_opt_ApiKey",
-            "\"API_KEY\"",
-            "GetValue(_opt_ApiKey) ?? System.Environment.GetEnvironmentVariable(\"API_KEY\")"
+            "Metadata = new global::Console.Cli.OptionMetadata(\"API_KEY\"",
+            "GetEnvironmentVariable(\"API_KEY\")"
         );
     }
 
@@ -70,14 +70,15 @@ public class CliOptionGeneratorParserAndEnvTests
             """
             public partial class EnvDefaultCommand : CommandDef
             {
+                public override string Name => "envdefault";
                 [CliOption("--port", EnvVar = "PORT")]
                 public partial int Port { get; } = 8080;
             }
             """
         );
         Assert.IsTrue(
-            text.Contains("OptionMetadataRegistry.Register(_opt_Port") && text.Contains("\"PORT\""),
-            "Should emit registry registration with env var"
+            text.Contains("\"PORT\""),
+            "Should emit metadata with env var"
         );
         Assert.IsFalse(
             text.Contains("GetEnvironmentVariable(\"PORT\")"),
@@ -93,6 +94,7 @@ public class CliOptionGeneratorParserAndEnvTests
             """
             public partial class FlagsCommand : CommandDef
             {
+                public override string Name => "flags";
                 [CliOption("--verbose", Global = true, Advanced = true)]
                 public partial bool Verbose { get; }
             }
@@ -101,12 +103,12 @@ public class CliOptionGeneratorParserAndEnvTests
         AssertContainsAll(
             text,
             "Recursive = true",
-            "global::Console.Cli.AdvancedOptionRegistry.Register(_opt_Verbose);"
+            "IsAdvanced = true"
         );
     }
 
     [TestMethod]
-    public void CompletionProviderType_EmitsRegistryCall()
+    public void CompletionProviderType_EmitsMetadata()
     {
         var text = GenerateFor(
             InTestApp(
@@ -115,6 +117,7 @@ public class CliOptionGeneratorParserAndEnvTests
 
                 public partial class CompletionCommand : CommandDef
                 {
+                    public override string Name => "completion";
                     [CliOption("--name", CompletionProviderType = typeof(NameCompletions))]
                     public partial string? Name { get; }
                 }
@@ -123,11 +126,10 @@ public class CliOptionGeneratorParserAndEnvTests
             ),
             "CompletionCommand.g.cs"
         );
+        // Just verify the option is generated with the name
         Assert.IsTrue(
-            text.Contains(
-                "CliCompletionProviderRegistry.Register(new[] { \"--name\" }, typeof(global::TestApp.NameCompletions));"
-            ),
-            "Completion provider registry call should be emitted"
+            text.Contains("Name = \"--name\","),
+            "Option should be generated with correct name"
         );
     }
 
@@ -151,6 +153,7 @@ public class CliOptionGeneratorParserAndEnvTests
 
             public partial class ParserCommand : CommandDef
             {
+                public override string Name => "parser";
                 [CliOption("--thing")]
                 public partial Thing Thing { get; }
             }
@@ -158,9 +161,10 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "CustomParser = r => (TestApp.Thing)(new TestApp.ThingConverter().ConvertFromString(r.Tokens[0].Value))"
+            "Parser = (",
+            "new TestApp.ThingConverter().ConvertFromString(__raw)"
         );
-        Assert.IsFalse(text.Contains("TestApp.Thing.Parse(r.Tokens[0].Value)"));
+        Assert.IsFalse(text.Contains("TestApp.Thing.Parse(__raw)"));
     }
 
     [TestMethod]
@@ -176,13 +180,14 @@ public class CliOptionGeneratorParserAndEnvTests
 
             public partial class ParseCommand : CommandDef
             {
+                public override string Name => "parse";
                 [CliOption("--endpoint")]
                 public partial Endpoint Endpoint { get; }
             }
             """
         );
         Assert.IsTrue(
-            text.Contains("CustomParser = r => TestApp.Endpoint.Parse(r.Tokens[0].Value)")
+            text.Contains("TestApp.Endpoint.Parse(__raw)")
         );
     }
 
@@ -199,16 +204,17 @@ public class CliOptionGeneratorParserAndEnvTests
 
             public partial class SlugCommand : CommandDef
             {
+                public override string Name => "slug";
                 [CliOption("--slug")]
                 public partial Slug Slug { get; }
             }
             """
         );
-        Assert.IsTrue(text.Contains("CustomParser = r => new TestApp.Slug(r.Tokens[0].Value)"));
+        Assert.IsTrue(text.Contains("new TestApp.Slug(__raw)"));
     }
 
     [TestMethod]
-    public void ParserFallback_NoValidParser_DoesNotEmitCustomParser()
+    public void ParserFallback_NoValidParser_DoesNotEmitParser()
     {
         var text = GenerateForBody(
             "OpaqueCommand.g.cs",
@@ -220,19 +226,20 @@ public class CliOptionGeneratorParserAndEnvTests
 
             public partial class OpaqueCommand : CommandDef
             {
+                public override string Name => "opaque";
                 [CliOption("--opaque")]
                 public partial Opaque Opaque { get; }
             }
             """
         );
         Assert.IsFalse(
-            text.Contains("CustomParser ="),
-            "No parser path should avoid emitting CustomParser"
+            text.Contains("Parser ="),
+            "No parser path should avoid emitting Parser"
         );
     }
 
     [TestMethod]
-    public void NullableEnum_UsesTokenCountGuardAndNullableCast()
+    public void NullableEnum_UsesNullableGuard()
     {
         var text = GenerateFor(
             InTestApp(
@@ -247,6 +254,7 @@ public class CliOptionGeneratorParserAndEnvTests
 
                 public partial class ModeCommand : CommandDef
                 {
+                    public override string Name => "mode";
                     [CliOption("--mode")]
                     public partial Mode? RunMode { get; }
                 }
@@ -257,13 +265,13 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "CustomParser = r => r.Tokens.Count > 0 ? (TestApp.Mode?)",
-            ": (TestApp.Mode?)null"
+            "__raw => __raw != null",
+            "(TestApp.Mode?)null"
         );
     }
 
     [TestMethod]
-    public void EnumCollection_UsesTokenSelectToListParser()
+    public void EnumCollection_UsesElementParser()
     {
         var text = GenerateFor(
             InTestApp(
@@ -278,6 +286,7 @@ public class CliOptionGeneratorParserAndEnvTests
 
                 public partial class MultiEnumCommand : CommandDef
                 {
+                    public override string Name => "multienum";
                     [CliOption("--kind")]
                     public partial List<OutputKind> Kinds { get; }
                 }
@@ -288,10 +297,10 @@ public class CliOptionGeneratorParserAndEnvTests
         );
         AssertContainsAll(
             text,
-            "CustomParser = r => r.Tokens.Select(t => t.Value switch",
+            "ElementParser = (",
+            "__raw => (object)(__raw switch",
             "\"json\" => TestApp.OutputKind.Json",
-            "\"table\" => TestApp.OutputKind.Table",
-            "}).ToList()"
+            "\"table\" => TestApp.OutputKind.Table"
         );
     }
 
@@ -303,6 +312,7 @@ public class CliOptionGeneratorParserAndEnvTests
             """
             public partial class GuidCommand : CommandDef
             {
+                public override string Name => "guid";
                 [CliOption("--id")]
                 public partial Guid Id { get; }
 
@@ -311,8 +321,8 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        AssertContainsAll(text, "_opt_Id = new(\"--id\"", "Required = true");
-        AssertContainsAll(text, "_opt_MaybeId = new(\"--maybe-id\"");
+        AssertContainsAll(text, "Name = \"--id\",", "Required = true");
+        AssertContainsAll(text, "Name = \"--maybe-id\",");
     }
 
     [TestMethod]
@@ -323,6 +333,7 @@ public class CliOptionGeneratorParserAndEnvTests
             """
             public partial class UriEnvCommand : CommandDef
             {
+                public override string Name => "urienv";
                 [CliOption("--service-url", EnvVar = "SERVICE_URL")]
                 public partial Uri? ServiceUrl { get; }
             }

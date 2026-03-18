@@ -1,6 +1,6 @@
-using System.CommandLine;
 using System.Text;
 using Console.Cli;
+using Console.Cli.Parsing;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CliGenerator.Tests;
@@ -8,16 +8,17 @@ namespace CliGenerator.Tests;
 [TestClass]
 public class CommandSuggesterTests
 {
-    private static RootCommand BuildRoot()
+    private static TestCommandDef BuildRoot()
     {
-        var root = new RootCommand();
-        root.Add(new Command("group", "Manage resource groups"));
-        root.Add(new Command("monitor", "Monitoring commands"));
-        root.Add(new Command("account", "Manage accounts"));
-        return root;
+        return new TestCommandDef("maz", [
+            new TestCommandDef("group"),
+            new TestCommandDef("monitor"),
+            new TestCommandDef("account"),
+        ]);
     }
 
-    private static ParseResult Parse(RootCommand root, params string[] args) => root.Parse(args);
+    private static CliParseResult Parse(TestCommandDef root, params string[] args) =>
+        CliParser.Parse(args, root);
 
     [TestMethod]
     public void GetUnknownToken_UnmatchedCommand_ReturnsToken()
@@ -54,7 +55,8 @@ public class CommandSuggesterTests
             ["grouop"],
             interactive: false,
             new StringWriter(stderr),
-            () => null
+            () => null,
+            root
         );
 
         Assert.AreEqual(1, exitCode);
@@ -64,11 +66,11 @@ public class CommandSuggesterTests
     [TestMethod]
     public void TrySuggest_SingleMatch_Interactive_UserConfirms_Reinvokes()
     {
-        var root = BuildRoot();
-
-        // Add a handler so invocation returns 0
-        var matched = root.Subcommands.First(c => c.Name == "group");
-        matched.SetAction(_ => 42);
+        var root = new TestCommandDef("maz", [
+            new TestCommandDef("group", handler: _ => Task.FromResult(42)),
+            new TestCommandDef("monitor"),
+            new TestCommandDef("account"),
+        ]);
 
         var result = Parse(root, "grouop");
         var stderr = new StringBuilder();
@@ -78,7 +80,8 @@ public class CommandSuggesterTests
             ["grouop"],
             interactive: true,
             new StringWriter(stderr),
-            () => "y"
+            () => "y",
+            root
         );
 
         // The re-invoked command returns 42
@@ -97,7 +100,8 @@ public class CommandSuggesterTests
             ["grouop"],
             interactive: true,
             new StringWriter(stderr),
-            () => "n"
+            () => "n",
+            root
         );
 
         Assert.AreEqual(1, exitCode);
@@ -106,14 +110,10 @@ public class CommandSuggesterTests
     [TestMethod]
     public void TrySuggest_MultipleMatches_Interactive_UserPicksNumber()
     {
-        var root = new RootCommand();
-        // Both "groupA" and "groupB" will match "group" (substring)
-        var cmdA = new Command("groupa", "Group A");
-        var cmdB = new Command("groupb", "Group B");
-        cmdA.SetAction(_ => 10);
-        cmdB.SetAction(_ => 20);
-        root.Add(cmdA);
-        root.Add(cmdB);
+        var root = new TestCommandDef("maz", [
+            new TestCommandDef("groupa", handler: _ => Task.FromResult(10)),
+            new TestCommandDef("groupb", handler: _ => Task.FromResult(20)),
+        ]);
 
         var result = Parse(root, "group");
         var stderr = new StringBuilder();
@@ -123,7 +123,8 @@ public class CommandSuggesterTests
             ["group"],
             interactive: true,
             new StringWriter(stderr),
-            () => "1" // pick first match
+            () => "1", // pick first match
+            root
         );
 
         // Should have re-invoked one of the commands
@@ -142,7 +143,8 @@ public class CommandSuggesterTests
             ["zzzzz"],
             interactive: false,
             new StringWriter(stderr),
-            () => null
+            () => null,
+            root
         );
 
         Assert.AreEqual(-1, exitCode);
