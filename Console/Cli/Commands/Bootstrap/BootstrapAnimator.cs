@@ -21,6 +21,9 @@ internal static class BootstrapAnimator
     /// <summary>Lines needed by the resource-names demo (same as subscriptions).</summary>
     internal const int ResourceNamesDemoLines = 5;
 
+    /// <summary>Lines needed by the jmespath editor demo.</summary>
+    internal const int JmesPathDemoLines = 16;
+
     /// <summary>Lines needed by the kusto demo.</summary>
     internal const int KustoDemoLines = 14;
 
@@ -336,6 +339,68 @@ internal static class BootstrapAnimator
         catch (OperationCanceledException)
         {
             ClearDemoArea(startRow, KustoDemoLines);
+        }
+    }
+
+    public static async Task PlayJmesPathAsync(int startRow, CancellationToken ct)
+    {
+        // Static "screenshot" of the JMESPath editor TUI layout.
+        // All widths are in visible characters; Pad() accounts for ANSI codes.
+        const int leftW = 40; // inner width of left pane
+        const int rightW = 33; // inner width of right pane
+        const int fullW = leftW + 1 + rightW; // inner width when middle border becomes content
+
+        static string Pad(string s, int width)
+        {
+            var vis = Ansi.VisibleLength(s);
+            return vis >= width ? s : s + new string(' ', width - vis);
+        }
+
+        static string Row(string left, string right, int lw, int rw) =>
+            Ansi.Dim("  │") + Pad(left, lw) + Ansi.Dim("│") + Pad(right, rw) + Ansi.Dim("│");
+
+        static string FullRow(string content, int w) =>
+            Ansi.Dim("  │") + Pad(content, w) + Ansi.Dim("│");
+
+        var hBar = new string('─', fullW);
+        var lBar = new string('─', leftW);
+        var rBar = new string('─', rightW);
+
+        var lines = new[]
+        {
+            "",
+            Ansi.Dim($"  ┌─ Input (sample resources) {new string('─', leftW - 27)}┬─ Output (JMESPath result) {new string('─', rightW - 27)}┐"),
+            Row(" [", " [", leftW, rightW),
+            Row("   {", "   " + Ansi.Yellow("\"myaccount\"") + ",", leftW, rightW),
+            Row("     " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"myaccount\"") + ",", "   " + Ansi.Yellow("\"backupstorage\""), leftW, rightW),
+            Row("     " + Ansi.Cyan("\"location\"") + ": " + Ansi.Yellow("\"eastus\"") + ",", " ]", leftW, rightW),
+            Row("     " + Ansi.Cyan("\"sku\"") + ": { " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"Standard\"") + " }", "", leftW, rightW),
+            Row("   },", "", leftW, rightW),
+            Row("   { " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"backupstorage\"") + ", " + Ansi.Dim("...") + " }", "", leftW, rightW),
+            Row(" ]", "", leftW, rightW),
+            Ansi.Dim($"  ├{lBar}┴{rBar}┤"),
+            FullRow(" " + Ansi.Dim("JMESPath Query:"), fullW),
+            FullRow("  [].name", fullW),
+            Ansi.Dim($"  ├{hBar}┤"),
+            FullRow(" " + Ansi.Green("F5") + " accept  " + Ansi.Dim("│") + " " + Ansi.Green("Tab") + " complete  " + Ansi.Dim("│") + " " + Ansi.Green("Enter") + " evaluate  " + Ansi.Dim("│") + " " + Ansi.Green("Esc") + " cancel", fullW),
+            Ansi.Dim($"  └{hBar}┘"),
+        };
+
+        try
+        {
+            for (var i = 0; i < lines.Length; i++)
+            {
+                WizardUi.MoveTo(startRow + i);
+                System.Console.Write("\x1b[2K");
+                System.Console.Write(lines[i]);
+            }
+
+            // Hold the static screenshot until cancelled.
+            await Task.Delay(Timeout.Infinite, ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            ClearDemoArea(startRow, JmesPathDemoLines);
         }
     }
 
