@@ -11,6 +11,7 @@ namespace Console.Cli.Commands;
 public partial class AcrCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "acr";
+    protected internal override bool IsManualCommand => true;
     public readonly AcrLoginCommandDef Login = new(auth);
 }
 

@@ -11,6 +11,7 @@ public partial class JmesPathCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "jmespath";
     public override string[] Aliases => ["jmes"];
+    protected internal override bool IsManualCommand => true;
 
     public readonly JmesPathEditorCommandDef Editor = new(auth);
 }

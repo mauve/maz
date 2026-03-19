@@ -248,8 +248,10 @@ internal static class GroupedHelpLayout
             {
                 var name = Ansi.White(command.Name);
                 var displayName = command.IsDataPlane
-                    ? name + Ansi.LightRed("*")
+                    ? name + " \u26a1"
                     : name;
+                if (command.IsManualCommand)
+                    displayName += " \u2728";
                 var desc = command.Description ?? "";
                 return (command, displayName, desc);
             })

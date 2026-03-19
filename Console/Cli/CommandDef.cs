@@ -132,6 +132,11 @@ public abstract partial class CommandDef
     protected internal virtual bool HasExecuteHandler => false;
 
     /// <summary>
+    /// True when this command is a manually crafted (non-generated) command.
+    /// </summary>
+    protected internal virtual bool IsManualCommand => false;
+
+    /// <summary>
     /// True for <see cref="RootCommandDef"/>.
     /// </summary>
     protected virtual bool IsRootCommand => false;
