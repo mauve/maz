@@ -53,26 +53,21 @@ internal static class BootstrapMarkdownRenderer
             if (line.TrimStart().StartsWith("<!-- demo:", StringComparison.Ordinal))
                 continue;
 
-            // ## Heading — bold purple
+            // ## Heading — bold purple (with extra blank line after)
             if (line.StartsWith("## ", StringComparison.Ordinal))
             {
-                System.Console.WriteLine("  " + Ansi.Bold(Ansi.Magenta(line[3..])));
+                System.Console.WriteLine("  " + MarkdownTerminal.RenderLine(line));
                 System.Console.WriteLine();
                 continue;
             }
 
-            // ### Sub-heading — bold cyan (contrasts with purple headings)
-            if (line.StartsWith("### ", StringComparison.Ordinal))
+            // ### Sub-heading, indented code, blank — use shared renderer
+            if (line.StartsWith("### ", StringComparison.Ordinal)
+                || line.StartsWith("    ", StringComparison.Ordinal)
+                || line.StartsWith('\t'))
             {
-                System.Console.WriteLine("  " + Ansi.Bold(Ansi.Cyan(line[4..])));
-                continue;
-            }
-
-            // Indented code block (4-space or tab)
-            if (line.StartsWith("    ", StringComparison.Ordinal) || line.StartsWith('\t'))
-            {
-                var code = line.StartsWith('\t') ? line[1..] : line[4..];
-                System.Console.WriteLine("    " + Ansi.Green(code));
+                var rendered = MarkdownTerminal.RenderLine(line);
+                System.Console.WriteLine(rendered is not null ? "  " + rendered : "");
                 continue;
             }
 
@@ -83,7 +78,7 @@ internal static class BootstrapMarkdownRenderer
                 continue;
             }
 
-            // Bullet (  • text) — purple bullet glyph
+            // Bullet (  • text) — purple bullet glyph, word-wrapped
             if (line.TrimStart().StartsWith("• ", StringComparison.Ordinal))
             {
                 var indent = line.Length - line.TrimStart().Length;
@@ -120,7 +115,7 @@ internal static class BootstrapMarkdownRenderer
         {
             for (var c = 0; c < row.Length; c++)
             {
-                var vis = Ansi.VisibleLength(RenderInlineCode(row[c]));
+                var vis = Ansi.VisibleLength(MarkdownTerminal.RenderInline(row[c]));
                 if (vis > colWidths[c])
                     colWidths[c] = vis;
             }
@@ -156,7 +151,7 @@ internal static class BootstrapMarkdownRenderer
         for (var c = 0; c < colCount; c++)
         {
             var raw = c < cells.Length ? cells[c] : "";
-            var rendered = RenderInlineCode(raw);
+            var rendered = MarkdownTerminal.RenderInline(raw);
             var vis = Ansi.VisibleLength(rendered);
             var pad = c < colCount - 1 ? Math.Max(0, colWidths[c] - vis) : 0;
 
@@ -185,7 +180,7 @@ internal static class BootstrapMarkdownRenderer
 
     private static void PrintWrapped(string prefix, string text, int width)
     {
-        text = RenderInlineCode(text);
+        text = MarkdownTerminal.RenderInline(text);
         var prefixVisible = Ansi.VisibleLength(prefix);
         var effective = width - prefixVisible;
         if (effective <= 0)
@@ -220,36 +215,4 @@ internal static class BootstrapMarkdownRenderer
             System.Console.WriteLine(prefix + current);
     }
 
-    private static string RenderInlineCode(string text)
-    {
-        if (!text.Contains('`'))
-            return text;
-
-        var sb = new System.Text.StringBuilder();
-        var inCode = false;
-        var i = 0;
-
-        while (i < text.Length)
-        {
-            if (text[i] == '`')
-            {
-                inCode = !inCode;
-            }
-            else if (inCode)
-            {
-                var start = i;
-                while (i < text.Length && text[i] != '`')
-                    i++;
-                sb.Append(Ansi.Yellow(text[start..i]));
-                continue;
-            }
-            else
-            {
-                sb.Append(text[i]);
-            }
-            i++;
-        }
-
-        return sb.ToString();
-    }
 }

@@ -1,5 +1,6 @@
 using Azure.Core;
 using Azure.Identity;
+using Console.Cli.Auth;
 
 namespace Console.Cli.Shared;
 
@@ -51,7 +52,11 @@ public partial class AuthOptionPack : OptionPack
     /// <summary>Specifies the credential types that will be used for authentication.</summary>
     [CliOption("--auth-allowed-credential-types", Global = true)]
     public partial List<CredentialType> AllowedCredentialTypes { get; } =
-        [CredentialType.Cli, CredentialType.DeviceCode, CredentialType.Env];
+        [CredentialType.MsalCache, CredentialType.Browser, CredentialType.DeviceCode, CredentialType.Env];
+
+    /// <summary>Auto-detect CI environment and use appropriate credentials.</summary>
+    [CliOption("--auth-autodetect-ci-credentials", Global = true)]
+    public partial bool AutodetectCiCredentials { get; } = true;
 
     /// <summary>Path to the workload identity token file.</summary>
     [CliOption(
@@ -75,11 +80,11 @@ public partial class AuthOptionPack : OptionPack
             return _credential;
         log.Credential($"Chain: {string.Join(" → ", AllowedCredentialTypes)}");
         _credentialLog = log;
-        _credential = new CachingTokenCredential(BuildCredentialChain(), log);
+        _credential = new CachingTokenCredential(BuildCredentialChain(log), log);
         return _credential;
     }
 
-    private ChainedTokenCredential BuildCredentialChain()
+    private ChainedTokenCredential BuildCredentialChain(DiagnosticLog log)
     {
         var allowedTypes = AllowedCredentialTypes;
         var authorityHost = AuthorityHost;
@@ -92,10 +97,53 @@ public partial class AuthOptionPack : OptionPack
         var sharedCacheUsername = SharedTokenCacheUsername;
 
         List<TokenCredential> credentials = [];
+
+        // Determine if interactive credential flows should be included.
+        // They are skipped when --auth-interactive is false or the terminal
+        // is non-interactive (redirected I/O, TERM=dumb).
+        var allowInteractiveFlows = Interactive
+            && !System.Console.IsInputRedirected
+            && !System.Console.IsOutputRedirected
+            && Environment.GetEnvironmentVariable("TERM") != "dumb";
+
+        // CI auto-detection: prepend appropriate credential before the configured chain
+        if (AutodetectCiCredentials)
+        {
+            var ci = CiEnvironmentDetector.Detect();
+            if (ci is not null)
+            {
+                log.Credential($"CI detected: {ci.Name} → {ci.RecommendedCredential}");
+                switch (ci.RecommendedCredential)
+                {
+                    case CredentialType.WorkloadIdentity:
+                        credentials.Add(
+                            BuildWorkloadIdentityCredential(
+                                authorityHost,
+                                authClientId ?? Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"),
+                                defaultTenantId ?? Environment.GetEnvironmentVariable("AZURE_TENANT_ID"),
+                                tokenFilePath ?? Environment.GetEnvironmentVariable("AZURE_FEDERATED_TOKEN_FILE"),
+                                additionalTenants
+                            )
+                        );
+                        break;
+                    case CredentialType.Env:
+                        credentials.Add(
+                            BuildEnvironmentCredential(authorityHost, additionalTenants)
+                        );
+                        break;
+                }
+            }
+        }
+
         foreach (var type in allowedTypes)
         {
             switch (type)
             {
+                case CredentialType.MsalCache:
+                    var cache = new MsalCache(log);
+                    var oauth = new OAuth2Client(cache, log);
+                    credentials.Add(new MsalCacheCredential(cache, oauth, log));
+                    break;
                 case CredentialType.Cli:
                     credentials.Add(
                         BuildCliCredential(authorityHost, defaultTenantId, additionalTenants)
@@ -124,6 +172,11 @@ public partial class AuthOptionPack : OptionPack
                     );
                     break;
                 case CredentialType.Browser:
+                    if (!allowInteractiveFlows)
+                    {
+                        log.Credential("Skipping Browser credential (non-interactive)");
+                        break;
+                    }
                     credentials.Add(
                         BuildBrowserCredential(
                             authorityHost,
@@ -153,6 +206,11 @@ public partial class AuthOptionPack : OptionPack
                     );
                     break;
                 case CredentialType.DeviceCode:
+                    if (!allowInteractiveFlows)
+                    {
+                        log.Credential("Skipping DeviceCode credential (non-interactive)");
+                        break;
+                    }
                     credentials.Add(
                         BuildDeviceCodeCredential(
                             authorityHost,

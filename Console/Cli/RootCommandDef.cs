@@ -28,6 +28,8 @@ public partial class RootCommandDef : CommandDef
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
     public readonly BootstrapCommandDef Bootstrap;
+    public readonly LoginCommandDef Login;
+    public readonly LogoutCommandDef Logout;
 
     partial void InitGeneratedCommands(string? targetService);
 
@@ -44,6 +46,8 @@ public partial class RootCommandDef : CommandDef
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
         Bootstrap = new BootstrapCommandDef(Auth, Interactive);
+        Login = new LoginCommandDef();
+        Logout = new LogoutCommandDef();
         InitGeneratedCommands(targetService);
     }
 }

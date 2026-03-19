@@ -1,4 +1,6 @@
+using Azure.Identity;
 using Azure.ResourceManager;
+using Console.Cli.Auth;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Shared;
 using Console.Config;
@@ -41,6 +43,10 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         var configPath = MazConfig.ResolveConfigPath();
         System.Console.WriteLine($"Configuration file: {configPath}");
         System.Console.WriteLine();
+
+        // Check if the user has valid cached credentials before proceeding.
+        if (!await EnsureLoggedInAsync(auth, log, ct))
+            return 1;
 
         var existing = MazConfig.Current;
         var boxWidth = WizardUi.GetTermWidth() - 1;
@@ -330,5 +336,75 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         w.WriteLine("; [cmd.storage account list]");
         w.WriteLine("; format = json");
         w.WriteLine("; subscription-id = /s/StorageSub:guid");
+    }
+
+    /// <summary>
+    /// Checks if there are cached credentials available. If not, prompts
+    /// the user to log in interactively before continuing.
+    /// </summary>
+    private static async Task<bool> EnsureLoggedInAsync(
+        AuthOptionPack auth,
+        DiagnosticLog log,
+        CancellationToken ct
+    )
+    {
+        // Quick check: see if we can silently get a token from cache.
+        var cache = new MsalCache(log);
+        var cached = cache.FindAccessToken("https://management.azure.com/.default", tenantId: null);
+        if (cached is not null)
+            return true;
+
+        // Also check if any accounts exist (may have expired access token but valid refresh token).
+        var accounts = cache.GetAccounts();
+        if (accounts.Count > 0)
+            return true;
+
+        // No credentials — ask the user.
+        System.Console.WriteLine("  No Azure credentials found.");
+        System.Console.Write("  Would you like to log in now? (Y/n): ");
+        var answer = System.Console.ReadLine()?.Trim().ToLowerInvariant() ?? "";
+        if (answer is "n" or "no")
+        {
+            System.Console.Error.WriteLine(
+                "  Run 'maz login' first, then try 'maz configure' again."
+            );
+            return false;
+        }
+
+        System.Console.WriteLine();
+
+        // Run interactive login.
+        var oauth = new OAuth2Client(cache, log);
+        try
+        {
+            try
+            {
+                await oauth.AcquireTokenInteractiveAsync(
+                    "organizations",
+                    ["https://management.azure.com/.default"],
+                    ct
+                );
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                log.Credential($"Browser login failed ({ex.Message}), falling back to device code");
+                await oauth.AcquireTokenByDeviceCodeAsync(
+                    "organizations",
+                    ["https://management.azure.com/.default"],
+                    ct
+                );
+            }
+
+            System.Console.WriteLine();
+            return true;
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            System.Console.Error.WriteLine($"  Login failed: {ex.Message}");
+            System.Console.Error.WriteLine(
+                "  Run 'maz login' manually, then try 'maz configure' again."
+            );
+            return false;
+        }
     }
 }

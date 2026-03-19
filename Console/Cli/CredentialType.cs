@@ -4,6 +4,9 @@ namespace Console.Cli;
 
 public enum CredentialType
 {
+    [Description("msalcache")]
+    MsalCache,
+
     [Description("cli")]
     Cli,
 

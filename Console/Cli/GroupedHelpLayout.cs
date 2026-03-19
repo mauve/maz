@@ -225,7 +225,10 @@ internal static class GroupedHelpLayout
             return;
         output.WriteLine();
         foreach (var line in text.Split('\n'))
-            output.WriteLine(line.Length > 0 ? $"  {line.TrimEnd()}" : "");
+        {
+            var rendered = MarkdownTerminal.RenderLine(line.TrimEnd());
+            output.WriteLine(rendered is not null ? $"  {rendered}" : "");
+        }
     }
 
     private static void WriteSubcommandsSection(TextWriter output, CommandDef cmd,
