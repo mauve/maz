@@ -83,6 +83,12 @@ Which means you don't need to specify separate arguments, and tab-completion wor
 
 ![Kusto autocomplete](./docs/kusto-2.png)
 
+## Interactive JMESPath query editor
+
+`maz jmespath editor`
+
+![JMESPath editor](./docs/jmeseditor-1.png)
+
 ### Help flags
 
 | Flag                       | Description                                                     |
