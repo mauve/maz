@@ -173,7 +173,12 @@ internal static class KqlAutocomplete
                 )
                 .ThenBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                 .Take(20)
-                .Select(c => c with { MatchIndices = FuzzyMatch.ComputeMatchIndices(c.InsertText, prefix) }),
+                .Select(c =>
+                    c with
+                    {
+                        MatchIndices = FuzzyMatch.ComputeMatchIndices(c.InsertText, prefix),
+                    }
+                ),
         ];
     }
 

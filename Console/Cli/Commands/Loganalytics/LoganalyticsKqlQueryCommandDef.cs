@@ -214,13 +214,7 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
                         ct
                     );
             }
-            return await client.QueryWorkspaceAsync(
-                resolvedId,
-                queryText,
-                timeRange,
-                opts,
-                ct
-            );
+            return await client.QueryWorkspaceAsync(resolvedId, queryText, timeRange, opts, ct);
         }
 
         if (resourceId != null)

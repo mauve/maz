@@ -4,7 +4,10 @@ internal static class FuzzyCommandMatcher
 {
     private const int MaxResults = 5;
 
-    public static IReadOnlyList<(int Score, CommandDef Cmd)> FindMatches(CommandDef parent, string token)
+    public static IReadOnlyList<(int Score, CommandDef Cmd)> FindMatches(
+        CommandDef parent,
+        string token
+    )
     {
         return parent
             .EnumerateChildren()

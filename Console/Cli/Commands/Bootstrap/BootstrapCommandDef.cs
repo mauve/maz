@@ -85,11 +85,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                     System.Console.SetOut(sw);
                     try
                     {
-                        await RenderWelcomeContentAsync(
-                            shell,
-                            completionsSetup,
-                            w
-                        );
+                        await RenderWelcomeContentAsync(shell, completionsSetup, w);
                     }
                     finally
                     {
@@ -216,11 +212,10 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 if (canScroll)
                 {
                     WizardUi.MoveTo(1, boxWidth - 3);
-                    var indicator = scrollOffset > 0 && scrollOffset < maxScroll
-                        ? "↑↓"
-                        : scrollOffset > 0
-                            ? "↑"
-                            : "↓";
+                    var indicator =
+                        scrollOffset > 0 && scrollOffset < maxScroll ? "↑↓"
+                        : scrollOffset > 0 ? "↑"
+                        : "↓";
                     System.Console.Write($"\x1b[35m{indicator}\x1b[0m");
                 }
 
@@ -536,18 +531,21 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         }
 
         System.Console.WriteLine();
-        await ConfigureCommandDef.RunConfigureAsync(_auth, _interactive, DiagnosticOptionPack.GetLog(), ct);
+        await ConfigureCommandDef.RunConfigureAsync(
+            _auth,
+            _interactive,
+            DiagnosticOptionPack.GetLog(),
+            ct
+        );
         System.Console.WriteLine();
     }
 
     // ── Navigation key helpers ─────────────────────────────────────────────────
 
     private static bool IsForwardKey(ConsoleKeyInfo k) =>
-        k.Key == ConsoleKey.Enter
-        || k.Key == ConsoleKey.RightArrow;
+        k.Key == ConsoleKey.Enter || k.Key == ConsoleKey.RightArrow;
 
-    private static bool IsBackwardKey(ConsoleKeyInfo k) =>
-        k.Key == ConsoleKey.LeftArrow;
+    private static bool IsBackwardKey(ConsoleKeyInfo k) => k.Key == ConsoleKey.LeftArrow;
 
     private static bool IsQuitKey(ConsoleKeyInfo k) =>
         k.Key is ConsoleKey.Q or ConsoleKey.Escape

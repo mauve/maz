@@ -66,7 +66,11 @@ internal static class JmesPathAutocomplete
             [
                 .. candidates
                     .DistinctBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
-                    .OrderBy(c => c.TypeLabel == "property" ? 0 : c.TypeLabel == "function" ? 1 : 2)
+                    .OrderBy(c =>
+                        c.TypeLabel == "property" ? 0
+                        : c.TypeLabel == "function" ? 1
+                        : 2
+                    )
                     .ThenBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                     .Take(20),
             ];
@@ -84,18 +88,18 @@ internal static class JmesPathAutocomplete
                 )
                 .DistinctBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                 .OrderBy(c =>
-                    c.InsertText.StartsWith(currentWord, StringComparison.Ordinal)
-                        ? 0
-                    : c.InsertText.StartsWith(currentWord, StringComparison.OrdinalIgnoreCase)
-                        ? 1
+                    c.InsertText.StartsWith(currentWord, StringComparison.Ordinal) ? 0
+                    : c.InsertText.StartsWith(currentWord, StringComparison.OrdinalIgnoreCase) ? 1
                     : 2
                 )
                 .ThenBy(c => c.InsertText, StringComparer.OrdinalIgnoreCase)
                 .Take(20)
-                .Select(c => c with
-                {
-                    MatchIndices = FuzzyMatch.ComputeMatchIndices(c.InsertText, currentWord),
-                }),
+                .Select(c =>
+                    c with
+                    {
+                        MatchIndices = FuzzyMatch.ComputeMatchIndices(c.InsertText, currentWord),
+                    }
+                ),
         ];
     }
 

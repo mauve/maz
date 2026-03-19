@@ -4,16 +4,27 @@ namespace Console.Cli;
 
 internal static class CommandTreePrinter
 {
-    public static void Print(TextWriter output, CommandDef root, string? filter,
+    public static void Print(
+        TextWriter output,
+        CommandDef root,
+        string? filter,
         CommandTab tab = CommandTab.All,
-        CommandFilterMode filterMode = CommandFilterMode.NameOnly)
+        CommandFilterMode filterMode = CommandFilterMode.NameOnly
+    )
     {
         output.WriteLine(Ansi.White(root.Name));
         PrintChildren(output, root, prefix: "", filter, tab, filterMode, pathSegments: [root.Name]);
     }
 
-    private static void PrintChildren(TextWriter output, CommandDef cmd, string prefix,
-        string? filter, CommandTab tab, CommandFilterMode filterMode, List<string> pathSegments)
+    private static void PrintChildren(
+        TextWriter output,
+        CommandDef cmd,
+        string prefix,
+        string? filter,
+        CommandTab tab,
+        CommandFilterMode filterMode,
+        List<string> pathSegments
+    )
     {
         var children = cmd.EnumerateChildren().ToList();
 
@@ -52,9 +63,7 @@ internal static class CommandTreePrinter
             else
                 baseName = Ansi.White(child.Name);
 
-            var name = child.IsDataPlane
-                ? baseName + " \u26a1"
-                : baseName;
+            var name = child.IsDataPlane ? baseName + " \u26a1" : baseName;
             if (child.IsManualCommand)
                 name += " \u2728";
 
@@ -78,9 +87,10 @@ internal static class CommandTreePrinter
 
                 for (var j = 0; j < lines.Count; j++)
                 {
-                    var styledSegment = filter is not null && fuzzyTokens is null
-                        ? HighlightDesc(lines[j], filter)
-                        : Ansi.Dim(lines[j]);
+                    var styledSegment =
+                        filter is not null && fuzzyTokens is null
+                            ? HighlightDesc(lines[j], filter)
+                            : Ansi.Dim(lines[j]);
 
                     if (j == 0)
                         output.WriteLine($"{linePrefix}{name}  {styledSegment}");
@@ -93,9 +103,18 @@ internal static class CommandTreePrinter
             if (fuzzyTokens is not null)
                 childFilter = filter; // fuzzy path match always threads through
             else
-                childFilter = filter is not null && Matches(child, filter, filterMode) ? null : filter;
+                childFilter =
+                    filter is not null && Matches(child, filter, filterMode) ? null : filter;
 
-            PrintChildren(output, child, prefix + childPrefix, childFilter, tab, filterMode, childPath);
+            PrintChildren(
+                output,
+                child,
+                prefix + childPrefix,
+                childFilter,
+                tab,
+                filterMode,
+                childPath
+            );
         }
     }
 
@@ -109,15 +128,17 @@ internal static class CommandTreePrinter
         );
 
     private static bool HasMatch(CommandDef cmd, string filter, CommandFilterMode filterMode) =>
-        Matches(cmd, filter, filterMode) || cmd.EnumerateChildren().Any(c => HasMatch(c, filter, filterMode));
+        Matches(cmd, filter, filterMode)
+        || cmd.EnumerateChildren().Any(c => HasMatch(c, filter, filterMode));
 
-    private static bool TabPredicate(CommandDef cmd, CommandTab tab) => tab switch
-    {
-        CommandTab.Manual => cmd.IsManualCommand,
-        CommandTab.Service => !cmd.IsManualCommand,
-        CommandTab.DataPlane => cmd.IsDataPlane,
-        _ => true,
-    };
+    private static bool TabPredicate(CommandDef cmd, CommandTab tab) =>
+        tab switch
+        {
+            CommandTab.Manual => cmd.IsManualCommand,
+            CommandTab.Service => !cmd.IsManualCommand,
+            CommandTab.DataPlane => cmd.IsDataPlane,
+            _ => true,
+        };
 
     private static bool HasTabMatch(CommandDef cmd, CommandTab tab) =>
         TabPredicate(cmd, tab) || cmd.EnumerateChildren().Any(c => HasTabMatch(c, tab));
@@ -135,7 +156,11 @@ internal static class CommandTreePrinter
     /// Returns which token (if any) matched the given segment name when walking the path
     /// left-to-right against the token list. Returns null if this segment wasn't consumed.
     /// </summary>
-    private static string? FindMatchingToken(List<string> fullPath, string[] tokens, string segmentName)
+    private static string? FindMatchingToken(
+        List<string> fullPath,
+        string[] tokens,
+        string segmentName
+    )
     {
         int ti = 0;
         for (int si = 0; si < fullPath.Count && ti < tokens.Length; si++)
@@ -158,7 +183,11 @@ internal static class CommandTreePrinter
         return cmd.EnumerateChildren().Any(c => HasFuzzyMatch(c, tokens, path));
     }
 
-    private static string HighlightFuzzyName(string segmentName, List<string> fullPath, string[] tokens)
+    private static string HighlightFuzzyName(
+        string segmentName,
+        List<string> fullPath,
+        string[] tokens
+    )
     {
         var matched = FindMatchingToken(fullPath, tokens, segmentName);
         if (matched is null)
@@ -166,8 +195,7 @@ internal static class CommandTreePrinter
 
         // The matched token is a prefix of this segment name
         var matchLen = matched.Length;
-        return Ansi.Yellow(segmentName[..matchLen])
-            + Ansi.White(segmentName[matchLen..]);
+        return Ansi.Yellow(segmentName[..matchLen]) + Ansi.White(segmentName[matchLen..]);
     }
 
     private static string HighlightName(string text, string filter)

@@ -429,10 +429,7 @@ public class CliDirectiveTests
     {
         public override string Name => "app";
 
-        internal readonly CliOption<bool> _verbose = new()
-        {
-            Name = "--verbose",
-        };
+        internal readonly CliOption<bool> _verbose = new() { Name = "--verbose" };
 
         internal override IEnumerable<CliOption> EnumerateAllOptions()
         {
@@ -594,11 +591,7 @@ public class CliOptionTests
     [TestMethod]
     public void CustomParser_Used()
     {
-        var opt = new CliOption<int>
-        {
-            Name = "--val",
-            Parser = raw => int.Parse(raw) * 2,
-        };
+        var opt = new CliOption<int> { Name = "--val", Parser = raw => int.Parse(raw) * 2 };
         Assert.IsTrue(opt.TryParse("5"));
         Assert.AreEqual(10, opt.Value);
     }

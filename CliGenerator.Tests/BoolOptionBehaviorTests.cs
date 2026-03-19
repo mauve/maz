@@ -58,10 +58,7 @@ public class BoolOptionBehaviorTests
     [TestMethod]
     public void MainAlias_WithExplicitFalse_ReturnsFalse()
     {
-        Assert.IsFalse(
-            Parse("--verbose", "false"),
-            "--verbose false should set value to false"
-        );
+        Assert.IsFalse(Parse("--verbose", "false"), "--verbose false should set value to false");
     }
 
     [TestMethod]

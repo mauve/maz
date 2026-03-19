@@ -66,7 +66,9 @@ public sealed class MazConfig
     /// From <c>[global] verbose-body-limit</c>. Default 8192.
     /// </summary>
     public int VerboseBodyLimit =>
-        GlobalDefaults.TryGetValue("verbose-body-limit", out var v) && int.TryParse(v, out var n) ? n : 8192;
+        GlobalDefaults.TryGetValue("verbose-body-limit", out var v) && int.TryParse(v, out var n)
+            ? n
+            : 8192;
 
     /// <summary>
     /// Timestamp format for verbose output: <c>relative</c> (default) or <c>absolute</c>.

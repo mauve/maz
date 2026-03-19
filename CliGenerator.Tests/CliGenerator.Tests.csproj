@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" />
-<PackageReference Include="MSTest" />
+    <PackageReference Include="MSTest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CliGenerator\CliGenerator.csproj" />

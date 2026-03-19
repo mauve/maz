@@ -76,10 +76,7 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        Assert.IsTrue(
-            text.Contains("\"PORT\""),
-            "Should emit metadata with env var"
-        );
+        Assert.IsTrue(text.Contains("\"PORT\""), "Should emit metadata with env var");
         Assert.IsFalse(
             text.Contains("GetEnvironmentVariable(\"PORT\")"),
             "Default should suppress env fallback suffix emission"
@@ -100,11 +97,7 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        AssertContainsAll(
-            text,
-            "Recursive = true",
-            "IsAdvanced = true"
-        );
+        AssertContainsAll(text, "Recursive = true", "IsAdvanced = true");
     }
 
     [TestMethod]
@@ -186,9 +179,7 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        Assert.IsTrue(
-            text.Contains("TestApp.Endpoint.Parse(__raw)")
-        );
+        Assert.IsTrue(text.Contains("TestApp.Endpoint.Parse(__raw)"));
     }
 
     [TestMethod]
@@ -232,10 +223,7 @@ public class CliOptionGeneratorParserAndEnvTests
             }
             """
         );
-        Assert.IsFalse(
-            text.Contains("Parser ="),
-            "No parser path should avoid emitting Parser"
-        );
+        Assert.IsFalse(text.Contains("Parser ="), "No parser path should avoid emitting Parser");
     }
 
     [TestMethod]
@@ -263,11 +251,7 @@ public class CliOptionGeneratorParserAndEnvTests
             ),
             "ModeCommand.g.cs"
         );
-        AssertContainsAll(
-            text,
-            "__raw => __raw != null",
-            "(TestApp.Mode?)null"
-        );
+        AssertContainsAll(text, "__raw => __raw != null", "(TestApp.Mode?)null");
     }
 
     [TestMethod]

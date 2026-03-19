@@ -72,11 +72,7 @@ public partial class LogoutCommandDef : CommandDef
 
                 if (
                     Account is not null
-                    && !string.Equals(
-                        account.Username,
-                        Account,
-                        StringComparison.OrdinalIgnoreCase
-                    )
+                    && !string.Equals(account.Username, Account, StringComparison.OrdinalIgnoreCase)
                 )
                     continue;
 
@@ -106,7 +102,9 @@ public partial class LogoutCommandDef : CommandDef
             foreach (var account in removed)
             {
                 var identity = account.Username ?? account.HomeAccountId;
-                var tenantInfo = account.TenantId is not null ? $" (tenant: {account.TenantId})" : "";
+                var tenantInfo = account.TenantId is not null
+                    ? $" (tenant: {account.TenantId})"
+                    : "";
                 System.Console.Out.WriteLine($"Logged out: {identity}{tenantInfo}");
             }
 

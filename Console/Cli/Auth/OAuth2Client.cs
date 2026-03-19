@@ -49,7 +49,8 @@ internal sealed class OAuth2Client
         listener.Start();
 
         var scopeString = BuildScopeString(scopes);
-        var authorizeUrl = $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize"
+        var authorizeUrl =
+            $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize"
             + $"?client_id={AzureCliClientId}"
             + $"&response_type=code"
             + $"&redirect_uri={Uri.EscapeDataString(redirectUri)}"
@@ -66,21 +67,21 @@ internal sealed class OAuth2Client
         string code;
         try
         {
-            var context = await listener.GetContextAsync().WaitAsync(
-                TimeSpan.FromMinutes(5),
-                ct
-            );
+            var context = await listener.GetContextAsync().WaitAsync(TimeSpan.FromMinutes(5), ct);
 
             var query = context.Request.Url?.Query;
             var queryParams = System.Web.HttpUtility.ParseQueryString(query ?? "");
-            code = queryParams["code"]
+            code =
+                queryParams["code"]
                 ?? throw new InvalidOperationException(
                     $"Authorization failed: {queryParams["error_description"] ?? queryParams["error"] ?? "no code received"}"
                 );
 
             var returnedState = queryParams["state"];
             if (returnedState != state)
-                throw new InvalidOperationException("OAuth2 state mismatch — possible CSRF attack.");
+                throw new InvalidOperationException(
+                    "OAuth2 state mismatch — possible CSRF attack."
+                );
 
             // Send success response to browser
             var responseHtml = System.Text.Encoding.UTF8.GetBytes(LoginSuccessHtml);
@@ -95,7 +96,14 @@ internal sealed class OAuth2Client
         }
 
         // Exchange code for tokens
-        var tokenResponse = await ExchangeCodeAsync(tenant, code, redirectUri, codeVerifier, scopeString, ct);
+        var tokenResponse = await ExchangeCodeAsync(
+            tenant,
+            code,
+            redirectUri,
+            codeVerifier,
+            scopeString,
+            ct
+        );
 
         // Write to cache
         foreach (var scope in scopes)
@@ -124,7 +132,8 @@ internal sealed class OAuth2Client
             ct
         );
 
-        var deviceCode = deviceCodeResponse["device_code"]?.GetValue<string>()
+        var deviceCode =
+            deviceCodeResponse["device_code"]?.GetValue<string>()
             ?? throw new InvalidOperationException("No device_code in response.");
         var userCode = deviceCodeResponse["user_code"]?.GetValue<string>() ?? "";
         var verificationUri = deviceCodeResponse["verification_uri"]?.GetValue<string>() ?? "";
@@ -224,7 +233,8 @@ internal sealed class OAuth2Client
             new Dictionary<string, string>
             {
                 ["client_id"] = clientId,
-                ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                ["client_assertion_type"] =
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 ["client_assertion"] = assertion,
                 ["grant_type"] = "client_credentials",
                 ["scope"] = scopeString,
@@ -255,7 +265,8 @@ internal sealed class OAuth2Client
             new Dictionary<string, string>
             {
                 ["client_id"] = clientId,
-                ["client_assertion_type"] = "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
+                ["client_assertion_type"] =
+                    "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
                 ["client_assertion"] = federatedToken,
                 ["grant_type"] = "client_credentials",
                 ["scope"] = scopeString,
@@ -378,7 +389,8 @@ internal sealed class OAuth2Client
         using var response = await _http.PostAsync(url, content, ct);
         var body = await response.Content.ReadAsStringAsync(ct);
 
-        var json = JsonNode.Parse(body)?.AsObject()
+        var json =
+            JsonNode.Parse(body)?.AsObject()
             ?? throw new InvalidOperationException($"Invalid JSON response from {url}");
 
         if (!response.IsSuccessStatusCode && json["error"] is not null)
@@ -394,7 +406,8 @@ internal sealed class OAuth2Client
 
     private static OAuth2TokenResponse ParseTokenResponse(JsonObject json)
     {
-        var accessToken = json["access_token"]?.GetValue<string>()
+        var accessToken =
+            json["access_token"]?.GetValue<string>()
             ?? throw new InvalidOperationException("No access_token in token response.");
 
         var idToken = json["id_token"]?.GetValue<string>();
@@ -406,7 +419,8 @@ internal sealed class OAuth2Client
         if (idToken is not null)
         {
             var claims = ParseJwtPayload(idToken);
-            username = claims?["preferred_username"]?.GetValue<string>()
+            username =
+                claims?["preferred_username"]?.GetValue<string>()
                 ?? claims?["upn"]?.GetValue<string>()
                 ?? claims?["email"]?.GetValue<string>();
             localAccountId = claims?["oid"]?.GetValue<string>();
@@ -459,19 +473,13 @@ internal sealed class OAuth2Client
     private static string GenerateCodeVerifier()
     {
         var bytes = RandomNumberGenerator.GetBytes(32);
-        return Convert.ToBase64String(bytes)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
+        return Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
     private static string ComputeCodeChallenge(string codeVerifier)
     {
         var hash = SHA256.HashData(Encoding.ASCII.GetBytes(codeVerifier));
-        return Convert.ToBase64String(hash)
-            .TrimEnd('=')
-            .Replace('+', '-')
-            .Replace('/', '_');
+        return Convert.ToBase64String(hash).TrimEnd('=').Replace('+', '-').Replace('/', '_');
     }
 
     private static string BuildScopeString(IReadOnlyList<string> scopes)

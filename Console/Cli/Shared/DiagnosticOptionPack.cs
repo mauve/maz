@@ -17,7 +17,8 @@ public class DiagnosticOptionPack : OptionPack
     internal static readonly CliOption<bool> VerboseOption = new()
     {
         Name = "-v",
-        Description = "Diagnostic output: credential interactions and HTTP request/response headers.",
+        Description =
+            "Diagnostic output: credential interactions and HTTP request/response headers.",
         Recursive = true,
     };
 
@@ -56,8 +57,10 @@ public class DiagnosticOptionPack : OptionPack
     /// </summary>
     public static int GetVerboseLevel()
     {
-        if (VeryVerboseOption.Value) return 2;
-        if (VerboseOption.Value) return 1;
+        if (VeryVerboseOption.Value)
+            return 2;
+        if (VerboseOption.Value)
+            return 1;
         return 0;
     }
 
@@ -67,16 +70,20 @@ public class DiagnosticOptionPack : OptionPack
     public static DiagnosticLog GetLog()
     {
         var level = GetVerboseLevel();
-        if (level <= 0) return DiagnosticLog.Null;
+        if (level <= 0)
+            return DiagnosticLog.Null;
 
         var config = MazConfig.Current;
         var bodyLimit = BodyLimitOption.Value;
-        if (bodyLimit <= 0) bodyLimit = 8192;
+        if (bodyLimit <= 0)
+            bodyLimit = 8192;
 
         // Read config overrides (only when CLI didn't explicitly set the limit)
-        if (config.GlobalDefaults.TryGetValue("verbose-body-limit", out var bl)
+        if (
+            config.GlobalDefaults.TryGetValue("verbose-body-limit", out var bl)
             && int.TryParse(bl, out var configLimit)
-            && bodyLimit == 8192)
+            && bodyLimit == 8192
+        )
         {
             bodyLimit = configLimit;
         }

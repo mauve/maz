@@ -10,11 +10,14 @@ public class CommandSuggesterTests
 {
     private static TestCommandDef BuildRoot()
     {
-        return new TestCommandDef("maz", [
-            new TestCommandDef("group"),
-            new TestCommandDef("monitor"),
-            new TestCommandDef("account"),
-        ]);
+        return new TestCommandDef(
+            "maz",
+            [
+                new TestCommandDef("group"),
+                new TestCommandDef("monitor"),
+                new TestCommandDef("account"),
+            ]
+        );
     }
 
     private static CliParseResult Parse(TestCommandDef root, params string[] args) =>
@@ -66,11 +69,14 @@ public class CommandSuggesterTests
     [TestMethod]
     public void TrySuggest_SingleMatch_Interactive_UserConfirms_Reinvokes()
     {
-        var root = new TestCommandDef("maz", [
-            new TestCommandDef("group", handler: _ => Task.FromResult(42)),
-            new TestCommandDef("monitor"),
-            new TestCommandDef("account"),
-        ]);
+        var root = new TestCommandDef(
+            "maz",
+            [
+                new TestCommandDef("group", handler: _ => Task.FromResult(42)),
+                new TestCommandDef("monitor"),
+                new TestCommandDef("account"),
+            ]
+        );
 
         var result = Parse(root, "grouop");
         var stderr = new StringBuilder();
@@ -110,10 +116,13 @@ public class CommandSuggesterTests
     [TestMethod]
     public void TrySuggest_MultipleMatches_Interactive_UserPicksNumber()
     {
-        var root = new TestCommandDef("maz", [
-            new TestCommandDef("groupa", handler: _ => Task.FromResult(10)),
-            new TestCommandDef("groupb", handler: _ => Task.FromResult(20)),
-        ]);
+        var root = new TestCommandDef(
+            "maz",
+            [
+                new TestCommandDef("groupa", handler: _ => Task.FromResult(10)),
+                new TestCommandDef("groupb", handler: _ => Task.FromResult(20)),
+            ]
+        );
 
         var result = Parse(root, "group");
         var stderr = new StringBuilder();

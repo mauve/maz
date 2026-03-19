@@ -13,7 +13,8 @@ public class GlobalBehaviorOptionPack : OptionPack
     {
         Name = "--require-confirmation",
         Aliases = ["--no-require-confirmation"],
-        Description = "Require interactive confirmation before any destructive (create/delete/update) operation.",
+        Description =
+            "Require interactive confirmation before any destructive (create/delete/update) operation.",
         Recursive = true,
         DefaultValueFactory = () =>
             bool.TryParse(Environment.GetEnvironmentVariable("MAZ_REQUIRE_CONFIRMATION"), out var v)

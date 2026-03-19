@@ -81,8 +81,15 @@ public static class OperationCommandEmitter
         w.Line("using Console.Cli.Http;");
         w.Line("using Console.Cli.Shared;");
         w.Line("using Console.Rendering;");
-        if (isDataPlane || usesResourcePack || usesResourceNameResolver
-            || usesSubscription || usesResourceGroup || isMergedList || usesStorageAccount)
+        if (
+            isDataPlane
+            || usesResourcePack
+            || usesResourceNameResolver
+            || usesSubscription
+            || usesResourceGroup
+            || isMergedList
+            || usesStorageAccount
+        )
             w.Line("using Azure.ResourceManager;");
         w.Line();
         w.Line($"namespace {ns};");
@@ -275,14 +282,18 @@ public static class OperationCommandEmitter
                             !isDataPlane
                             && !usesResourcePack
                             && !usesResourceNameResolver
-                            && (usesSubscription || usesResourceGroup || isMergedList || usesStorageAccount)
+                            && (
+                                usesSubscription
+                                || usesResourceGroup
+                                || isMergedList
+                                || usesStorageAccount
+                            )
                         )
                         {
-                            var subPack = usesStorageAccount
-                                ? "StorageAccount.Subscription"
-                                : usesResourceGroup || isMergedList
-                                    ? "ResourceGroup.Subscription"
-                                    : "Subscription";
+                            var subPack =
+                                usesStorageAccount ? "StorageAccount.Subscription"
+                                : usesResourceGroup || isMergedList ? "ResourceGroup.Subscription"
+                                : "Subscription";
                             w.Line(
                                 $"var subscriptionId = await {subPack}.RequireSubscriptionIdAsync(new ArmClient(cred));"
                             );
@@ -459,10 +470,7 @@ public static class OperationCommandEmitter
         else
         {
             // subscriptionId is pre-resolved to a GUID variable above; just normalize casing
-            expr = expr.Replace(
-                    "{subscriptionId}",
-                    "{subscriptionId}"
-                )
+            expr = expr.Replace("{subscriptionId}", "{subscriptionId}")
                 .Replace(
                     "{resourceGroupName}",
                     "{ResourceGroup.RequireResourceGroupName()}",

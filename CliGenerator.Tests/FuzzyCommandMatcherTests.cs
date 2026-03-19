@@ -60,11 +60,10 @@ public class FuzzyCommandMatcherTests
     [TestMethod]
     public void FindMatches_ReturnsTopMatchesSortedDescending()
     {
-        var root = new TestCommandDef("root", [
-            new TestCommandDef("group"),
-            new TestCommandDef("get"),
-            new TestCommandDef("monitor"),
-        ]);
+        var root = new TestCommandDef(
+            "root",
+            [new TestCommandDef("group"), new TestCommandDef("get"), new TestCommandDef("monitor")]
+        );
 
         // "grou" is prefix of "group" (score 80)
         var matches = FuzzyCommandMatcher.FindMatches(root, "grou");
@@ -80,7 +79,8 @@ public class FuzzyCommandMatcherTests
     [TestMethod]
     public void FindMatches_CapsAtFiveResults()
     {
-        var children = Enumerable.Range(0, 10)
+        var children = Enumerable
+            .Range(0, 10)
             .Select(i => (CommandDef)new TestCommandDef($"command{i}"))
             .ToList();
         var root = new TestCommandDef("root", children);

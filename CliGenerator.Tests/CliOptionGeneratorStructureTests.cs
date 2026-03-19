@@ -132,11 +132,7 @@ public class CliOptionGeneratorStructureTests
             }
             """
         );
-        AssertContainsAll(
-            text,
-            "EnumerateChildPacks()",
-            "yield return Child;"
-        );
+        AssertContainsAll(text, "EnumerateChildPacks()", "yield return Child;");
     }
 
     [TestMethod]
@@ -278,11 +274,7 @@ public class CliOptionGeneratorStructureTests
             }
             """
         );
-        AssertContainsAll(
-            text,
-            "EnumerateOptionPacks()",
-            "yield return Child;"
-        );
+        AssertContainsAll(text, "EnumerateOptionPacks()", "yield return Child;");
         // No child commands, so HasGeneratedChildren should not be emitted
         Assert.IsFalse(text.Contains("HasGeneratedChildren"));
     }

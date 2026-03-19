@@ -264,7 +264,8 @@ public sealed class CliOption<T> : CliOption
 
         if (underlyingType.IsEnum)
             return Enum.TryParse(underlyingType, raw, ignoreCase: true, out var e)
-                ? (true, (T)e!) : (false, default);
+                ? (true, (T)e!)
+                : (false, default);
 
         if (underlyingType == typeof(Uri))
         {
@@ -277,8 +278,14 @@ public sealed class CliOption<T> : CliOption
         var parseMethod = underlyingType.GetMethod("Parse", [typeof(string)]);
         if (parseMethod is { IsStatic: true })
         {
-            try { return (true, (T)parseMethod.Invoke(null, [raw])!); }
-            catch { return (false, default); }
+            try
+            {
+                return (true, (T)parseMethod.Invoke(null, [raw])!);
+            }
+            catch
+            {
+                return (false, default);
+            }
         }
 
         return (false, default);

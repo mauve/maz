@@ -62,9 +62,11 @@ internal static class BootstrapMarkdownRenderer
             }
 
             // ### Sub-heading, indented code, blank — use shared renderer
-            if (line.StartsWith("### ", StringComparison.Ordinal)
+            if (
+                line.StartsWith("### ", StringComparison.Ordinal)
                 || line.StartsWith("    ", StringComparison.Ordinal)
-                || line.StartsWith('\t'))
+                || line.StartsWith('\t')
+            )
             {
                 var rendered = MarkdownTerminal.RenderLine(line);
                 System.Console.WriteLine(rendered is not null ? "  " + rendered : "");
@@ -214,5 +216,4 @@ internal static class BootstrapMarkdownRenderer
         if (current.Length > 0)
             System.Console.WriteLine(prefix + current);
     }
-
 }

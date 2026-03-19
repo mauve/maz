@@ -237,13 +237,7 @@ internal class ColumnRenderer<T>(ColumnRendererOptions options) : ICollectionRen
                 continue; // skip nulls, nested objects and arrays
 
             var k = key;
-            columns.Add(
-                new ColumnDef(
-                    k,
-                    ToDisplayName(k),
-                    o => (o as JsonObject)?[k]?.ToString()
-                )
-            );
+            columns.Add(new ColumnDef(k, ToDisplayName(k), o => (o as JsonObject)?[k]?.ToString()));
         }
         return columns;
     }

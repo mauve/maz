@@ -348,8 +348,7 @@ internal sealed class MsalCache
             var rtSection = data["RefreshToken"]?.AsObject() ?? [];
             data["RefreshToken"] = rtSection;
 
-            var rtKey =
-                $"{homeAccountId}-{env}-refreshtoken-{clientId}--".ToLowerInvariant();
+            var rtKey = $"{homeAccountId}-{env}-refreshtoken-{clientId}--".ToLowerInvariant();
             rtSection[rtKey] = new JsonObject
             {
                 ["home_account_id"] = homeAccountId,
@@ -399,11 +398,7 @@ internal sealed class MsalCache
         data["AppMetadata"] = appSection;
 
         var appKey = $"appmetadata-{env}-{clientId}".ToLowerInvariant();
-        appSection[appKey] = new JsonObject
-        {
-            ["client_id"] = clientId,
-            ["environment"] = env,
-        };
+        appSection[appKey] = new JsonObject { ["client_id"] = clientId, ["environment"] = env };
 
         WriteCacheFile(path, data);
     }
@@ -564,9 +559,7 @@ internal sealed class MsalCache
         {
             try
             {
-                var json = JsonNode.Parse(
-                    Convert.FromBase64String(PadBase64(response.ClientInfo))
-                );
+                var json = JsonNode.Parse(Convert.FromBase64String(PadBase64(response.ClientInfo)));
                 var uid = json?["uid"]?.GetValue<string>();
                 var utid = json?["utid"]?.GetValue<string>();
                 if (uid is not null && utid is not null)

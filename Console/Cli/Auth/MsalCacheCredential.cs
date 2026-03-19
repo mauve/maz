@@ -28,10 +28,7 @@ internal sealed class MsalCacheCredential : TokenCredential
         CancellationToken cancellationToken
     )
     {
-        return GetTokenAsync(requestContext, cancellationToken)
-            .AsTask()
-            .GetAwaiter()
-            .GetResult();
+        return GetTokenAsync(requestContext, cancellationToken).AsTask().GetAwaiter().GetResult();
     }
 
     public override async ValueTask<AccessToken> GetTokenAsync(
@@ -39,9 +36,10 @@ internal sealed class MsalCacheCredential : TokenCredential
         CancellationToken cancellationToken
     )
     {
-        var scope = requestContext.Scopes.Length > 0
-            ? requestContext.Scopes[0]
-            : "https://management.azure.com/.default";
+        var scope =
+            requestContext.Scopes.Length > 0
+                ? requestContext.Scopes[0]
+                : "https://management.azure.com/.default";
 
         var tenantId = requestContext.TenantId;
 

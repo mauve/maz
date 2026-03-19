@@ -89,7 +89,11 @@ public partial class AcrLoginCommandDef(AuthOptionPack auth) : CommandDef
     /// Login server is derived from the registry name as "{name}.azurecr.io"
     /// (custom domains require passing the full hostname directly via --name).
     /// </summary>
-    private async Task<string> ResolveViaArmAsync(string registryName, DiagnosticLog log, CancellationToken ct)
+    private async Task<string> ResolveViaArmAsync(
+        string registryName,
+        DiagnosticLog log,
+        CancellationToken ct
+    )
     {
         var arg = new ArmArgClient(_auth.GetCredential(log), log);
 

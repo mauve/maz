@@ -91,8 +91,10 @@ internal sealed class CachingTokenCredential : TokenCredential
             var suffix = "\0" + key;
             foreach (var (k, v) in _cache)
             {
-                if (k.EndsWith(suffix, StringComparison.Ordinal)
-                    && v.ExpiresOn > DateTimeOffset.UtcNow + ExpiryBuffer)
+                if (
+                    k.EndsWith(suffix, StringComparison.Ordinal)
+                    && v.ExpiresOn > DateTimeOffset.UtcNow + ExpiryBuffer
+                )
                 {
                     token = v;
                     return true;

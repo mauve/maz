@@ -21,8 +21,11 @@ internal static class ClientAssertionBuilder
             ? X509CertificateLoader.LoadPkcs12FromFile(certificatePath, certificatePassword)
             : X509CertificateLoader.LoadCertificateFromFile(certificatePath);
 
-        var rsa = cert.GetRSAPrivateKey()
-            ?? throw new InvalidOperationException("Certificate does not contain an RSA private key.");
+        var rsa =
+            cert.GetRSAPrivateKey()
+            ?? throw new InvalidOperationException(
+                "Certificate does not contain an RSA private key."
+            );
 
         var thumbprint = cert.GetCertHash();
         var x5t = Base64UrlEncode(thumbprint);
