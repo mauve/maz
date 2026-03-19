@@ -31,7 +31,7 @@ public partial class HsmCloudhsmclusterShowCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CloudHsmClusterName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/cloudHsmClusters", ct);
+            CloudHsmClusterName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/cloudHsmClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HardwareSecurityModules/cloudHsmClusters/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-03-31", null, ct);

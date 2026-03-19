@@ -44,7 +44,7 @@ public partial class DatareplicationProtectedItemPlannedFailoverCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataReplication/replicationVaults/{resolvedName}/protectedItems/{ProtectedItemName}/plannedFailover";
 
         var body = BodyJson is { } rawJson

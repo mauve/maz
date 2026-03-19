@@ -36,7 +36,7 @@ public partial class SolutionsApplicationRefreshPermissionsCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationName!, ResourceGroup, armClient, "Microsoft.Solutions/applications", ct);
+            ApplicationName!, ResourceGroup, armClient, "Microsoft.Solutions/applications", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Solutions/applications/{resolvedName}/refreshPermissions";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2021-07-01", null, ct);

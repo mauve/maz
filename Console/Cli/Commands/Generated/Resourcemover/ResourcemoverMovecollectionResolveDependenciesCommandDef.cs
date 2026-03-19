@@ -36,7 +36,7 @@ public partial class ResourcemoverMovecollectionResolveDependenciesCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", ct);
+            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Migrate/moveCollections/{resolvedName}/resolveDependencies";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-08-01", null, ct);

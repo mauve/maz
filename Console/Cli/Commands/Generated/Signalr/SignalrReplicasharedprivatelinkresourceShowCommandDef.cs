@@ -39,7 +39,7 @@ public partial class SignalrReplicasharedprivatelinkresourceShowCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.SignalRService/signalR", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.SignalRService/signalR", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.SignalRService/signalR/{resolvedName}/replicas/{ReplicaName}/sharedPrivateLinkResources/{SharedPrivateLinkResourceName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-03-01", null, ct);

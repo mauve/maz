@@ -44,7 +44,7 @@ public partial class WebappAppserviceenvironmentChangeVnetCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/hostingEnvironments", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/hostingEnvironments", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/hostingEnvironments/{resolvedName}/changeVirtualNetwork";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

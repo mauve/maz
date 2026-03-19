@@ -48,7 +48,7 @@ public partial class CdnEndpointLoadContentCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", ct);
+            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cdn/profiles/{resolvedName}/endpoints/{EndpointName}/load";
 
         var body = BodyJson is { } rawJson

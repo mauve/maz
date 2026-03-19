@@ -31,7 +31,7 @@ public partial class NetworkcloudRackGetCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RackName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/racks", ct);
+            RackName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/racks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/racks/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

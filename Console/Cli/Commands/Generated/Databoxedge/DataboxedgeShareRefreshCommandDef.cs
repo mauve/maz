@@ -39,7 +39,7 @@ public partial class DataboxedgeShareRefreshCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeviceName!, ResourceGroup, armClient, "Microsoft.DataBoxEdge/dataBoxEdgeDevices", ct);
+            DeviceName!, ResourceGroup, armClient, "Microsoft.DataBoxEdge/dataBoxEdgeDevices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resolvedName}/shares/{ParamName}/refresh";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-07-01", null, ct);

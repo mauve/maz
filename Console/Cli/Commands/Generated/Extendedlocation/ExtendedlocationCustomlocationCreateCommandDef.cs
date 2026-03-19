@@ -36,7 +36,7 @@ public partial class ExtendedlocationCustomlocationCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ExtendedLocation/customLocations", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ExtendedLocation/customLocations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ExtendedLocation/customLocations/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2021-08-15", null, ct);

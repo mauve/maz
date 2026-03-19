@@ -36,7 +36,7 @@ public partial class WebpubsubReplicaDeleteCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.SignalRService/webPubSub", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.SignalRService/webPubSub", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.SignalRService/webPubSub/{resolvedName}/replicas/{ReplicaName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-03-01", null, ct);

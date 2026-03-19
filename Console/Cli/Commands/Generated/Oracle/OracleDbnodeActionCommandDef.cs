@@ -48,7 +48,7 @@ public partial class OracleDbnodeActionCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Cloudvmclustername!, ResourceGroup, armClient, "Oracle.Database/cloudVmClusters", ct);
+            Cloudvmclustername!, ResourceGroup, armClient, "Oracle.Database/cloudVmClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudVmClusters/{resolvedName}/dbNodes/{Dbnodeocid}/action";
 
         var body = BodyJson is { } rawJson

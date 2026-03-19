@@ -36,7 +36,7 @@ public partial class ImagebuilderVirtualmachineimagetemplateDeleteCommandDef(Aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ImageTemplateName!, ResourceGroup, armClient, "Microsoft.VirtualMachineImages/imageTemplates", ct);
+            ImageTemplateName!, ResourceGroup, armClient, "Microsoft.VirtualMachineImages/imageTemplates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VirtualMachineImages/imageTemplates/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-02-01", null, ct);

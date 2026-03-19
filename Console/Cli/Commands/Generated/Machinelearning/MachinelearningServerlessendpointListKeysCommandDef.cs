@@ -35,7 +35,7 @@ public partial class MachinelearningServerlessendpointListKeysCommandDef(AuthOpt
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.MachineLearningServices/workspaces/{resolvedName}/serverlessEndpoints/{ParamName}/listKeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-12-01", null, ct);

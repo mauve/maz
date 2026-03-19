@@ -43,7 +43,7 @@ public partial class ServicebusRuleShowCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.ServiceBus/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.ServiceBus/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceBus/namespaces/{resolvedName}/topics/{TopicName}/subscriptions/{SubscriptionName}/rules/{RuleName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);

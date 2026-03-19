@@ -44,7 +44,7 @@ public partial class OracleCloudexadatainfrastructureConfigureExascaleCommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", ct);
+            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudExadataInfrastructures/{resolvedName}/configureExascale";
 
         var body = BodyJson is { } rawJson

@@ -35,7 +35,7 @@ public partial class NetworkPeerexpressroutecircuitconnectionListCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", ct);
+            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/expressRouteCircuits/{resolvedName}/peerings/{PeeringName}/peerConnections";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

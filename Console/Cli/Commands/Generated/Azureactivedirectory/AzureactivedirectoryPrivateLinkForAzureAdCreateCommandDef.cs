@@ -36,7 +36,7 @@ public partial class AzureactivedirectoryPrivateLinkForAzureAdCreateCommandDef(A
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PolicyName!, ResourceGroup, armClient, "microsoft.aadiam/privateLinkForAzureAd", ct);
+            PolicyName!, ResourceGroup, armClient, "microsoft.aadiam/privateLinkForAzureAd", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/microsoft.aadiam/privateLinkForAzureAd/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2020-03-01", null, ct);

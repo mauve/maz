@@ -35,7 +35,7 @@ public partial class MonitorActiongroupGetTestNotificationsAtActionGroupResource
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ActionGroupName!, ResourceGroup, armClient, "Microsoft.Insights/actionGroups", ct);
+            ActionGroupName!, ResourceGroup, armClient, "Microsoft.Insights/actionGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/actionGroups/{resolvedName}/notificationStatus/{NotificationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-03-01", null, ct);

@@ -21,7 +21,7 @@ public partial class ReservationsCatalogShowCommandDef(AuthOptionPack auth) : Co
     [CliOption("--reserved-resource-type")]
     public partial string? ReservedResourceType { get; }
 
-    /// <summary>Filters the skus based on the location specified in this parameter. This can be an Azure region or global</summary>
+    /// <summary>Filters the skus based on the location specified in this parameter. This can be an azure region or global</summary>
     [CliOption("--location")]
     public partial string? Location { get; }
 

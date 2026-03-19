@@ -31,7 +31,7 @@ public partial class CommunicationDomainListCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", ct);
+            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Communication/emailServices/{resolvedName}/domains";
 
         var allItems = client.GetAllAsync(path, "2026-03-18", "value", "nextLink", ct);

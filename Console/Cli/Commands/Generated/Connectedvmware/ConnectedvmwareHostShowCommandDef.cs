@@ -31,7 +31,7 @@ public partial class ConnectedvmwareHostShowCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/hosts", ct);
+            HostName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/hosts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/hosts/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-12-01", null, ct);

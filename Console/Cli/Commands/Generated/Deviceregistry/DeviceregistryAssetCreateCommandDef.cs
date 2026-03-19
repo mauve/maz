@@ -48,7 +48,7 @@ public partial class DeviceregistryAssetCreateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AssetName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assets", ct);
+            AssetName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DeviceRegistry/assets/{resolvedName}";
 
         var body = BodyJson is { } rawJson

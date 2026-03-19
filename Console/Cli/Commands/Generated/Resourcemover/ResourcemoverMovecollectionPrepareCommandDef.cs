@@ -44,7 +44,7 @@ public partial class ResourcemoverMovecollectionPrepareCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", ct);
+            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Migrate/moveCollections/{resolvedName}/prepare";
 
         var body = BodyJson is { } rawJson

@@ -44,7 +44,7 @@ public partial class ConnectedvmwareResourcepoolCreateCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", ct);
+            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/resourcePools/{resolvedName}";
 
         var body = BodyJson is { } rawJson

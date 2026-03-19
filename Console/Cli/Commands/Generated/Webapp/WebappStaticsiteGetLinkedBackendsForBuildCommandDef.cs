@@ -34,7 +34,7 @@ public partial class WebappStaticsiteGetLinkedBackendsForBuildCommandDef(AuthOpt
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/staticSites", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/staticSites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/staticSites/{resolvedName}/builds/{EnvironmentName}/linkedBackends";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

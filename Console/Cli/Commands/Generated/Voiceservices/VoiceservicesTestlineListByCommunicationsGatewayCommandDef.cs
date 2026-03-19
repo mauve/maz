@@ -31,7 +31,7 @@ public partial class VoiceservicesTestlineListByCommunicationsGatewayCommandDef(
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", ct);
+            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VoiceServices/communicationsGateways/{resolvedName}/testLines";
 
         var allItems = client.GetAllAsync(path, "2023-09-01", "value", "nextLink", ct);

@@ -36,7 +36,7 @@ public partial class LoganalyticsTableMigrateCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}/tables/{TableName}/migrate";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-07-01", null, ct);

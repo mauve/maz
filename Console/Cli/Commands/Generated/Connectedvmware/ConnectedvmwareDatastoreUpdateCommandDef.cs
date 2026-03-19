@@ -31,7 +31,7 @@ public partial class ConnectedvmwareDatastoreUpdateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DatastoreName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/datastores", ct);
+            DatastoreName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/datastores", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/datastores/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2023-12-01", null, ct);

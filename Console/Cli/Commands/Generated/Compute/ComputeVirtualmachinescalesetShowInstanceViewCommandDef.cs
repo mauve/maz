@@ -31,7 +31,7 @@ public partial class ComputeVirtualmachinescalesetShowInstanceViewCommandDef(Aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", ct);
+            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachineScaleSets/{resolvedName}/instanceView";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-04-01", null, ct);

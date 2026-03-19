@@ -35,7 +35,7 @@ public partial class EventgridTopiceventsubscriptionShowCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            TopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/topics", ct);
+            TopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/topics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/topics/{resolvedName}/eventSubscriptions/{EventSubscriptionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-02-15", null, ct);

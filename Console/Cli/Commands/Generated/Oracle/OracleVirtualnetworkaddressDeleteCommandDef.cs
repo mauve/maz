@@ -40,7 +40,7 @@ public partial class OracleVirtualnetworkaddressDeleteCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Cloudvmclustername!, ResourceGroup, armClient, "Oracle.Database/cloudVmClusters", ct);
+            Cloudvmclustername!, ResourceGroup, armClient, "Oracle.Database/cloudVmClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudVmClusters/{resolvedName}/virtualNetworkAddresses/{Virtualnetworkaddressname}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-09-01", null, ct);

@@ -30,7 +30,7 @@ public partial class NotificationhubsPrivateendpointconnectionListCommandDef(Aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NotificationHubs/namespaces/{resolvedName}/privateEndpointConnections";
 
         var allItems = client.GetAllAsync(path, "2023-09-01", "value", "nextLink", ct);

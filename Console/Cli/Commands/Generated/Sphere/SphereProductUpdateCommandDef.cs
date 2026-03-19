@@ -39,7 +39,7 @@ public partial class SphereProductUpdateCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", ct);
+            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureSphere/catalogs/{resolvedName}/products/{ProductName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-04-01", null, ct);

@@ -36,7 +36,7 @@ public partial class HdinsightClusterDeleteCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.HDInsight/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.HDInsight/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HDInsight/clusters/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2021-06-01", null, ct);

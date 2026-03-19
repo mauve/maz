@@ -44,7 +44,7 @@ public partial class IothubIotHubFailoverCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IotHubName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", ct);
+            IotHubName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/IotHubs/{resolvedName}/failover";
 
         var body = BodyJson is { } rawJson

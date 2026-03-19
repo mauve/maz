@@ -35,7 +35,7 @@ public partial class HealthdataaiservicesDeidserviceUpdateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeidServiceName!, ResourceGroup, armClient, "Microsoft.HealthDataAIServices/deidServices", ct);
+            DeidServiceName!, ResourceGroup, armClient, "Microsoft.HealthDataAIServices/deidServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthDataAIServices/deidServices/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-09-20", null, ct);

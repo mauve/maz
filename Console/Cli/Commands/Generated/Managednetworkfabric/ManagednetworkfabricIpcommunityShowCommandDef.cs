@@ -31,7 +31,7 @@ public partial class ManagednetworkfabricIpcommunityShowCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IpCommunityName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipCommunities", ct);
+            IpCommunityName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipCommunities", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/ipCommunities/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);

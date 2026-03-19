@@ -36,7 +36,7 @@ public partial class MysqlBackupCreateCommandDef(AuthOptionPack auth) : CommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMySQL/flexibleServers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMySQL/flexibleServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMySQL/flexibleServers/{resolvedName}/backups/{BackupName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-12-30", null, ct);

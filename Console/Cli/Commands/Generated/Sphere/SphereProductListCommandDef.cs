@@ -31,7 +31,7 @@ public partial class SphereProductListCommandDef(AuthOptionPack auth) : CommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", ct);
+            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureSphere/catalogs/{resolvedName}/products";
 
         var allItems = client.GetAllAsync(path, "2024-04-01", "value", "nextLink", ct);

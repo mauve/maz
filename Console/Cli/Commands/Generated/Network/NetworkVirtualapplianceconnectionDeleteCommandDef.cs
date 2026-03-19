@@ -40,7 +40,7 @@ public partial class NetworkVirtualapplianceconnectionDeleteCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkVirtualApplianceName!, ResourceGroup, armClient, "Microsoft.Network/networkVirtualAppliances", ct);
+            NetworkVirtualApplianceName!, ResourceGroup, armClient, "Microsoft.Network/networkVirtualAppliances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/networkVirtualAppliances/{resolvedName}/networkVirtualApplianceConnections/{ConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

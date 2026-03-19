@@ -39,7 +39,7 @@ public partial class MonitorDatacollectionendpointCreateCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DataCollectionEndpointName!, ResourceGroup, armClient, "Microsoft.Insights/dataCollectionEndpoints", ct);
+            DataCollectionEndpointName!, ResourceGroup, armClient, "Microsoft.Insights/dataCollectionEndpoints", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/dataCollectionEndpoints/{resolvedName}";
 
         var body = BodyJson is { } rawJson

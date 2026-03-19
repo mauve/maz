@@ -31,7 +31,7 @@ public partial class ScvmmCloudShowCommandDef(AuthOptionPack auth) : CommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CloudResourceName!, ResourceGroup, armClient, "Microsoft.ScVmm/clouds", ct);
+            CloudResourceName!, ResourceGroup, armClient, "Microsoft.ScVmm/clouds", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/clouds/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-03-13", null, ct);

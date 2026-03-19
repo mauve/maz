@@ -39,7 +39,7 @@ public partial class DataprotectionBackupinstanceShowResultCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/backupVaults/{resolvedName}/backupInstances/{BackupInstanceName}/operationResults/{OperationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

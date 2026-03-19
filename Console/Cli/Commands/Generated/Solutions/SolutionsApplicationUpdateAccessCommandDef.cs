@@ -48,7 +48,7 @@ public partial class SolutionsApplicationUpdateAccessCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationName!, ResourceGroup, armClient, "Microsoft.Solutions/applications", ct);
+            ApplicationName!, ResourceGroup, armClient, "Microsoft.Solutions/applications", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Solutions/applications/{resolvedName}/updateAccess";
 
         var body = BodyJson is { } rawJson

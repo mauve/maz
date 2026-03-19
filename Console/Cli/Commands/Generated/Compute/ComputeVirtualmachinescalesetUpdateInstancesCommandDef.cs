@@ -44,7 +44,7 @@ public partial class ComputeVirtualmachinescalesetUpdateInstancesCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", ct);
+            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachineScaleSets/{resolvedName}/manualupgrade";
 
         var body = BodyJson is { } rawJson

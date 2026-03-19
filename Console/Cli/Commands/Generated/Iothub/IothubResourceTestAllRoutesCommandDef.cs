@@ -32,7 +32,7 @@ public partial class IothubResourceTestAllRoutesCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IotHubName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", ct);
+            IotHubName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/IotHubs/{resolvedName}/routing/routes/$testall";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-06-30", null, ct);

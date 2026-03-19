@@ -48,7 +48,7 @@ public partial class RsbackupValidateOperationTriggerCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.RecoveryServices/vaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.RecoveryServices/vaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.RecoveryServices/vaults/{resolvedName}/backupTriggerValidateOperation";
 
         var body = BodyJson is { } rawJson

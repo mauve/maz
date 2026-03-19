@@ -35,7 +35,7 @@ public partial class ComputeCapacityreservationListByCapacityReservationGroupCom
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CapacityReservationGroupName!, ResourceGroup, armClient, "Microsoft.Compute/capacityReservationGroups", ct);
+            CapacityReservationGroupName!, ResourceGroup, armClient, "Microsoft.Compute/capacityReservationGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/capacityReservationGroups/{resolvedName}/capacityReservations";
 
         var allItems = client.GetAllAsync(path, "2025-04-01", "value", "nextLink", ct);

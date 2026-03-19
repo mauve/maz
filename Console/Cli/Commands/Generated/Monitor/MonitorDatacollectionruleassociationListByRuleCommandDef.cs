@@ -38,7 +38,7 @@ public partial class MonitorDatacollectionruleassociationListByRuleCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DataCollectionRuleName!, ResourceGroup, armClient, "Microsoft.Insights/dataCollectionRules", ct);
+            DataCollectionRuleName!, ResourceGroup, armClient, "Microsoft.Insights/dataCollectionRules", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/dataCollectionRules/{resolvedName}/associations";
 
         var allItems = client.GetAllAsync(path, "2026-03-01", "value", "nextLink", ct);

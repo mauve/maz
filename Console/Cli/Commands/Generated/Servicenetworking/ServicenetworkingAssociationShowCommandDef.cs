@@ -35,7 +35,7 @@ public partial class ServicenetworkingAssociationShowCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            TrafficControllerName!, ResourceGroup, armClient, "Microsoft.ServiceNetworking/trafficControllers", ct);
+            TrafficControllerName!, ResourceGroup, armClient, "Microsoft.ServiceNetworking/trafficControllers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceNetworking/trafficControllers/{resolvedName}/associations/{AssociationName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-01-01", null, ct);

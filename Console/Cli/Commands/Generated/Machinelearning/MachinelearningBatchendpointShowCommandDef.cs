@@ -35,7 +35,7 @@ public partial class MachinelearningBatchendpointShowCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.MachineLearningServices/workspaces/{resolvedName}/batchEndpoints/{EndpointName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-12-01", null, ct);

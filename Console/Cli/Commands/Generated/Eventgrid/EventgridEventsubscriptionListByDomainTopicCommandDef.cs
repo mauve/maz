@@ -43,7 +43,7 @@ public partial class EventgridEventsubscriptionListByDomainTopicCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DomainName!, ResourceGroup, armClient, "Microsoft.EventGrid/domains", ct);
+            DomainName!, ResourceGroup, armClient, "Microsoft.EventGrid/domains", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/domains/{resolvedName}/topics/{TopicName}/providers/Microsoft.EventGrid/eventSubscriptions";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

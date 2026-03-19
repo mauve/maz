@@ -35,7 +35,7 @@ public partial class CommunicationSmtpusernameGetCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommunicationServiceName!, ResourceGroup, armClient, "Microsoft.Communication/communicationServices", ct);
+            CommunicationServiceName!, ResourceGroup, armClient, "Microsoft.Communication/communicationServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Communication/communicationServices/{resolvedName}/smtpUsernames/{SmtpUsername}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-03-18", null, ct);

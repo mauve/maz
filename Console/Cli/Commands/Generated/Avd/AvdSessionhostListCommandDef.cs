@@ -43,7 +43,7 @@ public partial class AvdSessionhostListCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", ct);
+            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/hostPools/{resolvedName}/sessionHosts";
 
         var allItems = client.GetAllAsync(path, "2024-04-03", "value", "nextLink", ct);

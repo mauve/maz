@@ -1,4 +1,5 @@
 using Azure.Core;
+using Azure.Identity;
 using Azure.Monitor.Query;
 using Azure.Monitor.Query.Models;
 using Console.Rendering;
@@ -618,6 +619,13 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         catch (OperationCanceledException)
         {
             return QueryOutcome.Fail(query, "Query cancelled.");
+        }
+        catch (AuthenticationFailedException)
+        {
+            return QueryOutcome.Fail(
+                query,
+                "Authentication failed. Run 'maz login' to re-authenticate."
+            );
         }
         catch (Exception ex)
         {

@@ -32,7 +32,7 @@ public partial class PowerbidedicatedAutoscalevcoreDeleteCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VcoreName!, ResourceGroup, armClient, "Microsoft.PowerBIDedicated/autoScaleVCores", ct);
+            VcoreName!, ResourceGroup, armClient, "Microsoft.PowerBIDedicated/autoScaleVCores", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PowerBIDedicated/autoScaleVCores/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2021-01-01", null, ct);

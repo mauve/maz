@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricInternetgatewayruleCreateCommandDef(Aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            InternetGatewayRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/internetGatewayRules", ct);
+            InternetGatewayRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/internetGatewayRules", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/internetGatewayRules/{resolvedName}";
 
         var body = BodyJson is { } rawJson

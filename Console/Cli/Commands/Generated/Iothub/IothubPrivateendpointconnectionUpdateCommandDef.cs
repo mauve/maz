@@ -44,7 +44,7 @@ public partial class IothubPrivateendpointconnectionUpdateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/iotHubs", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/iotHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/iotHubs/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var body = BodyJson is { } rawJson

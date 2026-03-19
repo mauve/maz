@@ -31,7 +31,7 @@ public partial class ScvmmAvailabilitysetShowCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AvailabilitySetResourceName!, ResourceGroup, armClient, "Microsoft.ScVmm/availabilitySets", ct);
+            AvailabilitySetResourceName!, ResourceGroup, armClient, "Microsoft.ScVmm/availabilitySets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/availabilitySets/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-03-13", null, ct);

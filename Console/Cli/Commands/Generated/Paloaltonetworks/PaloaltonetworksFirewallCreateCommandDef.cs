@@ -40,7 +40,7 @@ public partial class PaloaltonetworksFirewallCreateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FirewallName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/firewalls", ct);
+            FirewallName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/firewalls", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/firewalls/{resolvedName}";
 
         var body = BodyJson is { } rawJson

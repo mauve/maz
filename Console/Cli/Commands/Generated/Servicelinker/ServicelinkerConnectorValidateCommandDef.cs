@@ -40,7 +40,7 @@ public partial class ServicelinkerConnectorValidateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Location!, ResourceGroup, armClient, "Microsoft.ServiceLinker/locations", ct);
+            Location!, ResourceGroup, armClient, "Microsoft.ServiceLinker/locations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.ServiceLinker/locations/{resolvedName}/connectors/{ConnectorName}/validate";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2024-04-01", null, ct);

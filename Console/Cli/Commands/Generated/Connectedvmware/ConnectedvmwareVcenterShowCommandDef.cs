@@ -31,7 +31,7 @@ public partial class ConnectedvmwareVcenterShowCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VcenterName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/vcenters", ct);
+            VcenterName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/vcenters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/vcenters/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-12-01", null, ct);

@@ -36,7 +36,7 @@ public partial class PostgresqlServerRestartCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/flexibleServers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/flexibleServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{resolvedName}/restart";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-08-01", null, ct);

@@ -39,7 +39,7 @@ public partial class AutomationHybridrunbookworkerListByHybridRunbookWorkerGroup
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AutomationAccountName!, ResourceGroup, armClient, "Microsoft.Automation/automationAccounts", ct);
+            AutomationAccountName!, ResourceGroup, armClient, "Microsoft.Automation/automationAccounts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Automation/automationAccounts/{resolvedName}/hybridRunbookWorkerGroups/{HybridRunbookWorkerGroupName}/hybridRunbookWorkers";
 
         var allItems = client.GetAllAsync(path, "2024-10-23", "value", "nextLink", ct);

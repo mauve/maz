@@ -26,6 +26,8 @@ internal static class LoganalyticsWorkspaceResolver
             resourceGroup,
             armClient,
             "Microsoft.OperationalInsights/workspaces",
+            credential,
+            log,
             ct
         );
 

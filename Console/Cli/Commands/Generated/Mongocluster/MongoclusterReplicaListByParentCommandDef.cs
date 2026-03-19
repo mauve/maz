@@ -31,7 +31,7 @@ public partial class MongoclusterReplicaListByParentCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MongoClusterName!, ResourceGroup, armClient, "Microsoft.DocumentDB/mongoClusters", ct);
+            MongoClusterName!, ResourceGroup, armClient, "Microsoft.DocumentDB/mongoClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DocumentDB/mongoClusters/{resolvedName}/replicas";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

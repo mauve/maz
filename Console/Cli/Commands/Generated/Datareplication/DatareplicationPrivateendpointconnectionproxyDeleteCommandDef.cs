@@ -40,7 +40,7 @@ public partial class DatareplicationPrivateendpointconnectionproxyDeleteCommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataReplication/replicationVaults/{resolvedName}/privateEndpointConnectionProxies/{PrivateEndpointConnectionProxyName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-09-01", null, ct);

@@ -35,7 +35,7 @@ public partial class OracleDbserverShowCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", ct);
+            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudExadataInfrastructures/{resolvedName}/dbServers/{Dbserverocid}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

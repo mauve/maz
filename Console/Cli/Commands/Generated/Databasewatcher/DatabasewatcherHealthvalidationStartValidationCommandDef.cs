@@ -40,7 +40,7 @@ public partial class DatabasewatcherHealthvalidationStartValidationCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WatcherName!, ResourceGroup, armClient, "Microsoft.DatabaseWatcher/watchers", ct);
+            WatcherName!, ResourceGroup, armClient, "Microsoft.DatabaseWatcher/watchers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DatabaseWatcher/watchers/{resolvedName}/healthValidations/{HealthValidationName}/startValidation";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-01-02", null, ct);

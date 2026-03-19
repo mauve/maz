@@ -40,7 +40,7 @@ public partial class NetworkInterfacetapconfigurationDeleteCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkInterfaceName!, ResourceGroup, armClient, "Microsoft.Network/networkInterfaces", ct);
+            NetworkInterfaceName!, ResourceGroup, armClient, "Microsoft.Network/networkInterfaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/networkInterfaces/{resolvedName}/tapConfigurations/{TapConfigurationName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

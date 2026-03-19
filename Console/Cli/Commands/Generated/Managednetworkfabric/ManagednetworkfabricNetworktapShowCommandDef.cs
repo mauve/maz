@@ -31,7 +31,7 @@ public partial class ManagednetworkfabricNetworktapShowCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkTapName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkTaps", ct);
+            NetworkTapName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkTaps", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkTaps/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);

@@ -91,7 +91,7 @@ internal sealed class MsalCacheCredential : TokenCredential
         }
 
         throw new CredentialUnavailableException(
-            "No valid token or refresh token found in MSAL cache. Run 'maz login' or 'az login' to authenticate."
+            "No valid token or refresh token found in MSAL cache. Run 'maz login' to authenticate."
         );
     }
 }

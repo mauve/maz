@@ -31,7 +31,7 @@ public partial class ContainerinstanceContainergroupUpdateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ContainerGroupName!, ResourceGroup, armClient, "Microsoft.ContainerInstance/containerGroups", ct);
+            ContainerGroupName!, ResourceGroup, armClient, "Microsoft.ContainerInstance/containerGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerInstance/containerGroups/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-09-01", null, ct);

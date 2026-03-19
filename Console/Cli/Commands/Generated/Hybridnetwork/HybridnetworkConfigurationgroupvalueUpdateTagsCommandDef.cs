@@ -31,7 +31,7 @@ public partial class HybridnetworkConfigurationgroupvalueUpdateTagsCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ConfigurationGroupValueName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/configurationGroupValues", ct);
+            ConfigurationGroupValueName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/configurationGroupValues", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/configurationGroupValues/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2024-04-15", null, ct);

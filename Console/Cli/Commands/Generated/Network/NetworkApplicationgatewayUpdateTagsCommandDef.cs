@@ -31,7 +31,7 @@ public partial class NetworkApplicationgatewayUpdateTagsCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationGatewayName!, ResourceGroup, armClient, "Microsoft.Network/applicationGateways", ct);
+            ApplicationGatewayName!, ResourceGroup, armClient, "Microsoft.Network/applicationGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/applicationGateways/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

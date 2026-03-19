@@ -31,7 +31,7 @@ public partial class ElasticsanVolumegroupListCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ElasticSanName!, ResourceGroup, armClient, "Microsoft.ElasticSan/elasticSans", ct);
+            ElasticSanName!, ResourceGroup, armClient, "Microsoft.ElasticSan/elasticSans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ElasticSan/elasticSans/{resolvedName}/volumegroups";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

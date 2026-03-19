@@ -35,7 +35,7 @@ public partial class StoragecacheAmlfilesystemUpdateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AmlFilesystemName!, ResourceGroup, armClient, "Microsoft.StorageCache/amlFilesystems", ct);
+            AmlFilesystemName!, ResourceGroup, armClient, "Microsoft.StorageCache/amlFilesystems", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageCache/amlFilesystems/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2026-01-01", null, ct);

@@ -31,7 +31,7 @@ public partial class AttestationPrivateendpointconnectionListCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderName!, ResourceGroup, armClient, "Microsoft.Attestation/attestationProviders", ct);
+            ProviderName!, ResourceGroup, armClient, "Microsoft.Attestation/attestationProviders", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Attestation/attestationProviders/{resolvedName}/privateEndpointConnections";
 
         var allItems = client.GetAllAsync(path, "2021-06-01", "value", "nextLink", ct);

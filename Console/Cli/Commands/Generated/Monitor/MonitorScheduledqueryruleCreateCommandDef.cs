@@ -40,7 +40,7 @@ public partial class MonitorScheduledqueryruleCreateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RuleName!, ResourceGroup, armClient, "Microsoft.Insights/scheduledQueryRules", ct);
+            RuleName!, ResourceGroup, armClient, "Microsoft.Insights/scheduledQueryRules", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/scheduledQueryRules/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -48,7 +48,7 @@ public partial class NetworkcloudRackCreateOrUpdateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RackName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/racks", ct);
+            RackName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/racks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/racks/{resolvedName}";
 
         var body = BodyJson is { } rawJson

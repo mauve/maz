@@ -48,7 +48,7 @@ public partial class ChaosCapabilityCreateCommandDef(AuthOptionPack auth) : Comm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParentProviderNamespace!, ResourceGroup, armClient, "{parentProviderNamespace}/{parentResourceType}", ct);
+            ParentProviderNamespace!, ResourceGroup, armClient, "{parentProviderNamespace}/{parentResourceType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{resolvedName}/{ParentResourceType}/{ParentResourceName}/providers/Microsoft.Chaos/targets/{TargetName}/capabilities/{CapabilityName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-01-01", null, ct);

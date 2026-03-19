@@ -31,7 +31,7 @@ public partial class ManagednetworkfabricNetworkfabriccontrollerShowCommandDef(A
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkFabricControllerName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabricControllers", ct);
+            NetworkFabricControllerName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabricControllers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkFabricControllers/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);

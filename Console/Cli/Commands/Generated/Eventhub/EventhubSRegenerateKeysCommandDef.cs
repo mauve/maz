@@ -48,7 +48,7 @@ public partial class EventhubSRegenerateKeysCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventHub/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventHub/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventHub/namespaces/{resolvedName}/eventhubs/{EventHubName}/authorizationRules/{AuthorizationRuleName}/regenerateKeys";
 
         var body = BodyJson is { } rawJson

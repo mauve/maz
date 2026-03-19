@@ -46,7 +46,6 @@ public partial class RootCommandDef
     public HsmCommandDef Hsm = null!;
     public AttestationCommandDef Attestation = null!;
     public ConfidentialledgerCommandDef Confidentialledger = null!;
-    public MonitorCommandDef Monitor = null!;
     public LoganalyticsCommandDef Loganalytics = null!;
     public AppinsightsCommandDef Appinsights = null!;
     public AdvisorCommandDef Advisor = null!;
@@ -215,7 +214,6 @@ public partial class RootCommandDef
             "hsm",
             "attestation",
             "confidentialledger",
-            "monitor",
             "loganalytics",
             "appinsights",
             "advisor",
@@ -423,8 +421,6 @@ public partial class RootCommandDef
             Attestation = new AttestationCommandDef(Auth);
         if (targetService is null || targetService == "confidentialledger")
             Confidentialledger = new ConfidentialledgerCommandDef(Auth);
-        if (targetService is null || targetService == "monitor")
-            Monitor = new MonitorCommandDef(Auth);
         if (targetService is null || targetService == "loganalytics")
             Loganalytics = new LoganalyticsCommandDef(Auth);
         if (targetService is null || targetService == "appinsights")

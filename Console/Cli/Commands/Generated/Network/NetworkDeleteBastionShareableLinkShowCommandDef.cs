@@ -36,7 +36,7 @@ public partial class NetworkDeleteBastionShareableLinkShowCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BastionHostName!, ResourceGroup, armClient, "Microsoft.Network/bastionHosts", ct);
+            BastionHostName!, ResourceGroup, armClient, "Microsoft.Network/bastionHosts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/bastionHosts/{resolvedName}/deleteShareableLinks";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

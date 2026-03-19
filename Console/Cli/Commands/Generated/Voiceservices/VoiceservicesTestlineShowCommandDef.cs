@@ -35,7 +35,7 @@ public partial class VoiceservicesTestlineShowCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", ct);
+            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VoiceServices/communicationsGateways/{resolvedName}/testLines/{TestLineName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-09-01", null, ct);

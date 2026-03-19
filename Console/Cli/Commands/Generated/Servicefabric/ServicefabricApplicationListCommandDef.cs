@@ -31,7 +31,7 @@ public partial class ServicefabricApplicationListCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceFabric/clusters/{resolvedName}/applications";
 
         var allItems = client.GetAllAsync(path, "2021-06-01", "value", "nextLink", ct);

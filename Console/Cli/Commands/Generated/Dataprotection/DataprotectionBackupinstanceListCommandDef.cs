@@ -31,7 +31,7 @@ public partial class DataprotectionBackupinstanceListCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/backupVaults/{resolvedName}/backupInstances";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

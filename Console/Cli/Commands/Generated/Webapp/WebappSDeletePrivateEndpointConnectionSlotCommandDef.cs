@@ -44,7 +44,7 @@ public partial class WebappSDeletePrivateEndpointConnectionSlotCommandDef(AuthOp
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/sites/{resolvedName}/slots/{Slot}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

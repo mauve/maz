@@ -35,7 +35,7 @@ public partial class DeviceregistryAssetUpdateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AssetName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assets", ct);
+            AssetName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DeviceRegistry/assets/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-10-01", null, ct);

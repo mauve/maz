@@ -48,7 +48,7 @@ public partial class OracleExascaledbnodeActionCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ExadbVmClusterName!, ResourceGroup, armClient, "Oracle.Database/exadbVmClusters", ct);
+            ExadbVmClusterName!, ResourceGroup, armClient, "Oracle.Database/exadbVmClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/exadbVmClusters/{resolvedName}/dbNodes/{ExascaleDbNodeName}/action";
 
         var body = BodyJson is { } rawJson

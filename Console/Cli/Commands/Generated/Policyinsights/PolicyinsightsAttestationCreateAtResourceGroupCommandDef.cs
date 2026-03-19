@@ -40,7 +40,7 @@ public partial class PolicyinsightsAttestationCreateAtResourceGroupCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AttestationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/attestations", ct);
+            AttestationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/attestations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/attestations/{resolvedName}";
 
         var body = BodyJson is { } rawJson

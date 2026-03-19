@@ -48,7 +48,7 @@ public partial class RsbackupItemlevelrecoveryconnectionProvisionCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.RecoveryServices/vaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.RecoveryServices/vaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.RecoveryServices/vaults/{resolvedName}/backupFabrics/{FabricName}/protectionContainers/{ContainerName}/protectedItems/{ProtectedItemName}/recoveryPoints/{RecoveryPointId}/provisionInstantItemRecovery";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-08-01", null, ct);

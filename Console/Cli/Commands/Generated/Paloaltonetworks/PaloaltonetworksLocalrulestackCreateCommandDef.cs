@@ -40,7 +40,7 @@ public partial class PaloaltonetworksLocalrulestackCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", ct);
+            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/localRulestacks/{resolvedName}";
 
         var body = BodyJson is { } rawJson

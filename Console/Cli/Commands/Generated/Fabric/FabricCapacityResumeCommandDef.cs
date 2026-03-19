@@ -36,7 +36,7 @@ public partial class FabricCapacityResumeCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CapacityName!, ResourceGroup, armClient, "Microsoft.Fabric/capacities", ct);
+            CapacityName!, ResourceGroup, armClient, "Microsoft.Fabric/capacities", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Fabric/capacities/{resolvedName}/resume";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-11-01", null, ct);

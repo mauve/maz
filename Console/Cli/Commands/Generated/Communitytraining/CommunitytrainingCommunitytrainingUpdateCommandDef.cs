@@ -35,7 +35,7 @@ public partial class CommunitytrainingCommunitytrainingUpdateCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommunityTrainingName!, ResourceGroup, armClient, "Microsoft.Community/communityTrainings", ct);
+            CommunityTrainingName!, ResourceGroup, armClient, "Microsoft.Community/communityTrainings", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Community/communityTrainings/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-11-01", null, ct);

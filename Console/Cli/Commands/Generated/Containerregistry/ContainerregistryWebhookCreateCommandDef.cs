@@ -48,7 +48,7 @@ public partial class ContainerregistryWebhookCreateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RegistryName!, ResourceGroup, armClient, "Microsoft.ContainerRegistry/registries", ct);
+            RegistryName!, ResourceGroup, armClient, "Microsoft.ContainerRegistry/registries", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerRegistry/registries/{resolvedName}/webhooks/{WebhookName}";
 
         var body = BodyJson is { } rawJson

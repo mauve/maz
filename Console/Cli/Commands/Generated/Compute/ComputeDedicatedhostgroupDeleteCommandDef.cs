@@ -32,7 +32,7 @@ public partial class ComputeDedicatedhostgroupDeleteCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostGroupName!, ResourceGroup, armClient, "Microsoft.Compute/hostGroups", ct);
+            HostGroupName!, ResourceGroup, armClient, "Microsoft.Compute/hostGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/hostGroups/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2025-04-01", null, ct);

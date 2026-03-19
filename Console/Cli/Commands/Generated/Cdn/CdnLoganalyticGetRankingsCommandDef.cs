@@ -49,7 +49,7 @@ public partial class CdnLoganalyticGetRankingsCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", ct);
+            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cdn/profiles/{resolvedName}/getLogAnalyticsRankings";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);

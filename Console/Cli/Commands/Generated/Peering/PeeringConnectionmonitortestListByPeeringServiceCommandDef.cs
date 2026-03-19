@@ -31,7 +31,7 @@ public partial class PeeringConnectionmonitortestListByPeeringServiceCommandDef(
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PeeringServiceName!, ResourceGroup, armClient, "Microsoft.Peering/peeringServices", ct);
+            PeeringServiceName!, ResourceGroup, armClient, "Microsoft.Peering/peeringServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Peering/peeringServices/{resolvedName}/connectionMonitorTests";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

@@ -36,7 +36,7 @@ public partial class KustoDatabaseAddPrincipalsCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.Kusto/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.Kusto/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Kusto/clusters/{resolvedName}/databases/{DatabaseName}/addPrincipals";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-04-13", null, ct);

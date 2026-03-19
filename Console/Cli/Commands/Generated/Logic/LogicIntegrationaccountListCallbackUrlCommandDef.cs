@@ -32,7 +32,7 @@ public partial class LogicIntegrationaccountListCallbackUrlCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", ct);
+            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/integrationAccounts/{resolvedName}/listCallbackUrl";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2019-05-01", null, ct);

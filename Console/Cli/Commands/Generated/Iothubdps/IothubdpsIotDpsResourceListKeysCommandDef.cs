@@ -32,7 +32,7 @@ public partial class IothubdpsIotDpsResourceListKeysCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", ct);
+            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/provisioningServices/{resolvedName}/listkeys";
 
         var allItems = client.GetAllAsync(path, "2022-12-12", "value", "nextLink", ct);

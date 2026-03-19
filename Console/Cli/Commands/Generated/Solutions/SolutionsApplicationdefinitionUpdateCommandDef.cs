@@ -31,7 +31,7 @@ public partial class SolutionsApplicationdefinitionUpdateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationDefinitionName!, ResourceGroup, armClient, "Microsoft.Solutions/applicationDefinitions", ct);
+            ApplicationDefinitionName!, ResourceGroup, armClient, "Microsoft.Solutions/applicationDefinitions", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Solutions/applicationDefinitions/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2021-07-01", null, ct);

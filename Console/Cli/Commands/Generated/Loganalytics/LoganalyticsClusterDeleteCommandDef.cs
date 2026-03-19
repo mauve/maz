@@ -36,7 +36,7 @@ public partial class LoganalyticsClusterDeleteCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.OperationalInsights/clusters/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-07-01", null, ct);

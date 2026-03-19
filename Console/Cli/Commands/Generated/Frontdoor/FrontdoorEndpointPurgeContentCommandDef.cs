@@ -44,7 +44,7 @@ public partial class FrontdoorEndpointPurgeContentCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FrontDoorName!, ResourceGroup, armClient, "Microsoft.Network/frontDoors", ct);
+            FrontDoorName!, ResourceGroup, armClient, "Microsoft.Network/frontDoors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/frontDoors/{resolvedName}/purge";
 
         var body = BodyJson is { } rawJson

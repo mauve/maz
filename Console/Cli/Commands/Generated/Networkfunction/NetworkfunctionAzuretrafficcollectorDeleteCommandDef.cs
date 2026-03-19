@@ -36,7 +36,7 @@ public partial class NetworkfunctionAzuretrafficcollectorDeleteCommandDef(AuthOp
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AzureTrafficCollectorName!, ResourceGroup, armClient, "Microsoft.NetworkFunction/azureTrafficCollectors", ct);
+            AzureTrafficCollectorName!, ResourceGroup, armClient, "Microsoft.NetworkFunction/azureTrafficCollectors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkFunction/azureTrafficCollectors/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2022-11-01", null, ct);

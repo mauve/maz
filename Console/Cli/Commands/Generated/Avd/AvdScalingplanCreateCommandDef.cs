@@ -36,7 +36,7 @@ public partial class AvdScalingplanCreateCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", ct);
+            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/scalingPlans/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -39,7 +39,7 @@ public partial class ComputeVirtualmachinescalesetextensionUpdateCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", ct);
+            VmScaleSetName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachineScaleSets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachineScaleSets/{resolvedName}/extensions/{VmssExtensionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-04-01", null, ct);

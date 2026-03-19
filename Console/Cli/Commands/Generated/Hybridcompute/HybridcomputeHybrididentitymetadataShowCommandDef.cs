@@ -35,7 +35,7 @@ public partial class HybridcomputeHybrididentitymetadataShowCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MachineName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", ct);
+            MachineName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridCompute/machines/{resolvedName}/hybridIdentityMetadata/{MetadataName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-01-13", null, ct);

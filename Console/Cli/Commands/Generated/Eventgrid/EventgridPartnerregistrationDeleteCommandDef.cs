@@ -36,7 +36,7 @@ public partial class EventgridPartnerregistrationDeleteCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PartnerRegistrationName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerRegistrations", ct);
+            PartnerRegistrationName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerRegistrations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/partnerRegistrations/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-02-15", null, ct);

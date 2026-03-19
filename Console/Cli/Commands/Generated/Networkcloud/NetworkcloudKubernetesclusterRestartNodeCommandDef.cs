@@ -44,7 +44,7 @@ public partial class NetworkcloudKubernetesclusterRestartNodeCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            KubernetesClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/kubernetesClusters", ct);
+            KubernetesClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/kubernetesClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/kubernetesClusters/{resolvedName}/restartNode";
 
         var body = BodyJson is { } rawJson

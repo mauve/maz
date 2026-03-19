@@ -31,7 +31,7 @@ public partial class DatabricksOutboundnetworkdependenciesendpointListCommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Databricks/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Databricks/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Databricks/workspaces/{resolvedName}/outboundNetworkDependenciesEndpoints";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-01-01", null, ct);

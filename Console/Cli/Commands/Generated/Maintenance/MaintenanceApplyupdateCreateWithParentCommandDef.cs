@@ -48,7 +48,7 @@ public partial class MaintenanceApplyupdateCreateWithParentCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceParentType}", ct);
+            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceParentType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ResourceParentType}/{ResourceParentName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/applyUpdates/default";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2023-04-01", null, ct);

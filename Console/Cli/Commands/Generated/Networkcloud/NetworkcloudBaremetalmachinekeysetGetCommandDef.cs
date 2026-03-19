@@ -35,7 +35,7 @@ public partial class NetworkcloudBaremetalmachinekeysetGetCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/clusters/{resolvedName}/bareMetalMachineKeySets/{BareMetalMachineKeySetName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

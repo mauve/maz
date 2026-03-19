@@ -31,7 +31,7 @@ public partial class EventgridPartnertopicUpdateCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PartnerTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerTopics", ct);
+            PartnerTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerTopics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/partnerTopics/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-02-15", null, ct);

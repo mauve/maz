@@ -39,7 +39,7 @@ public partial class NetworkExpressroutecircuitconnectionGetCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", ct);
+            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/expressRouteCircuits/{resolvedName}/peerings/{PeeringName}/connections/{ConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

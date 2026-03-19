@@ -38,7 +38,7 @@ public partial class PaloaltonetworksLocalrulestackListPredefinedUrlCategoriesCo
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", ct);
+            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/localRulestacks/{resolvedName}/listPredefinedUrlCategories";
 
         var allItems = client.GetAllAsync(path, "2025-10-08", "value", "nextLink", ct);

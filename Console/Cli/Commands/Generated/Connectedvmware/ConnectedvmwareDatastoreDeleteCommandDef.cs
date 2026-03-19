@@ -40,7 +40,7 @@ public partial class ConnectedvmwareDatastoreDeleteCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DatastoreName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/datastores", ct);
+            DatastoreName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/datastores", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/datastores/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-12-01", null, ct);

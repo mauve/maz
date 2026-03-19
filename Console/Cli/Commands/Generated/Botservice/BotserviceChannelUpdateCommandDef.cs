@@ -35,7 +35,7 @@ public partial class BotserviceChannelUpdateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.BotService/botServices", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.BotService/botServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.BotService/botServices/{resolvedName}/channels/{ChannelName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2022-09-15", null, ct);

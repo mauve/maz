@@ -32,7 +32,7 @@ public partial class ResourcegraphGraphQueryCreateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceGraph/queries", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceGraph/queries", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ResourceGraph/queries/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-04-01", null, ct);

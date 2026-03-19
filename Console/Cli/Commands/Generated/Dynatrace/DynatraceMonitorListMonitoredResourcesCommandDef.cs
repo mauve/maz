@@ -32,7 +32,7 @@ public partial class DynatraceMonitorListMonitoredResourcesCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Dynatrace.Observability/monitors/{resolvedName}/listMonitoredResources";
 
         var allItems = client.GetAllAsync(path, "2024-04-24", "value", "nextLink", ct);

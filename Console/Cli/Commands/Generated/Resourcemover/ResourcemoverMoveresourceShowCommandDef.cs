@@ -35,7 +35,7 @@ public partial class ResourcemoverMoveresourceShowCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", ct);
+            MoveCollectionName!, ResourceGroup, armClient, "Microsoft.Migrate/moveCollections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Migrate/moveCollections/{resolvedName}/moveResources/{MoveResourceName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-08-01", null, ct);

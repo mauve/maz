@@ -35,7 +35,7 @@ public partial class ManagednetworkfabricRoutepolicyUpdateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RoutePolicyName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/routePolicies", ct);
+            RoutePolicyName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/routePolicies", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/routePolicies/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-06-15", null, ct);

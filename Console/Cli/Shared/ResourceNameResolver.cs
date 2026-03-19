@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.Identity;
 using Azure.ResourceManager;
 using Console.Config;
@@ -32,6 +33,8 @@ public static class ResourceNameResolver
         ResourceGroupOptionPack resourceGroup,
         ArmClient armClient,
         string resourceType,
+        TokenCredential credential,
+        DiagnosticLog? log = null,
         CancellationToken ct = default
     ) =>
         ResolveAsync(
@@ -43,7 +46,8 @@ public static class ResourceNameResolver
             argClient: null,
             isDestructive: false,
             warningWriter: null,
-            log: DiagnosticLog.Null,
+            log: log,
+            credential: credential,
             ct: ct
         );
 
@@ -65,6 +69,7 @@ public static class ResourceNameResolver
         bool isDestructive = false,
         TextWriter? warningWriter = null,
         DiagnosticLog? log = null,
+        TokenCredential? credential = null,
         CancellationToken ct = default
     )
     {
@@ -186,7 +191,7 @@ public static class ResourceNameResolver
         }
 
         var argClientResolved =
-            argClient ?? new ArmArgClient(new DefaultAzureCredential(), log ?? DiagnosticLog.Null);
+            argClient ?? new ArmArgClient(credential ?? new DefaultAzureCredential(), log ?? DiagnosticLog.Null);
         var config = MazConfig.Current;
 
         // CASE 2: rg known, sub unknown → find the subscription

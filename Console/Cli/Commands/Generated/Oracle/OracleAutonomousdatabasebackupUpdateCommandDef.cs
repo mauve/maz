@@ -39,7 +39,7 @@ public partial class OracleAutonomousdatabasebackupUpdateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", ct);
+            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/autonomousDatabases/{resolvedName}/autonomousDatabaseBackups/{Adbbackupid}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-09-01", null, ct);

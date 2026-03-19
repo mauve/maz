@@ -48,7 +48,7 @@ public partial class SqlManageddatabasCompleteMoveCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ManagedInstanceName!, ResourceGroup, armClient, "Microsoft.Sql/managedInstances", ct);
+            ManagedInstanceName!, ResourceGroup, armClient, "Microsoft.Sql/managedInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Sql/managedInstances/{resolvedName}/databases/{DatabaseName}/completeMove";
 
         var body = BodyJson is { } rawJson

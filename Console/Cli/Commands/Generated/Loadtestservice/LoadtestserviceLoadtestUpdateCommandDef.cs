@@ -35,7 +35,7 @@ public partial class LoadtestserviceLoadtestUpdateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LoadTestName!, ResourceGroup, armClient, "Microsoft.LoadTestService/loadTests", ct);
+            LoadTestName!, ResourceGroup, armClient, "Microsoft.LoadTestService/loadTests", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.LoadTestService/loadTests/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2022-12-01", null, ct);

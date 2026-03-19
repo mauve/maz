@@ -35,7 +35,7 @@ public partial class OracleResourceanchorUpdateCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceAnchorName!, ResourceGroup, armClient, "Oracle.Database/resourceAnchors", ct);
+            ResourceAnchorName!, ResourceGroup, armClient, "Oracle.Database/resourceAnchors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/resourceAnchors/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-09-01", null, ct);

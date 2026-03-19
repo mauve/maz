@@ -31,7 +31,7 @@ public partial class AppinsightsWebtestUpdateTagsCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WebTestName!, ResourceGroup, armClient, "Microsoft.Insights/webtests", ct);
+            WebTestName!, ResourceGroup, armClient, "Microsoft.Insights/webtests", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/webtests/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2020-02-02", null, ct);

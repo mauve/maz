@@ -35,7 +35,7 @@ public partial class RedhatopenshiftOpenshiftclusterUpdateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.RedHatOpenShift/openShiftClusters", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.RedHatOpenShift/openShiftClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.RedHatOpenShift/openShiftClusters/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-07-25", null, ct);

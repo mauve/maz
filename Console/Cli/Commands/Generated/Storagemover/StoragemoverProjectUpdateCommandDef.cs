@@ -35,7 +35,7 @@ public partial class StoragemoverProjectUpdateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", ct);
+            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageMover/storageMovers/{resolvedName}/projects/{ProjectName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-12-01", null, ct);

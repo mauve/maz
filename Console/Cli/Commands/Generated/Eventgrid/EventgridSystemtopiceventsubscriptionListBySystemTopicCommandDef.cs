@@ -39,7 +39,7 @@ public partial class EventgridSystemtopiceventsubscriptionListBySystemTopicComma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SystemTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/systemTopics", ct);
+            SystemTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/systemTopics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/systemTopics/{resolvedName}/eventSubscriptions";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

@@ -39,7 +39,7 @@ public partial class LogicWorkflowrunoperationShowCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkflowName!, ResourceGroup, armClient, "Microsoft.Logic/workflows", ct);
+            WorkflowName!, ResourceGroup, armClient, "Microsoft.Logic/workflows", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/workflows/{resolvedName}/runs/{RunName}/operations/{OperationId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2019-05-01", null, ct);

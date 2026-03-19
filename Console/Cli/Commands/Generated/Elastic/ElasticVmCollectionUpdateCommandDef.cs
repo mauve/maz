@@ -32,7 +32,7 @@ public partial class ElasticVmCollectionUpdateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Microsoft.Elastic/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Microsoft.Elastic/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Elastic/monitors/{resolvedName}/vmCollectionUpdate";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-06-01", null, ct);

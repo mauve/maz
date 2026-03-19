@@ -40,7 +40,7 @@ public partial class DashboardManagedprivateendpointDeleteCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Dashboard/grafana", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Dashboard/grafana", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Dashboard/grafana/{resolvedName}/managedPrivateEndpoints/{ManagedPrivateEndpointName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-08-01", null, ct);

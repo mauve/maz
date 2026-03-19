@@ -31,7 +31,7 @@ public partial class InformaticaServerlessruntimeListCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", ct);
+            OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Informatica.DataManagement/organizations/{resolvedName}/serverlessRuntimes";
 
         var allItems = client.GetAllAsync(path, "2025-11-27", "value", "nextLink", ct);

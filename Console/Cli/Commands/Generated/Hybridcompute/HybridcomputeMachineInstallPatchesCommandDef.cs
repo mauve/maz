@@ -48,7 +48,7 @@ public partial class HybridcomputeMachineInstallPatchesCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridCompute/machines/{resolvedName}/installPatches";
 
         var body = BodyJson is { } rawJson

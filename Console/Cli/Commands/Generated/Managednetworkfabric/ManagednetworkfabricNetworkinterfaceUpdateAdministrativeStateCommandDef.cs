@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricNetworkinterfaceUpdateAdministrativeSta
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkDeviceName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkDevices", ct);
+            NetworkDeviceName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkDevices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkDevices/{resolvedName}/networkInterfaces/{NetworkInterfaceName}/updateAdministrativeState";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-06-15", null, ct);

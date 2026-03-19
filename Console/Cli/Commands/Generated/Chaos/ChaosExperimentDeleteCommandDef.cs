@@ -36,7 +36,7 @@ public partial class ChaosExperimentDeleteCommandDef(AuthOptionPack auth) : Comm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ExperimentName!, ResourceGroup, armClient, "Microsoft.Chaos/experiments", ct);
+            ExperimentName!, ResourceGroup, armClient, "Microsoft.Chaos/experiments", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Chaos/experiments/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-01-01", null, ct);

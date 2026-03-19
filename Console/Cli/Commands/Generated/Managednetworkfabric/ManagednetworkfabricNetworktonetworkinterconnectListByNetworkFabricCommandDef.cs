@@ -31,7 +31,7 @@ public partial class ManagednetworkfabricNetworktonetworkinterconnectListByNetwo
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkFabricName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabrics", ct);
+            NetworkFabricName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabrics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkFabrics/{resolvedName}/networkToNetworkInterconnects";
 
         var allItems = client.GetAllAsync(path, "2023-06-15", "value", "nextLink", ct);

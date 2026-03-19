@@ -32,7 +32,7 @@ public partial class AzurearcdataSqlserverinstanceGetJobsStatusCommandDef(AuthOp
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SqlServerInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlServerInstances", ct);
+            SqlServerInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlServerInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureArcData/sqlServerInstances/{resolvedName}/getJobsStatus";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2026-01-01", null, ct);

@@ -35,7 +35,7 @@ public partial class DnsresolverDomainlistUpdateCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsResolverDomainListName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolverDomainLists", ct);
+            DnsResolverDomainListName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolverDomainLists", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsResolverDomainLists/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

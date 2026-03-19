@@ -39,7 +39,7 @@ public partial class DnsresolverVirtualnetworklinkUpdateCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsForwardingRulesetName!, ResourceGroup, armClient, "Microsoft.Network/dnsForwardingRulesets", ct);
+            DnsForwardingRulesetName!, ResourceGroup, armClient, "Microsoft.Network/dnsForwardingRulesets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsForwardingRulesets/{resolvedName}/virtualNetworkLinks/{VirtualNetworkLinkName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

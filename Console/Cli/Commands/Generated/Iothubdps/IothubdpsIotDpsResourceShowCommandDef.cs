@@ -31,7 +31,7 @@ public partial class IothubdpsIotDpsResourceShowCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", ct);
+            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/provisioningServices/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-12-12", null, ct);

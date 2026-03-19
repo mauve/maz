@@ -32,7 +32,7 @@ public partial class HealthbotBotRegenerateSecretCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", ct);
+            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthBot/healthBots/{resolvedName}/regenerateApiJwtSecret";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-11-01", null, ct);

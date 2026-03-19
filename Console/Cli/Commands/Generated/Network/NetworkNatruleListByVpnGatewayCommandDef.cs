@@ -31,7 +31,7 @@ public partial class NetworkNatruleListByVpnGatewayCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            GatewayName!, ResourceGroup, armClient, "Microsoft.Network/vpnGateways", ct);
+            GatewayName!, ResourceGroup, armClient, "Microsoft.Network/vpnGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/vpnGateways/{resolvedName}/natRules";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

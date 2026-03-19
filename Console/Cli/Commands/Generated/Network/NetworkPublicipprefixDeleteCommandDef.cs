@@ -36,7 +36,7 @@ public partial class NetworkPublicipprefixDeleteCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PublicIpPrefixName!, ResourceGroup, armClient, "Microsoft.Network/publicIPPrefixes", ct);
+            PublicIpPrefixName!, ResourceGroup, armClient, "Microsoft.Network/publicIPPrefixes", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/publicIPPrefixes/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

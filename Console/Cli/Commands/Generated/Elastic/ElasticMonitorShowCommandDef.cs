@@ -31,7 +31,7 @@ public partial class ElasticMonitorShowCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Microsoft.Elastic/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Microsoft.Elastic/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Elastic/monitors/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);

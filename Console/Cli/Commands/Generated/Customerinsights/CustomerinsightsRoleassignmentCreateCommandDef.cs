@@ -40,7 +40,7 @@ public partial class CustomerinsightsRoleassignmentCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HubName!, ResourceGroup, armClient, "Microsoft.CustomerInsights/hubs", ct);
+            HubName!, ResourceGroup, armClient, "Microsoft.CustomerInsights/hubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.CustomerInsights/hubs/{resolvedName}/roleAssignments/{AssignmentName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2017-04-26", null, ct);

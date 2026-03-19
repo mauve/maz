@@ -44,7 +44,7 @@ public partial class IotcentralAppCreateCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.IoTCentral/iotApps", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.IoTCentral/iotApps", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.IoTCentral/iotApps/{resolvedName}";
 
         var body = BodyJson is { } rawJson

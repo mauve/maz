@@ -40,7 +40,7 @@ public partial class NetworkVirtualnetworkgatewayCreateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworkGateways", ct);
+            VirtualNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworkGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualNetworkGateways/{resolvedName}";
 
         var body = BodyJson is { } rawJson

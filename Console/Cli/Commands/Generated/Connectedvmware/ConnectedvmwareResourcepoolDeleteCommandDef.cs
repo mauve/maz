@@ -40,7 +40,7 @@ public partial class ConnectedvmwareResourcepoolDeleteCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", ct);
+            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/resourcePools/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-12-01", null, ct);

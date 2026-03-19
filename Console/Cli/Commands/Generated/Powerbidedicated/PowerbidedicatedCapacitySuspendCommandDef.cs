@@ -36,7 +36,7 @@ public partial class PowerbidedicatedCapacitySuspendCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DedicatedCapacityName!, ResourceGroup, armClient, "Microsoft.PowerBIDedicated/capacities", ct);
+            DedicatedCapacityName!, ResourceGroup, armClient, "Microsoft.PowerBIDedicated/capacities", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PowerBIDedicated/capacities/{resolvedName}/suspend";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2021-01-01", null, ct);

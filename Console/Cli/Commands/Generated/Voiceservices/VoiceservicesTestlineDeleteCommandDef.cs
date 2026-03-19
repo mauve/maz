@@ -40,7 +40,7 @@ public partial class VoiceservicesTestlineDeleteCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", ct);
+            CommunicationsGatewayName!, ResourceGroup, armClient, "Microsoft.VoiceServices/communicationsGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VoiceServices/communicationsGateways/{resolvedName}/testLines/{TestLineName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-09-01", null, ct);

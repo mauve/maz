@@ -44,7 +44,7 @@ public partial class IothubResourceExportDevicesCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/IotHubs/{resolvedName}/exportDevices";
 
         var body = BodyJson is { } rawJson

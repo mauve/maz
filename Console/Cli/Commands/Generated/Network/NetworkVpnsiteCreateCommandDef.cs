@@ -40,7 +40,7 @@ public partial class NetworkVpnsiteCreateCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VpnSiteName!, ResourceGroup, armClient, "Microsoft.Network/vpnSites", ct);
+            VpnSiteName!, ResourceGroup, armClient, "Microsoft.Network/vpnSites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/vpnSites/{resolvedName}";
 
         var body = BodyJson is { } rawJson

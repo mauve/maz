@@ -36,7 +36,7 @@ public partial class PolicyinsightsRemediationListDeploymentsAtResourceGroupComm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RemediationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/remediations", ct);
+            RemediationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/remediations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/remediations/{resolvedName}/listDeployments";
 
         var allItems = client.GetAllAsync(path, "2024-10-01", "value", "nextLink", ct);

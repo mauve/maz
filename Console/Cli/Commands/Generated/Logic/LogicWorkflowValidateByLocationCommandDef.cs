@@ -36,7 +36,7 @@ public partial class LogicWorkflowValidateByLocationCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Location!, ResourceGroup, armClient, "Microsoft.Logic/locations", ct);
+            Location!, ResourceGroup, armClient, "Microsoft.Logic/locations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/locations/{resolvedName}/workflows/{WorkflowName}/validate";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2019-05-01", null, ct);

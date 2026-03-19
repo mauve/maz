@@ -36,7 +36,7 @@ public partial class AutomationJobStopCommandDef(AuthOptionPack auth) : CommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AutomationAccountName!, ResourceGroup, armClient, "Microsoft.Automation/automationAccounts", ct);
+            AutomationAccountName!, ResourceGroup, armClient, "Microsoft.Automation/automationAccounts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Automation/automationAccounts/{resolvedName}/jobs/{JobName}/stop";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-10-23", null, ct);

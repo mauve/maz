@@ -36,7 +36,7 @@ public partial class NetworkAzurefirewallListLearnedPrefixesCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AzureFirewallName!, ResourceGroup, armClient, "Microsoft.Network/azureFirewalls", ct);
+            AzureFirewallName!, ResourceGroup, armClient, "Microsoft.Network/azureFirewalls", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/azureFirewalls/{resolvedName}/learnedIPPrefixes";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

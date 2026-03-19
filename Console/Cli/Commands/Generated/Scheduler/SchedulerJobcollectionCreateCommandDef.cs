@@ -32,7 +32,7 @@ public partial class SchedulerJobcollectionCreateCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            JobCollectionName!, ResourceGroup, armClient, "Microsoft.Scheduler/jobCollections", ct);
+            JobCollectionName!, ResourceGroup, armClient, "Microsoft.Scheduler/jobCollections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Scheduler/jobCollections/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2016-03-01", null, ct);

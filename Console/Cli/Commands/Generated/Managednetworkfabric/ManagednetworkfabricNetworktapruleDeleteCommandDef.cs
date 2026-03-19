@@ -36,7 +36,7 @@ public partial class ManagednetworkfabricNetworktapruleDeleteCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkTapRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkTapRules", ct);
+            NetworkTapRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkTapRules", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkTapRules/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-06-15", null, ct);

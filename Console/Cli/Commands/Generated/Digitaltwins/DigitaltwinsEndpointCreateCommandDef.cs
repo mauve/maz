@@ -44,7 +44,7 @@ public partial class DigitaltwinsEndpointCreateCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.DigitalTwins/digitalTwinsInstances", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.DigitalTwins/digitalTwinsInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DigitalTwins/digitalTwinsInstances/{resolvedName}/endpoints/{EndpointName}";
 
         var body = BodyJson is { } rawJson

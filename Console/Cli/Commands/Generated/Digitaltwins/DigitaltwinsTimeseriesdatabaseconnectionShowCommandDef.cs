@@ -35,7 +35,7 @@ public partial class DigitaltwinsTimeseriesdatabaseconnectionShowCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.DigitalTwins/digitalTwinsInstances", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.DigitalTwins/digitalTwinsInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DigitalTwins/digitalTwinsInstances/{resolvedName}/timeSeriesDatabaseConnections/{TimeSeriesDatabaseConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-01-31", null, ct);

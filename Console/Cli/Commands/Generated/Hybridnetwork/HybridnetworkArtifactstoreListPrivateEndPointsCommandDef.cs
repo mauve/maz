@@ -40,7 +40,7 @@ public partial class HybridnetworkArtifactstoreListPrivateEndPointsCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", ct);
+            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/publishers/{resolvedName}/artifactStores/{ArtifactStoreName}/listPrivateEndPoints";
 
         var allItems = client.GetAllAsync(path, "2024-04-15", "value", "nextLink", ct);

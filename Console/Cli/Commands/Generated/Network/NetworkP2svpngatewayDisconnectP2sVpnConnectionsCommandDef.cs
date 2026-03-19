@@ -36,7 +36,7 @@ public partial class NetworkP2svpngatewayDisconnectP2sVpnConnectionsCommandDef(A
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            P2sVpnGatewayName!, ResourceGroup, armClient, "Microsoft.Network/p2svpnGateways", ct);
+            P2sVpnGatewayName!, ResourceGroup, armClient, "Microsoft.Network/p2svpnGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/p2svpnGateways/{resolvedName}/disconnectP2sVpnConnections";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

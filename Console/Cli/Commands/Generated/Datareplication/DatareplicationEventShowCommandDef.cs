@@ -35,7 +35,7 @@ public partial class DatareplicationEventShowCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataReplication/replicationVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataReplication/replicationVaults/{resolvedName}/events/{EventName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-09-01", null, ct);

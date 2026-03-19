@@ -40,7 +40,7 @@ public partial class DataprotectionBackupinstanceDeleteCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", ct);
+            VaultName!, ResourceGroup, armClient, "Microsoft.DataProtection/backupVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/backupVaults/{resolvedName}/backupInstances/{BackupInstanceName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-09-01", null, ct);

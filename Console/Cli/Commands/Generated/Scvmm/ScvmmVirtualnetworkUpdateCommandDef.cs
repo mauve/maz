@@ -35,7 +35,7 @@ public partial class ScvmmVirtualnetworkUpdateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualNetworkName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualNetworks", ct);
+            VirtualNetworkName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualNetworks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/virtualNetworks/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-03-13", null, ct);

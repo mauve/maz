@@ -39,7 +39,7 @@ public partial class WorkloadsSapapplicationserverinstanceUpdateCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SapVirtualInstanceName!, ResourceGroup, armClient, "Microsoft.Workloads/sapVirtualInstances", ct);
+            SapVirtualInstanceName!, ResourceGroup, armClient, "Microsoft.Workloads/sapVirtualInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Workloads/sapVirtualInstances/{resolvedName}/applicationInstances/{ApplicationInstanceName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-04-01", null, ct);

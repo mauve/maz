@@ -32,7 +32,7 @@ public partial class AvdWorkspaceCreateCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/workspaces/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-04-03", null, ct);

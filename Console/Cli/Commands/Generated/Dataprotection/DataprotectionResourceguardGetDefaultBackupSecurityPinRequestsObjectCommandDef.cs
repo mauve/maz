@@ -35,7 +35,7 @@ public partial class DataprotectionResourceguardGetDefaultBackupSecurityPinReque
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceGuardsName!, ResourceGroup, armClient, "Microsoft.DataProtection/resourceGuards", ct);
+            ResourceGuardsName!, ResourceGroup, armClient, "Microsoft.DataProtection/resourceGuards", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/resourceGuards/{resolvedName}/getBackupSecurityPINRequests/{RequestName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

@@ -36,7 +36,7 @@ public partial class SqlvirtualmachineGroupDeleteCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SqlVirtualMachineGroupName!, ResourceGroup, armClient, "Microsoft.SqlVirtualMachine/sqlVirtualMachineGroups", ct);
+            SqlVirtualMachineGroupName!, ResourceGroup, armClient, "Microsoft.SqlVirtualMachine/sqlVirtualMachineGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachineGroups/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-10-01", null, ct);

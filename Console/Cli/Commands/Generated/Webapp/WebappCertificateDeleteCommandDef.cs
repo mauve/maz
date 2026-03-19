@@ -32,7 +32,7 @@ public partial class WebappCertificateDeleteCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/certificates", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/certificates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/certificates/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

@@ -31,7 +31,7 @@ public partial class MariadbReplicaListCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMariaDB/servers/{resolvedName}/replicas";
 
         var allItems = client.GetAllAsync(path, "2018-06-01", "value", "nextLink", ct);

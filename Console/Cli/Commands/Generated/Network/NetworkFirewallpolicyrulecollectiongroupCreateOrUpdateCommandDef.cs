@@ -40,7 +40,7 @@ public partial class NetworkFirewallpolicyrulecollectiongroupCreateOrUpdateComma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FirewallPolicyName!, ResourceGroup, armClient, "Microsoft.Network/firewallPolicies", ct);
+            FirewallPolicyName!, ResourceGroup, armClient, "Microsoft.Network/firewallPolicies", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/firewallPolicies/{resolvedName}/ruleCollectionGroups/{RuleCollectionGroupName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-05-01", null, ct);

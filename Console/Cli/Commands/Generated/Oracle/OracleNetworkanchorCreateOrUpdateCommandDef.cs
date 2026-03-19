@@ -36,7 +36,7 @@ public partial class OracleNetworkanchorCreateOrUpdateCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkAnchorName!, ResourceGroup, armClient, "Oracle.Database/networkAnchors", ct);
+            NetworkAnchorName!, ResourceGroup, armClient, "Oracle.Database/networkAnchors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/networkAnchors/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-09-01", null, ct);

@@ -36,7 +36,7 @@ public partial class AvdAppAttachPackageCreateCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AppAttachPackageName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/appAttachPackages", ct);
+            AppAttachPackageName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/appAttachPackages", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/appAttachPackages/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -32,7 +32,7 @@ public partial class PolicyinsightsAttestationDeleteAtResourceGroupCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AttestationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/attestations", ct);
+            AttestationName!, ResourceGroup, armClient, "Microsoft.PolicyInsights/attestations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/attestations/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-10-01", null, ct);

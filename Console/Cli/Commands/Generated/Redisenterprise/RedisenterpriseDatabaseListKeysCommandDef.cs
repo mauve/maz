@@ -36,7 +36,7 @@ public partial class RedisenterpriseDatabaseListKeysCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.Cache/redisEnterprise", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.Cache/redisEnterprise", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cache/redisEnterprise/{resolvedName}/databases/{DatabaseName}/listKeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-07-01", null, ct);

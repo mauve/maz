@@ -39,7 +39,7 @@ public partial class HealthcareapisFhirserviceUpdateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.HealthcareApis/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.HealthcareApis/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthcareApis/workspaces/{resolvedName}/fhirservices/{FhirServiceName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-03-31", null, ct);

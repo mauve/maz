@@ -36,7 +36,7 @@ public partial class NetworkIpallocationDeleteCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IpAllocationName!, ResourceGroup, armClient, "Microsoft.Network/IpAllocations", ct);
+            IpAllocationName!, ResourceGroup, armClient, "Microsoft.Network/IpAllocations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/IpAllocations/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

@@ -32,7 +32,7 @@ public partial class NetworkDisconnectactivesessionShowCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BastionHostName!, ResourceGroup, armClient, "Microsoft.Network/bastionHosts", ct);
+            BastionHostName!, ResourceGroup, armClient, "Microsoft.Network/bastionHosts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/bastionHosts/{resolvedName}/disconnectActiveSessions";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

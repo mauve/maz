@@ -36,7 +36,7 @@ public partial class HybridnetworkNetworkfunctionDeleteCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkFunctionName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/networkFunctions", ct);
+            NetworkFunctionName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/networkFunctions", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/networkFunctions/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-04-15", null, ct);

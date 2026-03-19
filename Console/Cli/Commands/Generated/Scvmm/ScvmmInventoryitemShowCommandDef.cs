@@ -35,7 +35,7 @@ public partial class ScvmmInventoryitemShowCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmmServerName!, ResourceGroup, armClient, "Microsoft.ScVmm/vmmServers", ct);
+            VmmServerName!, ResourceGroup, armClient, "Microsoft.ScVmm/vmmServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/vmmServers/{resolvedName}/inventoryItems/{InventoryItemResourceName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-03-13", null, ct);

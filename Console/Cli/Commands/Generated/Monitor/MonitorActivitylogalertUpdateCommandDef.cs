@@ -31,7 +31,7 @@ public partial class MonitorActivitylogalertUpdateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ActivityLogAlertName!, ResourceGroup, armClient, "Microsoft.Insights/activityLogAlerts", ct);
+            ActivityLogAlertName!, ResourceGroup, armClient, "Microsoft.Insights/activityLogAlerts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/activityLogAlerts/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2026-03-01", null, ct);

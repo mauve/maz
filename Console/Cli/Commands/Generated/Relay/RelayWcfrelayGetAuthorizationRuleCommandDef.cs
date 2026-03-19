@@ -39,7 +39,7 @@ public partial class RelayWcfrelayGetAuthorizationRuleCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.Relay/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.Relay/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Relay/namespaces/{resolvedName}/wcfRelays/{RelayName}/authorizationRules/{AuthorizationRuleName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);

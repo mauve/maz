@@ -44,7 +44,7 @@ public partial class HealthbotBotCreateCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", ct);
+            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthBot/healthBots/{resolvedName}";
 
         var body = BodyJson is { } rawJson

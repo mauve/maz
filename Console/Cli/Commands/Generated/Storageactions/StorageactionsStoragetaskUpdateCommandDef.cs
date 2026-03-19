@@ -35,7 +35,7 @@ public partial class StorageactionsStoragetaskUpdateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageTaskName!, ResourceGroup, armClient, "Microsoft.StorageActions/storageTasks", ct);
+            StorageTaskName!, ResourceGroup, armClient, "Microsoft.StorageActions/storageTasks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageActions/storageTasks/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-01-01", null, ct);

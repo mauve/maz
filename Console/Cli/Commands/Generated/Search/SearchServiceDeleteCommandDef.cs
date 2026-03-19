@@ -32,7 +32,7 @@ public partial class SearchServiceDeleteCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SearchServiceName!, ResourceGroup, armClient, "Microsoft.Search/searchServices", ct);
+            SearchServiceName!, ResourceGroup, armClient, "Microsoft.Search/searchServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Search/searchServices/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

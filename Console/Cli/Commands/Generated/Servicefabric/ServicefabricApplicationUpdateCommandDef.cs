@@ -39,7 +39,7 @@ public partial class ServicefabricApplicationUpdateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceFabric/clusters/{resolvedName}/applications/{ApplicationName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2021-06-01", null, ct);

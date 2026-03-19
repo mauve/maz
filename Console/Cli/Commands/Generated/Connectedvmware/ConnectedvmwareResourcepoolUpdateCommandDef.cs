@@ -31,7 +31,7 @@ public partial class ConnectedvmwareResourcepoolUpdateCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", ct);
+            ResourcePoolName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/resourcePools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/resourcePools/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2023-12-01", null, ct);

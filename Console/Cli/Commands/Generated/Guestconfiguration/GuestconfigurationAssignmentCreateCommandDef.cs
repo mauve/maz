@@ -36,7 +36,7 @@ public partial class GuestconfigurationAssignmentCreateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", ct);
+            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachines/{resolvedName}/providers/Microsoft.GuestConfiguration/guestConfigurationAssignments/{GuestConfigurationAssignmentName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2022-01-25", null, ct);

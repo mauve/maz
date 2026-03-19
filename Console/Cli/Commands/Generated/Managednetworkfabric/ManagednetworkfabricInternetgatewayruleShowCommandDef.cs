@@ -31,7 +31,7 @@ public partial class ManagednetworkfabricInternetgatewayruleShowCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            InternetGatewayRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/internetGatewayRules", ct);
+            InternetGatewayRuleName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/internetGatewayRules", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/internetGatewayRules/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-06-15", null, ct);

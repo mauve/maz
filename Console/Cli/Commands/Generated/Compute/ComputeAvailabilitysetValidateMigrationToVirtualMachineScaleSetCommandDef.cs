@@ -36,7 +36,7 @@ public partial class ComputeAvailabilitysetValidateMigrationToVirtualMachineScal
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AvailabilitySetName!, ResourceGroup, armClient, "Microsoft.Compute/availabilitySets", ct);
+            AvailabilitySetName!, ResourceGroup, armClient, "Microsoft.Compute/availabilitySets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/availabilitySets/{resolvedName}/validateMigrationToVirtualMachineScaleSet";
 
         var body = BodyJson is { } rawJson
