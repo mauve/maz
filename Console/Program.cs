@@ -54,9 +54,20 @@ foreach (var directive in result.Directives)
     {
         case "debug":
             System.Console.Error.WriteLine(
-                $"Attach debugger to PID {Environment.ProcessId} and press Enter..."
+                $"Waiting for debugger to attach to PID {Environment.ProcessId}..."
             );
-            System.Console.ReadLine();
+            while (!System.Diagnostics.Debugger.IsAttached)
+                Thread.Sleep(100);
+            System.Console.Error.WriteLine("Debugger attached.");
+            if (
+                directive.Value is { } delayStr
+                && int.TryParse(delayStr, out var delaySec)
+                && delaySec > 0
+            )
+            {
+                System.Console.Error.WriteLine($"Waiting {delaySec}s before continuing...");
+                Thread.Sleep(delaySec * 1000);
+            }
             break;
         case "suggest":
             // Already handled above (pre-parse path for performance).
