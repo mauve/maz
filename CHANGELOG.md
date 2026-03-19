@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-19
+### Added
+- `[debug]` and `[debug:N]` source-gen directives that poll for debugger attach with optional delay
+
+### Changed
+- Auth chain now uses maz credentials everywhere — `ResourceNameResolver`, generated commands, and error formatter all flow the configured `TokenCredential` instead of falling back to `DefaultAzureCredential`
+- `azure-rest-api-specs` added as git submodule; specgen paths converted to relative
+
+### Fixed
+- `AuthenticationErrorFormatter` no longer suggests credentials outside the configured chain
+- `MsalCacheCredential` and `KustoTuiApp` error messages now consistently say `maz login`
+- Log Analytics explore pauses before TUI launch when `-v` is active so auth diagnostics are visible
+
 ## [0.5.0] - 2026-03-19
 ### Added
 - Interactive JMESPath editor TUI (`maz jmespath editor`) with live evaluation, syntax highlighting, and tab-completion
