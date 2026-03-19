@@ -13,6 +13,7 @@ namespace Console.Cli.Commands;
 public partial class GetTokenCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "get-token";
+    protected internal override bool IsManualCommand => true;
 
     /// <summary>The scopes required for the token.</summary>
     [CliOption("--scopes")]

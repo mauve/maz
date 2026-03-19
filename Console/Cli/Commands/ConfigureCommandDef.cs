@@ -17,6 +17,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
 {
     public override string Name => "configure";
     public override string Description => "Interactively configure maz settings.";
+    protected internal override bool IsManualCommand => true;
 
     private readonly AuthOptionPack _auth = auth;
     private readonly InteractiveOptionPack _interactive = interactive;

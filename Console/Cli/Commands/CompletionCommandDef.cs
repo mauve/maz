@@ -10,6 +10,7 @@ namespace Console.Cli.Commands;
 public partial class CompletionCommandDef : CommandDef
 {
     public override string Name => "completion";
+    protected internal override bool IsManualCommand => true;
 
     /// <summary>Hide the "Authentication" group for this command.</summary>
     internal CompletionCommandDef()

@@ -16,6 +16,7 @@ public partial class JmesPathEditorCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "editor";
     public override string[] Aliases => ["ed"];
+    protected internal override bool IsManualCommand => true;
 
     public readonly SubscriptionOptionPack Subscription = new();
 
@@ -84,7 +85,8 @@ public partial class JmesPathEditorCommandDef(AuthOptionPack auth) : CommandDef
 
     private async Task<string> FetchResourcesAsync(CancellationToken ct)
     {
-        var client = new AzureRestClient(_auth.GetCredential());
+        var log = DiagnosticOptionPack.GetLog();
+        var client = new AzureRestClient(_auth.GetCredential(log), log);
         var kql = $"Resources | where type =~ '{ResourceType}' | take {SampleCount}";
 
         var body = new JsonObject { ["query"] = kql };

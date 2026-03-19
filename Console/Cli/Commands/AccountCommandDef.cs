@@ -15,6 +15,7 @@ namespace Console.Cli.Commands;
 public partial class AccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "account";
+    protected internal override bool IsManualCommand => true;
 
     public readonly AccountShowCommandDef Show = new();
     public readonly AccountListCommandDef List = new(auth);

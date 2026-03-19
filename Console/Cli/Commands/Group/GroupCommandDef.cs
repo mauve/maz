@@ -15,6 +15,7 @@ public partial class GroupCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "group";
     public override string[] Aliases => ["grp"];
+    protected internal override bool IsManualCommand => true;
 
     public readonly GroupCreateCommandDef Create = new(auth);
     public readonly GroupListCommandDef List = new(auth);

@@ -16,6 +16,7 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
 {
     public override string Name => "explore";
     public override string[] Aliases => ["ex"];
+    protected internal override bool IsManualCommand => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
 

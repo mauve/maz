@@ -14,6 +14,7 @@ public partial class LoganalyticsKqlQueryCommandDef(AuthOptionPack auth) : Comma
 {
     public override string Name => "query";
     public override string[] Aliases => ["q"];
+    protected internal override bool IsManualCommand => true;
 
     public readonly ResourceGroupOptionPack ResourceGroup = new();
 

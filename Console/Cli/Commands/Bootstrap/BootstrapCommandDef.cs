@@ -17,6 +17,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     public override string Name => "bootstrap";
     public override string Description =>
         "Interactive onboarding wizard — completions, tutorial, and animated demos.";
+    protected internal override bool IsManualCommand => true;
 
     private readonly AuthOptionPack _auth = auth;
     private readonly InteractiveOptionPack _interactive = interactive;
