@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 - Fix double token acquisition when commands use both AzureRestClient and ArmClient
 - Add tenant-fallback to `CachingTokenCredential` for auth-challenge flows
+- Show consistent maz-branded browser success page for implicit login (e.g. `maz acr login`), replacing Azure.Identity's default page
 
 ## [0.4.0] - 2026-03-18
 ### Fixed
