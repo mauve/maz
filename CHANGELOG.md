@@ -5,6 +5,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-03-19
+### Added
+- Interactive JMESPath editor TUI (`maz jmespath editor`) with live evaluation, syntax highlighting, and tab-completion
+- Native `maz login` / `maz logout` commands with shared MSAL cache (az cli, VS, VS Code, azd interop)
+- Diagnostic log mechanism (`-v` / `-vv`) for HTTP request/response tracing and credential diagnostics
+- Enhanced `--help-commands` with tabbed browsing, fuzzy path matching, and manual/data-plane command markers
+- JMESPath editor section in bootstrap wizard and getting started guide
+
+### Changed
+- Replace System.CommandLine with compile-time CliParser and lightweight `CliOption<T>` / `CliArgument<T>` types
+- Add stackable short aliases (`-vv` = 2, `-vvv` = 3) and optional-value flag support to CLI parser
+
+### Fixed
+- Fix double token acquisition when commands use both AzureRestClient and ArmClient
+- Add tenant-fallback to `CachingTokenCredential` for auth-challenge flows
+
 ## [0.4.0] - 2026-03-18
 ### Fixed
 - Fix paginated API requests failing with duplicate `api-version` query parameter when following `nextLink` URLs

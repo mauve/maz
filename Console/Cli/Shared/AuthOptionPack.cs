@@ -188,14 +188,13 @@ public partial class AuthOptionPack : OptionPack
                         log.Credential("Skipping Browser credential (non-interactive)");
                         break;
                     }
-                    credentials.Add(
-                        BuildBrowserCredential(
-                            authorityHost,
-                            authClientId,
-                            defaultTenantId,
-                            additionalTenants
-                        )
-                    );
+                    {
+                        var browserCache = new MsalCache(log);
+                        var browserOAuth = new OAuth2Client(browserCache, log);
+                        credentials.Add(
+                            new BrowserCredential(browserOAuth, log, defaultTenantId)
+                        );
+                    }
                     break;
                 case CredentialType.VisualStudio:
                     credentials.Add(
@@ -326,25 +325,6 @@ public partial class AuthOptionPack : OptionPack
         var opts = new ManagedIdentityCredentialOptions(miId);
         if (authorityHost is not null)
             opts.AuthorityHost = authorityHost;
-        return new(opts);
-    }
-
-    private static InteractiveBrowserCredential BuildBrowserCredential(
-        Uri? authorityHost,
-        string? clientId,
-        string? tenantId,
-        List<string> additionalTenants
-    )
-    {
-        var opts = new InteractiveBrowserCredentialOptions();
-        if (authorityHost is not null)
-            opts.AuthorityHost = authorityHost;
-        if (clientId is not null)
-            opts.ClientId = clientId;
-        if (tenantId is not null)
-            opts.TenantId = tenantId;
-        foreach (var t in additionalTenants)
-            opts.AdditionallyAllowedTenants.Add(t);
         return new(opts);
     }
 
