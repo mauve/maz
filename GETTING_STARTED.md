@@ -1,3 +1,46 @@
+## Authentication
+
+Log in to Azure with a single command:
+
+    maz login
+
+This opens your browser for interactive sign-in. On WSL it opens the browser on
+the Windows host. Over SSH or headless? Use device code:
+
+    maz login --use-device-code
+
+### Token sharing with az cli and other tools
+
+`maz login` writes tokens to the same cache as `az login`. This means:
+
+  • After `maz login`, `az` commands work without `az login`
+  • After `az login`, `maz` commands work without `maz login`
+  • Visual Studio, VS Code, and azd also share these tokens
+
+You only need one login across all Azure dev tools.
+
+### CI / pipelines
+
+In CI, maz auto-detects the environment and authenticates without `maz login`:
+
+  • GitHub Actions — OIDC workload identity or AZURE_CLIENT_ID + AZURE_CLIENT_SECRET
+  • Azure Pipelines — OIDC or environment variables
+  • Any CI with `CI=true` — environment variables
+
+No setup needed. Disable with `--no-auth-autodetect-ci-credentials`.
+
+### Service principals and managed identity
+
+    maz login --client-id ID --client-secret SECRET --tenant TENANT
+    maz login --managed-identity
+    maz login --federated-token-file path --client-id ID --tenant TENANT
+
+### Logging out
+
+    maz logout                         # clear all cached tokens + revoke
+    maz logout --tenant TENANT-ID      # specific tenant only
+    maz logout --shared                # also clear VS / VS Code / azd cache
+
 ## Subscriptions
 
 maz tab-completes `--subscription-id` from your actual Azure subscriptions.

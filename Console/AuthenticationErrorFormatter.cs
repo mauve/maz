@@ -26,9 +26,13 @@ internal static partial class AuthenticationErrorFormatter
     private static readonly Dictionary<string, (string Name, string[] FixHints)> CredentialHints =
         new()
         {
+            ["MsalCacheCredential"] = (
+                "MSAL Cache",
+                ["Re-authenticate:", "  maz logout", "  maz login"]
+            ),
             ["Azure CLI"] = (
                 "Azure CLI",
-                ["Re-authenticate the Azure CLI:", "  az logout", "  az login"]
+                ["Re-authenticate:", "  maz login", "  (or: az logout && az login)"]
             ),
             ["Azure Developer CLI"] = (
                 "Azure Developer CLI",
@@ -209,6 +213,7 @@ internal static partial class AuthenticationErrorFormatter
         static string ToCliValue(CredentialType t) =>
             t switch
             {
+                CredentialType.MsalCache => "msalcache",
                 CredentialType.Cli => "cli",
                 CredentialType.Dev => "dev",
                 CredentialType.PowerShell => "ps",
@@ -226,6 +231,7 @@ internal static partial class AuthenticationErrorFormatter
         static CredentialType? MatchFailed(string? failed) =>
             failed switch
             {
+                "MsalCacheCredential" => CredentialType.MsalCache,
                 "Azure CLI" => CredentialType.Cli,
                 "Azure Developer CLI" => CredentialType.Dev,
                 "Azure PowerShell" => CredentialType.PowerShell,

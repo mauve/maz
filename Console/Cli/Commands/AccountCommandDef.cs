@@ -1,6 +1,7 @@
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Resources.Models;
+using Console.Cli.Auth;
 using Console.Cli.Shared;
 using Console.Rendering;
 
@@ -15,6 +16,7 @@ public partial class AccountCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "account";
 
+    public readonly AccountShowCommandDef Show = new();
     public readonly AccountListCommandDef List = new(auth);
     public readonly AccountListLocationsCommandDef ListLocations = new(auth);
 }
@@ -65,6 +67,83 @@ public partial class AccountListCommandDef(AuthOptionPack auth) : CommandDef
                 continue;
             yield return sub;
         }
+    }
+}
+
+/// <summary>Show the current logged-in account and default subscription.</summary>
+/// <remarks>
+/// Displays information about the currently authenticated identity from the MSAL
+/// token cache, including username, tenant, and the default subscription if configured.
+///
+/// This command does not make any network calls — it reads directly from the local
+/// token cache and configuration.
+/// </remarks>
+public partial class AccountShowCommandDef : CommandDef
+{
+    public override string Name => "show";
+
+    public readonly RenderOptionPack Render = new();
+
+    protected override Task<int> ExecuteAsync(CancellationToken ct)
+    {
+        var log = DiagnosticOptionPack.GetLog();
+        var cache = new MsalCache(log);
+        var accounts = cache.GetAccounts();
+
+        if (accounts.Count == 0)
+        {
+            System.Console.Error.WriteLine("Not logged in. Run 'maz login' to authenticate.");
+            return Task.FromResult(1);
+        }
+
+        var defaultSubId = Config.MazConfig.Current.DefaultSubscriptionId;
+
+        if (Render.Format is not null)
+        {
+            // Structured output for the first (primary) account.
+            var primary = accounts[0];
+            var obj = new
+            {
+                username = primary.Username ?? "",
+                tenantId = primary.TenantId ?? "",
+                homeAccountId = primary.HomeAccountId,
+                environment = primary.Environment,
+                defaultSubscription = defaultSubId ?? "",
+                accountCount = accounts.Count,
+            };
+            var renderer = Render.GetRendererFactory().CreateRendererForType<object>();
+            return renderer.RenderAsync(System.Console.Out, obj, ct)
+                .ContinueWith(_ => 0, ct);
+        }
+
+        // Default text output.
+        var first = accounts[0];
+        var entries = new List<(string, string)>();
+
+        if (first.Username is not null)
+            entries.Add(("User", Ansi.White(first.Username)));
+        if (first.TenantId is not null)
+            entries.Add(("Tenant", first.TenantId));
+        entries.Add(("Environment", first.Environment));
+
+        if (defaultSubId is not null)
+            entries.Add(("Default Subscription", defaultSubId));
+
+        // Show token status.
+        var token = cache.FindAccessToken(
+            "https://management.azure.com/.default",
+            first.TenantId
+        );
+        if (token is not null)
+            entries.Add(("Token Expires", token.ExpiresOn.ToString("yyyy-MM-dd HH:mm:ss UTC")));
+        else
+            entries.Add(("Token", Ansi.Yellow("expired or not cached (will refresh on next command)")));
+
+        if (accounts.Count > 1)
+            entries.Add(("Other Accounts", $"{accounts.Count - 1} additional"));
+
+        DefinitionList.Write(System.Console.Out, entries);
+        return Task.FromResult(0);
     }
 }
 

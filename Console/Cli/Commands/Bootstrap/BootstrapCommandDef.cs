@@ -124,11 +124,16 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
     {
         var index = 0;
         var total = steps.Count;
+        var scrollOffset = 0;
 
         CancellationTokenSource? stepCts = null;
         Task? demoTask = null;
         int currentWidth = 0,
             currentHeight = 0;
+
+        // Cached content lines for the current step (avoid re-rendering on scroll).
+        List<string>? cachedContentLines = null;
+        int cachedMaxContentRows = 0;
 
         // Enter alternate screen buffer and hide cursor.
         System.Console.TreatControlCAsInput = true;
@@ -136,7 +141,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         try
         {
-            async Task DrawStepAsync(int i)
+            async Task DrawStepAsync(int i, bool contentOnly = false)
             {
                 // Cancel and await any running demo.
                 if (stepCts != null)
@@ -163,40 +168,73 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 var boxWidth = w - 1;
                 var step = steps[i];
                 var demoLines = GetDemoHeight(step.DemoTag);
-                var nextLabel = i >= total - 1 ? "done " : "next ";
-                var navAnsi =
-                    $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {nextLabel}│  \x1b[35mq\x1b[0m quit  ";
-
-                // Clear screen.
-                System.Console.Write("\x1b[2J");
-
-                // Top border at row 1.
-                WizardUi.MoveTo(1);
-                WizardUi.RenderTopBorder(step.Title, i, total, boxWidth);
-
-                // Bottom border at row h.
-                WizardUi.MoveTo(h);
-                WizardUi.RenderBottomBorder(navAnsi, boxWidth);
-
-                // Content area: rows 2..(h-1).
-                // When a demo is present, reserve demoLines + 1 (separator) rows so
-                // content doesn't overflow into the demo area.
-                var maxContentRows = demoLines > 0 ? h - 2 - demoLines - 1 : h - 2;
-                maxContentRows = Math.Max(0, maxContentRows);
                 var contentWidth = boxWidth - 2;
 
-                var contentLines = await step.GetContentLines(contentWidth);
-                var renderedCount = Math.Min(contentLines.Count, maxContentRows);
-                for (var r = 0; r < renderedCount; r++)
+                // Content area: rows 2..(h-1).
+                // When a demo is present, reserve demoLines + 1 (separator) rows.
+                var maxContentRows = demoLines > 0 ? h - 2 - demoLines - 1 : h - 2;
+                maxContentRows = Math.Max(0, maxContentRows);
+                cachedMaxContentRows = maxContentRows;
+
+                if (!contentOnly)
+                {
+                    // Full redraw: clear screen, recompute content.
+                    System.Console.Write("\x1b[2J");
+
+                    // Top border at row 1.
+                    WizardUi.MoveTo(1);
+                    WizardUi.RenderTopBorder(step.Title, i, total, boxWidth);
+
+                    cachedContentLines = await step.GetContentLines(contentWidth);
+                    scrollOffset = 0;
+                }
+
+                // Render visible content window.
+                var totalLines = cachedContentLines!.Count;
+                var maxScroll = Math.Max(0, totalLines - maxContentRows);
+                scrollOffset = Math.Clamp(scrollOffset, 0, maxScroll);
+                var canScroll = totalLines > maxContentRows;
+
+                for (var r = 0; r < maxContentRows; r++)
                 {
                     WizardUi.MoveTo(2 + r);
                     System.Console.Write("\x1b[2K");
-                    System.Console.Write(contentLines[r]);
+                    var lineIdx = scrollOffset + r;
+                    if (lineIdx < totalLines)
+                    {
+                        // Truncate to available width to prevent terminal wrapping.
+                        var line = cachedContentLines[lineIdx];
+                        var visLen = Ansi.VisibleLength(line);
+                        if (visLen > w - 1)
+                            line = TruncateAnsiLine(line, w - 2);
+                        System.Console.Write(line);
+                    }
                 }
 
-                // Start demo loop if this step has one.
-                if (step.DemoTag is { } tag)
+                // Scroll indicator on top border (right side).
+                if (canScroll)
                 {
+                    WizardUi.MoveTo(1, boxWidth - 3);
+                    var indicator = scrollOffset > 0 && scrollOffset < maxScroll
+                        ? "↑↓"
+                        : scrollOffset > 0
+                            ? "↑"
+                            : "↓";
+                    System.Console.Write($"\x1b[35m{indicator}\x1b[0m");
+                }
+
+                // Always draw bottom border last — after all content, so it's never overwritten.
+                WizardUi.MoveTo(h);
+                var navNextLabel = i >= total - 1 ? "done " : "next ";
+                var navBar = canScroll
+                    ? $"  \x1b[35mPgUp\x1b[0m/\x1b[35mPgDn\x1b[0m scroll  │  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {navNextLabel}│  \x1b[35mq\x1b[0m quit  "
+                    : $"  \x1b[35m←\x1b[0m back  │  \x1b[35m→\x1b[0m {navNextLabel}│  \x1b[35mq\x1b[0m quit  ";
+                WizardUi.RenderBottomBorder(navBar, boxWidth);
+
+                // Start demo loop if this step has one.
+                if (!contentOnly && step.DemoTag is { } tag)
+                {
+                    var renderedCount = Math.Min(totalLines, maxContentRows);
                     if (demoLines > 0)
                     {
                         var separatorRow = 2 + renderedCount;
@@ -237,6 +275,20 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 }
 
                 var key = System.Console.ReadKey(intercept: true);
+
+                // Scrolling: PgUp/PgDn (with or without Ctrl), Up/Down arrows.
+                var scrollDelta = GetScrollDelta(key, cachedMaxContentRows);
+                if (scrollDelta != 0 && cachedContentLines is not null)
+                {
+                    var maxScroll = Math.Max(0, cachedContentLines.Count - cachedMaxContentRows);
+                    var newOffset = Math.Clamp(scrollOffset + scrollDelta, 0, maxScroll);
+                    if (newOffset != scrollOffset)
+                    {
+                        scrollOffset = newOffset;
+                        await DrawStepAsync(index, contentOnly: true);
+                    }
+                    continue;
+                }
 
                 bool forward = IsForwardKey(key);
                 bool backward = IsBackwardKey(key);
@@ -488,16 +540,67 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
 
     private static bool IsForwardKey(ConsoleKeyInfo k) =>
         k.Key == ConsoleKey.Enter
-        || k.Key == ConsoleKey.RightArrow
-        || (k.Key == ConsoleKey.PageDown && k.Modifiers.HasFlag(ConsoleModifiers.Control));
+        || k.Key == ConsoleKey.RightArrow;
 
     private static bool IsBackwardKey(ConsoleKeyInfo k) =>
-        k.Key == ConsoleKey.LeftArrow
-        || (k.Key == ConsoleKey.PageUp && k.Modifiers.HasFlag(ConsoleModifiers.Control));
+        k.Key == ConsoleKey.LeftArrow;
 
     private static bool IsQuitKey(ConsoleKeyInfo k) =>
         k.Key is ConsoleKey.Q or ConsoleKey.Escape
         || (k.Key == ConsoleKey.C && k.Modifiers.HasFlag(ConsoleModifiers.Control));
+
+    /// <summary>
+    /// Returns scroll delta for scroll keys. PgUp/PgDn (with or without Ctrl)
+    /// scroll by a page, Up/Down arrows scroll by one line.
+    /// Returns 0 for non-scroll keys.
+    /// </summary>
+    private static int GetScrollDelta(ConsoleKeyInfo k, int pageSize)
+    {
+        if (k.Key == ConsoleKey.PageDown)
+            return Math.Max(1, pageSize - 2);
+        if (k.Key == ConsoleKey.PageUp)
+            return -Math.Max(1, pageSize - 2);
+        if (k.Key == ConsoleKey.DownArrow)
+            return 1;
+        if (k.Key == ConsoleKey.UpArrow)
+            return -1;
+        return 0;
+    }
+
+    /// <summary>
+    /// Truncates a string that may contain ANSI escape codes to a given visible width.
+    /// Ensures the ANSI state is reset at the end.
+    /// </summary>
+    private static string TruncateAnsiLine(string line, int maxVisible)
+    {
+        var sb = new System.Text.StringBuilder(line.Length);
+        int visible = 0;
+        int i = 0;
+
+        while (i < line.Length && visible < maxVisible)
+        {
+            if (line[i] == '\x1b' && i + 1 < line.Length && line[i + 1] == '[')
+            {
+                // Consume the entire ANSI sequence (doesn't count as visible).
+                var start = i;
+                i += 2;
+                while (i < line.Length && line[i] != 'm')
+                    i++;
+                if (i < line.Length)
+                    i++; // consume 'm'
+                sb.Append(line[start..i]);
+            }
+            else
+            {
+                sb.Append(line[i]);
+                visible++;
+                i++;
+            }
+        }
+
+        sb.Append("\x1b[0m");
+        return sb.ToString();
+    }
 
     private static int GetDemoHeight(string? tag) =>
         tag switch
