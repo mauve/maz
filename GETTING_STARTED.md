@@ -129,6 +129,21 @@ exact error position, and moves the editor cursor there automatically.
 
 <!-- demo:kusto -->
 
+## Interactive JMESPath Editor
+
+`maz jmespath editor` opens a split-pane JMESPath explorer.
+Load Azure resources live or pass a local JSON file:
+
+    maz jmespath editor -t Microsoft.Storage/storageAccounts
+    maz jmespath editor --file data.json
+
+  • Write a JMESPath expression in the bottom editor pane
+  • See input JSON on the left, live results on the right
+  • Tab for autocomplete, Enter to evaluate, F5 to accept
+  • Ctrl+E/D scroll input, Ctrl+R/F scroll output
+
+<!-- demo:jmespath -->
+
 ## Commands
 
 Explore everything maz can do:

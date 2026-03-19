@@ -513,6 +513,9 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             case "kusto":
                 await BootstrapAnimator.PlayKustoAsync(startRow, ct);
                 break;
+            case "jmespath":
+                await BootstrapAnimator.PlayJmesPathAsync(startRow, ct);
+                break;
         }
     }
 
@@ -610,6 +613,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
             "resource-groups" => BootstrapAnimator.ResourceGroupsDemoLines,
             "resource-names" => BootstrapAnimator.ResourceNamesDemoLines,
             "kusto" => BootstrapAnimator.KustoDemoLines,
+            "jmespath" => BootstrapAnimator.JmesPathDemoLines,
             _ => 0,
         };
 }
