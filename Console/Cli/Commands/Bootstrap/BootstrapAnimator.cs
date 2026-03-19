@@ -369,20 +369,71 @@ internal static class BootstrapAnimator
         var lines = new[]
         {
             "",
-            Ansi.Dim($"  ┌─ Input (sample resources) {new string('─', leftW - 27)}┬─ Output (JMESPath result) {new string('─', rightW - 27)}┐"),
+            Ansi.Dim(
+                $"  ┌─ Input (sample resources) {new string('─', leftW - 27)}┬─ Output (JMESPath result) {new string('─', rightW - 27)}┐"
+            ),
             Row(" [", " [", leftW, rightW),
             Row("   {", "   " + Ansi.Yellow("\"myaccount\"") + ",", leftW, rightW),
-            Row("     " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"myaccount\"") + ",", "   " + Ansi.Yellow("\"backupstorage\""), leftW, rightW),
-            Row("     " + Ansi.Cyan("\"location\"") + ": " + Ansi.Yellow("\"eastus\"") + ",", " ]", leftW, rightW),
-            Row("     " + Ansi.Cyan("\"sku\"") + ": { " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"Standard\"") + " }", "", leftW, rightW),
+            Row(
+                "     " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"myaccount\"") + ",",
+                "   " + Ansi.Yellow("\"backupstorage\""),
+                leftW,
+                rightW
+            ),
+            Row(
+                "     " + Ansi.Cyan("\"location\"") + ": " + Ansi.Yellow("\"eastus\"") + ",",
+                " ]",
+                leftW,
+                rightW
+            ),
+            Row(
+                "     "
+                    + Ansi.Cyan("\"sku\"")
+                    + ": { "
+                    + Ansi.Cyan("\"name\"")
+                    + ": "
+                    + Ansi.Yellow("\"Standard\"")
+                    + " }",
+                "",
+                leftW,
+                rightW
+            ),
             Row("   },", "", leftW, rightW),
-            Row("   { " + Ansi.Cyan("\"name\"") + ": " + Ansi.Yellow("\"backupstorage\"") + ", " + Ansi.Dim("...") + " }", "", leftW, rightW),
+            Row(
+                "   { "
+                    + Ansi.Cyan("\"name\"")
+                    + ": "
+                    + Ansi.Yellow("\"backupstorage\"")
+                    + ", "
+                    + Ansi.Dim("...")
+                    + " }",
+                "",
+                leftW,
+                rightW
+            ),
             Row(" ]", "", leftW, rightW),
             Ansi.Dim($"  ├{lBar}┴{rBar}┤"),
             FullRow(" " + Ansi.Dim("JMESPath Query:"), fullW),
             FullRow("  [].name", fullW),
             Ansi.Dim($"  ├{hBar}┤"),
-            FullRow(" " + Ansi.Green("F5") + " accept  " + Ansi.Dim("│") + " " + Ansi.Green("Tab") + " complete  " + Ansi.Dim("│") + " " + Ansi.Green("Enter") + " evaluate  " + Ansi.Dim("│") + " " + Ansi.Green("Esc") + " cancel", fullW),
+            FullRow(
+                " "
+                    + Ansi.Green("F5")
+                    + " accept  "
+                    + Ansi.Dim("│")
+                    + " "
+                    + Ansi.Green("Tab")
+                    + " complete  "
+                    + Ansi.Dim("│")
+                    + " "
+                    + Ansi.Green("Enter")
+                    + " evaluate  "
+                    + Ansi.Dim("│")
+                    + " "
+                    + Ansi.Green("Esc")
+                    + " cancel",
+                fullW
+            ),
             Ansi.Dim($"  └{hBar}┘"),
         };
 
@@ -444,16 +495,16 @@ internal static class BootstrapAnimator
     private static string ShimmerColor(int dist, int bandHalf) =>
         dist switch
         {
-            0 => "\x1b[1;38;5;231m",                          // bold pure white — peak
-            1 => "\x1b[1;97m",                                // bold bright white
-            2 => "\x1b[38;5;255m",                            // near white
-            3 => "\x1b[38;5;252m",                            // light silver
+            0 => "\x1b[1;38;5;231m", // bold pure white — peak
+            1 => "\x1b[1;97m", // bold bright white
+            2 => "\x1b[38;5;255m", // near white
+            3 => "\x1b[38;5;252m", // light silver
             _ when dist <= bandHalf * 4 / 10 => "\x1b[38;5;249m", // medium silver
             _ when dist <= bandHalf * 5 / 10 => "\x1b[38;5;246m", // dim silver
             _ when dist <= bandHalf * 6 / 10 => "\x1b[38;5;141m", // light purple
-            _ when dist <= bandHalf * 8 / 10 => "\x1b[38;5;99m",  // medium purple
-            _ when dist <= bandHalf => "\x1b[38;5;93m",           // deeper purple
-            _ => "\x1b[35m",                                  // base magenta
+            _ when dist <= bandHalf * 8 / 10 => "\x1b[38;5;99m", // medium purple
+            _ when dist <= bandHalf => "\x1b[38;5;93m", // deeper purple
+            _ => "\x1b[35m", // base magenta
         };
 
     // ── Shared animation primitives ────────────────────────────────────────────

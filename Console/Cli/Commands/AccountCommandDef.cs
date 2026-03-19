@@ -113,8 +113,7 @@ public partial class AccountShowCommandDef : CommandDef
                 accountCount = accounts.Count,
             };
             var renderer = Render.GetRendererFactory().CreateRendererForType<object>();
-            return renderer.RenderAsync(System.Console.Out, obj, ct)
-                .ContinueWith(_ => 0, ct);
+            return renderer.RenderAsync(System.Console.Out, obj, ct).ContinueWith(_ => 0, ct);
         }
 
         // Default text output.
@@ -131,14 +130,13 @@ public partial class AccountShowCommandDef : CommandDef
             entries.Add(("Default Subscription", defaultSubId));
 
         // Show token status.
-        var token = cache.FindAccessToken(
-            "https://management.azure.com/.default",
-            first.TenantId
-        );
+        var token = cache.FindAccessToken("https://management.azure.com/.default", first.TenantId);
         if (token is not null)
             entries.Add(("Token Expires", token.ExpiresOn.ToString("yyyy-MM-dd HH:mm:ss UTC")));
         else
-            entries.Add(("Token", Ansi.Yellow("expired or not cached (will refresh on next command)")));
+            entries.Add(
+                ("Token", Ansi.Yellow("expired or not cached (will refresh on next command)"))
+            );
 
         if (accounts.Count > 1)
             entries.Add(("Other Accounts", $"{accounts.Count - 1} additional"));

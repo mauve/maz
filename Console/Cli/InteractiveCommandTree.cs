@@ -9,7 +9,13 @@ namespace Console.Cli;
 /// </summary>
 internal static class InteractiveCommandTree
 {
-    private static readonly CommandTab[] Tabs = [CommandTab.All, CommandTab.Manual, CommandTab.Service, CommandTab.DataPlane];
+    private static readonly CommandTab[] Tabs =
+    [
+        CommandTab.All,
+        CommandTab.Manual,
+        CommandTab.Service,
+        CommandTab.DataPlane,
+    ];
 
     public static void Run(CommandDef root, string? initialFilter)
     {
@@ -31,7 +37,13 @@ internal static class InteractiveCommandTree
             void Rebuild()
             {
                 var sw = new StringWriter();
-                CommandTreePrinter.Print(sw, root, filter.Length > 0 ? filter : null, activeTab, filterMode);
+                CommandTreePrinter.Print(
+                    sw,
+                    root,
+                    filter.Length > 0 ? filter : null,
+                    activeTab,
+                    filterMode
+                );
                 lines = [.. sw.ToString().Split('\n').Where(l => l.Length > 0)];
                 var h = WizardUi.GetTermHeight();
                 var viewportRows = Math.Max(1, h - overhead);
@@ -52,8 +64,8 @@ internal static class InteractiveCommandTree
                 var buf = new StringBuilder(4096);
 
                 buf.Append("\x1b[?2026h"); // begin synchronized output
-                buf.Append("\x1b[?25l");   // hide cursor during draw
-                buf.Append("\x1b[2J");     // clear screen
+                buf.Append("\x1b[?25l"); // hide cursor during draw
+                buf.Append("\x1b[2J"); // clear screen
 
                 // Row 1: Tab bar + keybinding hints
                 buf.Append("\x1b[1;1H\x1b[2K");
@@ -77,9 +89,8 @@ internal static class InteractiveCommandTree
                 buf.Append($"\x1b[35m{new string('─', Math.Max(0, boxWidth))}\x1b[0m");
 
                 // Row h-2: Filter prompt
-                var modeLabel = filterMode == CommandFilterMode.NameAndDescription
-                    ? "Name+Desc"
-                    : "Name";
+                var modeLabel =
+                    filterMode == CommandFilterMode.NameAndDescription ? "Name+Desc" : "Name";
                 var label = $"Type to filter [{modeLabel}] (Ctrl+T toggle): ";
                 buf.Append($"\x1b[{h - 2};1H\x1b[2K");
                 buf.Append($"  \x1b[2m{label}\x1b[0m{Ansi.Yellow(filter)}");
@@ -91,7 +102,7 @@ internal static class InteractiveCommandTree
                 // Reposition cursor at end of filter text and show it
                 var cursorCol = 2 + label.Length + filter.Length;
                 buf.Append($"\x1b[{h - 2};{cursorCol}H");
-                buf.Append("\x1b[?25h");   // show cursor
+                buf.Append("\x1b[?25h"); // show cursor
                 buf.Append("\x1b[?2026l"); // end synchronized output
 
                 System.Console.Write(buf.ToString());
@@ -143,9 +154,10 @@ internal static class InteractiveCommandTree
                 // Ctrl+T: toggle filter mode
                 if (key.Key == ConsoleKey.T && key.Modifiers.HasFlag(ConsoleModifiers.Control))
                 {
-                    filterMode = filterMode == CommandFilterMode.NameAndDescription
-                        ? CommandFilterMode.NameOnly
-                        : CommandFilterMode.NameAndDescription;
+                    filterMode =
+                        filterMode == CommandFilterMode.NameAndDescription
+                            ? CommandFilterMode.NameOnly
+                            : CommandFilterMode.NameAndDescription;
                     scrollOffset = 0;
                     Rebuild();
                     Draw();
@@ -167,10 +179,7 @@ internal static class InteractiveCommandTree
                     }
                     continue;
                 }
-                if (
-                    key.Key == ConsoleKey.PageUp
-                    && key.Modifiers.HasFlag(ConsoleModifiers.Control)
-                )
+                if (key.Key == ConsoleKey.PageUp && key.Modifiers.HasFlag(ConsoleModifiers.Control))
                 {
                     var viewportRows = Math.Max(1, prevHeight - overhead);
                     var newOffset = Math.Max(scrollOffset - viewportRows, 0);

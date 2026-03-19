@@ -6,8 +6,12 @@ namespace Console.Cli;
 internal static class GroupedHelpLayout
 {
     /// <summary>Render help for a command to the given output.</summary>
-    public static void Render(TextWriter output, CommandDef cmd, bool showAdvanced = false,
-        List<CommandDef>? commandPath = null)
+    public static void Render(
+        TextWriter output,
+        CommandDef cmd,
+        bool showAdvanced = false,
+        List<CommandDef>? commandPath = null
+    )
     {
         WriteUsageSection(output, cmd, commandPath);
         WriteArgumentsSection(output, cmd);
@@ -17,12 +21,13 @@ internal static class GroupedHelpLayout
         WriteRemarksSection(output, cmd);
     }
 
-    private static void WriteUsageSection(TextWriter output, CommandDef cmd,
-        List<CommandDef>? commandPath)
+    private static void WriteUsageSection(
+        TextWriter output,
+        CommandDef cmd,
+        List<CommandDef>? commandPath
+    )
     {
-        var names = commandPath is not null
-            ? commandPath.Select(c => c.Name).ToList()
-            : [cmd.Name];
+        var names = commandPath is not null ? commandPath.Select(c => c.Name).ToList() : [cmd.Name];
         var baseLine = string.Join(" ", names);
 
         var allOpts = commandPath is not null
@@ -65,8 +70,12 @@ internal static class GroupedHelpLayout
         }
     }
 
-    private static void WriteGroupedOptions(TextWriter output, CommandDef cmd, bool showAdvanced,
-        List<CommandDef>? commandPath)
+    private static void WriteGroupedOptions(
+        TextWriter output,
+        CommandDef cmd,
+        bool showAdvanced,
+        List<CommandDef>? commandPath
+    )
     {
         var allOpts = commandPath is not null
             ? cmd.EnumerateAllOptionsWithRecursive(commandPath).ToList()
@@ -76,9 +85,7 @@ internal static class GroupedHelpLayout
         if (all.Count == 0)
             return;
 
-        var visible = showAdvanced
-            ? all
-            : all.Where(o => !o.IsAdvanced).ToList();
+        var visible = showAdvanced ? all : all.Where(o => !o.IsAdvanced).ToList();
         bool hasAdvanced = all.Any(o => o.IsAdvanced);
 
         // Partition into ungrouped and ordered groups.
@@ -141,7 +148,11 @@ internal static class GroupedHelpLayout
             .Select(o =>
             {
                 var rawAliases = o.AllNames.ToList();
-                var aliases = SplitAliasesWithValueHint(rawAliases, o.IsBool, o.AllowMultipleArgumentsPerToken);
+                var aliases = SplitAliasesWithValueHint(
+                    rawAliases,
+                    o.IsBool,
+                    o.AllowMultipleArgumentsPerToken
+                );
                 var meta = o.Metadata;
                 var metadata = new List<string>();
                 if (o.Required)
@@ -231,8 +242,11 @@ internal static class GroupedHelpLayout
         }
     }
 
-    private static void WriteSubcommandsSection(TextWriter output, CommandDef cmd,
-        bool showDetailedDescriptions)
+    private static void WriteSubcommandsSection(
+        TextWriter output,
+        CommandDef cmd,
+        bool showDetailedDescriptions
+    )
     {
         var commands = cmd.EnumerateChildren().ToList();
         if (commands.Count == 0)
@@ -247,9 +261,7 @@ internal static class GroupedHelpLayout
             .Select(command =>
             {
                 var name = Ansi.White(command.Name);
-                var displayName = command.IsDataPlane
-                    ? name + " \u26a1"
-                    : name;
+                var displayName = command.IsDataPlane ? name + " \u26a1" : name;
                 if (command.IsManualCommand)
                     displayName += " \u2728";
                 var desc = command.Description ?? "";

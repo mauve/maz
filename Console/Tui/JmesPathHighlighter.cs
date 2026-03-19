@@ -110,8 +110,23 @@ internal static class JmesPathHighlighter
             }
 
             // Operators / structural characters
-            if (c is '[' or ']' or '{' or '}' or '.' or '|' or '@' or '*' or '&' or '?' or '!'
-                or '<' or '>' or '=')
+            if (
+                c
+                is '['
+                    or ']'
+                    or '{'
+                    or '}'
+                    or '.'
+                    or '|'
+                    or '@'
+                    or '*'
+                    or '&'
+                    or '?'
+                    or '!'
+                    or '<'
+                    or '>'
+                    or '='
+            )
             {
                 sb.Append(Ansi.Bold(c.ToString()));
                 i++;

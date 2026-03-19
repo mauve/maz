@@ -35,7 +35,8 @@ internal static class BrowserLauncher
             if (File.Exists("/proc/version"))
             {
                 var version = File.ReadAllText("/proc/version");
-                _isWsl = version.Contains("microsoft", StringComparison.OrdinalIgnoreCase)
+                _isWsl =
+                    version.Contains("microsoft", StringComparison.OrdinalIgnoreCase)
                     || version.Contains("WSL", StringComparison.Ordinal);
             }
         }

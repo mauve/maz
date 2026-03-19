@@ -874,7 +874,9 @@ public class CliOptionGenerator : IIncrementalGenerator
             sb.AppendLine("    {");
             sb.AppendLine($"        Name = {Quote(opt.PrimaryAlias)},");
             if (opt.ExtraAliases.Length > 0)
-                sb.AppendLine($"        Aliases = new string[] {{{string.Join(", ", opt.ExtraAliases.Select(Quote))}}},");
+                sb.AppendLine(
+                    $"        Aliases = new string[] {{{string.Join(", ", opt.ExtraAliases.Select(Quote))}}},"
+                );
             if (!string.IsNullOrEmpty(opt.Description))
                 sb.AppendLine($"        Description = {Quote(opt.Description)},");
             if (opt.IsRequired)
@@ -897,10 +899,16 @@ public class CliOptionGenerator : IIncrementalGenerator
                 // Wrap in parens to avoid switch expression braces confusing the object initializer
                 sb.AppendLine($"        {propName} = ({parserExpr}),");
             }
-            if (opt.EnvVar is not null || opt.AllowedValuesText is not null || opt.DefaultText is not null)
+            if (
+                opt.EnvVar is not null
+                || opt.AllowedValuesText is not null
+                || opt.DefaultText is not null
+            )
             {
                 var envArg = opt.EnvVar is not null ? Quote(opt.EnvVar) : "null";
-                var allowedArg = opt.AllowedValuesText is not null ? Quote(opt.AllowedValuesText) : "null";
+                var allowedArg = opt.AllowedValuesText is not null
+                    ? Quote(opt.AllowedValuesText)
+                    : "null";
                 var defaultArg = opt.DefaultText is not null ? Quote(opt.DefaultText) : "null";
                 sb.AppendLine(
                     $"        Metadata = new global::Console.Cli.OptionMetadata({envArg}, {allowedArg}, {defaultArg}),"
@@ -973,12 +981,16 @@ public class CliOptionGenerator : IIncrementalGenerator
                     {
                         // Inline children when names collide
                         sb.AppendLine($"        if ({child.Name} is not null)");
-                        sb.AppendLine($"            foreach (var __c in {child.Name}.InlineChildren())");
+                        sb.AppendLine(
+                            $"            foreach (var __c in {child.Name}.InlineChildren())"
+                        );
                         sb.AppendLine($"                yield return __c;");
                     }
                     else
                     {
-                        sb.AppendLine($"        if ({child.Name} is not null) yield return {child.Name};");
+                        sb.AppendLine(
+                            $"        if ({child.Name} is not null) yield return {child.Name};"
+                        );
                     }
                 }
                 sb.AppendLine("    }");
@@ -1056,7 +1068,8 @@ public class CliOptionGenerator : IIncrementalGenerator
     /// </summary>
     static string EmitCliOptionParser(OptionPropModel opt)
     {
-        if (opt.CustomParserExpr == null) return "null";
+        if (opt.CustomParserExpr == null)
+            return "null";
 
         // The old parser expressions use r.Tokens[0].Value or r.Tokens patterns.
         // We need to transform them to simple string parsers.
@@ -1089,22 +1102,21 @@ public class CliOptionGenerator : IIncrementalGenerator
         if (expr.Contains("r.Tokens[0].Value switch"))
         {
             return expr.Replace("r => r.Tokens[0].Value switch", "__raw => __raw switch")
-                        .Replace("r => r.Tokens.Count > 0 ? ", "__raw => __raw != null ? ")
-                        .Replace("r.Tokens[0].Value", "__raw");
+                .Replace("r => r.Tokens.Count > 0 ? ", "__raw => __raw != null ? ")
+                .Replace("r.Tokens[0].Value", "__raw");
         }
 
         // Nullable check: r => r.Tokens.Count > 0 ? ... : null
         if (expr.Contains("r.Tokens.Count > 0"))
         {
             return expr.Replace("r => r.Tokens.Count > 0", "__raw => __raw != null")
-                        .Replace("r.Tokens[0].Value", "__raw");
+                .Replace("r.Tokens[0].Value", "__raw");
         }
 
         // Simple value parser: r => SomeType.Parse(r.Tokens[0].Value) or similar
         if (expr.Contains("r.Tokens[0].Value"))
         {
-            return expr.Replace("r => ", "__raw => ")
-                        .Replace("r.Tokens[0].Value", "__raw");
+            return expr.Replace("r => ", "__raw => ").Replace("r.Tokens[0].Value", "__raw");
         }
 
         // Collection parser with token iteration
@@ -1119,8 +1131,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         }
 
         // Fallback: just use as-is with substitution
-        return expr.Replace("r => ", "__raw => ")
-                    .Replace("r.Tokens[0].Value", "__raw");
+        return expr.Replace("r => ", "__raw => ").Replace("r.Tokens[0].Value", "__raw");
     }
 
     static string Quote(string s) =>

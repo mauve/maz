@@ -94,13 +94,15 @@ public abstract partial class CommandDef
     internal readonly CliOption<bool> _helpMoreOption = new()
     {
         Name = "--help-more",
-        Description = "Show all options including advanced ones, and detailed command descriptions.",
+        Description =
+            "Show all options including advanced ones, and detailed command descriptions.",
     };
 
     internal readonly CliOption<string?> _helpCommandsOption = new()
     {
         Name = "--help-commands",
-        Description = "Show the full command tree. Optionally filter by name, alias, or description.",
+        Description =
+            "Show the full command tree. Optionally filter by name, alias, or description.",
         ValueIsOptional = true,
     };
 
@@ -204,7 +206,9 @@ public abstract partial class CommandDef
 
             if (requireConfirm)
             {
-                var interactive = Shared.InteractiveOptionPack.IsEffectivelyInteractiveFromTree(this);
+                var interactive = Shared.InteractiveOptionPack.IsEffectivelyInteractiveFromTree(
+                    this
+                );
                 PromptForConfirmation(interactive, Name);
             }
         }
@@ -222,9 +226,7 @@ public abstract partial class CommandDef
         {
             var authPack = GetAuthOptionPack();
             var configured = authPack?.AllowedCredentialTypes;
-            System.Console.Error.WriteLine(
-                AuthenticationErrorFormatter.Format(ex, configured)
-            );
+            System.Console.Error.WriteLine(AuthenticationErrorFormatter.Format(ex, configured));
             if (IsDetailedErrorsEnabled())
                 System.Console.Error.WriteLine(ex.ToString());
             return 1;

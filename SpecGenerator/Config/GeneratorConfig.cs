@@ -33,11 +33,7 @@ public record ServiceConfig(
 /// <param name="ClassName">The C# class name of the option pack (e.g. "EventHubOptionPack").</param>
 /// <param name="FieldName">The C# field name in the generated command class (e.g. "EventHub").</param>
 /// <param name="Scope">The OAuth2 scope for the data-plane endpoint (e.g. "https://eventhubs.azure.net/.default").</param>
-public record DataplaneOptionPackConfig(
-    string ClassName,
-    string FieldName,
-    string Scope
-);
+public record DataplaneOptionPackConfig(string ClassName, string FieldName, string Scope);
 
 /// <summary>
 /// Configures an ARM-resource-backed option pack for RM commands that target a specific named resource.

@@ -39,9 +39,7 @@ public class HelpSmokeTests
         Assert.IsTrue(result.Command._helpOption.WasProvided, "Expected --help to be recognized");
 
         // Only non-required-option errors indicate real problems
-        var nonRequiredErrors = result.Errors
-            .Where(e => !e.Contains("is required"))
-            .ToList();
+        var nonRequiredErrors = result.Errors.Where(e => !e.Contains("is required")).ToList();
         Assert.AreEqual(
             0,
             nonRequiredErrors.Count,

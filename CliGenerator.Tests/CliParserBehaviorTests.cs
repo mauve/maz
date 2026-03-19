@@ -36,10 +36,7 @@ public class CliParserBehaviorTests
             ValueIsOptional = true,
         };
 
-        public readonly CliOption<int> Count = new()
-        {
-            Name = "--count",
-        };
+        public readonly CliOption<int> Count = new() { Name = "--count" };
 
         internal override IEnumerable<CliOption> EnumerateOptions()
         {
@@ -56,9 +53,15 @@ public class CliParserBehaviorTests
         var cmd = new OptionalValueCommandDef();
         var result = CliParser.Parse(["--filter"], cmd);
 
-        Assert.IsTrue(cmd.Filter.WasProvided, "--filter without value should be marked as provided");
+        Assert.IsTrue(
+            cmd.Filter.WasProvided,
+            "--filter without value should be marked as provided"
+        );
         Assert.IsNull(cmd.Filter.Value, "--filter without value should have null value");
-        Assert.IsFalse(result.Errors.Any(e => e.Contains("--filter")), "No error for optional-value option");
+        Assert.IsFalse(
+            result.Errors.Any(e => e.Contains("--filter")),
+            "No error for optional-value option"
+        );
     }
 
     [TestMethod]
@@ -98,7 +101,10 @@ public class CliParserBehaviorTests
         var result = CliParser.Parse(["--port"], cmd);
 
         Assert.IsTrue(cmd.Port.WasProvided, "--port without value should be marked as provided");
-        Assert.IsFalse(result.Errors.Any(e => e.Contains("--port")), "No error for optional-value option");
+        Assert.IsFalse(
+            result.Errors.Any(e => e.Contains("--port")),
+            "No error for optional-value option"
+        );
     }
 
     [TestMethod]
@@ -191,10 +197,7 @@ public class CliParserBehaviorTests
     {
         public override string Name => "test";
 
-        public readonly CliOption<bool> Verbose = new()
-        {
-            Name = "--verbose",
-        };
+        public readonly CliOption<bool> Verbose = new() { Name = "--verbose" };
 
         internal override IEnumerable<CliOption> EnumerateOptions()
         {
@@ -365,8 +368,14 @@ public class CliParserBehaviorTests
     {
         var cmd = new StackableOnStringCommandDef();
         var threw = false;
-        try { CliParser.Parse([], cmd); }
-        catch (InvalidOperationException) { threw = true; }
+        try
+        {
+            CliParser.Parse([], cmd);
+        }
+        catch (InvalidOperationException)
+        {
+            threw = true;
+        }
         Assert.IsTrue(threw, "Expected InvalidOperationException for Stackable on non-int option");
     }
 

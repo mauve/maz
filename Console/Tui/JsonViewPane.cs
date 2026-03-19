@@ -6,7 +6,10 @@ namespace Console.Tui;
 /// <summary>Read-only scrollable pane that displays syntax-highlighted JSON.</summary>
 internal sealed class JsonViewPane
 {
-    private static readonly JsonSerializerOptions PrettyPrintOptions = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions PrettyPrintOptions = new()
+    {
+        WriteIndented = true,
+    };
 
     private string[] _lines = [];
     private int _scrollOffset;
@@ -59,9 +62,7 @@ internal sealed class JsonViewPane
 
         // Title
         MoveTo(top, left);
-        var titleText = focused
-            ? Ansi.Color("  " + _title, "\x1b[1;7m")
-            : Ansi.Bold("  " + _title);
+        var titleText = focused ? Ansi.Color("  " + _title, "\x1b[1;7m") : Ansi.Bold("  " + _title);
         WriteCell(titleText, width);
 
         // Separator

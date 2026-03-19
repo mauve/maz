@@ -53,7 +53,9 @@ foreach (var directive in result.Directives)
     switch (directive.Name)
     {
         case "debug":
-            System.Console.Error.WriteLine($"Attach debugger to PID {Environment.ProcessId} and press Enter...");
+            System.Console.Error.WriteLine(
+                $"Attach debugger to PID {Environment.ProcessId} and press Enter..."
+            );
             System.Console.ReadLine();
             break;
         case "suggest":
@@ -106,7 +108,9 @@ if (result.Command is not null)
 
 if (result.Errors.Count > 0)
 {
-    var interactive = InteractiveOptionPack.IsEffectivelyInteractiveFromTree(result.Command ?? rootDef);
+    var interactive = InteractiveOptionPack.IsEffectivelyInteractiveFromTree(
+        result.Command ?? rootDef
+    );
 
     var suggestionResult = CommandSuggester.TrySuggest(
         result,

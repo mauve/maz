@@ -128,13 +128,19 @@ public partial class LoginCommandDef : CommandDef
         {
             if (Tenant is null)
             {
-                System.Console.Error.WriteLine("Error: --tenant is required for service principal auth.");
+                System.Console.Error.WriteLine(
+                    "Error: --tenant is required for service principal auth."
+                );
                 return 1;
             }
 
             log.Credential($"Authenticating as service principal {ClientId}");
             response = await oauth.AcquireTokenByClientSecretAsync(
-                tenant, ClientId, ClientSecret, Scopes, ct
+                tenant,
+                ClientId,
+                ClientSecret,
+                Scopes,
+                ct
             );
             PrintResult(response, "service principal");
             return 0;
@@ -145,13 +151,20 @@ public partial class LoginCommandDef : CommandDef
         {
             if (Tenant is null)
             {
-                System.Console.Error.WriteLine("Error: --tenant is required for service principal auth.");
+                System.Console.Error.WriteLine(
+                    "Error: --tenant is required for service principal auth."
+                );
                 return 1;
             }
 
             log.Credential($"Authenticating with certificate for {ClientId}");
             response = await oauth.AcquireTokenByCertificateAsync(
-                tenant, ClientId, CertificatePath, CertificatePassword, Scopes, ct
+                tenant,
+                ClientId,
+                CertificatePath,
+                CertificatePassword,
+                Scopes,
+                ct
             );
             PrintResult(response, "service principal (certificate)");
             return 0;
@@ -168,7 +181,9 @@ public partial class LoginCommandDef : CommandDef
             var tokenRequest = new Azure.Core.TokenRequestContext([.. Scopes]);
             var token = await miCredential.GetTokenAsync(tokenRequest, ct);
             System.Console.Out.WriteLine($"Logged in via managed identity");
-            System.Console.Out.WriteLine($"Token expires: {token.ExpiresOn:yyyy-MM-dd HH:mm:ss} UTC");
+            System.Console.Out.WriteLine(
+                $"Token expires: {token.ExpiresOn:yyyy-MM-dd HH:mm:ss} UTC"
+            );
             return 0;
         }
 
@@ -177,16 +192,21 @@ public partial class LoginCommandDef : CommandDef
         {
             if (ClientId is null || Tenant is null)
             {
-                System.Console.Error.WriteLine("Error: --client-id and --tenant are required for federated token auth.");
+                System.Console.Error.WriteLine(
+                    "Error: --client-id and --tenant are required for federated token auth."
+                );
                 return 1;
             }
 
-            var token = FederatedToken
-                ?? await File.ReadAllTextAsync(FederatedTokenFile!, ct);
+            var token = FederatedToken ?? await File.ReadAllTextAsync(FederatedTokenFile!, ct);
 
             log.Credential("Authenticating with federated token");
             response = await oauth.AcquireTokenByFederatedTokenAsync(
-                tenant, ClientId, token.Trim(), Scopes, ct
+                tenant,
+                ClientId,
+                token.Trim(),
+                Scopes,
+                ct
             );
             PrintResult(response, "workload identity");
             return 0;
@@ -233,21 +253,25 @@ public partial class LoginCommandDef : CommandDef
     )
     {
         var oauth = new OAuth2Client(cache, log);
-        var tenant = Tenant
-            ?? Environment.GetEnvironmentVariable("AZURE_TENANT_ID")
-            ?? "organizations";
+        var tenant =
+            Tenant ?? Environment.GetEnvironmentVariable("AZURE_TENANT_ID") ?? "organizations";
 
         if (ci.RecommendedCredential == CredentialType.WorkloadIdentity)
         {
             var clientId = ClientId ?? Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
-            var tokenFile = FederatedTokenFile
+            var tokenFile =
+                FederatedTokenFile
                 ?? Environment.GetEnvironmentVariable("AZURE_FEDERATED_TOKEN_FILE");
 
             if (clientId is not null && tokenFile is not null && File.Exists(tokenFile))
             {
                 var token = (await File.ReadAllTextAsync(tokenFile, ct)).Trim();
                 var response = await oauth.AcquireTokenByFederatedTokenAsync(
-                    tenant, clientId, token, Scopes, ct
+                    tenant,
+                    clientId,
+                    token,
+                    Scopes,
+                    ct
                 );
                 PrintResult(response, $"workload identity ({ci.Name})");
                 return 0;
@@ -261,7 +285,11 @@ public partial class LoginCommandDef : CommandDef
         if (envClientId is not null && envSecret is not null)
         {
             var response = await oauth.AcquireTokenByClientSecretAsync(
-                tenant, envClientId, envSecret, Scopes, ct
+                tenant,
+                envClientId,
+                envSecret,
+                Scopes,
+                ct
             );
             PrintResult(response, $"service principal ({ci.Name})");
             return 0;

@@ -113,8 +113,10 @@ internal sealed class JmesPathTuiApp
         }
 
         // F5 or Ctrl+Enter: accept expression
-        if (key.Key == ConsoleKey.F5
-            || (key.Key == ConsoleKey.Enter && (key.Modifiers & ConsoleModifiers.Control) != 0))
+        if (
+            key.Key == ConsoleKey.F5
+            || (key.Key == ConsoleKey.Enter && (key.Modifiers & ConsoleModifiers.Control) != 0)
+        )
         {
             var expr = _editor.GetText().Trim();
             if (!string.IsNullOrEmpty(expr))

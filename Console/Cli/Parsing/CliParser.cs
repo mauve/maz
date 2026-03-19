@@ -49,7 +49,11 @@ internal static class CliParser
             {
                 i2++;
                 // Skip the value token for non-bool options
-                if (i2 < tokens.Count && !tokens[i2].Raw.StartsWith('-') && !token.Raw.Contains('='))
+                if (
+                    i2 < tokens.Count
+                    && !tokens[i2].Raw.StartsWith('-')
+                    && !token.Raw.Contains('=')
+                )
                 {
                     // Peek: is this an option that takes a value?
                     var currentCmd = commandPath[^1];
@@ -133,8 +137,12 @@ internal static class CliParser
             var isCommand = false;
             foreach (var cmd in commandPath.Skip(1))
             {
-                if (string.Equals(cmd.Name, token.Raw, StringComparison.OrdinalIgnoreCase)
-                    || cmd.Aliases.Any(a => string.Equals(a, token.Raw, StringComparison.OrdinalIgnoreCase)))
+                if (
+                    string.Equals(cmd.Name, token.Raw, StringComparison.OrdinalIgnoreCase)
+                    || cmd.Aliases.Any(a =>
+                        string.Equals(a, token.Raw, StringComparison.OrdinalIgnoreCase)
+                    )
+                )
                 {
                     isCommand = true;
                     break;
@@ -186,10 +194,15 @@ internal static class CliParser
                     if (matchedOpt.IsBool)
                     {
                         // Bool options: check if next token is true/false, otherwise flag-style
-                        if (j + 1 < tokens.Count
+                        if (
+                            j + 1 < tokens.Count
                             && !tokens[j + 1].Raw.StartsWith('-')
-                            && (tokens[j + 1].Raw.Equals("true", StringComparison.OrdinalIgnoreCase)
-                                || tokens[j + 1].Raw.Equals("false", StringComparison.OrdinalIgnoreCase)))
+                            && (
+                                tokens[j + 1].Raw.Equals("true", StringComparison.OrdinalIgnoreCase)
+                                || tokens[j + 1]
+                                    .Raw.Equals("false", StringComparison.OrdinalIgnoreCase)
+                            )
+                        )
                         {
                             j++;
                             matchedOpt.TryParse(tokens[j].Raw);
@@ -197,7 +210,10 @@ internal static class CliParser
                         else
                         {
                             // Determine truth value from the alias used
-                            var isNegation = optName.StartsWith("--no-", StringComparison.OrdinalIgnoreCase);
+                            var isNegation = optName.StartsWith(
+                                "--no-",
+                                StringComparison.OrdinalIgnoreCase
+                            );
                             matchedOpt.TryParse(isNegation ? "false" : null);
                         }
                     }
@@ -222,7 +238,9 @@ internal static class CliParser
                         {
                             j++;
                             if (!matchedOpt.TryParse(tokens[j].Raw))
-                                result.Errors.Add($"Cannot parse '{tokens[j].Raw}' for option '{optName}'.");
+                                result.Errors.Add(
+                                    $"Cannot parse '{tokens[j].Raw}' for option '{optName}'."
+                                );
                         }
                         else if (matchedOpt.ValueIsOptional)
                         {
@@ -258,9 +276,16 @@ internal static class CliParser
         for (int k = arguments.Count; k < positionalArgs.Count; k++)
         {
             // Don't mark command path tokens as unmatched
-            if (!commandPath.Skip(1).Any(c =>
-                    string.Equals(c.Name, positionalArgs[k], StringComparison.OrdinalIgnoreCase)
-                    || c.Aliases.Any(a => string.Equals(a, positionalArgs[k], StringComparison.OrdinalIgnoreCase))))
+            if (
+                !commandPath
+                    .Skip(1)
+                    .Any(c =>
+                        string.Equals(c.Name, positionalArgs[k], StringComparison.OrdinalIgnoreCase)
+                        || c.Aliases.Any(a =>
+                            string.Equals(a, positionalArgs[k], StringComparison.OrdinalIgnoreCase)
+                        )
+                    )
+            )
             {
                 result.UnmatchedTokens.Add(positionalArgs[k]);
             }
@@ -348,8 +373,9 @@ internal static class CliParser
         {
             if (opt.Stackable && !opt.IsInt)
                 throw new InvalidOperationException(
-                    $"Option '{opt.Name}' is marked Stackable but its type is {opt.ValueTypeName}. " +
-                    "Stackable is only supported on int options.");
+                    $"Option '{opt.Name}' is marked Stackable but its type is {opt.ValueTypeName}. "
+                        + "Stackable is only supported on int options."
+                );
 
             foreach (var name in opt.AllNames)
             {
@@ -382,7 +408,8 @@ internal static class CliParser
         {
             foreach (var opt in commandPath[i].EnumerateAllOptions())
             {
-                if (!opt.Recursive) continue;
+                if (!opt.Recursive)
+                    continue;
                 foreach (var n in opt.AllNames)
                 {
                     if (string.Equals(n, name, StringComparison.OrdinalIgnoreCase))

@@ -9,7 +9,8 @@ public class InteractiveOptionPack : OptionPack
     {
         Name = "--interactive",
         Aliases = ["--no-interactive"],
-        Description = "Allow interactive prompts. Defaults to true; auto-disabled when redirecting or TERM=dumb.",
+        Description =
+            "Allow interactive prompts. Defaults to true; auto-disabled when redirecting or TERM=dumb.",
         Recursive = true,
         DefaultValueFactory = () => true,
     };

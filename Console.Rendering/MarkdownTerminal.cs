@@ -85,7 +85,10 @@ public static class MarkdownTerminal
         {
             var indent = line.Length - line.TrimStart().Length;
             var bulletText = line.TrimStart()[2..];
-            return new string(' ', indent) + Ansi.Color("•", "\x1b[35m") + " " + RenderInline(bulletText);
+            return new string(' ', indent)
+                + Ansi.Color("•", "\x1b[35m")
+                + " "
+                + RenderInline(bulletText);
         }
 
         // Normal text — inline formatting only

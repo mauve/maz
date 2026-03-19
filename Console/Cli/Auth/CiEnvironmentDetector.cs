@@ -34,9 +34,7 @@ internal static class CiEnvironmentDetector
         // Azure Pipelines with OIDC
         if (
             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("BUILD_BUILDID"))
-            && !string.IsNullOrEmpty(
-                Environment.GetEnvironmentVariable("SYSTEM_OIDCREQUESTURI")
-            )
+            && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("SYSTEM_OIDCREQUESTURI"))
         )
         {
             return new DetectedCiEnvironment(

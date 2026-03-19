@@ -21,7 +21,11 @@ public sealed class AzureRestClient
     /// <param name="credential">The credential to use for authentication.</param>
     /// <param name="log">Diagnostic log for runtime diagnostics.</param>
     /// <param name="scope">The OAuth scope to request. Defaults to the ARM management scope.</param>
-    public AzureRestClient(TokenCredential credential, DiagnosticLog log, string scope = ManagementScope)
+    public AzureRestClient(
+        TokenCredential credential,
+        DiagnosticLog log,
+        string scope = ManagementScope
+    )
     {
         _credential = credential;
         _log = log;
@@ -44,7 +48,8 @@ public sealed class AzureRestClient
         {
             var errorBody = await response.Content.ReadAsStringAsync(ct);
             throw new HttpRequestException(
-                $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).\n{errorBody}");
+                $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).\n{errorBody}"
+            );
         }
         var content = await response.Content.ReadAsStringAsync(ct);
         return string.IsNullOrWhiteSpace(content)

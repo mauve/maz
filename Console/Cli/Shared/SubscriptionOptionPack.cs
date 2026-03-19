@@ -34,7 +34,7 @@ public partial class SubscriptionOptionPack : OptionPack
         return ExtractSubscriptionGuid(id)
             ?? throw new InvocationException(
                 $"Cannot resolve subscription '{id}' without an ARM client. "
-                + "Use a GUID, /subscriptions/{{guid}}, or /s/name:guid format."
+                    + "Use a GUID, /subscriptions/{{guid}}, or /s/name:guid format."
             );
     }
 

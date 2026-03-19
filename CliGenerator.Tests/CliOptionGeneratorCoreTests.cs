@@ -115,12 +115,11 @@ public class CliOptionGeneratorCoreTests
             """
         );
         // Bool option: --no-verbose is appended after the explicit extra aliases
+        Assert.IsTrue(text.Contains("\"--no-verbose\""), "Bool option gets --no- negation alias");
         Assert.IsTrue(
-            text.Contains("\"--no-verbose\""),
-            "Bool option gets --no- negation alias"
-        );
-        Assert.IsTrue(
-            text.Contains("\"-v\"") && text.Contains("\"-vv\"") && text.Contains("\"--very-verbose\""),
+            text.Contains("\"-v\"")
+                && text.Contains("\"-vv\"")
+                && text.Contains("\"--very-verbose\""),
             "Explicit extra aliases are preserved"
         );
     }
@@ -243,10 +242,7 @@ public class CliOptionGeneratorCoreTests
             }
             """
         );
-        AssertContainsAll(
-            text,
-            "AllowMultipleArgumentsPerToken = true"
-        );
+        AssertContainsAll(text, "AllowMultipleArgumentsPerToken = true");
     }
 
     [TestMethod]
@@ -284,9 +280,6 @@ public class CliOptionGeneratorCoreTests
             }
             """
         );
-        AssertContainsAll(
-            text,
-            "AllowMultipleArgumentsPerToken = true"
-        );
+        AssertContainsAll(text, "AllowMultipleArgumentsPerToken = true");
     }
 }

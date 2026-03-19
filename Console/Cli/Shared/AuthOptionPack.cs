@@ -52,7 +52,12 @@ public partial class AuthOptionPack : OptionPack
     /// <summary>Specifies the credential types that will be used for authentication.</summary>
     [CliOption("--auth-allowed-credential-types", Global = true)]
     public partial List<CredentialType> AllowedCredentialTypes { get; } =
-        [CredentialType.MsalCache, CredentialType.Browser, CredentialType.DeviceCode, CredentialType.Env];
+        [
+            CredentialType.MsalCache,
+            CredentialType.Browser,
+            CredentialType.DeviceCode,
+            CredentialType.Env,
+        ];
 
     /// <summary>Auto-detect CI environment and use appropriate credentials.</summary>
     [CliOption("--auth-autodetect-ci-credentials", Global = true)]
@@ -101,7 +106,8 @@ public partial class AuthOptionPack : OptionPack
         // Determine if interactive credential flows should be included.
         // They are skipped when --auth-interactive is false or the terminal
         // is non-interactive (redirected I/O, TERM=dumb).
-        var allowInteractiveFlows = Interactive
+        var allowInteractiveFlows =
+            Interactive
             && !System.Console.IsInputRedirected
             && !System.Console.IsOutputRedirected
             && Environment.GetEnvironmentVariable("TERM") != "dumb";
@@ -119,9 +125,14 @@ public partial class AuthOptionPack : OptionPack
                         credentials.Add(
                             BuildWorkloadIdentityCredential(
                                 authorityHost,
-                                authClientId ?? Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"),
-                                defaultTenantId ?? Environment.GetEnvironmentVariable("AZURE_TENANT_ID"),
-                                tokenFilePath ?? Environment.GetEnvironmentVariable("AZURE_FEDERATED_TOKEN_FILE"),
+                                authClientId
+                                    ?? Environment.GetEnvironmentVariable("AZURE_CLIENT_ID"),
+                                defaultTenantId
+                                    ?? Environment.GetEnvironmentVariable("AZURE_TENANT_ID"),
+                                tokenFilePath
+                                    ?? Environment.GetEnvironmentVariable(
+                                        "AZURE_FEDERATED_TOKEN_FILE"
+                                    ),
                                 additionalTenants
                             )
                         );
