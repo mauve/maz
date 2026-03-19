@@ -40,7 +40,7 @@ public partial class DatafactoryTriggerSubscribeCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FactoryName!, ResourceGroup, armClient, "Microsoft.DataFactory/factories", ct);
+            FactoryName!, ResourceGroup, armClient, "Microsoft.DataFactory/factories", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataFactory/factories/{resolvedName}/triggers/{TriggerName}/subscribeToEvents";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2018-06-01", null, ct);

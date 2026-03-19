@@ -31,7 +31,7 @@ public partial class InformaticaOrganizationShowCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", ct);
+            OrganizationName!, ResourceGroup, armClient, "Informatica.DataManagement/organizations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Informatica.DataManagement/organizations/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-11-27", null, ct);

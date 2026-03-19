@@ -44,7 +44,7 @@ public partial class AzurearcdataPostgresinstanceCreateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PostgresInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/postgresInstances", ct);
+            PostgresInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/postgresInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureArcData/postgresInstances/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -48,7 +48,7 @@ public partial class WebappSStartWebSiteNetworkTraceOperationCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/sites/{resolvedName}/networkTrace/startOperation";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

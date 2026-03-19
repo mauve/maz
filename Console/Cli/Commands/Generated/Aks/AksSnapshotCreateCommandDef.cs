@@ -32,7 +32,7 @@ public partial class AksSnapshotCreateCommandDef(AuthOptionPack auth) : CommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ContainerService/snapshots", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ContainerService/snapshots", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerService/snapshots/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2026-01-01", null, ct);

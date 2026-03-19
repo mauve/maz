@@ -39,7 +39,7 @@ public partial class EventgridTopicListEventTypesCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderNamespace!, ResourceGroup, armClient, "{providerNamespace}/{resourceTypeName}", ct);
+            ProviderNamespace!, ResourceGroup, armClient, "{providerNamespace}/{resourceTypeName}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{resolvedName}/{ResourceTypeName}/{ResourceName}/providers/Microsoft.EventGrid/eventTypes";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

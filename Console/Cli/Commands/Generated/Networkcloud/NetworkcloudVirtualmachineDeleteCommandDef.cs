@@ -36,7 +36,7 @@ public partial class NetworkcloudVirtualmachineDeleteCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/virtualMachines", ct);
+            VirtualMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/virtualMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/virtualMachines/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-09-01", null, ct);

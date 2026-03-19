@@ -40,7 +40,7 @@ public partial class AvdScalingplanpersonalscheduleCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", ct);
+            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/scalingPlans/{resolvedName}/personalSchedules/{ScalingPlanScheduleName}";
 
         var body = BodyJson is { } rawJson

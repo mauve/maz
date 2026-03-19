@@ -31,7 +31,7 @@ public partial class ScvmmVirtualmachinetemplateShowCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualMachineTemplates", ct);
+            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualMachineTemplates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/virtualMachineTemplates/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-03-13", null, ct);

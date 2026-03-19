@@ -36,7 +36,7 @@ public partial class ManagednetworkfabricL2isolationdomainCommitConfigurationCom
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            L2IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l2IsolationDomains", ct);
+            L2IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l2IsolationDomains", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/l2IsolationDomains/{resolvedName}/commitConfiguration";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-06-15", null, ct);

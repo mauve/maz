@@ -36,7 +36,7 @@ public partial class NetworkVirtualhubGetInboundRoutesCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", ct);
+            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualHubs/{resolvedName}/inboundRoutes";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

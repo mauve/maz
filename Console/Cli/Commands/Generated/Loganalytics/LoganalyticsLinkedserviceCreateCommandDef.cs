@@ -44,7 +44,7 @@ public partial class LoganalyticsLinkedserviceCreateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}/linkedServices/{LinkedServiceName}";
 
         var body = BodyJson is { } rawJson

@@ -40,7 +40,7 @@ public partial class AvdMsixpackageCreateCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", ct);
+            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/hostPools/{resolvedName}/msixPackages/{MsixPackageFullName}";
 
         var body = BodyJson is { } rawJson

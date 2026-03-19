@@ -35,7 +35,7 @@ public partial class PrivatednsVirtualnetworklinkListCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PrivateZoneName!, ResourceGroup, armClient, "Microsoft.Network/privateDnsZones", ct);
+            PrivateZoneName!, ResourceGroup, armClient, "Microsoft.Network/privateDnsZones", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/privateDnsZones/{resolvedName}/virtualNetworkLinks";
 
         var allItems = client.GetAllAsync(path, "2024-06-01", "value", "nextLink", ct);

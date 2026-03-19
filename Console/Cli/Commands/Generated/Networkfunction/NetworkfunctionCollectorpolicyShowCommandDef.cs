@@ -35,7 +35,7 @@ public partial class NetworkfunctionCollectorpolicyShowCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AzureTrafficCollectorName!, ResourceGroup, armClient, "Microsoft.NetworkFunction/azureTrafficCollectors", ct);
+            AzureTrafficCollectorName!, ResourceGroup, armClient, "Microsoft.NetworkFunction/azureTrafficCollectors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkFunction/azureTrafficCollectors/{resolvedName}/collectorPolicies/{CollectorPolicyName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-11-01", null, ct);

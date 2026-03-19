@@ -32,7 +32,7 @@ public partial class WebappSCreateOneDeployOperationCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/sites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/sites/{resolvedName}/extensions/onedeploy";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2025-05-01", null, ct);

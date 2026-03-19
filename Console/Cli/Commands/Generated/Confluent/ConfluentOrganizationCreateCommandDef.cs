@@ -40,7 +40,7 @@ public partial class ConfluentOrganizationCreateCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            OrganizationName!, ResourceGroup, armClient, "Microsoft.Confluent/organizations", ct);
+            OrganizationName!, ResourceGroup, armClient, "Microsoft.Confluent/organizations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Confluent/organizations/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -40,7 +40,7 @@ public partial class IothubResourceDeleteConsumerGroupCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.Devices/IotHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/IotHubs/{resolvedName}/eventHubEndpoints/{EventHubEndpointName}/ConsumerGroups/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2023-06-30", null, ct);

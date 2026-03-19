@@ -40,7 +40,7 @@ public partial class ComputeVmruncommandresourceCreateCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", ct);
+            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachines/{resolvedName}/runCommands/{RunCommandName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-04-01", null, ct);

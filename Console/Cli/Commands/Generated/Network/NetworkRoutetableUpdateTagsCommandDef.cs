@@ -31,7 +31,7 @@ public partial class NetworkRoutetableUpdateTagsCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RouteTableName!, ResourceGroup, armClient, "Microsoft.Network/routeTables", ct);
+            RouteTableName!, ResourceGroup, armClient, "Microsoft.Network/routeTables", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/routeTables/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

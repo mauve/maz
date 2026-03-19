@@ -35,7 +35,7 @@ public partial class AzurefleetFleetUpdateCommandDef(AuthOptionPack auth) : Comm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FleetName!, ResourceGroup, armClient, "Microsoft.AzureFleet/fleets", ct);
+            FleetName!, ResourceGroup, armClient, "Microsoft.AzureFleet/fleets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureFleet/fleets/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2024-11-01", null, ct);

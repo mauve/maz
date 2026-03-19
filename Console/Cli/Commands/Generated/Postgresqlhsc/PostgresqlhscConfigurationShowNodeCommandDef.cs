@@ -35,7 +35,7 @@ public partial class PostgresqlhscConfigurationShowNodeCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/serverGroupsv2", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/serverGroupsv2", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforPostgreSQL/serverGroupsv2/{resolvedName}/nodeConfigurations/{ConfigurationName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-11-08", null, ct);

@@ -31,7 +31,7 @@ public partial class AzurearcdataPostgresinstanceUpdateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PostgresInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/postgresInstances", ct);
+            PostgresInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/postgresInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureArcData/postgresInstances/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2026-01-01", null, ct);

@@ -40,7 +40,7 @@ public partial class NetworkExpressrouteconnectionDeleteCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ExpressRouteGatewayName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteGateways", ct);
+            ExpressRouteGatewayName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/expressRouteGateways/{resolvedName}/expressRouteConnections/{ConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

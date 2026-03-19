@@ -40,7 +40,7 @@ public partial class NetworkApplicationgatewayBackendHealthCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationGatewayName!, ResourceGroup, armClient, "Microsoft.Network/applicationGateways", ct);
+            ApplicationGatewayName!, ResourceGroup, armClient, "Microsoft.Network/applicationGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/applicationGateways/{resolvedName}/backendhealth";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

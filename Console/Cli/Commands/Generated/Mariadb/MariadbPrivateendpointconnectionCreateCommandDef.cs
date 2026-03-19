@@ -39,7 +39,7 @@ public partial class MariadbPrivateendpointconnectionCreateCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMariaDB/servers/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2018-06-01", null, ct);

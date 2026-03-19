@@ -31,7 +31,7 @@ public partial class AlertsmanagementPrometheusrulegroupUpdateCommandDef(AuthOpt
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RuleGroupName!, ResourceGroup, armClient, "Microsoft.AlertsManagement/prometheusRuleGroups", ct);
+            RuleGroupName!, ResourceGroup, armClient, "Microsoft.AlertsManagement/prometheusRuleGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2023-03-01", null, ct);

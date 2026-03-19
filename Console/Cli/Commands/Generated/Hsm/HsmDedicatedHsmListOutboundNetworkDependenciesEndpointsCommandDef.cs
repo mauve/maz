@@ -31,7 +31,7 @@ public partial class HsmDedicatedHsmListOutboundNetworkDependenciesEndpointsComm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/dedicatedHSMs", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.HardwareSecurityModules/dedicatedHSMs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HardwareSecurityModules/dedicatedHSMs/{resolvedName}/outboundNetworkDependenciesEndpoints";
 
         var allItems = client.GetAllAsync(path, "2025-03-31", "value", "nextLink", ct);

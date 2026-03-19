@@ -35,7 +35,7 @@ public partial class DnsresolverOutboundendpointShowCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", ct);
+            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsResolvers/{resolvedName}/outboundEndpoints/{OutboundEndpointName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

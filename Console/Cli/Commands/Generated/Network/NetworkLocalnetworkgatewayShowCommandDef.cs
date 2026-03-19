@@ -31,7 +31,7 @@ public partial class NetworkLocalnetworkgatewayShowCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LocalNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/localNetworkGateways", ct);
+            LocalNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/localNetworkGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/localNetworkGateways/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

@@ -39,7 +39,7 @@ public partial class EventgridPrivateendpointconnectionShowCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParentType!, ResourceGroup, armClient, "Microsoft.EventGrid/{parentType}", ct);
+            ParentType!, ResourceGroup, armClient, "Microsoft.EventGrid/{parentType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/{resolvedName}/{ParentName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-02-15", null, ct);

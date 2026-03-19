@@ -40,7 +40,7 @@ public partial class IothubdpsIotDpsResourceCreateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", ct);
+            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/provisioningServices/{resolvedName}";
 
         var body = BodyJson is { } rawJson

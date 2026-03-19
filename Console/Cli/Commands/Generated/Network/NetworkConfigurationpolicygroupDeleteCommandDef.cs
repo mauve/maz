@@ -40,7 +40,7 @@ public partial class NetworkConfigurationpolicygroupDeleteCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VpnServerConfigurationName!, ResourceGroup, armClient, "Microsoft.Network/vpnServerConfigurations", ct);
+            VpnServerConfigurationName!, ResourceGroup, armClient, "Microsoft.Network/vpnServerConfigurations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/vpnServerConfigurations/{resolvedName}/configurationPolicyGroups/{ConfigurationPolicyGroupName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

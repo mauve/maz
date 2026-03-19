@@ -36,7 +36,7 @@ public partial class NetworkRoutefilterDeleteCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RouteFilterName!, ResourceGroup, armClient, "Microsoft.Network/routeFilters", ct);
+            RouteFilterName!, ResourceGroup, armClient, "Microsoft.Network/routeFilters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/routeFilters/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

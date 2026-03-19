@@ -39,7 +39,7 @@ public partial class SqlManageddatabasUpdateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ManagedInstanceName!, ResourceGroup, armClient, "Microsoft.Sql/managedInstances", ct);
+            ManagedInstanceName!, ResourceGroup, armClient, "Microsoft.Sql/managedInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Sql/managedInstances/{resolvedName}/databases/{DatabaseName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-08-01", null, ct);

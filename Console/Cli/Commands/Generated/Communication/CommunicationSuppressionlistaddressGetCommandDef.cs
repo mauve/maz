@@ -43,7 +43,7 @@ public partial class CommunicationSuppressionlistaddressGetCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", ct);
+            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Communication/emailServices/{resolvedName}/domains/{DomainName}/suppressionLists/{SuppressionListName}/suppressionListAddresses/{AddressId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-03-18", null, ct);

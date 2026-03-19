@@ -50,7 +50,7 @@ public partial class MachinelearningJobListCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.MachineLearningServices/workspaces/{resolvedName}/jobs";
 
         var allItems = client.GetAllAsync(path, "2025-12-01", "value", "nextLink", ct);

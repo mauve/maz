@@ -44,7 +44,7 @@ public partial class ConfidentialledgerLedgerFilesExportCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LedgerName!, ResourceGroup, armClient, "Microsoft.ConfidentialLedger/ledgers", ct);
+            LedgerName!, ResourceGroup, armClient, "Microsoft.ConfidentialLedger/ledgers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConfidentialLedger/ledgers/{resolvedName}/filesExport";
 
         var body = BodyJson is { } rawJson

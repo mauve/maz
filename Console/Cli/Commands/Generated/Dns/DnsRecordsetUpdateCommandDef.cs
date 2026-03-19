@@ -39,7 +39,7 @@ public partial class DnsRecordsetUpdateCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ZoneName!, ResourceGroup, armClient, "Microsoft.Network/dnsZones", ct);
+            ZoneName!, ResourceGroup, armClient, "Microsoft.Network/dnsZones", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsZones/{resolvedName}/{RecordType}/{RelativeRecordSetName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2018-05-01", null, ct);

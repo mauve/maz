@@ -31,7 +31,7 @@ public partial class HybridcomputeHybrididentitymetadataListCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MachineName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", ct);
+            MachineName!, ResourceGroup, armClient, "Microsoft.HybridCompute/machines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridCompute/machines/{resolvedName}/hybridIdentityMetadata";
 
         var allItems = client.GetAllAsync(path, "2025-01-13", "value", "nextLink", ct);

@@ -36,7 +36,7 @@ public partial class HybridnetworkSiteCreateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SiteName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/sites", ct);
+            SiteName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/sites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/sites/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2024-04-15", null, ct);

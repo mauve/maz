@@ -31,7 +31,7 @@ public partial class EventgridPartnerregistrationShowCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PartnerRegistrationName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerRegistrations", ct);
+            PartnerRegistrationName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerRegistrations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/partnerRegistrations/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-02-15", null, ct);

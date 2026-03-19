@@ -31,7 +31,7 @@ public partial class NetworkPrivatednszonegroupListCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PrivateEndpointName!, ResourceGroup, armClient, "Microsoft.Network/privateEndpoints", ct);
+            PrivateEndpointName!, ResourceGroup, armClient, "Microsoft.Network/privateEndpoints", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/privateEndpoints/{resolvedName}/privateDnsZoneGroups";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

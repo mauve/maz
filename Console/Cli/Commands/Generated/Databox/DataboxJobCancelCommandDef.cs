@@ -40,7 +40,7 @@ public partial class DataboxJobCancelCommandDef(AuthOptionPack auth) : CommandDe
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            JobName!, ResourceGroup, armClient, "Microsoft.DataBox/jobs", ct);
+            JobName!, ResourceGroup, armClient, "Microsoft.DataBox/jobs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataBox/jobs/{resolvedName}/cancel";
 
         var body = BodyJson is { } rawJson

@@ -36,7 +36,7 @@ public partial class ResourceconnectorApplianceListKeysCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceConnector/appliances", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceConnector/appliances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ResourceConnector/appliances/{resolvedName}/listkeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2022-10-27", null, ct);

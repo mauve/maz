@@ -94,6 +94,15 @@ public partial class LoganalyticsExploreCommandDef(AuthOptionPack auth) : Comman
             workspaceArmId ??= resolvedResourceId;
         }
 
+        // When verbose diagnostics are active, pause so the user can read
+        // auth/resolution output before the TUI takes over the screen.
+        if (DiagnosticOptionPack.GetVerboseLevel() > 0)
+        {
+            System.Console.Error.WriteLine();
+            System.Console.Error.Write("[verbose] Press Enter to launch TUI...");
+            System.Console.ReadLine();
+        }
+
         var client = new LogsQueryClient(credential);
         await using var app = new KustoTuiApp(
             client,

@@ -36,7 +36,7 @@ public partial class NetworkcloudStorageapplianceEnableRemoteVendorManagementCom
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageApplianceName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/storageAppliances", ct);
+            StorageApplianceName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/storageAppliances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/storageAppliances/{resolvedName}/enableRemoteVendorManagement";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-09-01", null, ct);

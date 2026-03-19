@@ -59,9 +59,13 @@ internal static partial class AuthenticationErrorFormatter
                     "Verify the managed identity is assigned to this resource and has the required roles.",
                 ]
             ),
+            ["BrowserCredential"] = (
+                "Browser",
+                ["Re-authenticate:", "  maz login"]
+            ),
             ["InteractiveBrowserCredential"] = (
                 "Interactive Browser",
-                ["Re-authenticate via the browser login flow."]
+                ["Re-authenticate:", "  maz login"]
             ),
             ["VisualStudioCredential"] = (
                 "Visual Studio",
@@ -94,8 +98,7 @@ internal static partial class AuthenticationErrorFormatter
         var allMessages = CollectMessages(ex);
 
         var aadCode = ExtractAadStsCode(allMessages);
-        var failedCredential = DetectFailedCredential(allMessages);
-        var azCommands = ExtractAzCommands(allMessages).Distinct().ToList();
+        var failedCredential = DetectFailedCredential(allMessages, configuredTypes);
         var tenantId = ExtractTenantId(allMessages);
 
         sb.AppendLine(Ansi.Red(Ansi.Bold("Authentication failed")));
@@ -127,15 +130,8 @@ internal static partial class AuthenticationErrorFormatter
 
         sb.AppendLine();
 
-        // Specific remediation from the exception (az commands)
-        if (azCommands.Count > 0)
-        {
-            sb.AppendLine(Ansi.Bold("  To fix:"));
-            foreach (var cmd in azCommands)
-                sb.AppendLine($"    {cmd}");
-            sb.AppendLine();
-        }
-        else if (
+        // Remediation hints from our own credential descriptions
+        if (
             failedCredential is not null
             && CredentialHints.TryGetValue(failedCredential, out var credHint)
         )
@@ -180,22 +176,45 @@ internal static partial class AuthenticationErrorFormatter
         return m.Success ? m.Value : null;
     }
 
-    private static string? DetectFailedCredential(string messages)
-    {
-        foreach (var key in CredentialHints.Keys)
+    /// <summary>
+    /// Maps CredentialType enum to the hint key strings used in CredentialHints.
+    /// </summary>
+    private static readonly Dictionary<CredentialType, string> CredentialTypeToHintKey =
+        new()
         {
-            if (messages.Contains(key, StringComparison.OrdinalIgnoreCase))
-                return key;
-        }
-        return null;
-    }
+            [CredentialType.MsalCache] = "MsalCacheCredential",
+            [CredentialType.Cli] = "Azure CLI",
+            [CredentialType.Dev] = "Azure Developer CLI",
+            [CredentialType.PowerShell] = "Azure PowerShell",
+            [CredentialType.Env] = "EnvironmentCredential",
+            [CredentialType.ManagedIdentity] = "ManagedIdentityCredential",
+            [CredentialType.Browser] = "BrowserCredential",
+            [CredentialType.VisualStudio] = "VisualStudioCredential",
+            [CredentialType.SharedTokenCache] = "SharedTokenCacheCredential",
+            [CredentialType.DeviceCode] = "DeviceCodeCredential",
+            [CredentialType.WorkloadIdentity] = "WorkloadIdentityCredential",
+        };
 
-    private static List<string> ExtractAzCommands(string messages)
+    private static string? DetectFailedCredential(
+        string messages,
+        IReadOnlyList<CredentialType>? configuredTypes
+    )
     {
-        var commands = new List<string>();
-        foreach (Match m in AzCommandRegex().Matches(messages))
-            commands.Add(m.Value.Trim());
-        return commands;
+        // Only match credentials actually in the configured chain
+        if (configuredTypes is { Count: > 0 })
+        {
+            // Walk the chain in reverse — the last credential that failed is most relevant
+            for (int i = configuredTypes.Count - 1; i >= 0; i--)
+            {
+                if (
+                    CredentialTypeToHintKey.TryGetValue(configuredTypes[i], out var key)
+                    && messages.Contains(key, StringComparison.OrdinalIgnoreCase)
+                )
+                    return key;
+            }
+        }
+
+        return null;
     }
 
     private static string? ExtractTenantId(string messages)
@@ -227,33 +246,14 @@ internal static partial class AuthenticationErrorFormatter
                 _ => t.ToString().ToLowerInvariant(),
             };
 
-        // Map the detected failed credential string to a CredentialType
-        static CredentialType? MatchFailed(string? failed) =>
-            failed switch
-            {
-                "MsalCacheCredential" => CredentialType.MsalCache,
-                "Azure CLI" => CredentialType.Cli,
-                "Azure Developer CLI" => CredentialType.Dev,
-                "Azure PowerShell" => CredentialType.PowerShell,
-                "EnvironmentCredential" => CredentialType.Env,
-                "ManagedIdentityCredential" => CredentialType.ManagedIdentity,
-                "InteractiveBrowserCredential" => CredentialType.Browser,
-                "VisualStudioCredential" => CredentialType.VisualStudio,
-                "SharedTokenCacheCredential" => CredentialType.SharedTokenCache,
-                "DeviceCodeCredential" => CredentialType.DeviceCode,
-                "WorkloadIdentityCredential" => CredentialType.WorkloadIdentity,
-                _ => null,
-            };
-
-        var failedType = MatchFailed(failedCredential);
+        var failedType = CredentialTypeToHintKey
+            .FirstOrDefault(kv => kv.Value == failedCredential)
+            .Key;
         return configured.Where(t => t != failedType).Select(ToCliValue).ToList();
     }
 
     [GeneratedRegex(@"AADSTS\d+")]
     private static partial Regex AadStsRegex();
-
-    [GeneratedRegex(@"az\s+\S+(?:\s+--\S+(?:\s+""[^""]*"")?)*")]
-    private static partial Regex AzCommandRegex();
 
     [GeneratedRegex(@"--tenant\s+[""']?([0-9a-f\-]{36})[""']?")]
     private static partial Regex TenantRegex();

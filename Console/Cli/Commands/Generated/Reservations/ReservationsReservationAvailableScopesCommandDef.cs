@@ -9,7 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Get Available Scopes for `Reservation`.</summary>
-/// <remarks>Check whether the scopes from request is valid for `Reservation`. </remarks>
+/// <remarks>Check whether the scopes from request is valid for `Reservation`.</remarks>
 public partial class ReservationsReservationAvailableScopesCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "available-scopes";

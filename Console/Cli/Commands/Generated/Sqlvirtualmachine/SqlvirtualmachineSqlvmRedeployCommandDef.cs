@@ -36,7 +36,7 @@ public partial class SqlvirtualmachineSqlvmRedeployCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SqlVirtualMachineName!, ResourceGroup, armClient, "Microsoft.SqlVirtualMachine/sqlVirtualMachines", ct);
+            SqlVirtualMachineName!, ResourceGroup, armClient, "Microsoft.SqlVirtualMachine/sqlVirtualMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.SqlVirtualMachine/sqlVirtualMachines/{resolvedName}/redeploy";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-10-01", null, ct);

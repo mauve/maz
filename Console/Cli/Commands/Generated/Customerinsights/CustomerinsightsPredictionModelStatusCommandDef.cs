@@ -44,7 +44,7 @@ public partial class CustomerinsightsPredictionModelStatusCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HubName!, ResourceGroup, armClient, "Microsoft.CustomerInsights/hubs", ct);
+            HubName!, ResourceGroup, armClient, "Microsoft.CustomerInsights/hubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.CustomerInsights/hubs/{resolvedName}/predictions/{PredictionName}/modelStatus";
 
         var body = BodyJson is { } rawJson

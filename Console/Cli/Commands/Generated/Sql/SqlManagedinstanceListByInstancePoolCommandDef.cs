@@ -35,7 +35,7 @@ public partial class SqlManagedinstanceListByInstancePoolCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            InstancePoolName!, ResourceGroup, armClient, "Microsoft.Sql/instancePools", ct);
+            InstancePoolName!, ResourceGroup, armClient, "Microsoft.Sql/instancePools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Sql/instancePools/{resolvedName}/managedInstances";
 
         var allItems = client.GetAllAsync(path, "2023-08-01", "value", "nextLink", ct);

@@ -48,7 +48,7 @@ public partial class CommunicationDomainCancelVerificationCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", ct);
+            EmailServiceName!, ResourceGroup, armClient, "Microsoft.Communication/emailServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Communication/emailServices/{resolvedName}/domains/{DomainName}/cancelVerification";
 
         var body = BodyJson is { } rawJson

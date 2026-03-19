@@ -40,7 +40,7 @@ public partial class LoganalyticsWorkspaceDeleteCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-07-01", null, ct);

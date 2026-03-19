@@ -48,7 +48,7 @@ public partial class PolicyinsightsPolicystateSummarizeForResourceGroupCommandDe
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PolicyStatesSummaryResource!, ResourceGroup, armClient, "Microsoft.PolicyInsights/policyStates", ct);
+            PolicyStatesSummaryResource!, ResourceGroup, armClient, "Microsoft.PolicyInsights/policyStates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/policyStates/{resolvedName}/summarize";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-10-01", null, ct);

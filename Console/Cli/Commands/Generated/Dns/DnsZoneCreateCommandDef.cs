@@ -32,7 +32,7 @@ public partial class DnsZoneCreateCommandDef(AuthOptionPack auth) : CommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ZoneName!, ResourceGroup, armClient, "Microsoft.Network/dnsZones", ct);
+            ZoneName!, ResourceGroup, armClient, "Microsoft.Network/dnsZones", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsZones/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2018-05-01", null, ct);

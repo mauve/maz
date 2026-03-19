@@ -40,7 +40,7 @@ public partial class ConfluentClusterCreateOrUpdateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            OrganizationName!, ResourceGroup, armClient, "Microsoft.Confluent/organizations", ct);
+            OrganizationName!, ResourceGroup, armClient, "Microsoft.Confluent/organizations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Confluent/organizations/{resolvedName}/environments/{EnvironmentId}/clusters/{ClusterId}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-07-01", null, ct);

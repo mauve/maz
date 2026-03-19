@@ -39,7 +39,7 @@ public partial class NetworkcloudBmckeysetListByClusterCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/clusters/{resolvedName}/bmcKeySets";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

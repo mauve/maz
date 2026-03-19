@@ -35,7 +35,7 @@ public partial class WebappStaticsiteListStaticSiteUsersCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "microsoft.Web/staticSites", ct);
+            ParamName!, ResourceGroup, armClient, "microsoft.Web/staticSites", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/microsoft.Web/staticSites/{resolvedName}/authproviders/{Authprovider}/listUsers";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

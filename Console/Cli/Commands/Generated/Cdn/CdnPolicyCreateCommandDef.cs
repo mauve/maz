@@ -40,7 +40,7 @@ public partial class CdnPolicyCreateCommandDef(AuthOptionPack auth) : CommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PolicyName!, ResourceGroup, armClient, "Microsoft.Cdn/cdnWebApplicationFirewallPolicies", ct);
+            PolicyName!, ResourceGroup, armClient, "Microsoft.Cdn/cdnWebApplicationFirewallPolicies", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cdn/cdnWebApplicationFirewallPolicies/{resolvedName}";
 
         var body = BodyJson is { } rawJson

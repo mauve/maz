@@ -35,7 +35,7 @@ public partial class SynapseRestorabledroppedsqlpoolShowCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Synapse/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Synapse/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Synapse/workspaces/{resolvedName}/restorableDroppedSqlPools/{RestorableDroppedSqlPoolId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-06-01", null, ct);

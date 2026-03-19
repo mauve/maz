@@ -39,7 +39,7 @@ public partial class WebappAppserviceplanListWebAppsByHybridConnectionCommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Web/serverfarms", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Web/serverfarms", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Web/serverfarms/{resolvedName}/hybridConnectionNamespaces/{NamespaceName}/relays/{RelayName}/sites";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

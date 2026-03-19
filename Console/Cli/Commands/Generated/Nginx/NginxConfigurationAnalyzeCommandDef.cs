@@ -40,7 +40,7 @@ public partial class NginxConfigurationAnalyzeCommandDef(AuthOptionPack auth) : 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeploymentName!, ResourceGroup, armClient, "Nginx.NginxPlus/nginxDeployments", ct);
+            DeploymentName!, ResourceGroup, armClient, "Nginx.NginxPlus/nginxDeployments", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Nginx.NginxPlus/nginxDeployments/{resolvedName}/configurations/{ConfigurationName}/analyze";
 
         var body = BodyJson is { } rawJson

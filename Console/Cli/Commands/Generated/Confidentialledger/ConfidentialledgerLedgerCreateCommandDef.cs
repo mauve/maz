@@ -36,7 +36,7 @@ public partial class ConfidentialledgerLedgerCreateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LedgerName!, ResourceGroup, armClient, "Microsoft.ConfidentialLedger/ledgers", ct);
+            LedgerName!, ResourceGroup, armClient, "Microsoft.ConfidentialLedger/ledgers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConfidentialLedger/ledgers/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2026-02-23", null, ct);

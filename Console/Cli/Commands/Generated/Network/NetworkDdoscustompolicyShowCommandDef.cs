@@ -31,7 +31,7 @@ public partial class NetworkDdoscustompolicyShowCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DdosCustomPolicyName!, ResourceGroup, armClient, "Microsoft.Network/ddosCustomPolicies", ct);
+            DdosCustomPolicyName!, ResourceGroup, armClient, "Microsoft.Network/ddosCustomPolicies", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/ddosCustomPolicies/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

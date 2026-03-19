@@ -35,7 +35,7 @@ public partial class NetworkRoutemapGetCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", ct);
+            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualHubs/{resolvedName}/routeMaps/{RouteMapName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

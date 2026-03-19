@@ -35,7 +35,7 @@ public partial class EventgridPartnernamespaceUpdateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PartnerNamespaceName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerNamespaces", ct);
+            PartnerNamespaceName!, ResourceGroup, armClient, "Microsoft.EventGrid/partnerNamespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/partnerNamespaces/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-02-15", null, ct);

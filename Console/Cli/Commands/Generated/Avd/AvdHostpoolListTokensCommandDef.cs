@@ -32,7 +32,7 @@ public partial class AvdHostpoolListTokensCommandDef(AuthOptionPack auth) : Comm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", ct);
+            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/hostPools/{resolvedName}/listRegistrationTokens";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-04-03", null, ct);

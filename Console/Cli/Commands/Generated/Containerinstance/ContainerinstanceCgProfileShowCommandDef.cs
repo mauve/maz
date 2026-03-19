@@ -31,7 +31,7 @@ public partial class ContainerinstanceCgProfileShowCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ContainerGroupProfileName!, ResourceGroup, armClient, "Microsoft.ContainerInstance/containerGroupProfiles", ct);
+            ContainerGroupProfileName!, ResourceGroup, armClient, "Microsoft.ContainerInstance/containerGroupProfiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerInstance/containerGroupProfiles/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

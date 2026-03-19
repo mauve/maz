@@ -43,7 +43,7 @@ public partial class MachinelearningComponentversionCreateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.MachineLearningServices/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.MachineLearningServices/workspaces/{resolvedName}/components/{ParamName}/versions/{Version}";
 
         var body = BodyJson is { } rawJson

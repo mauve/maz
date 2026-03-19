@@ -31,7 +31,7 @@ public partial class OracleExascaledbstoragevaultGetCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ExascaleDbStorageVaultName!, ResourceGroup, armClient, "Oracle.Database/exascaleDbStorageVaults", ct);
+            ExascaleDbStorageVaultName!, ResourceGroup, armClient, "Oracle.Database/exascaleDbStorageVaults", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/exascaleDbStorageVaults/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

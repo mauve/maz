@@ -46,7 +46,7 @@ public partial class DataprotectionFetchcrossregionrestorejobListCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Location!, ResourceGroup, armClient, "Microsoft.DataProtection/locations", ct);
+            Location!, ResourceGroup, armClient, "Microsoft.DataProtection/locations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/locations/{resolvedName}/fetchCrossRegionRestoreJobs";
 
         var allItems = client.GetAllAsync(path, "2025-09-01", "value", "nextLink", ct);

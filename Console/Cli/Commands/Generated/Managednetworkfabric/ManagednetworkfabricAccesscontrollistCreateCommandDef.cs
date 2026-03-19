@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricAccesscontrollistCreateCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AccessControlListName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/accessControlLists", ct);
+            AccessControlListName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/accessControlLists", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/accessControlLists/{resolvedName}";
 
         var body = BodyJson is { } rawJson

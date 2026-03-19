@@ -36,7 +36,7 @@ public partial class AlertsmanagementPrometheusrulegroupCreateCommandDef(AuthOpt
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RuleGroupName!, ResourceGroup, armClient, "Microsoft.AlertsManagement/prometheusRuleGroups", ct);
+            RuleGroupName!, ResourceGroup, armClient, "Microsoft.AlertsManagement/prometheusRuleGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AlertsManagement/prometheusRuleGroups/{resolvedName}";
 
         var body = BodyJson is { } rawJson

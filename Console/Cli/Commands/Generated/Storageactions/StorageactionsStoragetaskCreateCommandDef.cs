@@ -40,7 +40,7 @@ public partial class StorageactionsStoragetaskCreateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageTaskName!, ResourceGroup, armClient, "Microsoft.StorageActions/storageTasks", ct);
+            StorageTaskName!, ResourceGroup, armClient, "Microsoft.StorageActions/storageTasks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageActions/storageTasks/{resolvedName}";
 
         var body = BodyJson is { } rawJson

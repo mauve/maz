@@ -40,7 +40,7 @@ public partial class ComputeVirtualmachineDeallocateCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", ct);
+            VmName!, ResourceGroup, armClient, "Microsoft.Compute/virtualMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/virtualMachines/{resolvedName}/deallocate";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-04-01", null, ct);

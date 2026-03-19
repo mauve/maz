@@ -31,7 +31,7 @@ public partial class HybridcomputeGatewayUpdateCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            GatewayName!, ResourceGroup, armClient, "Microsoft.HybridCompute/gateways", ct);
+            GatewayName!, ResourceGroup, armClient, "Microsoft.HybridCompute/gateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridCompute/gateways/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-01-13", null, ct);

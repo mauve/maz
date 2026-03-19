@@ -35,7 +35,7 @@ public partial class ManagednetworkfabricIpprefixUpdateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IpPrefixName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipPrefixes", ct);
+            IpPrefixName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipPrefixes", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/ipPrefixes/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-06-15", null, ct);

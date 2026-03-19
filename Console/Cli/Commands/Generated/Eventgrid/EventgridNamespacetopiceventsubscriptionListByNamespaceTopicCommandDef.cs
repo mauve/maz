@@ -43,7 +43,7 @@ public partial class EventgridNamespacetopiceventsubscriptionListByNamespaceTopi
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventGrid/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventGrid/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/namespaces/{resolvedName}/topics/{TopicName}/eventSubscriptions";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

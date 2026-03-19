@@ -40,7 +40,7 @@ public partial class SfmcNodetypeRestartCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/managedClusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.ServiceFabric/managedClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceFabric/managedClusters/{resolvedName}/nodeTypes/{NodeTypeName}/restart";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-01", null, ct);

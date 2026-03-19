@@ -35,7 +35,7 @@ public partial class MigratePrivateLinkResourceControllerGetPrivateLinkResourceC
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MigrateProjectName!, ResourceGroup, armClient, "Microsoft.Migrate/migrateProjects", ct);
+            MigrateProjectName!, ResourceGroup, armClient, "Microsoft.Migrate/migrateProjects", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Migrate/migrateProjects/{resolvedName}/privateLinkResources/{PrivateLinkResourceName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-01-01", null, ct);

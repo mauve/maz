@@ -44,7 +44,7 @@ public partial class HybridnetworkNetworkservicedesignversionDeleteCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", ct);
+            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/publishers/{resolvedName}/networkServiceDesignGroups/{NetworkServiceDesignGroupName}/networkServiceDesignVersions/{NetworkServiceDesignVersionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-04-15", null, ct);

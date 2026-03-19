@@ -31,7 +31,7 @@ public partial class EventhubNamespaceGetNetworkRuleSetCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventHub/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.EventHub/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventHub/namespaces/{resolvedName}/networkRuleSets/default";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-01-01", null, ct);

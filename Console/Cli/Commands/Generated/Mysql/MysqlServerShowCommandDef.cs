@@ -31,7 +31,7 @@ public partial class MysqlServerShowCommandDef(AuthOptionPack auth) : CommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMySQL/flexibleServers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMySQL/flexibleServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMySQL/flexibleServers/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-12-30", null, ct);

@@ -40,7 +40,7 @@ public partial class TrafficmanagerEndpointCreateCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProfileName!, ResourceGroup, armClient, "Microsoft.Network/trafficmanagerprofiles", ct);
+            ProfileName!, ResourceGroup, armClient, "Microsoft.Network/trafficmanagerprofiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/trafficmanagerprofiles/{resolvedName}/{EndpointType}/{EndpointName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2022-04-01", null, ct);

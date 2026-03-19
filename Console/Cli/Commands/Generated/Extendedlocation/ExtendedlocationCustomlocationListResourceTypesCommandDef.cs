@@ -31,7 +31,7 @@ public partial class ExtendedlocationCustomlocationListResourceTypesCommandDef(A
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ExtendedLocation/customLocations", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ExtendedLocation/customLocations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ExtendedLocation/customLocations/{resolvedName}/enabledResourceTypes";
 
         var allItems = client.GetAllAsync(path, "2021-08-15", "value", "nextLink", ct);

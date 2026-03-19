@@ -31,7 +31,7 @@ public partial class NginxDeploymentShowCommandDef(AuthOptionPack auth) : Comman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeploymentName!, ResourceGroup, armClient, "Nginx.NginxPlus/nginxDeployments", ct);
+            DeploymentName!, ResourceGroup, armClient, "Nginx.NginxPlus/nginxDeployments", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Nginx.NginxPlus/nginxDeployments/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-11-01", null, ct);

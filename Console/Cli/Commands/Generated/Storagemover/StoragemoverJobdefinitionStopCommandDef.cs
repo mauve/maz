@@ -40,7 +40,7 @@ public partial class StoragemoverJobdefinitionStopCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", ct);
+            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageMover/storageMovers/{resolvedName}/projects/{ProjectName}/jobDefinitions/{JobDefinitionName}/stopJob";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-12-01", null, ct);

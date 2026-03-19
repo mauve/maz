@@ -36,7 +36,7 @@ public partial class ManagednetworkfabricNetworkfabricRefreshConfigurationComman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkFabricName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabrics", ct);
+            NetworkFabricName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkFabrics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkFabrics/{resolvedName}/refreshConfiguration";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-06-15", null, ct);

@@ -40,7 +40,7 @@ public partial class ServicenetworkingAssociationDeleteCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            TrafficControllerName!, ResourceGroup, armClient, "Microsoft.ServiceNetworking/trafficControllers", ct);
+            TrafficControllerName!, ResourceGroup, armClient, "Microsoft.ServiceNetworking/trafficControllers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ServiceNetworking/trafficControllers/{resolvedName}/associations/{AssociationName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-01-01", null, ct);

@@ -35,7 +35,7 @@ public partial class ManagednetworkfabricNeighborgroupUpdateCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NeighborGroupName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/neighborGroups", ct);
+            NeighborGroupName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/neighborGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/neighborGroups/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2023-06-15", null, ct);

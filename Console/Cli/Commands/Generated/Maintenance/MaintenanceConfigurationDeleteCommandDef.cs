@@ -31,7 +31,7 @@ public partial class MaintenanceConfigurationDeleteCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.Maintenance/maintenanceConfigurations", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.Maintenance/maintenanceConfigurations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.Maintenance/maintenanceConfigurations/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2023-04-01", null, ct);

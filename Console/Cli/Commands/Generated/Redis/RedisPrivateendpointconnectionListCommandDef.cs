@@ -31,7 +31,7 @@ public partial class RedisPrivateendpointconnectionListCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CacheName!, ResourceGroup, armClient, "Microsoft.Cache/redis", ct);
+            CacheName!, ResourceGroup, armClient, "Microsoft.Cache/redis", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cache/redis/{resolvedName}/privateEndpointConnections";
 
         var allItems = client.GetAllAsync(path, "2024-11-01", "value", "nextLink", ct);

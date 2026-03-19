@@ -48,7 +48,7 @@ public partial class DeviceregistryAssetendpointprofileCreateCommandDef(AuthOpti
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AssetEndpointProfileName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assetEndpointProfiles", ct);
+            AssetEndpointProfileName!, ResourceGroup, armClient, "Microsoft.DeviceRegistry/assetEndpointProfiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DeviceRegistry/assetEndpointProfiles/{resolvedName}";
 
         var body = BodyJson is { } rawJson

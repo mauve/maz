@@ -36,7 +36,7 @@ public partial class StoragecacheCacheStartCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CacheName!, ResourceGroup, armClient, "Microsoft.StorageCache/caches", ct);
+            CacheName!, ResourceGroup, armClient, "Microsoft.StorageCache/caches", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.StorageCache/caches/{resolvedName}/start";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-01-01", null, ct);

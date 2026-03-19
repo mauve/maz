@@ -32,7 +32,7 @@ public partial class AppinsightsWebtestCreateCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WebTestName!, ResourceGroup, armClient, "Microsoft.Insights/webtests", ct);
+            WebTestName!, ResourceGroup, armClient, "Microsoft.Insights/webtests", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/webtests/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2020-02-02", null, ct);

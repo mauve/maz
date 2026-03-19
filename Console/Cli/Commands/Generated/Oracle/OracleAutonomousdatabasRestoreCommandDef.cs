@@ -44,7 +44,7 @@ public partial class OracleAutonomousdatabasRestoreCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", ct);
+            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/autonomousDatabases/{resolvedName}/restore";
 
         var body = BodyJson is { } rawJson

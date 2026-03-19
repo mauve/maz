@@ -9,7 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Exchange Reservation(s)</summary>
-/// <remarks>Returns one or more `Reservations` in exchange for one or more `Reservation` purchases. </remarks>
+/// <remarks>Returns one or more `Reservations` in exchange for one or more `Reservation` purchases.</remarks>
 public partial class ReservationsExchangePostCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "post";

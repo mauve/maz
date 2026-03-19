@@ -31,7 +31,7 @@ public partial class NetworkSecurityruleListCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkSecurityGroupName!, ResourceGroup, armClient, "Microsoft.Network/networkSecurityGroups", ct);
+            NetworkSecurityGroupName!, ResourceGroup, armClient, "Microsoft.Network/networkSecurityGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/networkSecurityGroups/{resolvedName}/securityRules";
 
         var allItems = client.GetAllAsync(path, "2025-05-01", "value", "nextLink", ct);

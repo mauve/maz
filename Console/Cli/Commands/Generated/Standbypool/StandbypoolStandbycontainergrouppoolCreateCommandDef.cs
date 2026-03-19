@@ -36,7 +36,7 @@ public partial class StandbypoolStandbycontainergrouppoolCreateCommandDef(AuthOp
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StandbyContainerGroupPoolName!, ResourceGroup, armClient, "Microsoft.StandbyPool/standbyContainerGroupPools", ct);
+            StandbyContainerGroupPoolName!, ResourceGroup, armClient, "Microsoft.StandbyPool/standbyContainerGroupPools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StandbyPool/standbyContainerGroupPools/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-10-01", null, ct);

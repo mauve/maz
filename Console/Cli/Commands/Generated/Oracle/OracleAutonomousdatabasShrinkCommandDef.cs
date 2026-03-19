@@ -36,7 +36,7 @@ public partial class OracleAutonomousdatabasShrinkCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", ct);
+            Autonomousdatabasename!, ResourceGroup, armClient, "Oracle.Database/autonomousDatabases", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/autonomousDatabases/{resolvedName}/shrink";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-09-01", null, ct);

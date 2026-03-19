@@ -31,7 +31,7 @@ public partial class AvdScalingplanShowCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", ct);
+            ScalingPlanName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/scalingPlans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/scalingPlans/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-04-03", null, ct);

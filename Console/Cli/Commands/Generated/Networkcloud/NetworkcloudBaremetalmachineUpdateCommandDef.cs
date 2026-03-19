@@ -35,7 +35,7 @@ public partial class NetworkcloudBaremetalmachineUpdateCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BareMetalMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/bareMetalMachines", ct);
+            BareMetalMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/bareMetalMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/bareMetalMachines/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-09-01", null, ct);

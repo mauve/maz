@@ -36,7 +36,7 @@ public partial class NetworkDscpConfigurationCreateCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DscpConfigurationName!, ResourceGroup, armClient, "Microsoft.Network/dscpConfigurations", ct);
+            DscpConfigurationName!, ResourceGroup, armClient, "Microsoft.Network/dscpConfigurations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dscpConfigurations/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-05-01", null, ct);

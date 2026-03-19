@@ -39,7 +39,7 @@ public partial class MariadbRecommendedactionGetCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforMariaDB/servers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforMariaDB/servers/{resolvedName}/advisors/{AdvisorName}/recommendedActions/{RecommendedActionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2018-06-01", null, ct);

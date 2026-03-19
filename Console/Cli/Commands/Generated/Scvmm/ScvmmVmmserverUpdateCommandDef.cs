@@ -35,7 +35,7 @@ public partial class ScvmmVmmserverUpdateCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VmmServerName!, ResourceGroup, armClient, "Microsoft.ScVmm/vmmServers", ct);
+            VmmServerName!, ResourceGroup, armClient, "Microsoft.ScVmm/vmmServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/vmmServers/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-03-13", null, ct);

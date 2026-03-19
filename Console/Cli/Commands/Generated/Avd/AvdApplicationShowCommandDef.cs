@@ -35,7 +35,7 @@ public partial class AvdApplicationShowCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationGroupName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/applicationGroups", ct);
+            ApplicationGroupName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/applicationGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/applicationGroups/{resolvedName}/applications/{ApplicationName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-04-03", null, ct);

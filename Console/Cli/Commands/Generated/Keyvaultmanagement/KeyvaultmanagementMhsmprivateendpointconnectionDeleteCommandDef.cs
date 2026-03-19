@@ -40,7 +40,7 @@ public partial class KeyvaultmanagementMhsmprivateendpointconnectionDeleteComman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.KeyVault/managedHSMs", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.KeyVault/managedHSMs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.KeyVault/managedHSMs/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2026-02-01", null, ct);

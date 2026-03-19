@@ -35,7 +35,7 @@ public partial class NetworkVirtualnetworkgatewayUpdateTagsCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworkGateways", ct);
+            VirtualNetworkGatewayName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworkGateways", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualNetworkGateways/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

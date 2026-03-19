@@ -9,7 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Calculate the refund amount of a reservation order.</summary>
-/// <remarks>Calculate price for returning `Reservations` if there are no policy errors. </remarks>
+/// <remarks>Calculate price for returning `Reservations` if there are no policy errors.</remarks>
 public partial class ReservationsCalculateRefundPostCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "post";

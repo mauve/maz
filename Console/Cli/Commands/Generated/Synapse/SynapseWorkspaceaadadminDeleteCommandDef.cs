@@ -36,7 +36,7 @@ public partial class SynapseWorkspaceaadadminDeleteCommandDef(AuthOptionPack aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Synapse/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.Synapse/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Synapse/workspaces/{resolvedName}/administrators/activeDirectory";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2021-06-01", null, ct);

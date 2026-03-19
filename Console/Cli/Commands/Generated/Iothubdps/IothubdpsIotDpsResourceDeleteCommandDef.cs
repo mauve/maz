@@ -36,7 +36,7 @@ public partial class IothubdpsIotDpsResourceDeleteCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", ct);
+            ProvisioningServiceName!, ResourceGroup, armClient, "Microsoft.Devices/provisioningServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Devices/provisioningServices/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2022-12-12", null, ct);

@@ -44,7 +44,7 @@ public partial class AzurearcdataSqlmanagedinstanceCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SqlManagedInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlManagedInstances", ct);
+            SqlManagedInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlManagedInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureArcData/sqlManagedInstances/{resolvedName}";
 
         var body = BodyJson is { } rawJson

@@ -40,7 +40,7 @@ public partial class CdnSecretDeleteCommandDef(AuthOptionPack auth) : CommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", ct);
+            ProfileName!, ResourceGroup, armClient, "Microsoft.Cdn/profiles", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cdn/profiles/{resolvedName}/secrets/{SecretName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-06-01", null, ct);

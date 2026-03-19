@@ -40,7 +40,7 @@ public partial class KeyvaultmanagementManagedhsmkeyCreateCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.KeyVault/managedHSMs", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.KeyVault/managedHSMs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.KeyVault/managedHSMs/{resolvedName}/keys/{KeyName}";
 
         var body = BodyJson is { } rawJson

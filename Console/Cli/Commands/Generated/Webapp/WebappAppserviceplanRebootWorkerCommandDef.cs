@@ -36,7 +36,7 @@ public partial class WebappAppserviceplanRebootWorkerCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "microsoft.Web/serverfarms", ct);
+            ParamName!, ResourceGroup, armClient, "microsoft.Web/serverfarms", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/microsoft.Web/serverfarms/{resolvedName}/workers/{WorkerName}/reboot";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

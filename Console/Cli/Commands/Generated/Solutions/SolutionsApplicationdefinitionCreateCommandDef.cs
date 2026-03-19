@@ -36,7 +36,7 @@ public partial class SolutionsApplicationdefinitionCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ApplicationDefinitionName!, ResourceGroup, armClient, "Microsoft.Solutions/applicationDefinitions", ct);
+            ApplicationDefinitionName!, ResourceGroup, armClient, "Microsoft.Solutions/applicationDefinitions", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Solutions/applicationDefinitions/{resolvedName}";
 
         var body = BodyJson is { } rawJson

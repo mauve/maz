@@ -47,7 +47,7 @@ public partial class MaintenanceConfigurationassignmentListWithParentCommandDef(
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceParentType}", ct);
+            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceParentType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ResourceParentType}/{ResourceParentName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/configurationAssignments";
 
         var allItems = client.GetAllAsync(path, "2023-04-01", "value", "nextLink", ct);

@@ -48,7 +48,7 @@ public partial class NetworkcloudL3networkCreateCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            L3NetworkName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/l3Networks", ct);
+            L3NetworkName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/l3Networks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/l3Networks/{resolvedName}";
 
         var body = BodyJson is { } rawJson

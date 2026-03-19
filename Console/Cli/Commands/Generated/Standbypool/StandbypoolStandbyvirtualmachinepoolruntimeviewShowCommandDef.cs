@@ -35,7 +35,7 @@ public partial class StandbypoolStandbyvirtualmachinepoolruntimeviewShowCommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StandbyVirtualMachinePoolName!, ResourceGroup, armClient, "Microsoft.StandbyPool/standbyVirtualMachinePools", ct);
+            StandbyVirtualMachinePoolName!, ResourceGroup, armClient, "Microsoft.StandbyPool/standbyVirtualMachinePools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StandbyPool/standbyVirtualMachinePools/{resolvedName}/runtimeViews/{RuntimeView}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-10-01", null, ct);

@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricExternalnetworkUpdateAdministrativeStat
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            L3IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l3IsolationDomains", ct);
+            L3IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l3IsolationDomains", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/l3IsolationDomains/{resolvedName}/externalNetworks/{ExternalNetworkName}/updateAdministrativeState";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-06-15", null, ct);

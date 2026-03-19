@@ -43,7 +43,7 @@ public partial class MaintenanceConfigurationassignmentShowCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceType}", ct);
+            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/configurationAssignments/{ConfigurationAssignmentName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2023-04-01", null, ct);

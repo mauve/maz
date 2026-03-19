@@ -36,7 +36,7 @@ public partial class ManagednetworkfabricNetworkdeviceDeleteCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NetworkDeviceName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkDevices", ct);
+            NetworkDeviceName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/networkDevices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/networkDevices/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-06-15", null, ct);

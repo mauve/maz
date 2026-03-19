@@ -36,7 +36,7 @@ public partial class NetworkPrivatelinkserviceDeleteCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServiceName!, ResourceGroup, armClient, "Microsoft.Network/privateLinkServices", ct);
+            ServiceName!, ResourceGroup, armClient, "Microsoft.Network/privateLinkServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/privateLinkServices/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

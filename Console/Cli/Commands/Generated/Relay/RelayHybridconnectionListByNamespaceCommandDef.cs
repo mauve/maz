@@ -31,7 +31,7 @@ public partial class RelayHybridconnectionListByNamespaceCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.Relay/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.Relay/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Relay/namespaces/{resolvedName}/hybridConnections";
 
         var allItems = client.GetAllAsync(path, "2024-01-01", "value", "nextLink", ct);

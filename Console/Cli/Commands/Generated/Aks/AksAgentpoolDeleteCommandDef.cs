@@ -44,7 +44,7 @@ public partial class AksAgentpoolDeleteCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ContainerService/managedClusters", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ContainerService/managedClusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ContainerService/managedClusters/{resolvedName}/agentPools/{AgentPoolName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2026-01-01", null, ct);

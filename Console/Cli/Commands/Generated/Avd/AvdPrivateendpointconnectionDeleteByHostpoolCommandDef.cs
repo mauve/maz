@@ -36,7 +36,7 @@ public partial class AvdPrivateendpointconnectionDeleteByHostpoolCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", ct);
+            HostPoolName!, ResourceGroup, armClient, "Microsoft.DesktopVirtualization/hostPools", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DesktopVirtualization/hostPools/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-04-03", null, ct);

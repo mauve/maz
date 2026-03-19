@@ -36,7 +36,7 @@ public partial class StoragesyncServiceDeleteCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageSyncServiceName!, ResourceGroup, armClient, "Microsoft.StorageSync/storageSyncServices", ct);
+            StorageSyncServiceName!, ResourceGroup, armClient, "Microsoft.StorageSync/storageSyncServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageSync/storageSyncServices/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2022-09-01", null, ct);

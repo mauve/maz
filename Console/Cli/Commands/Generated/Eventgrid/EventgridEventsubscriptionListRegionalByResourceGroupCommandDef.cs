@@ -39,7 +39,7 @@ public partial class EventgridEventsubscriptionListRegionalByResourceGroupComman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Location!, ResourceGroup, armClient, "Microsoft.EventGrid/locations", ct);
+            Location!, ResourceGroup, armClient, "Microsoft.EventGrid/locations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/locations/{resolvedName}/eventSubscriptions";
 
         var allItems = client.GetAllAsync(path, "2025-02-15", "value", "nextLink", ct);

@@ -36,7 +36,7 @@ public partial class DnsresolverForwardingruleDeleteCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsForwardingRulesetName!, ResourceGroup, armClient, "Microsoft.Network/dnsForwardingRulesets", ct);
+            DnsForwardingRulesetName!, ResourceGroup, armClient, "Microsoft.Network/dnsForwardingRulesets", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsForwardingRulesets/{resolvedName}/forwardingRules/{ForwardingRuleName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

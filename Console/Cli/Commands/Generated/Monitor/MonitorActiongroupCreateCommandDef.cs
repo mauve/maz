@@ -32,7 +32,7 @@ public partial class MonitorActiongroupCreateCommandDef(AuthOptionPack auth) : C
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ActionGroupName!, ResourceGroup, armClient, "Microsoft.Insights/actionGroups", ct);
+            ActionGroupName!, ResourceGroup, armClient, "Microsoft.Insights/actionGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/actionGroups/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2026-03-01", null, ct);

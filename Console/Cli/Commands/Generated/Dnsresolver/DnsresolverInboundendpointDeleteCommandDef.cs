@@ -40,7 +40,7 @@ public partial class DnsresolverInboundendpointDeleteCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", ct);
+            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsResolvers/{resolvedName}/inboundEndpoints/{InboundEndpointName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-05-01", null, ct);

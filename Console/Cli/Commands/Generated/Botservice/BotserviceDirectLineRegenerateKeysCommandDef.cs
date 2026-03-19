@@ -48,7 +48,7 @@ public partial class BotserviceDirectLineRegenerateKeysCommandDef(AuthOptionPack
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.BotService/botServices", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.BotService/botServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.BotService/botServices/{resolvedName}/channels/{ChannelName}/regeneratekeys";
 
         var body = BodyJson is { } rawJson

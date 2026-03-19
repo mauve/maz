@@ -39,7 +39,7 @@ public partial class IdentityFederatedidentitycredentialListCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ManagedIdentity/userAssignedIdentities", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ManagedIdentity/userAssignedIdentities", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedIdentity/userAssignedIdentities/{resolvedName}/federatedIdentityCredentials";
 
         var allItems = client.GetAllAsync(path, "2024-11-30", "value", "nextLink", ct);

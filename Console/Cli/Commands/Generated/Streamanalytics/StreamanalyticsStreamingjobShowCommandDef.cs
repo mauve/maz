@@ -35,7 +35,7 @@ public partial class StreamanalyticsStreamingjobShowCommandDef(AuthOptionPack au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            JobName!, ResourceGroup, armClient, "Microsoft.StreamAnalytics/streamingjobs", ct);
+            JobName!, ResourceGroup, armClient, "Microsoft.StreamAnalytics/streamingjobs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.StreamAnalytics/streamingjobs/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2020-03-01", null, ct);

@@ -39,7 +39,7 @@ public partial class MaintenanceUpdateListCommandDef(AuthOptionPack auth) : Comm
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceType}", ct);
+            ProviderName!, ResourceGroup, armClient, "{providerName}/{resourceType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ResourceType}/{ResourceName}/providers/Microsoft.Maintenance/updates";
 
         var allItems = client.GetAllAsync(path, "2023-04-01", "value", "nextLink", ct);

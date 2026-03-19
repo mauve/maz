@@ -40,7 +40,7 @@ public partial class EventgridSystemtopiceventsubscriptionCreateCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SystemTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/systemTopics", ct);
+            SystemTopicName!, ResourceGroup, armClient, "Microsoft.EventGrid/systemTopics", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/systemTopics/{resolvedName}/eventSubscriptions/{EventSubscriptionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-02-15", null, ct);

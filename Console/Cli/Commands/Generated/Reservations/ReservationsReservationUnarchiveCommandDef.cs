@@ -9,7 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Unarchive a `Reservation`.</summary>
-/// <remarks>Restores a `Reservation` to the state it was before archiving. </remarks>
+/// <remarks>Restores a `Reservation` to the state it was before archiving.</remarks>
 public partial class ReservationsReservationUnarchiveCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "unarchive";

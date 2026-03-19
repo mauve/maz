@@ -48,7 +48,7 @@ public partial class NetworkcloudTrunkednetworkCreateCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            TrunkedNetworkName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/trunkedNetworks", ct);
+            TrunkedNetworkName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/trunkedNetworks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/trunkedNetworks/{resolvedName}";
 
         var body = BodyJson is { } rawJson

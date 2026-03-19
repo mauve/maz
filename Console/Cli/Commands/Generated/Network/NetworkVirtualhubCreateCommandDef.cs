@@ -40,7 +40,7 @@ public partial class NetworkVirtualhubCreateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", ct);
+            VirtualHubName!, ResourceGroup, armClient, "Microsoft.Network/virtualHubs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualHubs/{resolvedName}";
 
         var body = BodyJson is { } rawJson

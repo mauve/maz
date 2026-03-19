@@ -36,7 +36,7 @@ public partial class ManagednetworkfabricIpcommunityDeleteCommandDef(AuthOptionP
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IpCommunityName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipCommunities", ct);
+            IpCommunityName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/ipCommunities", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/ipCommunities/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2023-06-15", null, ct);

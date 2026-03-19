@@ -35,7 +35,7 @@ public partial class StoragesyncWorkflowShowCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageSyncServiceName!, ResourceGroup, armClient, "Microsoft.StorageSync/storageSyncServices", ct);
+            StorageSyncServiceName!, ResourceGroup, armClient, "Microsoft.StorageSync/storageSyncServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageSync/storageSyncServices/{resolvedName}/workflows/{WorkflowId}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2022-09-01", null, ct);

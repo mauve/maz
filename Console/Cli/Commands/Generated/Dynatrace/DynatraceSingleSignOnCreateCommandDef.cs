@@ -44,7 +44,7 @@ public partial class DynatraceSingleSignOnCreateCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Dynatrace.Observability/monitors/{resolvedName}/singleSignOnConfigurations/{ConfigurationName}";
 
         var body = BodyJson is { } rawJson

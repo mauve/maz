@@ -32,7 +32,7 @@ public partial class WindowsiotServiceDeleteCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeviceName!, ResourceGroup, armClient, "Microsoft.WindowsIoT/deviceServices", ct);
+            DeviceName!, ResourceGroup, armClient, "Microsoft.WindowsIoT/deviceServices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.WindowsIoT/deviceServices/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2019-06-01", null, ct);

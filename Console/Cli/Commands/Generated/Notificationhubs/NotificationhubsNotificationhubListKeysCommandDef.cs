@@ -39,7 +39,7 @@ public partial class NotificationhubsNotificationhubListKeysCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NotificationHubs/namespaces/{resolvedName}/notificationHubs/{NotificationHubName}/authorizationRules/{AuthorizationRuleName}/listKeys";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-09-01", null, ct);

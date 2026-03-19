@@ -35,7 +35,7 @@ public partial class ImagebuilderVirtualmachineimagetemplateShowOutputCommandDef
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ImageTemplateName!, ResourceGroup, armClient, "Microsoft.VirtualMachineImages/imageTemplates", ct);
+            ImageTemplateName!, ResourceGroup, armClient, "Microsoft.VirtualMachineImages/imageTemplates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.VirtualMachineImages/imageTemplates/{resolvedName}/runOutputs/{RunOutputName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-02-01", null, ct);

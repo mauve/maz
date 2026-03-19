@@ -39,7 +39,7 @@ public partial class LoganalyticsTableUpdateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", ct);
+            WorkspaceName!, ResourceGroup, armClient, "Microsoft.OperationalInsights/workspaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.OperationalInsights/workspaces/{resolvedName}/tables/{TableName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-07-01", null, ct);

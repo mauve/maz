@@ -35,7 +35,7 @@ public partial class DnsresolverSUpdateCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", ct);
+            DnsResolverName!, ResourceGroup, armClient, "Microsoft.Network/dnsResolvers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/dnsResolvers/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Patch, path, "2025-05-01", null, ct);

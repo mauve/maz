@@ -39,7 +39,7 @@ public partial class DataboxedgeSupportpackageTriggerSupportPackageCommandDef(Au
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DeviceName!, ResourceGroup, armClient, "Microsoft.DataBoxEdge/dataBoxEdgeDevices", ct);
+            DeviceName!, ResourceGroup, armClient, "Microsoft.DataBoxEdge/dataBoxEdgeDevices", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataBoxEdge/dataBoxEdgeDevices/{resolvedName}/triggerSupportPackage";
 
         var body = BodyJson is { } rawJson

@@ -36,7 +36,7 @@ public partial class DatafactoryCredentialoperationDeleteCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FactoryName!, ResourceGroup, armClient, "Microsoft.DataFactory/factories", ct);
+            FactoryName!, ResourceGroup, armClient, "Microsoft.DataFactory/factories", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataFactory/factories/{resolvedName}/credentials/{CredentialName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2018-06-01", null, ct);

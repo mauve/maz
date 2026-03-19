@@ -43,7 +43,7 @@ public partial class SerialconsoleSerialportShowCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceProviderNamespace!, ResourceGroup, armClient, "{resourceProviderNamespace}/{parentResourceType}", ct);
+            ResourceProviderNamespace!, ResourceGroup, armClient, "{resourceProviderNamespace}/{parentResourceType}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ParentResourceType}/{ParentResource}/providers/Microsoft.SerialConsole/serialPorts/{SerialPort}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-07-01", null, ct);

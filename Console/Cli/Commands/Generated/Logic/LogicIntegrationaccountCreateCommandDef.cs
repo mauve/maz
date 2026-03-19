@@ -32,7 +32,7 @@ public partial class LogicIntegrationaccountCreateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", ct);
+            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/integrationAccounts/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2019-05-01", null, ct);

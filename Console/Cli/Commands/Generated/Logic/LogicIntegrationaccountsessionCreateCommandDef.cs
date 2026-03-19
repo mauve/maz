@@ -40,7 +40,7 @@ public partial class LogicIntegrationaccountsessionCreateCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", ct);
+            IntegrationAccountName!, ResourceGroup, armClient, "Microsoft.Logic/integrationAccounts", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/integrationAccounts/{resolvedName}/sessions/{SessionName}";
 
         var body = BodyJson is { } rawJson

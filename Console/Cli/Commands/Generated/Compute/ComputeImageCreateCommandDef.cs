@@ -36,7 +36,7 @@ public partial class ComputeImageCreateCommandDef(AuthOptionPack auth) : Command
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ImageName!, ResourceGroup, armClient, "Microsoft.Compute/images", ct);
+            ImageName!, ResourceGroup, armClient, "Microsoft.Compute/images", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/images/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-04-01", null, ct);

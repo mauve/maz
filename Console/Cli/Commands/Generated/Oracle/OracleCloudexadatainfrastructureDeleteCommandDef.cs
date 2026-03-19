@@ -36,7 +36,7 @@ public partial class OracleCloudexadatainfrastructureDeleteCommandDef(AuthOption
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", ct);
+            Cloudexadatainfrastructurename!, ResourceGroup, armClient, "Oracle.Database/cloudExadataInfrastructures", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Oracle.Database/cloudExadataInfrastructures/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-09-01", null, ct);

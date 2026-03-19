@@ -36,7 +36,7 @@ public partial class MonitorAutoscalesettingCreateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            AutoscaleSettingName!, ResourceGroup, armClient, "Microsoft.Insights/autoscalesettings", ct);
+            AutoscaleSettingName!, ResourceGroup, armClient, "Microsoft.Insights/autoscalesettings", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.Insights/autoscalesettings/{resolvedName}";
 
         var body = BodyJson is { } rawJson

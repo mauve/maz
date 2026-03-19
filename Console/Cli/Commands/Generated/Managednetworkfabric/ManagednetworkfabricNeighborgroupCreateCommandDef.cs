@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricNeighborgroupCreateCommandDef(AuthOptio
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NeighborGroupName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/neighborGroups", ct);
+            NeighborGroupName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/neighborGroups", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/neighborGroups/{resolvedName}";
 
         var body = BodyJson is { } rawJson

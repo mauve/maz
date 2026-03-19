@@ -44,7 +44,7 @@ public partial class SphereCertificateShowNonceCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", ct);
+            CatalogName!, ResourceGroup, armClient, "Microsoft.AzureSphere/catalogs", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureSphere/catalogs/{resolvedName}/certificates/{SerialNumber}/retrieveProofOfPossessionNonce";
 
         var body = BodyJson is { } rawJson

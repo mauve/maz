@@ -31,7 +31,7 @@ public partial class CognitiveservicesCommitmentplanListAssociationsCommandDef(A
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CommitmentPlanName!, ResourceGroup, armClient, "Microsoft.CognitiveServices/commitmentPlans", ct);
+            CommitmentPlanName!, ResourceGroup, armClient, "Microsoft.CognitiveServices/commitmentPlans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.CognitiveServices/commitmentPlans/{resolvedName}/accountAssociations";
 
         var allItems = client.GetAllAsync(path, "2025-12-01", "value", "nextLink", ct);

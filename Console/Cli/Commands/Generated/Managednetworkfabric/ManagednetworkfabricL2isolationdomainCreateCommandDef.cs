@@ -40,7 +40,7 @@ public partial class ManagednetworkfabricL2isolationdomainCreateCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            L2IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l2IsolationDomains", ct);
+            L2IsolationDomainName!, ResourceGroup, armClient, "Microsoft.ManagedNetworkFabric/l2IsolationDomains", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ManagedNetworkFabric/l2IsolationDomains/{resolvedName}";
 
         var body = BodyJson is { } rawJson

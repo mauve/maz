@@ -40,7 +40,7 @@ public partial class ScvmmVirtualmachinetemplateDeleteCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualMachineTemplates", ct);
+            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ScVmm/virtualMachineTemplates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ScVmm/virtualMachineTemplates/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-03-13", null, ct);

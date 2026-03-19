@@ -31,7 +31,7 @@ public partial class NetworkSupportedsecurityproviderShowCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualWanname!, ResourceGroup, armClient, "Microsoft.Network/virtualWans", ct);
+            VirtualWanname!, ResourceGroup, armClient, "Microsoft.Network/virtualWans", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/virtualWans/{resolvedName}/supportedSecurityProviders";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-05-01", null, ct);

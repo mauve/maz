@@ -31,7 +31,7 @@ public partial class ComputeRestorepointcollectionUpdateCommandDef(AuthOptionPac
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            RestorePointCollectionName!, ResourceGroup, armClient, "Microsoft.Compute/restorePointCollections", ct);
+            RestorePointCollectionName!, ResourceGroup, armClient, "Microsoft.Compute/restorePointCollections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Compute/restorePointCollections/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2025-04-01", null, ct);

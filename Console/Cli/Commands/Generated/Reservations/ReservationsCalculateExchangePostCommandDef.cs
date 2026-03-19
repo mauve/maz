@@ -9,7 +9,7 @@ using Console.Rendering;
 namespace Console.Cli.Commands.Generated;
 
 /// <summary>Calculates the refund amounts and price of the new purchases.</summary>
-/// <remarks>Calculates price for exchanging `Reservations` if there are no policy errors. </remarks>
+/// <remarks>Calculates price for exchanging `Reservations` if there are no policy errors.</remarks>
 public partial class ReservationsCalculateExchangePostCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "post";

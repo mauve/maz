@@ -36,7 +36,7 @@ public partial class NetworkVirtualnetworkgatewayconnectionResetConnectionComman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualNetworkGatewayConnectionName!, ResourceGroup, armClient, "Microsoft.Network/connections", ct);
+            VirtualNetworkGatewayConnectionName!, ResourceGroup, armClient, "Microsoft.Network/connections", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/connections/{resolvedName}/resetconnection";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-05-01", null, ct);

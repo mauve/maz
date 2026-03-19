@@ -36,7 +36,7 @@ public partial class PaloaltonetworksLocalrulestackCommitCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", ct);
+            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/localRulestacks/{resolvedName}/commit";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2025-10-08", null, ct);

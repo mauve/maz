@@ -36,7 +36,7 @@ public partial class AnalysisservicesServerSuspendCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.AnalysisServices/servers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.AnalysisServices/servers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AnalysisServices/servers/{resolvedName}/suspend";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2017-08-01", null, ct);

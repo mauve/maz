@@ -46,7 +46,7 @@ public partial class DataprotectionBackupinstanceValidateCrossRegionRestoreComma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            Location!, ResourceGroup, armClient, "Microsoft.DataProtection/locations", ct);
+            Location!, ResourceGroup, armClient, "Microsoft.DataProtection/locations", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DataProtection/locations/{resolvedName}/validateCrossRegionRestore";
 
         var body = BodyJson is { } rawJson

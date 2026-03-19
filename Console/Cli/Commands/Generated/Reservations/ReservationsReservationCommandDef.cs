@@ -10,14 +10,14 @@ namespace Console.Cli.Commands.Generated;
 public partial class ReservationsReservationCommandDef(AuthOptionPack auth) : CommandDef
 {
     public override string Name => "reservation";
-    public readonly ReservationsReservationAvailableScopesCommandDef AvailableScopes = new(auth);
-    public readonly ReservationsReservationSplitCommandDef Split = new(auth);
     public readonly ReservationsReservationMergeCommandDef Merge = new(auth);
     public readonly ReservationsReservationListCommandDef List = new(auth);
     public readonly ReservationsReservationShowCommandDef Show = new(auth);
     public readonly ReservationsReservationUpdateCommandDef Update = new(auth);
     public readonly ReservationsReservationArchiveCommandDef Archive = new(auth);
-    public readonly ReservationsReservationUnarchiveCommandDef Unarchive = new(auth);
+    public readonly ReservationsReservationAvailableScopesCommandDef AvailableScopes = new(auth);
     public readonly ReservationsReservationListRevisionsCommandDef ListRevisions = new(auth);
+    public readonly ReservationsReservationUnarchiveCommandDef Unarchive = new(auth);
+    public readonly ReservationsReservationSplitCommandDef Split = new(auth);
     public readonly ReservationsReservationListAllCommandDef ListAll = new(auth);
 }

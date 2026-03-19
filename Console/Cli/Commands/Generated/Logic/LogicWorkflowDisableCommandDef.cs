@@ -32,7 +32,7 @@ public partial class LogicWorkflowDisableCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            WorkflowName!, ResourceGroup, armClient, "Microsoft.Logic/workflows", ct);
+            WorkflowName!, ResourceGroup, armClient, "Microsoft.Logic/workflows", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Logic/workflows/{resolvedName}/disable";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2019-05-01", null, ct);

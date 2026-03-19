@@ -40,7 +40,7 @@ public partial class ContainerinstanceSubnetServiceAssociationLinkDeleteCommandD
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualNetworkName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworks", ct);
+            VirtualNetworkName!, ResourceGroup, armClient, "Microsoft.Network/virtualNetworks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/Microsoft.Network/virtualNetworks/{resolvedName}/subnets/{SubnetName}/providers/Microsoft.ContainerInstance/serviceAssociationLinks/default";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-09-01", null, ct);

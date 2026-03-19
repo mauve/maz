@@ -48,7 +48,7 @@ public partial class NetworkcloudBaremetalmachineRunDataExtractsCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BareMetalMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/bareMetalMachines", ct);
+            BareMetalMachineName!, ResourceGroup, armClient, "Microsoft.NetworkCloud/bareMetalMachines", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NetworkCloud/bareMetalMachines/{resolvedName}/runDataExtracts";
 
         var body = BodyJson is { } rawJson

@@ -31,7 +31,7 @@ public partial class ConnectedvmwareVirtualmachinetemplateUpdateCommandDef(AuthO
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/virtualMachineTemplates", ct);
+            VirtualMachineTemplateName!, ResourceGroup, armClient, "Microsoft.ConnectedVMwarevSphere/virtualMachineTemplates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ConnectedVMwarevSphere/virtualMachineTemplates/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2023-12-01", null, ct);

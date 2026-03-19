@@ -31,7 +31,7 @@ public partial class AppinsightsWebtestListByComponentCommandDef(AuthOptionPack 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ComponentName!, ResourceGroup, armClient, "Microsoft.Insights/components", ct);
+            ComponentName!, ResourceGroup, armClient, "Microsoft.Insights/components", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Insights/components/{resolvedName}/webtests";
 
         var allItems = client.GetAllAsync(path, "2020-02-02", "value", "nextLink", ct);

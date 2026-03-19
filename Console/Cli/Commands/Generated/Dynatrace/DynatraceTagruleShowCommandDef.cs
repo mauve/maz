@@ -35,7 +35,7 @@ public partial class DynatraceTagruleShowCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Dynatrace.Observability/monitors/{resolvedName}/tagRules/{RuleSetName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-04-24", null, ct);

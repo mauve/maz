@@ -47,7 +47,7 @@ public partial class AuthorizationDenyassignmentListForResourceCommandDef(AuthOp
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceProviderNamespace!, ResourceGroup, armClient, "{resourceProviderNamespace}/{parentResourcePath}", ct);
+            ResourceProviderNamespace!, ResourceGroup, armClient, "{resourceProviderNamespace}/{parentResourcePath}", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourcegroups/{resolvedRg}/providers/{resolvedName}/{ParentResourcePath}/{ResourceType}/{ResourceName}/providers/Microsoft.Authorization/denyAssignments";
 
         var allItems = client.GetAllAsync(path, "2022-04-01", "value", "nextLink", ct);

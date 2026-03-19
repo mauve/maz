@@ -36,7 +36,7 @@ public partial class PaloaltonetworksLocalrulestackGetSupportInfoCommandDef(Auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", ct);
+            LocalRulestackName!, ResourceGroup, armClient, "PaloAltoNetworks.Cloudngfw/localRulestacks", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/PaloAltoNetworks.Cloudngfw/localRulestacks/{resolvedName}/getSupportInfo";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-10-08", null, ct);

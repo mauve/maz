@@ -40,7 +40,7 @@ public partial class NetworkExpressroutecircuitauthorizationCreateOrUpdateComman
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", ct);
+            CircuitName!, ResourceGroup, armClient, "Microsoft.Network/expressRouteCircuits", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/expressRouteCircuits/{resolvedName}/authorizations/{AuthorizationName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Put, path, "2025-05-01", null, ct);

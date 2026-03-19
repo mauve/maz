@@ -40,7 +40,7 @@ public partial class DynatraceMonitorCreateCommandDef(AuthOptionPack auth) : Com
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", ct);
+            MonitorName!, ResourceGroup, armClient, "Dynatrace.Observability/monitors", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Dynatrace.Observability/monitors/{resolvedName}";
 
         var body = BodyJson is { } rawJson

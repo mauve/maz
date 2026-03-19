@@ -47,7 +47,7 @@ public partial class NotificationhubsNotificationhubRegenerateKeysCommandDef(Aut
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", ct);
+            NamespaceName!, ResourceGroup, armClient, "Microsoft.NotificationHubs/namespaces", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.NotificationHubs/namespaces/{resolvedName}/notificationHubs/{NotificationHubName}/authorizationRules/{AuthorizationRuleName}/regenerateKeys";
 
         var body = BodyJson is { } rawJson

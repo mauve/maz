@@ -60,7 +60,7 @@ public partial class SqlServerImportDatabaseCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.Sql/servers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.Sql/servers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Sql/servers/{resolvedName}/import";
 
         var body = BodyJson is { } rawJson

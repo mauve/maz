@@ -48,7 +48,7 @@ public partial class RedisFirewallruleCreateCommandDef(AuthOptionPack auth) : Co
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            CacheName!, ResourceGroup, armClient, "Microsoft.Cache/redis", ct);
+            CacheName!, ResourceGroup, armClient, "Microsoft.Cache/redis", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cache/redis/{resolvedName}/firewallRules/{RuleName}";
 
         var body = BodyJson is { } rawJson

@@ -1,5 +1,5 @@
 {
-  "specsRoot": "/home/mikae/repos/azure-rest-api-specs/specification",
+  "specsRoot": "azure-rest-api-specs/specification",
   "outputDir": "Console/Cli/Commands/Generated",
   "commandNamespace": "Console.Cli.Commands.Generated",
   "services": [
@@ -10477,7 +10477,7 @@
       "description": "Manage Oracle Database@Azure resources including autonomous databases and Exadata infrastructure",
       "detailedDescription": "Covers Oracle Autonomous Databases, Exadata infrastructure, VM clusters, and associated resources like backups, character sets, and DB nodes. Requires the Oracle.Database resource provider registered in your subscription.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/oracle/resource-manager/Oracle.Database/stable/2025-09-01/openapi.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/oracle/resource-manager/Oracle.Database/stable/2025-09-01/openapi.json"
       ],
       "resourceDescriptions": {
         "autonomousdatabas": "Manage Oracle Autonomous Databases",
@@ -10546,7 +10546,7 @@
       "description": "Manage Palo Alto Networks Cloud NGFW firewalls, rulestacks, and security policies in Azure",
       "detailedDescription": "Covers PAN Cloud Next-Generation Firewall resources including firewalls, local and global rulestacks, pre/post rules, and certificate objects. Requires the PaloAltoNetworks.Cloudngfw resource provider.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/paloaltonetworks/resource-manager/PaloAltoNetworks.Cloudngfw/stable/2025-10-08/PaloAltoNetworks.Cloudngfw.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/paloaltonetworks/resource-manager/PaloAltoNetworks.Cloudngfw/stable/2025-10-08/PaloAltoNetworks.Cloudngfw.json"
       ],
       "resourceDescriptions": {
         "firewall": "Manage Palo Alto Networks Cloud NGFW firewalls",
@@ -10603,7 +10603,7 @@
       "description": "Manage Azure Peering Service connections, peerings, and network configuration",
       "detailedDescription": "Covers Microsoft network peerings, peering services, registered ASNs and prefixes, and connection monitor tests. Used for managing BGP peering relationships between customer networks and Microsoft.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/peering/resource-manager/Microsoft.Peering/Peering/stable/2025-05-01/peering.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/peering/resource-manager/Microsoft.Peering/Peering/stable/2025-05-01/peering.json"
       ],
       "resourceDescriptions": {
         "cdnpeeringprefix": "List CDN peering prefixes by location",
@@ -10650,7 +10650,7 @@
       "description": "Manage Power BI Dedicated capacity and auto-scale v-cores",
       "detailedDescription": "Covers Power BI Embedded and Premium capacity resources for dedicated compute. Supports suspend, resume, and SKU management for capacity nodes.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/powerbidedicated/resource-manager/Microsoft.PowerBIdedicated/PowerBIDedicated/stable/2021-01-01/openapi.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/powerbidedicated/resource-manager/Microsoft.PowerBIdedicated/PowerBIDedicated/stable/2021-01-01/openapi.json"
       ],
       "resourceDescriptions": {
         "autoscalevcore": "Manage auto-scale v-cores for Power BI",
@@ -10686,7 +10686,7 @@
       "description": "Manage Azure Red Hat OpenShift clusters",
       "detailedDescription": "Covers Red Hat OpenShift 4 cluster lifecycle on Azure including create, update, delete, and credential retrieval. Requires the Microsoft.RedHatOpenShift resource provider.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/redhatopenshift/resource-manager/Microsoft.RedHatOpenShift/OpenShiftClusters/stable/2025-07-25/redhatopenshift.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/redhatopenshift/resource-manager/Microsoft.RedHatOpenShift/OpenShiftClusters/stable/2025-07-25/redhatopenshift.json"
       ],
       "resourceDescriptions": {
         "openshiftcluster": "Manage Red Hat OpenShift clusters",
@@ -10725,7 +10725,7 @@
       "description": "Manage Azure Resource Mover collections for moving resources between regions",
       "detailedDescription": "Covers move collection lifecycle and move resource management. Use to plan and execute resource moves across Azure regions, including dependency resolution and staged commit/discard.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/resourcemover/resource-manager/Microsoft.Migrate/ResourceMover/stable/2023-08-01/resourcemovercollection.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/resourcemover/resource-manager/Microsoft.Migrate/ResourceMover/stable/2023-08-01/resourcemovercollection.json"
       ],
       "resourceDescriptions": {
         "movecollection": "Manage resource move collections",
@@ -10753,7 +10753,7 @@
       "description": "Manage Azure Scheduler job collections and scheduled jobs",
       "detailedDescription": "Covers job collections and individual scheduled jobs for Azure Scheduler. Note: Azure Scheduler is retired; consider migrating to Azure Logic Apps.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/scheduler/resource-manager/Microsoft.Scheduler/Scheduler/stable/2016-03-01/scheduler.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/scheduler/resource-manager/Microsoft.Scheduler/Scheduler/stable/2016-03-01/scheduler.json"
       ],
       "resourceDescriptions": {
         "job": "Manage scheduled jobs",
@@ -10783,7 +10783,7 @@
       "description": "Manage Azure Serial Console access for virtual machines",
       "detailedDescription": "Covers enabling, disabling, and checking the status of Serial Console for a subscription, plus managing serial ports on virtual machines.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/serialconsole/resource-manager/Microsoft.SerialConsole/SerialConsole/stable/2024-07-01/openapi.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/serialconsole/resource-manager/Microsoft.SerialConsole/SerialConsole/stable/2024-07-01/openapi.json"
       ],
       "resourceDescriptions": {
         "serialport": "Manage serial ports on virtual machines"
@@ -10807,7 +10807,7 @@
       "description": "Manage Azure Active Directory private link resources",
       "detailedDescription": "Covers private link policies for Azure AD, enabling secure private endpoint connectivity to Azure Active Directory services.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/azureactivedirectory/resource-manager/Microsoft.Aadiam/AzureActiveDirectory/stable/2020-03-01/privateLinkForAzureAD.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/azureactivedirectory/resource-manager/Microsoft.Aadiam/AzureActiveDirectory/stable/2020-03-01/privateLinkForAzureAD.json"
       ],
       "resourceDescriptions": {
         "private-link-for-azure-ad": "Manage private link policies for Azure Active Directory"
@@ -10832,7 +10832,7 @@
       "description": "Manage Azure Database Watcher instances for database monitoring",
       "detailedDescription": "Covers Database Watcher resources that collect and analyze database metrics. Includes watchers, targets, alert rules, health validations, and shared private link resources.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/databasewatcher/resource-manager/Microsoft.DatabaseWatcher/stable/2025-01-02/Watcher.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/databasewatcher/resource-manager/Microsoft.DatabaseWatcher/stable/2025-01-02/Watcher.json"
       ],
       "resourceDescriptions": {
         "alertruleresource": "Manage alert rules for Database Watcher",
@@ -10867,7 +10867,7 @@
       "description": "Manage Health Data AI Services De-identification Service resources",
       "detailedDescription": "Covers De-identification Service (DeidService) instances for PHI de-identification in health data pipelines. Includes private endpoint connectivity management.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/healthdataaiservices/resource-manager/Microsoft.HealthDataAIServices/stable/2024-09-20/openapi.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/healthdataaiservices/resource-manager/Microsoft.HealthDataAIServices/stable/2024-09-20/openapi.json"
       ],
       "resourceDescriptions": {
         "deidservice": "Manage De-identification Service instances",
@@ -10897,7 +10897,7 @@
       "description": "Manage Informatica Intelligent Data Management Cloud organizations in Azure",
       "detailedDescription": "Covers Informatica IDMC organization resources and serverless runtimes deployed in Azure. Requires the Informatica.DataManagement resource provider.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/informatica/resource-manager/Informatica.DataManagement/stable/2025-11-27/openapi.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/informatica/resource-manager/Informatica.DataManagement/stable/2025-11-27/openapi.json"
       ],
       "resourceDescriptions": {
         "organization": "Manage Informatica IDMC organizations",
@@ -10926,7 +10926,7 @@
       "description": "Manage Azure Marketplace private stores and offer access policies",
       "detailedDescription": "Covers private store management for controlling which Marketplace offers are available within a tenant. Includes offer management, approval workflows, and collection administration.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/marketplace/resource-manager/Microsoft.Marketplace/Marketplace/stable/2025-01-01/Marketplace.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/marketplace/resource-manager/Microsoft.Marketplace/Marketplace/stable/2025-01-01/Marketplace.json"
       ],
       "resourceDescriptions": {
         "private-store": "Manage private stores for Azure Marketplace access control",
@@ -10960,7 +10960,7 @@
       "description": "Manage Azure Cosmos DB for PostgreSQL (Hyperscale Citus) clusters",
       "detailedDescription": "Covers Cosmos DB for PostgreSQL cluster lifecycle, servers, configurations, firewalls, and roles. Formerly known as Azure Database for PostgreSQL Hyperscale (Citus).",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/postgresqlhsc/resource-manager/Microsoft.DBforPostgreSQL/PostgresqlHsc/stable/2022-11-08/postgresqlhsc.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/postgresqlhsc/resource-manager/Microsoft.DBforPostgreSQL/PostgresqlHsc/stable/2022-11-08/postgresqlhsc.json"
       ],
       "resourceDescriptions": {
         "cluster": "Manage Cosmos DB for PostgreSQL clusters",
@@ -11004,7 +11004,7 @@
       "description": "Manage Microsoft Purview accounts and governance resources",
       "detailedDescription": "Covers Purview account lifecycle, Kafka configurations, private endpoint connections, and default account management. Requires the Microsoft.Purview resource provider.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/purview/resource-manager/Microsoft.Purview/Purview/stable/2021-12-01/purview.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/purview/resource-manager/Microsoft.Purview/Purview/stable/2021-12-01/purview.json"
       ],
       "resourceDescriptions": {
         "account": "Manage Microsoft Purview accounts",
@@ -11042,7 +11042,7 @@
       "description": "Manage Azure Operator Voice Services communications gateways",
       "detailedDescription": "Covers Communications Gateway resources for Azure Operator Voice Services, including test lines for pre-deployment validation.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/voiceservices/resource-manager/Microsoft.VoiceServices/stable/2023-09-01/voiceservices.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/voiceservices/resource-manager/Microsoft.VoiceServices/stable/2023-09-01/voiceservices.json"
       ],
       "resourceDescriptions": {
         "communicationsgateway": "Manage Communications Gateway resources",
@@ -11071,7 +11071,7 @@
       "description": "Manage Azure Help API diagnostics and solution discovery",
       "detailedDescription": "Covers the Azure Help API for creating self-help diagnostics and discovering solutions to common Azure issues.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/help/resource-manager/Microsoft.Help/Help/stable/2023-06-01/help.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/help/resource-manager/Microsoft.Help/Help/stable/2023-06-01/help.json"
       ],
       "resourceDescriptions": {
         "diagnostic": "Manage self-help diagnostics",
@@ -11097,7 +11097,7 @@
       "description": "Manage Azure Operator Nexus bare-metal machines, clusters, and network fabric resources",
       "detailedDescription": "Covers Azure Operator Nexus (Network Cloud) infrastructure including bare-metal machines, Kubernetes clusters, storage appliances, virtual machines, and L2/L3 networks.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/networkcloud/resource-manager/Microsoft.NetworkCloud/stable/2025-09-01/networkcloud.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/networkcloud/resource-manager/Microsoft.NetworkCloud/stable/2025-09-01/networkcloud.json"
       ],
       "resourceDescriptions": {
         "agentpool": "Manage agent pools for Network Cloud Kubernetes clusters",
@@ -11171,7 +11171,7 @@
       "description": "Manage Azure Hybrid AKS provisioned cluster instances on Arc-enabled infrastructure",
       "detailedDescription": "Covers Hybrid AKS provisioned cluster instances, agent pools, and VM SKUs for Kubernetes clusters running on Arc-enabled hardware.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridaks/resource-manager/Microsoft.HybridContainerService/stable/2024-01-01/provisionedClusterInstances.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridaks/resource-manager/Microsoft.HybridContainerService/stable/2024-01-01/provisionedClusterInstances.json"
       ],
       "resourceDescriptions": {
         "agent-pool": "Manage agent pools in Hybrid AKS clusters",
@@ -11213,10 +11213,10 @@
       "description": "Query Azure Policy compliance states, events, and manage remediations and attestations",
       "detailedDescription": "Covers policy states, events, remediations, attestations, and metadata for Azure Policy. Use to audit compliance, trigger remediations, and review policy evaluation results.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/remediations.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/attestations.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyStates.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyEvents.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/remediations.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/attestations.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyStates.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/policyinsights/resource-manager/Microsoft.PolicyInsights/PolicyInsights/stable/2024-10-01/policyEvents.json"
       ],
       "resourceDescriptions": {
         "attestation": "Manage policy compliance attestations",
@@ -11256,23 +11256,23 @@
       "description": "Manage Azure Operator Nexus Network Fabric resources for carrier-grade networking",
       "detailedDescription": "Covers Network Fabric infrastructure including network fabrics, devices, L2/L3 isolation domains, route policies, ACLs, and network-to-network interconnects.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabrics.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkDevices.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L2IsolationDomains.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L3IsolationDomains.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/RoutePolicies.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/AccessControlLists.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpPrefixes.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabricControllers.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkRacks.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTaps.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTapRules.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkPacketBrokers.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGateways.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGatewayRules.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NeighborGroups.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpCommunities.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpExtendedCommunities.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabrics.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkDevices.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L2IsolationDomains.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/L3IsolationDomains.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/RoutePolicies.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/AccessControlLists.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpPrefixes.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkFabricControllers.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkRacks.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTaps.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkTapRules.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NetworkPacketBrokers.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGateways.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/InternetGatewayRules.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/NeighborGroups.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpCommunities.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/managednetworkfabric/resource-manager/Microsoft.ManagedNetworkFabric/stable/2023-06-15/IpExtendedCommunities.json"
       ],
       "resourceDescriptions": {
         "accesscontrollist": "Manage access control lists",
@@ -11346,14 +11346,14 @@
       "description": "Manage Azure Hybrid Network functions, publishers, and network service designs",
       "detailedDescription": "Covers Azure Operator Nexus Hybrid Network resources for deploying network functions (VNF/CNF) from publishers. Includes publishers, network function definitions, and site network services.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunction.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/publisher.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunctionDefinition.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkServiceDesign.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupSchema.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupValues.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/site.json",
-        "/home/mikae/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/siteNetworkService.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunction.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/publisher.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkFunctionDefinition.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/networkServiceDesign.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupSchema.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/configurationGroupValues.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/site.json",
+        "/home/mikael/repos/azure-rest-api-specs/specification/hybridnetwork/resource-manager/Microsoft.HybridNetwork/stable/2024-04-15/siteNetworkService.json"
       ],
       "resourceDescriptions": {
         "component": "List network function components",
@@ -11392,7 +11392,7 @@
       "description": "Manage Azure Customer Insights hubs and unified customer profiles",
       "detailedDescription": "Covers Customer Insights hub management, profile and interaction types, KPIs, predictions, relationships, and authorization policies.",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/customer-insights/resource-manager/Microsoft.CustomerInsights/CustomerInsights/stable/2017-04-26/customer-insights.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/customer-insights/resource-manager/Microsoft.CustomerInsights/CustomerInsights/stable/2017-04-26/customer-insights.json"
       ],
       "resourceDescriptions": {
         "authorizationpolicy": "Manage hub authorization policies",
@@ -11459,7 +11459,7 @@
       "displayName": "servicebusdata",
       "apiVersion": "2021-05",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/servicebus/data-plane/ServiceBus/stable/2021-05/servicebus.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/servicebus/data-plane/ServiceBus/stable/2021-05/servicebus.json"
       ],
       "description": "Manage Azure Service Bus entities, rules, and subscriptions via the data-plane API",
       "detailedDescription": "Provides direct data-plane access to Service Bus namespaces for managing queues, topics, subscriptions, and rules. Requires a Service Bus namespace endpoint (--servicebus-url) or --servicebus-namespace to identify the namespace by name for ARM-based endpoint resolution.",
@@ -11503,7 +11503,7 @@
       "displayName": "appconfigdata",
       "apiVersion": "2024-09-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/appconfiguration/data-plane/AppConfiguration/stable/2024-09-01/appconfiguration.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/appconfiguration/data-plane/AppConfiguration/stable/2024-09-01/appconfiguration.json"
       ],
       "description": "Read and write Azure App Configuration key-values, labels, snapshots, and locks",
       "resourceRenames": {
@@ -11562,7 +11562,7 @@
       "displayName": "batchdata",
       "apiVersion": "2025-06-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/batch/data-plane/Batch/stable/2025-06-01/BatchService.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/batch/data-plane/Batch/stable/2025-06-01/BatchService.json"
       ],
       "description": "Submit and manage Azure Batch jobs, tasks, pools, and job schedules",
       "detailedDescription": "Provides direct data-plane access to Batch accounts for creating and monitoring jobs, tasks, pools, and job schedules. Requires a Batch account endpoint (--batch-url) or --batch-account to identify the account by name for ARM-based endpoint resolution.",
@@ -11631,7 +11631,7 @@
       "displayName": "acrdata",
       "apiVersion": "2021-07-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/containerregistry/data-plane/Registry/stable/2021-07-01/containerregistry.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/containerregistry/data-plane/Registry/stable/2021-07-01/containerregistry.json"
       ],
       "description": "Manage Azure Container Registry manifests, tags, and blobs via the data-plane API",
       "detailedDescription": "Provides direct OCI-compatible data-plane access to container registries for managing repositories, manifests, tags, and blob uploads. Requires a registry login server URL (--acr-url) or --acr to identify the registry by name for ARM-based endpoint resolution.",
@@ -11683,7 +11683,7 @@
       "displayName": "searchdata",
       "apiVersion": "2025-09-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/search/data-plane/Search/stable/2025-09-01/searchservice.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/search/data-plane/Search/stable/2025-09-01/searchservice.json"
       ],
       "description": "Manage Azure AI Search indexes, indexers, data sources, skillsets, and synonym maps",
       "detailedDescription": "Provides direct data-plane access to Azure AI Search service management: creating and configuring indexes, indexers, data sources, skillsets, and synonym maps. Requires a search service endpoint (--search-url) or --search-service to identify the service by name for ARM-based endpoint resolution.",
@@ -11745,7 +11745,7 @@
       "displayName": "attestationdata",
       "apiVersion": "2025-06-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/attestation/data-plane/Attestation/stable/2025-06-01/attestation.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/attestation/data-plane/Attestation/stable/2025-06-01/attestation.json"
       ],
       "description": "Submit attestation evidence and manage attestation policies via the data-plane API",
       "detailedDescription": "Provides direct data-plane access to Azure Attestation service endpoints for attesting TEEs (SGX enclaves, TPM, SNP VMs, TDX VMs) and managing attestation policies. Identify the provider with --attestation / --atp (resolves the endpoint from ARM) or supply the URL directly via --attestation-url.",
@@ -11790,7 +11790,7 @@
       "displayName": "ledgerdata",
       "apiVersion": "2022-05-13",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/confidentialledger/data-plane/ConfidentialLedger/stable/2022-05-13/confidentialledger.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/confidentialledger/data-plane/ConfidentialLedger/stable/2022-05-13/confidentialledger.json"
       ],
       "description": "Read and write to an Azure Confidential Ledger via the data-plane API",
       "detailedDescription": "Provides direct data-plane access to Azure Confidential Ledger for appending immutable ledger entries, managing users, and verifying entries via cryptographic receipts. Identify the ledger with --ledger / --cl (resolves the endpoint from ARM) or supply the URL directly via --ledger-url.",
@@ -11840,7 +11840,7 @@
       "displayName": "digitaltwinsdata",
       "apiVersion": "2023-10-31",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/digitaltwins/data-plane/DigitalTwins/stable/2023-10-31/digitaltwins.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/digitaltwins/data-plane/DigitalTwins/stable/2023-10-31/digitaltwins.json"
       ],
       "description": "Manage Azure Digital Twins instances, models, relationships, and event routes",
       "detailedDescription": "Provides direct data-plane access to Azure Digital Twins for creating and querying digital twin instances, models (DTDL), relationships, and event routes. Identify the instance with --digital-twins / --dt (resolves the endpoint from ARM) or supply the URL directly via --digital-twins-url.",
@@ -11898,7 +11898,7 @@
       "displayName": "devcenterdata",
       "apiVersion": "2025-02-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/devcenter/data-plane/Microsoft.DevCenter/stable/2025-02-01/devcenter.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/devcenter/data-plane/Microsoft.DevCenter/stable/2025-02-01/devcenter.json"
       ],
       "description": "Manage developer boxes, environments, and projects via the Dev Center data-plane API",
       "detailedDescription": "Provides direct data-plane access to Azure Dev Center for managing developer boxes (create, start, stop, delete), environments (create, deploy, delete), and project resources. Identify the Dev Center with --dev-center / --dc (resolves the endpoint from ARM) or supply the URL directly via --dev-center-url.",
@@ -11933,7 +11933,7 @@
       "displayName": "loadtestdata",
       "apiVersion": "2022-11-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/loadtestservice/data-plane/loadtesting/stable/2022-11-01/loadtestservice.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/loadtestservice/data-plane/loadtesting/stable/2022-11-01/loadtestservice.json"
       ],
       "description": "Create and run Azure Load Testing tests, manage test files and server metrics",
       "detailedDescription": "Provides direct data-plane access to Azure Load Testing for creating tests, uploading JMX/YAML test files, configuring app components and server metrics, and starting test runs. Identify the resource with --load-test / --lt (resolves the endpoint from ARM) or supply the URL directly via --load-test-url.",
@@ -11975,7 +11975,7 @@
       "displayName": "purviewdata",
       "apiVersion": "2023-09-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/purview/data-plane/datamap/stable/2023-09-01/purviewdatamap.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/purview/data-plane/datamap/stable/2023-09-01/purviewdatamap.json"
       ],
       "description": "Search and manage Microsoft Purview data catalog entities, classifications, and glossary terms",
       "detailedDescription": "Provides direct data-plane access to Microsoft Purview's unified data map for querying entities, managing classifications, business metadata, relationships, and glossary terms. Identify the account with --purview / --pv (resolves the catalog endpoint from ARM) or supply the URL directly via --purview-url.",
@@ -12021,7 +12021,7 @@
       "displayName": "deiddata",
       "apiVersion": "2024-11-15",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/healthdataaiservices/data-plane/HealthDataAIServices.DeidServices/stable/2024-11-15/HealthDataAIServices.DeidServices.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/healthdataaiservices/data-plane/HealthDataAIServices.DeidServices/stable/2024-11-15/HealthDataAIServices.DeidServices.json"
       ],
       "description": "De-identify health documents and manage batch de-identification jobs",
       "detailedDescription": "Provides direct data-plane access to Azure Health Data AI Services for real-time text de-identification and batch document de-identification jobs. Identify the service with --deid-service / --deid (resolves the endpoint from ARM) or supply the URL directly via --deid-url.",
@@ -12059,7 +12059,7 @@
       "displayName": "webpubsubdata",
       "apiVersion": "2024-12-01",
       "specFiles": [
-        "/home/mikae/repos/azure-rest-api-specs/specification/webpubsub/data-plane/WebPubSub/stable/2024-12-01/webpubsub.json"
+        "/home/mikael/repos/azure-rest-api-specs/specification/webpubsub/data-plane/WebPubSub/stable/2024-12-01/webpubsub.json"
       ],
       "description": "Send messages and manage connections in Azure Web PubSub hubs",
       "detailedDescription": "Provides direct data-plane access to Azure Web PubSub for sending broadcast messages to hubs, groups, or users; managing connection group membership; and generating client tokens. Identify the service with --web-pubsub / --wps (resolves the endpoint from ARM) or supply the URL directly via --web-pubsub-url.",

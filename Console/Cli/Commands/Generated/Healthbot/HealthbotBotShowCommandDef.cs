@@ -31,7 +31,7 @@ public partial class HealthbotBotShowCommandDef(AuthOptionPack auth) : CommandDe
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", ct);
+            BotName!, ResourceGroup, armClient, "Microsoft.HealthBot/healthBots", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HealthBot/healthBots/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-11-01", null, ct);

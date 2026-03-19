@@ -64,7 +64,7 @@ public partial class PolicyinsightsPolicystateListQueryResultsForResourceGroupCo
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PolicyStatesResource!, ResourceGroup, armClient, "Microsoft.PolicyInsights/policyStates", ct);
+            PolicyStatesResource!, ResourceGroup, armClient, "Microsoft.PolicyInsights/policyStates", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.PolicyInsights/policyStates/{resolvedName}/queryResults";
 
         var allItems = client.GetAllAsync(path, "2024-10-01", "value", "@odata.nextLink", ct);

@@ -273,7 +273,7 @@ public static class OperationCommandEmitter
                                 $"var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync("
                             );
                             w.Line(
-                                $"    {primaryPropName}!, ResourceGroup, armClient, \"{resourceType}\", ct);"
+                                $"    {primaryPropName}!, ResourceGroup, armClient, \"{resourceType}\", cred, log, ct);"
                             );
                         }
 

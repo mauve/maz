@@ -36,7 +36,7 @@ public partial class AzurearcdataSqlmanagedinstanceDeleteCommandDef(AuthOptionPa
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            SqlManagedInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlManagedInstances", ct);
+            SqlManagedInstanceName!, ResourceGroup, armClient, "Microsoft.AzureArcData/sqlManagedInstances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureArcData/sqlManagedInstances/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2026-01-01", null, ct);

@@ -40,7 +40,7 @@ public partial class PostgresqlPrivateendpointconnectionDeleteCommandDef(AuthOpt
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ServerName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/flexibleServers", ct);
+            ServerName!, ResourceGroup, armClient, "Microsoft.DBforPostgreSQL/flexibleServers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.DBforPostgreSQL/flexibleServers/{resolvedName}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2025-08-01", null, ct);

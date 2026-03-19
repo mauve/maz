@@ -36,7 +36,7 @@ public partial class AzurestackhciArcsettingCreateCommandDef(AuthOptionPack auth
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ClusterName!, ResourceGroup, armClient, "Microsoft.AzureStackHCI/clusters", ct);
+            ClusterName!, ResourceGroup, armClient, "Microsoft.AzureStackHCI/clusters", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.AzureStackHCI/clusters/{resolvedName}/arcSettings/{ArcSettingName}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2026-02-01", null, ct);

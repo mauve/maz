@@ -36,7 +36,7 @@ public partial class PrivatednsPrivatezoneDeleteCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PrivateZoneName!, ResourceGroup, armClient, "Microsoft.Network/privateDnsZones", ct);
+            PrivateZoneName!, ResourceGroup, armClient, "Microsoft.Network/privateDnsZones", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Network/privateDnsZones/{resolvedName}";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Delete, path, "2024-06-01", null, ct);

@@ -47,7 +47,7 @@ public partial class DatafactoryActivityrunQueryCommandDef(AuthOptionPack auth) 
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            FactoryName!, ResourceGroup, armClient, "microsoft.DataFactory/factories", ct);
+            FactoryName!, ResourceGroup, armClient, "microsoft.DataFactory/factories", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/microsoft.DataFactory/factories/{resolvedName}/pipelineruns/{RunId}/queryActivityruns";
 
         var body = BodyJson is { } rawJson

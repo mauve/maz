@@ -31,7 +31,7 @@ public partial class ResourceconnectorApplianceUpdateCommandDef(AuthOptionPack a
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceConnector/appliances", ct);
+            ResourceName!, ResourceGroup, armClient, "Microsoft.ResourceConnector/appliances", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.ResourceConnector/appliances/{resolvedName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2022-10-27", null, ct);

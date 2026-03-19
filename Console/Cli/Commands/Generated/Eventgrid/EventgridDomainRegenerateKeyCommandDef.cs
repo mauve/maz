@@ -40,7 +40,7 @@ public partial class EventgridDomainRegenerateKeyCommandDef(AuthOptionPack auth)
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            DomainName!, ResourceGroup, armClient, "Microsoft.EventGrid/domains", ct);
+            DomainName!, ResourceGroup, armClient, "Microsoft.EventGrid/domains", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.EventGrid/domains/{resolvedName}/regenerateKey";
 
         var body = BodyJson is { } rawJson

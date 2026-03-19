@@ -39,7 +39,7 @@ public partial class HybridnetworkNetworkfunctiondefinitionversionGetCommandDef(
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", ct);
+            PublisherName!, ResourceGroup, armClient, "Microsoft.HybridNetwork/publishers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.HybridNetwork/publishers/{resolvedName}/networkFunctionDefinitionGroups/{NetworkFunctionDefinitionGroupName}/networkFunctionDefinitionVersions/{NetworkFunctionDefinitionVersionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-04-15", null, ct);

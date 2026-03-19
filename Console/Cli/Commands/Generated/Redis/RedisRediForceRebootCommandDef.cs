@@ -32,7 +32,7 @@ public partial class RedisRediForceRebootCommandDef(AuthOptionPack auth) : Comma
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            ParamName!, ResourceGroup, armClient, "Microsoft.Cache/redis", ct);
+            ParamName!, ResourceGroup, armClient, "Microsoft.Cache/redis", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.Cache/redis/{resolvedName}/forceReboot";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2024-11-01", null, ct);

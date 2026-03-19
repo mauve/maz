@@ -31,7 +31,7 @@ public partial class StoragemoverConnectionListCommandDef(AuthOptionPack auth) :
         var client = new AzureRestClient(cred, log);
         var armClient = new ArmClient(cred);
         var (resolvedSub, resolvedRg, resolvedName) = await ResourceNameResolver.ResolveAsync(
-            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", ct);
+            StorageMoverName!, ResourceGroup, armClient, "Microsoft.StorageMover/storageMovers", cred, log, ct);
         var path = $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/Microsoft.StorageMover/storageMovers/{resolvedName}/connections";
 
         var allItems = client.GetAllAsync(path, "2025-12-01", "value", "nextLink", ct);
