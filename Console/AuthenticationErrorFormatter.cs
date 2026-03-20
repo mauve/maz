@@ -59,10 +59,7 @@ internal static partial class AuthenticationErrorFormatter
                     "Verify the managed identity is assigned to this resource and has the required roles.",
                 ]
             ),
-            ["BrowserCredential"] = (
-                "Browser",
-                ["Re-authenticate:", "  maz login"]
-            ),
+            ["BrowserCredential"] = ("Browser", ["Re-authenticate:", "  maz login"]),
             ["InteractiveBrowserCredential"] = (
                 "Interactive Browser",
                 ["Re-authenticate:", "  maz login"]
@@ -179,21 +176,20 @@ internal static partial class AuthenticationErrorFormatter
     /// <summary>
     /// Maps CredentialType enum to the hint key strings used in CredentialHints.
     /// </summary>
-    private static readonly Dictionary<CredentialType, string> CredentialTypeToHintKey =
-        new()
-        {
-            [CredentialType.MsalCache] = "MsalCacheCredential",
-            [CredentialType.Cli] = "Azure CLI",
-            [CredentialType.Dev] = "Azure Developer CLI",
-            [CredentialType.PowerShell] = "Azure PowerShell",
-            [CredentialType.Env] = "EnvironmentCredential",
-            [CredentialType.ManagedIdentity] = "ManagedIdentityCredential",
-            [CredentialType.Browser] = "BrowserCredential",
-            [CredentialType.VisualStudio] = "VisualStudioCredential",
-            [CredentialType.SharedTokenCache] = "SharedTokenCacheCredential",
-            [CredentialType.DeviceCode] = "DeviceCodeCredential",
-            [CredentialType.WorkloadIdentity] = "WorkloadIdentityCredential",
-        };
+    private static readonly Dictionary<CredentialType, string> CredentialTypeToHintKey = new()
+    {
+        [CredentialType.MsalCache] = "MsalCacheCredential",
+        [CredentialType.Cli] = "Azure CLI",
+        [CredentialType.Dev] = "Azure Developer CLI",
+        [CredentialType.PowerShell] = "Azure PowerShell",
+        [CredentialType.Env] = "EnvironmentCredential",
+        [CredentialType.ManagedIdentity] = "ManagedIdentityCredential",
+        [CredentialType.Browser] = "BrowserCredential",
+        [CredentialType.VisualStudio] = "VisualStudioCredential",
+        [CredentialType.SharedTokenCache] = "SharedTokenCacheCredential",
+        [CredentialType.DeviceCode] = "DeviceCodeCredential",
+        [CredentialType.WorkloadIdentity] = "WorkloadIdentityCredential",
+    };
 
     private static string? DetectFailedCredential(
         string messages,

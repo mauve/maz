@@ -269,25 +269,40 @@ internal static class CliParser
         }
 
         // Phase 5: Assign positional arguments
-        for (int k = 0; k < positionalArgs.Count && k < arguments.Count; k++)
-            arguments[k].TryParse(positionalArgs[k]);
-
-        // Remaining positional args are unmatched
-        for (int k = arguments.Count; k < positionalArgs.Count; k++)
+        var argIdx = 0;
+        for (int k = 0; k < positionalArgs.Count; k++)
         {
-            // Don't mark command path tokens as unmatched
-            if (
-                !commandPath
-                    .Skip(1)
-                    .Any(c =>
-                        string.Equals(c.Name, positionalArgs[k], StringComparison.OrdinalIgnoreCase)
-                        || c.Aliases.Any(a =>
-                            string.Equals(a, positionalArgs[k], StringComparison.OrdinalIgnoreCase)
-                        )
-                    )
-            )
+            if (argIdx < arguments.Count)
             {
-                result.UnmatchedTokens.Add(positionalArgs[k]);
+                arguments[argIdx].TryParse(positionalArgs[k]);
+                // IsRest arguments keep consuming; others advance to next
+                if (!arguments[argIdx].IsRest)
+                    argIdx++;
+            }
+            else
+            {
+                // Don't mark command path tokens as unmatched
+                if (
+                    !commandPath
+                        .Skip(1)
+                        .Any(c =>
+                            string.Equals(
+                                c.Name,
+                                positionalArgs[k],
+                                StringComparison.OrdinalIgnoreCase
+                            )
+                            || c.Aliases.Any(a =>
+                                string.Equals(
+                                    a,
+                                    positionalArgs[k],
+                                    StringComparison.OrdinalIgnoreCase
+                                )
+                            )
+                        )
+                )
+                {
+                    result.UnmatchedTokens.Add(positionalArgs[k]);
+                }
             }
         }
 

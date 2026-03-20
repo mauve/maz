@@ -59,7 +59,7 @@ internal static class GroupedHelpLayout
         var nameWidth = args.Max(a => a.Name.Length + 2);
         foreach (var arg in args)
         {
-            var label = $"<{arg.Name}>";
+            var label = arg.IsRest ? $"<{arg.Name}...>" : $"<{arg.Name}>";
             var padded = label.PadRight(nameWidth);
             var desc = arg.Description ?? "";
             output.WriteLine(

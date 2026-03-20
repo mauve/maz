@@ -144,6 +144,49 @@ Load Azure resources live or pass a local JSON file:
 
 <!-- demo:jmespath -->
 
+## Blob Copy
+
+`maz copy` transfers blobs between local filesystem and Azure Blob Storage
+with parallel chunked downloads, an interactive progress TUI, and resume support.
+
+    # Download a recording folder
+    maz copy myaccount/mycontainer/recordings/session-1 ./local-data
+
+    # Upload local files
+    maz copy ./data myaccount/mycontainer/backup
+
+    # Multiple sources into one destination (like cp)
+    maz copy acct/c1/folder1 acct/c1/folder2 acct/c2/logs ./all-data
+
+    # Glob filtering
+    maz copy 'myaccount/container/**/*.json' ./json-files --exclude 'temp_*'
+
+    # Tag-based filtering
+    maz copy myaccount/container ./output --tag-filter env=prod
+
+Folder semantics match `cp -r`:
+
+  • `maz copy .../folder dest` → creates `dest/folder/...`
+  • `maz copy .../folder/* dest` → copies contents directly into `dest/`
+
+Options:
+
+  --parallel N       concurrent blob transfers (default 4)
+  --block-size N     chunk size in bytes (default 4 MB)
+  --overwrite-policy skip, overwrite, or newer
+  --include GLOB     include only matching blobs
+  --exclude GLOB     exclude matching blobs
+  --no-journal       disable resume journal
+
+Transfers start as soon as blobs are discovered — no waiting for full enumeration.
+If interrupted, rerun the same command to resume from where it left off.
+
+Downloaded files have blob metadata stored as extended attributes (xattr on
+Linux/macOS, NTFS alternate data streams on Windows) — use `getfattr` or
+`xattr -l` to inspect source URL and content type.
+
+<!-- demo:copy -->
+
 ## Commands
 
 Explore everything maz can do:

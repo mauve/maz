@@ -73,11 +73,12 @@ internal sealed class JmesPathTuiApp
         _running = true;
         while (_running && !ct.IsCancellationRequested)
         {
-            // Detect window resize
+            // Detect window resize — clear screen to remove artifacts from old dimensions
             if (System.Console.WindowWidth != _width || System.Console.WindowHeight != _height)
             {
                 _width = System.Console.WindowWidth;
                 _height = System.Console.WindowHeight;
+                System.Console.Write("\x1b[2J");
                 Redraw();
             }
 

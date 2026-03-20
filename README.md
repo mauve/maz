@@ -89,6 +89,12 @@ Which means you don't need to specify separate arguments, and tab-completion wor
 
 ![JMESPath editor](./docs/jmeseditor-1.png)
 
+## Blob Storage Copy Tool
+
+`maz copy` can upload and download from blob storage accounts, but it can also copy from storage account to storage account, either via direct copy (storage to storage) or by forcing a download to upload. To preserve tags during download and upload the tool uses extended filesystem attributes or extended streams (NTFS).
+
+![Screenshot of maz copy](./docs/copy-1.png)
+
 ### Help flags
 
 | Flag                       | Description                                                     |
@@ -104,7 +110,7 @@ Which means you don't need to specify separate arguments, and tab-completion wor
 
 ### Data-plane vs. control-plane commands
 
-Commands marked with `*` in help output operate against **data-plane endpoints** (e.g. Key Vault secrets API) rather than ARM. These require different authentication scopes and bypass the ARM gateway.
+Commands marked with `⚡` in help output operate against **data-plane endpoints** (e.g. Key Vault secrets API) rather than ARM. These require different authentication scopes and bypass the ARM gateway.
 
 ### Output formats
 
