@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-03-21
+### Fixed
+- Fix formatting issues in copy TUI and command definition
+
 ## [0.7.0] - 2026-03-20
 ### Added
 - `maz copy` command for copying blobs between local filesystem and Azure Blob Storage
