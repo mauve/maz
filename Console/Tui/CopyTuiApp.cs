@@ -45,16 +45,24 @@ internal sealed class CopyTuiApp : IAsyncDisposable
         _states
             .Where(s => s.Status == TransferStatus.Failed && s.Error is not null)
             .Select(s => (s.Item, s.Error!));
-    public IEnumerable<(string Group, int Total, int Completed, int Failed, long Bytes)> GroupStats =>
+    public IEnumerable<(
+        string Group,
+        int Total,
+        int Completed,
+        int Failed,
+        long Bytes
+    )> GroupStats =>
         _states
             .GroupBy(s => s.Item.SourceGroup ?? "")
-            .Select(g => (
-                Group: g.Key,
-                Total: g.Count(),
-                Completed: g.Count(s => s.Status == TransferStatus.Completed),
-                Failed: g.Count(s => s.Status == TransferStatus.Failed),
-                Bytes: g.Where(s => s.Status == TransferStatus.Completed).Sum(s => s.Item.Size)
-            ));
+            .Select(g =>
+                (
+                    Group: g.Key,
+                    Total: g.Count(),
+                    Completed: g.Count(s => s.Status == TransferStatus.Completed),
+                    Failed: g.Count(s => s.Status == TransferStatus.Failed),
+                    Bytes: g.Where(s => s.Status == TransferStatus.Completed).Sum(s => s.Item.Size)
+                )
+            );
 
     public CopyTuiApp(BlockTransferEngine engine)
     {
