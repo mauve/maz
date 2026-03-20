@@ -5,14 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
-## [0.6.1] - 2026-03-20
+## [0.6.2] - 2026-03-20
 ### Changed
-- Enable IL trimming (`partial` mode), single-file compression, and keep R2R composite — published binary drops from 237 MB to 64 MB
 - Running `maz` with no arguments now shows a short about line instead of full help
 - Root command description updated to be user-facing
 
 ### Fixed
 - `maz --version` now prints the version instead of showing help
+
+## [0.6.1] - 2026-03-20
+### Changed
+- Enable IL trimming (`partial` mode), single-file compression, and keep R2R composite — published binary drops from 237 MB to 64 MB
 
 ## [0.6.0] - 2026-03-19
 ### Added
