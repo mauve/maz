@@ -248,12 +248,11 @@ public partial class CopyCommandDef(AuthOptionPack auth, InteractiveOptionPack i
         {
             foreach (var g in tui.GroupStats)
             {
-                var status = g.Failed > 0
-                    ? Rendering.Ansi.Red($"{g.Completed}/{g.Total}")
-                    : g.Completed == g.Total
-                        ? Rendering.Ansi.Green($"{g.Completed}/{g.Total}")
-                        : $"{g.Completed}/{g.Total}";
-                err.WriteLine($"  {status}  {FormatBytes(g.Bytes),10}  {g.Group}");
+                var status =
+                    g.Failed > 0 ? Rendering.Ansi.Red($"{g.Completed}/{g.Total}")
+                    : g.Completed == g.Total ? Rendering.Ansi.Green($"{g.Completed}/{g.Total}")
+                    : $"{g.Completed}/{g.Total}";
+                err.WriteLine($"  {status}  {FormatBytes(g.Bytes), 10}  {g.Group}");
             }
             err.WriteLine();
         }
