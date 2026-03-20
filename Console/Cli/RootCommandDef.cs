@@ -1,21 +1,22 @@
+using System.Reflection;
 using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Group;
 using Console.Cli.Commands.JmesPath;
-using Console.Cli.Parsing;
 using Console.Cli.Shared;
 
 namespace Console.Cli;
 
-/// <summary>Root command for the maz CLI.</summary>
-/// <remarks>
-/// The root command defines the entry point and wires all top-level command groups.
-/// It also initializes shared authentication options used across subcommands.
-/// </remarks>
+/// <summary>A fast, lightweight Azure CLI built for speed.</summary>
 public partial class RootCommandDef : CommandDef
 {
     public override string Name => "maz";
     protected override bool IsRootCommand => true;
+
+    public override string Description =>
+        "A fast, lightweight Azure CLI built for speed.";
+
+    protected override string? Remarks => null;
 
     public readonly AuthOptionPack Auth;
     public readonly DiagnosticOptionPack Diagnostics;
@@ -52,5 +53,20 @@ public partial class RootCommandDef : CommandDef
         Login = new LoginCommandDef();
         Logout = new LogoutCommandDef();
         InitGeneratedCommands(targetService);
+    }
+
+    internal static string GetVersion() =>
+        Assembly
+            .GetEntryAssembly()
+            ?.GetCustomAttribute<AssemblyInformationalVersionAttribute>()
+            ?.InformationalVersion ?? "0.0.0-dev";
+
+    protected override Task<int> ExecuteAsync(CancellationToken cancellationToken)
+    {
+        var version = GetVersion();
+        System.Console.WriteLine($"maz {version} — A fast, lightweight Azure CLI built for speed.");
+        System.Console.WriteLine();
+        System.Console.WriteLine("Run 'maz --help' for usage or 'maz --help-commands' to browse all commands.");
+        return Task.FromResult(0);
     }
 }

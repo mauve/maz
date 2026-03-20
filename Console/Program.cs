@@ -21,6 +21,12 @@ if (args is [var first, ..] && first.StartsWith("[suggest:") && first.EndsWith('
     return 0;
 }
 
+if (args is ["--version"])
+{
+    System.Console.WriteLine(RootCommandDef.GetVersion());
+    return 0;
+}
+
 // Detect if we need the full tree (--help-commands shows all commands).
 bool needsFullTree = args.Any(a =>
     a is "--help-commands" or "--help-commands-flat"
