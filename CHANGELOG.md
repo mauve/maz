@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-03-20
+### Changed
+- Enable IL trimming (`partial` mode), single-file compression, and keep R2R composite — published binary drops from 237 MB to 64 MB
+
 ## [0.6.0] - 2026-03-19
 ### Added
 - `[debug]` and `[debug:N]` source-gen directives that poll for debugger attach with optional delay
