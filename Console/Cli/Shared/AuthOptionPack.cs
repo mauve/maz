@@ -188,12 +188,11 @@ public partial class AuthOptionPack : OptionPack
                         log.Credential("Skipping Browser credential (non-interactive)");
                         break;
                     }
+
                     {
                         var browserCache = new MsalCache(log);
                         var browserOAuth = new OAuth2Client(browserCache, log);
-                        credentials.Add(
-                            new BrowserCredential(browserOAuth, log, defaultTenantId)
-                        );
+                        credentials.Add(new BrowserCredential(browserOAuth, log, defaultTenantId));
                     }
                     break;
                 case CredentialType.VisualStudio:

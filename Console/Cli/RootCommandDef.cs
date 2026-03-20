@@ -1,6 +1,7 @@
 using System.Reflection;
 using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
+using Console.Cli.Commands.Copy;
 using Console.Cli.Commands.Group;
 using Console.Cli.Commands.JmesPath;
 using Console.Cli.Shared;
@@ -13,8 +14,7 @@ public partial class RootCommandDef : CommandDef
     public override string Name => "maz";
     protected override bool IsRootCommand => true;
 
-    public override string Description =>
-        "A fast, lightweight Azure CLI built for speed.";
+    public override string Description => "A fast, lightweight Azure CLI built for speed.";
 
     protected override string? Remarks => null;
 
@@ -31,6 +31,7 @@ public partial class RootCommandDef : CommandDef
     public readonly ConfigureCommandDef Configure;
     public readonly JmesPathCommandDef JmesPath;
     public readonly BootstrapCommandDef Bootstrap;
+    public readonly CopyCommandDef Copy;
     public readonly LoginCommandDef Login;
     public readonly LogoutCommandDef Logout;
 
@@ -48,6 +49,7 @@ public partial class RootCommandDef : CommandDef
         Group = new GroupCommandDef(Auth);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
+        Copy = new CopyCommandDef(Auth, Interactive);
         JmesPath = new JmesPathCommandDef(Auth);
         Bootstrap = new BootstrapCommandDef(Auth, Interactive);
         Login = new LoginCommandDef();
@@ -66,7 +68,9 @@ public partial class RootCommandDef : CommandDef
         var version = GetVersion();
         System.Console.WriteLine($"maz {version} — A fast, lightweight Azure CLI built for speed.");
         System.Console.WriteLine();
-        System.Console.WriteLine("Run 'maz --help' for usage or 'maz --help-commands' to browse all commands.");
+        System.Console.WriteLine(
+            "Run 'maz --help' for usage or 'maz --help-commands' to browse all commands."
+        );
         return Task.FromResult(0);
     }
 }

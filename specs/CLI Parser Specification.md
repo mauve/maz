@@ -108,6 +108,19 @@ Directives must appear before any command or option tokens. They are consumed an
 
 After command resolution and option parsing, remaining non-option tokens are assigned to positional arguments (`CliArgument<T>`) in declaration order. Extra positional tokens beyond declared arguments become unmatched tokens.
 
+#### Rest arguments
+
+A positional argument with `IsRest = true` consumes all remaining positional tokens (like `params` in C#). Each token is fed to the same argument's `TryParse`, accumulating values in the `Values` list. The parser does not advance to the next argument while a rest argument is active.
+
+| Declaration | Input | Result |
+|---|---|---|
+| `Paths (IsRest)` | `src1 src2 dst` | `Paths.Values = ["src1", "src2", "dst"]` |
+| `Name`, `Paths (IsRest)` | `foo a b c` | `Name.Value = "foo"`, `Paths.Values = ["a", "b", "c"]` |
+
+Rest arguments appear as `<name...>` in help output. Only one rest argument should be declared per command (the last one), as it will consume all remaining tokens.
+
+Example: the `copy` command uses a single rest argument to accept `maz copy src [src...] dest`, splitting sources and destination in `ExecuteAsync`.
+
 ### Recursive options
 
 Options marked `Recursive = true` on a parent command are available to all child commands. The parser collects options from the leaf command first, then walks up the ancestor chain adding recursive options (skipping duplicates by name).
@@ -139,7 +152,7 @@ The parser is a single static method `CliParser.Parse(string[] args, CommandDef 
 3. **Build option map** — collect all options from the leaf (via `EnumerateAllOptions()`) plus recursive options from ancestors; build a name→option dictionary
 3b. **Initialize collections** — call `ApplyDefault()` on multi-value options so `TryParseMany` can accumulate into them
 4. **Parse options and collect positionals** — iterate remaining tokens, match options by name/alias, consume values, handle `--no-X`, `--foo=bar`, bools, multi-value, optional-value, and stacked short aliases
-5. **Assign positional arguments** — map remaining non-option tokens to `CliArgument<T>` in order
+5. **Assign positional arguments** — map remaining non-option tokens to `CliArgument<T>` in order; rest arguments (`IsRest = true`) consume all remaining tokens via repeated `TryParse` calls
 6. **Apply defaults** — call `ApplyDefault()` on all options not yet provided
 7. **Check required** — error for any `Required = true` option where `WasProvided == false`
 

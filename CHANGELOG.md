@@ -5,6 +5,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-03-20
+### Added
+- `maz copy` command for copying blobs between local filesystem and Azure Blob Storage
+  - Parallel chunked transfers with `--parallel` and `--block-size` controls
+  - Interactive TUI with per-blob progress bars (▅ filled / ▂ track), speed, and ETA
+  - Multi-source support: `maz copy src1 src2 ... dest` (like `cp`)
+  - Streaming enumeration — transfers start as soon as blobs are discovered
+  - Glob filtering with `--include`, `--exclude`, and inline patterns (`account/container/**/*.json`)
+  - Tag-based filtering with `--tag-filter key=value` and `--tag-query`
+  - Crash-safe resume journal keyed by source path (survives restarts and reordering)
+  - Server-side and client-side blob-to-blob copy
+  - Folder semantics matching `cp -r`: `copy folder dest` recreates the folder; `copy folder/* dest` copies contents only
+  - Overwrite policies: skip (default), overwrite, newer
+  - Stores blob metadata (URL, content-type) as xattr on Linux/macOS and NTFS alternate data streams on Windows
+  - Non-interactive NDJSON output for piping and CI
+  - Multi-source TUI groups items under source headers with per-group progress
+  - Post-TUI summary: per-source stats, error details, and totals
+- `IsRest` flag on `CliArgument<T>` for variadic positional arguments (like `params`)
+
+### Changed
+- `CopyPath.Parse` now treats bare names without `/` as local paths (e.g. `maz copy src smurf` works)
+- All TUIs (Copy, JMESPath, Kusto) clear screen on window resize to prevent artifacts
+- All Blob REST API errors now include the request URL in the exception message
+
 ## [0.6.2] - 2026-03-20
 ### Changed
 - Running `maz` with no arguments now shows a short about line instead of full help

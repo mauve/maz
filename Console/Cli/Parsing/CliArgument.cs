@@ -12,8 +12,24 @@ public class CliArgument<T>
     public bool WasProvided { get; set; }
     public bool Hidden { get; init; }
 
+    /// <summary>
+    /// When true, this argument consumes all remaining positional tokens.
+    /// Values are accumulated in <see cref="Values"/>.
+    /// </summary>
+    public bool IsRest { get; init; }
+
+    /// <summary>Accumulated values when <see cref="IsRest"/> is true.</summary>
+    public List<string> Values { get; } = [];
+
     public bool TryParse(string raw)
     {
+        if (IsRest)
+        {
+            Values.Add(raw);
+            WasProvided = true;
+            return true;
+        }
+
         var targetType = typeof(T);
         var underlyingType = Nullable.GetUnderlyingType(targetType) ?? targetType;
 

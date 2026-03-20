@@ -191,7 +191,11 @@ public static class ResourceNameResolver
         }
 
         var argClientResolved =
-            argClient ?? new ArmArgClient(credential ?? new DefaultAzureCredential(), log ?? DiagnosticLog.Null);
+            argClient
+            ?? new ArmArgClient(
+                credential ?? new DefaultAzureCredential(),
+                log ?? DiagnosticLog.Null
+            );
         var config = MazConfig.Current;
 
         // CASE 2: rg known, sub unknown → find the subscription
