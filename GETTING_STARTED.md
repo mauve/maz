@@ -187,6 +187,28 @@ Linux/macOS, NTFS alternate data streams on Windows) — use `getfattr` or
 
 <!-- demo:copy -->
 
+## Storage Browser & Query
+
+`maz storage browse` opens an interactive TUI for navigating blobs:
+
+    maz storage browse myaccount
+    maz storage browse myaccount/mycontainer
+    maz storage browse myaccount/mycontainer/prefix --include '**/*.json'
+
+  • Containers and virtual folders expand/collapse like a file explorer
+  • Space to select blobs, Ctrl+A to select all, `/` for glob filter, `t` for tag query
+  • Enter on selected blobs opens an action menu: download, delete, export, set tag, info
+  • Export writes NDJSON with full blob metadata (URL, size, content-type, dates)
+
+`maz storage query` is the non-interactive counterpart — it streams the same
+NDJSON format to stdout for scripting and pipelines:
+
+    maz storage query myaccount/mycontainer --include '*.parquet' | jq -r .blob
+    maz storage query myaccount/mycontainer --tag-query '"env" = '\''prod'\''' > prod-blobs.jsonl
+    maz storage query myaccount/mycontainer --exclude 'tmp/*' | wc -l
+
+Both commands support `--sas-token` and `--account-key` for non-AAD auth.
+
 ## Commands
 
 Explore everything maz can do:

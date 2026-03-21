@@ -46,37 +46,7 @@ public sealed class BlobRestClient
             var blobs = xml.Descendants("Blob");
 
             foreach (var blob in blobs)
-            {
-                var name = blob.Element("Name")?.Value ?? "";
-                var props = blob.Element("Properties");
-                var size = long.TryParse(props?.Element("Content-Length")?.Value, out var s)
-                    ? s
-                    : 0;
-                var lastModified = DateTimeOffset.TryParse(
-                    props?.Element("Last-Modified")?.Value,
-                    out var lm
-                )
-                    ? lm
-                    : (DateTimeOffset?)null;
-                var contentType = props?.Element("Content-Type")?.Value;
-                var contentMD5 = props?.Element("Content-MD5")?.Value;
-
-                var tagsElement = blob.Element("Tags")?.Element("TagSet");
-                Dictionary<string, string>? tags = null;
-                if (tagsElement is not null)
-                {
-                    tags = new Dictionary<string, string>();
-                    foreach (var tag in tagsElement.Elements("Tag"))
-                    {
-                        var key = tag.Element("Key")?.Value;
-                        var value = tag.Element("Value")?.Value;
-                        if (key is not null)
-                            tags[key] = value ?? "";
-                    }
-                }
-
-                yield return new BlobItem(name, size, lastModified, contentType, tags, contentMD5);
-            }
+                yield return ParseBlobItem(blob);
 
             marker = xml.Descendants("NextMarker").FirstOrDefault()?.Value;
             if (string.IsNullOrEmpty(marker))
@@ -320,7 +290,95 @@ public sealed class BlobRestClient
         } while (marker is not null);
     }
 
-    /// <summary>Get the index tags for a single blob.</summary>
+    /// <summary>List containers in a storage account.</summary>
+    public async IAsyncEnumerable<ContainerItem> ListContainersAsync(
+        string account,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct
+    )
+    {
+        string? marker = null;
+        do
+        {
+            var url = $"https://{account}.blob.core.windows.net/?comp=list&maxresults=5000";
+            if (marker is not null)
+                url += $"&marker={Uri.EscapeDataString(marker)}";
+
+            var response = await SendAsync(HttpMethod.Get, url, ct);
+            var xml = XDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+
+            foreach (var container in xml.Descendants("Container"))
+            {
+                var name = container.Element("Name")?.Value ?? "";
+                var props = container.Element("Properties");
+                var lastModified = DateTimeOffset.TryParse(
+                    props?.Element("Last-Modified")?.Value,
+                    out var lm
+                )
+                    ? lm
+                    : (DateTimeOffset?)null;
+                yield return new ContainerItem(name, lastModified);
+            }
+
+            marker = xml.Descendants("NextMarker").FirstOrDefault()?.Value;
+            if (string.IsNullOrEmpty(marker))
+                marker = null;
+        } while (marker is not null);
+    }
+
+    /// <summary>List blobs and virtual folders using delimiter-based hierarchy.</summary>
+    public async IAsyncEnumerable<BlobHierarchyItem> ListBlobsByHierarchyAsync(
+        string account,
+        string container,
+        string? prefix,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct
+    )
+    {
+        string? marker = null;
+        do
+        {
+            var url =
+                $"https://{account}.blob.core.windows.net/{container}?restype=container&comp=list&delimiter=/&maxresults=5000";
+            if (!string.IsNullOrEmpty(prefix))
+                url += $"&prefix={Uri.EscapeDataString(prefix)}";
+            if (marker is not null)
+                url += $"&marker={Uri.EscapeDataString(marker)}";
+
+            var response = await SendAsync(HttpMethod.Get, url, ct);
+            var xml = XDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+
+            // Virtual folders (BlobPrefix elements)
+            foreach (var bp in xml.Descendants("BlobPrefix"))
+            {
+                var name = bp.Element("Name")?.Value ?? "";
+                yield return new BlobHierarchyItem(name, null);
+            }
+
+            // Actual blobs
+            foreach (var blob in xml.Descendants("Blob"))
+            {
+                var item = ParseBlobItem(blob);
+                yield return new BlobHierarchyItem(item.Name, item);
+            }
+
+            marker = xml.Descendants("NextMarker").FirstOrDefault()?.Value;
+            if (string.IsNullOrEmpty(marker))
+                marker = null;
+        } while (marker is not null);
+    }
+
+    /// <summary>Delete a blob.</summary>
+    public async Task DeleteBlobAsync(
+        string account,
+        string container,
+        string blob,
+        CancellationToken ct
+    )
+    {
+        var url = $"https://{account}.blob.core.windows.net/{container}/{blob}";
+        await SendAsync(HttpMethod.Delete, url, ct);
+    }
+
+    /// <summary>Get blob tags as key-value pairs.</summary>
     public async Task<Dictionary<string, string>> GetBlobTagsAsync(
         string account,
         string container,
@@ -342,6 +400,49 @@ public sealed class BlobRestClient
         }
 
         return tags;
+    }
+
+    /// <summary>Set blob tags (replaces all existing tags).</summary>
+    public async Task SetBlobTagsAsync(
+        string account,
+        string container,
+        string blob,
+        Dictionary<string, string> tags,
+        CancellationToken ct
+    )
+    {
+        var url = $"https://{account}.blob.core.windows.net/{container}/{blob}?comp=tags";
+
+        var tagSet = new XElement(
+            "Tags",
+            new XElement(
+                "TagSet",
+                tags.Select(kv => new XElement(
+                    "Tag",
+                    new XElement("Key", kv.Key),
+                    new XElement("Value", kv.Value)
+                ))
+            )
+        );
+
+        var request = new HttpRequestMessage(HttpMethod.Put, url);
+        request.Content = new StringContent(
+            tagSet.ToString(),
+            Encoding.UTF8,
+            "application/xml"
+        );
+        request.Headers.Add("x-ms-version", "2024-11-04");
+        await _auth.ApplyAsync(request, ct);
+
+        _log.HttpRequest(HttpMethod.Put, url, request);
+        var sw = Stopwatch.StartNew();
+
+        var response = await Http.SendAsync(request, ct);
+
+        sw.Stop();
+        _log.HttpResponse(response, sw.ElapsedMilliseconds);
+
+        EnsureSuccess(response, url);
     }
 
     /// <summary>Download a full blob as a stream.</summary>
@@ -367,6 +468,37 @@ public sealed class BlobRestClient
 
         EnsureSuccess(response, url);
         return await response.Content.ReadAsStreamAsync(ct);
+    }
+
+    private static BlobItem ParseBlobItem(XElement blob)
+    {
+        var name = blob.Element("Name")?.Value ?? "";
+        var props = blob.Element("Properties");
+        var size = long.TryParse(props?.Element("Content-Length")?.Value, out var s) ? s : 0;
+        var lastModified = DateTimeOffset.TryParse(props?.Element("Last-Modified")?.Value, out var lm)
+            ? lm
+            : (DateTimeOffset?)null;
+        var contentType = props?.Element("Content-Type")?.Value;
+        var contentMD5 = props?.Element("Content-MD5")?.Value;
+        var creationTime = DateTimeOffset.TryParse(props?.Element("Creation-Time")?.Value, out var ct2)
+            ? ct2
+            : (DateTimeOffset?)null;
+
+        var tagsElement = blob.Element("Tags")?.Element("TagSet");
+        Dictionary<string, string>? tags = null;
+        if (tagsElement is not null)
+        {
+            tags = new Dictionary<string, string>();
+            foreach (var tag in tagsElement.Elements("Tag"))
+            {
+                var key = tag.Element("Key")?.Value;
+                var value = tag.Element("Value")?.Value;
+                if (key is not null)
+                    tags[key] = value ?? "";
+            }
+        }
+
+        return new BlobItem(name, size, lastModified, contentType, tags, contentMD5, creationTime);
     }
 
     private async Task<HttpResponseMessage> SendAsync(
@@ -451,7 +583,8 @@ public sealed record BlobItem(
     DateTimeOffset? LastModified,
     string? ContentType,
     Dictionary<string, string>? Tags = null,
-    string? ContentMD5 = null
+    string? ContentMD5 = null,
+    DateTimeOffset? CreationTime = null
 );
 
 /// <summary>Blob properties from a HEAD request.</summary>
@@ -471,3 +604,13 @@ public sealed record BlobProperties(
 
 /// <summary>A blob found by tag query.</summary>
 public sealed record BlobTagItem(string Name);
+
+/// <summary>A container in a storage account.</summary>
+public sealed record ContainerItem(string Name, DateTimeOffset? LastModified);
+
+/// <summary>An item from hierarchy listing: either a virtual folder prefix or a blob.</summary>
+public sealed record BlobHierarchyItem(string Name, BlobItem? Blob)
+{
+    /// <summary>True when this item is a virtual folder (prefix), not an actual blob.</summary>
+    public bool IsPrefix => Blob is null;
+}

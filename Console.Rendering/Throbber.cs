@@ -2,7 +2,6 @@ namespace Console.Rendering;
 
 internal sealed class Throbber : IDisposable
 {
-    private static readonly string[] Frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
 
     private readonly Timer? _timer;
     private readonly string _message;
@@ -26,7 +25,7 @@ internal sealed class Throbber : IDisposable
     {
         if (_disposed)
             return;
-        var frame = Frames[_frame % Frames.Length];
+        var frame = Ansi.ThrobberFrames[_frame % Ansi.ThrobberFrames.Length];
         _frame++;
         System.Console.Error.Write($"\r{frame} {_message}");
     }

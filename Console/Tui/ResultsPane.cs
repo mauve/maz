@@ -40,20 +40,6 @@ internal sealed class ResultsPane
 
     public bool IsContextMenuVisible => _contextMenuVisible;
 
-    private static readonly string[] SpinnerFrames =
-    [
-        "⠋",
-        "⠙",
-        "⠹",
-        "⠸",
-        "⠼",
-        "⠴",
-        "⠦",
-        "⠧",
-        "⠇",
-        "⠏",
-    ];
-
     public void SetResults(
         IReadOnlyList<string> columns,
         IReadOnlyList<string> columnTypes,
@@ -298,7 +284,7 @@ internal sealed class ResultsPane
             return;
 
         // ── Title ──
-        var spinner = _isLoading ? SpinnerFrames[_spinnerFrame % SpinnerFrames.Length] + " " : "  ";
+        var spinner = _isLoading ? Ansi.ThrobberFrames[_spinnerFrame % Ansi.ThrobberFrames.Length] + " " : "  ";
         var wsInfo = _workspaceName.Length > 0 ? $"[{_workspaceName}]  " : "";
         var rowCount =
             _isLoading ? "running…"

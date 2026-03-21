@@ -35,6 +35,26 @@ public static partial class Ansi
     public static string Color(string text, string ansiCode) =>
         Enabled ? $"{ansiCode}{text}\x1b[0m" : text;
 
+    // ── Brand styling ───────────────────────────────────────────────────
+
+    /// <summary>Maz brand color: magenta background with white text.</summary>
+    public const string BrandBarCode = "\x1b[97;45m";
+
+    /// <summary>Render a full-width status bar in the maz brand color.</summary>
+    public static string BrandBar(string text, int width)
+    {
+        if (!Enabled)
+            return text.Length >= width ? text[..width] : text.PadRight(width);
+        var padded = text.Length >= width ? text[..width] : text.PadRight(width);
+        return $"{BrandBarCode}{padded}\x1b[0m";
+    }
+
+    // ── Throbber / spinner ──────────────────────────────────────────────
+
+    /// <summary>Braille spinner animation frames (10 frames, ~80ms per tick).</summary>
+    public static readonly string[] ThrobberFrames =
+        ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
     public static string StyleOptionDescription(string text)
     {
         if (!Enabled)
