@@ -20,20 +20,6 @@ internal sealed class EditorPane
     private bool _autocompleteLoading;
     private int _autocompleteSpinnerFrame;
 
-    private static readonly string[] SpinnerFrames =
-    [
-        "⠋",
-        "⠙",
-        "⠹",
-        "⠸",
-        "⠼",
-        "⠴",
-        "⠦",
-        "⠧",
-        "⠇",
-        "⠏",
-    ];
-
     public bool IsAutocompleteVisible => _autocompleteVisible;
 
     public EditorPane(
@@ -487,7 +473,7 @@ internal sealed class EditorPane
         if (_autocompleteLoading)
         {
             MoveTo(cursorScreenRow + 1, popupLeft);
-            var spinner = SpinnerFrames[_autocompleteSpinnerFrame % SpinnerFrames.Length];
+            var spinner = Ansi.ThrobberFrames[_autocompleteSpinnerFrame % Ansi.ThrobberFrames.Length];
             var text = (" " + spinner + " loading…").PadRight(PopupWidth);
             if (text.Length > PopupWidth)
                 text = text[..PopupWidth];

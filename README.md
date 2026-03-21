@@ -124,6 +124,12 @@ Use `--verify` to re-read each downloaded file and compare its MD5 hash against
 the blob's Content-MD5 header. Blobs without Content-MD5 are skipped with a
 warning to stderr.
 
+## Storage Browser
+
+`maz storage browse` shows an interactive TUI for browsing storage accounts.
+
+![Screenshot of maz storage browse](./docs/storage-browse-1.png)
+
 ### Help flags
 
 | Flag                       | Description                                                     |

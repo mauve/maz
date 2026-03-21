@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- `maz storage browse` — interactive TUI for browsing Azure Blob Storage
+  - Navigate containers and blobs as a virtual folder tree with lazy loading
+  - Expand/collapse virtual folders, containers shown as top-level when browsing by account
+  - Select individual blobs (Space), recursive folder select, Ctrl+A select all
+  - Glob filter (`/` key or `--include`): client-side pattern matching with live scanned/matched counters
+  - Tag query filter (`t` key or `--tag-query`): server-side blob tag queries with syntax highlighting
+  - Action menu (Enter): download, delete (with confirmation), export NDJSON, set tag, show properties
+  - Properties pane: closeable bottom panel showing blob metadata, URL, and tags
+  - Export produces NDJSON with account, container, blob, url, size, contentType, contentMd5, createdOn, lastModified
+- `maz storage query` (alias: `maz storage ls`) — non-interactive blob listing to stdout
+  - Streams NDJSON in the same format as the browse export action
+  - Supports `--include`, `--exclude` glob filters and `--tag-query`
+  - Works with account-only target (iterates all containers) or account/container/prefix
+  - Pipeable: `maz storage query acct/container --include '*.json' | jq -r .blob`
+
+### Changed
+- Status bars in all TUI apps (KQL explorer, JMESPath editor, copy, browse) now use maz brand color (magenta)
+- Consolidated throbber/spinner frames into shared `Ansi.ThrobberFrames` constant, removing 4 duplicate definitions
 
 ## [0.8.0] - 2026-03-21
 ### Added

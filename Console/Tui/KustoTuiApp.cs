@@ -766,7 +766,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
         else
             bar =
                 "  F5 Run query block  │  F6 Format  │  Tab Complete  │  F2 Results  │  F3 Schema  │  F7/F8 History  │  Esc Exit  ";
-        System.Console.Write(Ansi.Color(bar.PadRight(_width), "\x1b[7m"));
+        System.Console.Write(Ansi.BrandBar(bar, _width));
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -535,12 +535,7 @@ internal sealed class CopyTuiApp : IAsyncDisposable
         var statusText =
             $"  \u2191\u2193 Select \u2502 PgUp/Dn Scroll \u2502 P Pause \u2502 C Cancel \u2502 Esc Exit \u2502 {countLabel} \u2502 {FormatSpeed(_aggregateSpeed)}";
 
-        if (statusText.Length > _width)
-            statusText = statusText[.._width];
-        else
-            statusText = statusText.PadRight(_width);
-
-        buf.Append(Ansi.Color(statusText, "\x1b[7m"));
+        buf.Append(Ansi.BrandBar(statusText, _width));
     }
 
     private static string FormatSpeed(double bytesPerSec)

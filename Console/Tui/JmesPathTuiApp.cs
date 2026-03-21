@@ -257,6 +257,6 @@ internal sealed class JmesPathTuiApp
         System.Console.Write($"\x1b[{row + 1};1H");
         var bar =
             "  Tab: complete  │  Enter: run  │  Ctrl+Enter/F5: accept  │  Esc: exit  │  Ctrl+E/D: scroll input  │  Ctrl+R/F: scroll output  ";
-        System.Console.Write(Ansi.Color(bar.PadRight(_width), "\x1b[7m"));
+        System.Console.Write(Ansi.BrandBar(bar, _width));
     }
 }
