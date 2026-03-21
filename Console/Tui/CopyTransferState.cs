@@ -28,7 +28,10 @@ internal sealed class CopyTransferState
     {
         get
         {
-            if (BytesPerSecond <= 0 || Status != TransferStatus.InProgress)
+            if (
+                BytesPerSecond <= 0
+                || Status is not (TransferStatus.InProgress or TransferStatus.Verifying)
+            )
                 return null;
             var remaining = Item.Size - BytesTransferred;
             return TimeSpan.FromSeconds(remaining / BytesPerSecond);
@@ -42,7 +45,10 @@ internal sealed class CopyTransferState
 
     public void UpdateProgress(long bytesTransferred, TransferStatus status, string? error)
     {
-        if (status == TransferStatus.InProgress && !_stopwatch.IsRunning)
+        if (
+            status is TransferStatus.InProgress or TransferStatus.Verifying
+            && !_stopwatch.IsRunning
+        )
             _stopwatch.Start();
 
         BytesTransferred = bytesTransferred;

@@ -5,6 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-03-21
+### Added
+- `maz copy` now downloads and stores blob index tags as file attributes (`maz.blob.tag.{key}`)
+- `--save-properties` flag to store extended blob properties (ETag, headers, tier) as file attributes
+- `--verify` flag to verify downloaded files against the blob's Content-MD5 hash
+  - Re-reads each file after download and compares the computed MD5 to the blob's Content-MD5
+  - Blobs without Content-MD5 are skipped with a warning to stderr
+  - TUI shows a cyan progress bar during the verification pass
+- `GetBlobTagsAsync` REST API method for fetching blob index tags
+- Documentation of the xattr/ADS attribute scheme in README and `--help`
+
+### Changed
+- `ListBlobsAsync` now requests `include=tags` to fetch blob tags inline (zero extra API calls)
+- `BlobProperties` record expanded with Content-MD5, ETag, Cache-Control, Content-Disposition, Content-Encoding, Content-Language, blob type, and access tier
+
 ## [0.7.2] - 2026-03-21
 ### Fixed
 - Add missing `<remarks>` XML doc on `RootCommandDef` that broke CI documentation coverage test

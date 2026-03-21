@@ -20,6 +20,7 @@ public sealed class TransferPlan
     private readonly string? _tagQuery;
     private readonly DiagnosticLog _log;
     private readonly string? _sourceGroup;
+    private readonly bool _saveProperties;
     private string? _sourceFolderName;
 
     public TransferPlan(
@@ -31,7 +32,8 @@ public sealed class TransferPlan
         string? excludePattern,
         string? tagQuery,
         DiagnosticLog log,
-        string? sourceGroup = null
+        string? sourceGroup = null,
+        bool saveProperties = false
     )
     {
         _client = client;
@@ -39,6 +41,7 @@ public sealed class TransferPlan
         _dest = dest;
         _overwritePolicy = overwritePolicy;
         _sourceGroup = sourceGroup;
+        _saveProperties = saveProperties;
         _includeGlob = includePattern is not null ? new GlobMatcher(includePattern) : null;
         _excludeGlob = excludePattern is not null ? new GlobMatcher(excludePattern) : null;
         _inlineGlob = source.GlobPattern is not null ? new GlobMatcher(source.GlobPattern) : null;
@@ -231,6 +234,17 @@ public sealed class TransferPlan
                 }
             }
 
+            BlobProperties? extendedProps = null;
+            if (_saveProperties)
+            {
+                extendedProps = await _client.GetBlobPropertiesAsync(
+                    _source.AccountName!,
+                    _source.ContainerName!,
+                    blob.Name,
+                    ct
+                );
+            }
+
             emit(
                 new TransferItem(
                     blob.Name,
@@ -241,7 +255,10 @@ public sealed class TransferPlan
                     _source.AccountName,
                     _source.ContainerName,
                     blob.ContentType,
-                    _sourceGroup
+                    _sourceGroup,
+                    blob.Tags,
+                    blob.ContentMD5,
+                    extendedProps
                 )
             );
         }
@@ -325,11 +342,19 @@ public sealed class TransferPlan
                 tagItem.Name,
                 ct
             );
+            var tags = await _client.GetBlobTagsAsync(
+                _source.AccountName!,
+                _source.ContainerName!,
+                tagItem.Name,
+                ct
+            );
             yield return new BlobItem(
                 tagItem.Name,
                 props.Size,
                 props.LastModified,
-                props.ContentType
+                props.ContentType,
+                tags,
+                props.ContentMD5
             );
         }
     }
