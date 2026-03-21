@@ -9,6 +9,7 @@ using Console.Cli.Shared;
 namespace Console.Cli;
 
 /// <summary>A fast, lightweight Azure CLI built for speed.</summary>
+/// <remarks>Run 'maz --help' for usage or 'maz --help-commands' to browse all commands.</remarks>
 public partial class RootCommandDef : CommandDef
 {
     public override string Name => "maz";
