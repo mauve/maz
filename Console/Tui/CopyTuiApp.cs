@@ -472,6 +472,7 @@ internal sealed class CopyTuiApp : IAsyncDisposable
             TransferStatus.Paused => ("\x1b[2m", "\x1b[90m"), // dim / dark gray
             TransferStatus.Failed => ("\x1b[31m", "\x1b[90m"), // red / dark gray
             TransferStatus.Cancelled => ("\x1b[2m", "\x1b[90m"), // dim / dark gray
+            TransferStatus.Verifying => ("\x1b[36m", "\x1b[90m"), // cyan / dark gray
             _ => ("", "\x1b[90m"),
         };
 

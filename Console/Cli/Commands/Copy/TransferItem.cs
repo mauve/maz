@@ -18,6 +18,7 @@ public enum TransferStatus
     Completed,
     Failed,
     Cancelled,
+    Verifying,
 }
 
 /// <summary>A single item to transfer.</summary>
@@ -30,7 +31,10 @@ public sealed record TransferItem(
     string? SourceAccountName = null,
     string? SourceContainerName = null,
     string? ContentType = null,
-    string? SourceGroup = null
+    string? SourceGroup = null,
+    Dictionary<string, string>? Tags = null,
+    string? ContentMD5 = null,
+    Http.BlobProperties? ExtendedProperties = null
 );
 
 /// <summary>Progress event emitted by the transfer engine.</summary>

@@ -35,7 +35,7 @@ public sealed class BlobRestClient
         do
         {
             var url =
-                $"https://{account}.blob.core.windows.net/{container}?restype=container&comp=list&maxresults=5000";
+                $"https://{account}.blob.core.windows.net/{container}?restype=container&comp=list&maxresults=5000&include=tags";
             if (!string.IsNullOrEmpty(prefix))
                 url += $"&prefix={Uri.EscapeDataString(prefix)}";
             if (marker is not null)
@@ -59,8 +59,23 @@ public sealed class BlobRestClient
                     ? lm
                     : (DateTimeOffset?)null;
                 var contentType = props?.Element("Content-Type")?.Value;
+                var contentMD5 = props?.Element("Content-MD5")?.Value;
 
-                yield return new BlobItem(name, size, lastModified, contentType);
+                var tagsElement = blob.Element("Tags")?.Element("TagSet");
+                Dictionary<string, string>? tags = null;
+                if (tagsElement is not null)
+                {
+                    tags = new Dictionary<string, string>();
+                    foreach (var tag in tagsElement.Elements("Tag"))
+                    {
+                        var key = tag.Element("Key")?.Value;
+                        var value = tag.Element("Value")?.Value;
+                        if (key is not null)
+                            tags[key] = value ?? "";
+                    }
+                }
+
+                yield return new BlobItem(name, size, lastModified, contentType, tags, contentMD5);
             }
 
             marker = xml.Descendants("NextMarker").FirstOrDefault()?.Value;
@@ -108,11 +123,7 @@ public sealed class BlobRestClient
         var url = $"https://{account}.blob.core.windows.net/{container}/{blob}";
         var response = await SendAsync(HttpMethod.Head, url, ct);
 
-        var size = response.Content.Headers.ContentLength ?? 0;
-        var lastModified = response.Content.Headers.LastModified;
-        var contentType = response.Content.Headers.ContentType?.ToString();
-
-        return new BlobProperties(size, lastModified, contentType);
+        return ParseBlobProperties(response);
     }
 
     /// <summary>Check if a blob exists. Returns null if not found.</summary>
@@ -140,11 +151,7 @@ public sealed class BlobRestClient
             return null;
         EnsureSuccess(response, url);
 
-        var size = response.Content.Headers.ContentLength ?? 0;
-        var lastModified = response.Content.Headers.LastModified;
-        var contentType = response.Content.Headers.ContentType?.ToString();
-
-        return new BlobProperties(size, lastModified, contentType);
+        return ParseBlobProperties(response);
     }
 
     /// <summary>Upload a block for a block blob.</summary>
@@ -313,6 +320,30 @@ public sealed class BlobRestClient
         } while (marker is not null);
     }
 
+    /// <summary>Get the index tags for a single blob.</summary>
+    public async Task<Dictionary<string, string>> GetBlobTagsAsync(
+        string account,
+        string container,
+        string blob,
+        CancellationToken ct
+    )
+    {
+        var url = $"https://{account}.blob.core.windows.net/{container}/{blob}?comp=tags";
+        var response = await SendAsync(HttpMethod.Get, url, ct);
+        var xml = XDocument.Parse(await response.Content.ReadAsStringAsync(ct));
+
+        var tags = new Dictionary<string, string>();
+        foreach (var tag in xml.Descendants("Tag"))
+        {
+            var key = tag.Element("Key")?.Value;
+            var value = tag.Element("Value")?.Value;
+            if (key is not null)
+                tags[key] = value ?? "";
+        }
+
+        return tags;
+    }
+
     /// <summary>Download a full blob as a stream.</summary>
     public async Task<Stream> GetBlobAsync(
         string account,
@@ -360,6 +391,40 @@ public sealed class BlobRestClient
         return response;
     }
 
+    private static string? GetHeader(HttpResponseMessage response, string name) =>
+        response.Headers.TryGetValues(name, out var vals) ? vals.FirstOrDefault() : null;
+
+    private static BlobProperties ParseBlobProperties(HttpResponseMessage response)
+    {
+        var size = response.Content.Headers.ContentLength ?? 0;
+        var lastModified = response.Content.Headers.LastModified;
+        var contentType = response.Content.Headers.ContentType?.ToString();
+        var contentMD5 = response.Content.Headers.ContentMD5 is { } md5Bytes
+            ? Convert.ToBase64String(md5Bytes)
+            : null;
+        var etag = response.Headers.ETag?.Tag;
+        var cacheControl = response.Headers.CacheControl?.ToString();
+        var contentDisposition = response.Content.Headers.ContentDisposition?.ToString();
+        var contentEncoding = response.Content.Headers.ContentEncoding.FirstOrDefault();
+        var contentLanguage = response.Content.Headers.ContentLanguage.FirstOrDefault();
+        var blobType = GetHeader(response, "x-ms-blob-type");
+        var accessTier = GetHeader(response, "x-ms-access-tier");
+
+        return new BlobProperties(
+            size,
+            lastModified,
+            contentType,
+            contentMD5,
+            etag,
+            cacheControl,
+            contentDisposition,
+            contentEncoding,
+            contentLanguage,
+            blobType,
+            accessTier
+        );
+    }
+
     /// <summary>
     /// Like EnsureSuccessStatusCode but includes the URL in the exception
     /// so error messages identify which resource failed.
@@ -384,11 +449,25 @@ public sealed record BlobItem(
     string Name,
     long Size,
     DateTimeOffset? LastModified,
-    string? ContentType
+    string? ContentType,
+    Dictionary<string, string>? Tags = null,
+    string? ContentMD5 = null
 );
 
 /// <summary>Blob properties from a HEAD request.</summary>
-public sealed record BlobProperties(long Size, DateTimeOffset? LastModified, string? ContentType);
+public sealed record BlobProperties(
+    long Size,
+    DateTimeOffset? LastModified,
+    string? ContentType,
+    string? ContentMD5 = null,
+    string? ETag = null,
+    string? CacheControl = null,
+    string? ContentDisposition = null,
+    string? ContentEncoding = null,
+    string? ContentLanguage = null,
+    string? BlobType = null,
+    string? AccessTier = null
+);
 
 /// <summary>A blob found by tag query.</summary>
 public sealed record BlobTagItem(string Name);

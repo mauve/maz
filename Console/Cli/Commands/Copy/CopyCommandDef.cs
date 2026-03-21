@@ -23,6 +23,20 @@ namespace Console.Cli.Commands.Copy;
 ///   maz copy 'myaccount/c1/**/*.json' ./local --exclude 'temp_*'
 ///   maz copy myaccount/c1 ./local --tag-filter env=prod
 ///   maz copy acct/c1/folder1 acct/c1/folder2 ./local    (multiple sources)
+///
+/// File attributes:
+///   Downloaded files get blob metadata stored as extended attributes (xattr on
+///   Linux/macOS, NTFS Alternate Data Streams on Windows). The following are
+///   always written: maz.blob.url, maz.blob.content-type, and maz.blob.tag.{key}
+///   for each blob index tag. Use --save-properties to also store ETag, headers,
+///   and access tier. On Linux the 'user.' namespace is prepended automatically
+///   (e.g. user.maz.blob.url). Read with getfattr -d (Linux), xattr -l (macOS),
+///   or Get-Content file -Stream maz.blob.url (Windows).
+///
+/// Verification:
+///   Use --verify to re-read each downloaded file and compare its MD5 hash against
+///   the blob's Content-MD5 header. Blobs without Content-MD5 are skipped with a
+///   warning. The TUI shows a cyan progress bar during verification.
 /// </remarks>
 public partial class CopyCommandDef(AuthOptionPack auth, InteractiveOptionPack interactive)
     : CommandDef
@@ -103,6 +117,14 @@ public partial class CopyCommandDef(AuthOptionPack auth, InteractiveOptionPack i
     [CliOption("--no-journal", Advanced = true)]
     public partial bool NoJournal { get; }
 
+    /// <summary>Save extended blob properties (ETag, headers, tier) as file attributes.</summary>
+    [CliOption("--save-properties", Advanced = true)]
+    public partial bool SaveProperties { get; }
+
+    /// <summary>Verify downloaded files against the blob's Content-MD5 hash.</summary>
+    [CliOption("--verify")]
+    public partial bool Verify { get; }
+
     // ── Execution ────────────────────────────────────────────────────────
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
@@ -172,7 +194,8 @@ public partial class CopyCommandDef(AuthOptionPack auth, InteractiveOptionPack i
                             Exclude,
                             tagQuery,
                             log,
-                            sourceGroup: sourceRaw
+                            sourceGroup: sourceRaw,
+                            saveProperties: SaveProperties
                         );
 
                         await plan.EnumerateAsync(itemChannel.Writer, ForceClientSide, ct);
@@ -207,7 +230,9 @@ public partial class CopyCommandDef(AuthOptionPack auth, InteractiveOptionPack i
             Parallel,
             BlockSize,
             journal,
-            ct
+            ct,
+            saveProperties: SaveProperties,
+            verify: Verify
         );
 
         // Start engine in background

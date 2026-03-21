@@ -13,7 +13,11 @@ internal static partial class FileMetadata
     /// Store blob origin metadata on a downloaded file. Best-effort — silently
     /// ignored if the filesystem doesn't support extended attributes.
     /// </summary>
-    public static void WriteBlobAttributes(string filePath, TransferItem item)
+    public static void WriteBlobAttributes(
+        string filePath,
+        TransferItem item,
+        bool saveProperties = false
+    )
     {
         try
         {
@@ -27,6 +31,40 @@ internal static partial class FileMetadata
 
             if (item.ContentType is not null)
                 SetAttribute(filePath, "maz.blob.content-type", item.ContentType);
+
+            // Blob index tags — always written when present
+            if (item.Tags is not null)
+            {
+                foreach (var (key, value) in item.Tags)
+                    SetAttribute(filePath, $"maz.blob.tag.{key}", value);
+            }
+
+            // Extended properties — opt-in via --save-properties
+            if (saveProperties && item.ExtendedProperties is { } props)
+            {
+                if (props.ContentMD5 is not null)
+                    SetAttribute(filePath, "maz.blob.content-md5", props.ContentMD5);
+                if (props.ETag is not null)
+                    SetAttribute(filePath, "maz.blob.etag", props.ETag);
+                if (props.LastModified is { } lm)
+                    SetAttribute(filePath, "maz.blob.last-modified", lm.ToString("O"));
+                if (props.CacheControl is not null)
+                    SetAttribute(filePath, "maz.blob.cache-control", props.CacheControl);
+                if (props.ContentDisposition is not null)
+                    SetAttribute(
+                        filePath,
+                        "maz.blob.content-disposition",
+                        props.ContentDisposition
+                    );
+                if (props.ContentEncoding is not null)
+                    SetAttribute(filePath, "maz.blob.content-encoding", props.ContentEncoding);
+                if (props.ContentLanguage is not null)
+                    SetAttribute(filePath, "maz.blob.content-language", props.ContentLanguage);
+                if (props.BlobType is not null)
+                    SetAttribute(filePath, "maz.blob.blob-type", props.BlobType);
+                if (props.AccessTier is not null)
+                    SetAttribute(filePath, "maz.blob.access-tier", props.AccessTier);
+            }
         }
         catch
         {

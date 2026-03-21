@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Security.Cryptography;
 using System.Threading.Channels;
 using Console.Cli.Http;
 
@@ -17,6 +18,8 @@ public sealed class BlockTransferEngine
     private readonly int _blockSize;
     private readonly int _blocksPerBlob;
     private readonly CopyJournal? _journal;
+    private readonly bool _saveProperties;
+    private readonly bool _verify;
     private readonly Channel<TransferProgressEvent> _progressChannel;
     private readonly CancellationTokenSource _globalCts;
     private readonly ChannelReader<TransferItem> _itemSource;
@@ -60,7 +63,9 @@ public sealed class BlockTransferEngine
         int parallelism,
         int blockSize,
         CopyJournal? journal,
-        CancellationToken ct
+        CancellationToken ct,
+        bool saveProperties = false,
+        bool verify = false
     )
     {
         _client = client;
@@ -70,6 +75,8 @@ public sealed class BlockTransferEngine
         _blockSize = blockSize;
         _blocksPerBlob = 4;
         _journal = journal;
+        _saveProperties = saveProperties;
+        _verify = verify;
         _progressChannel = Channel.CreateUnbounded<TransferProgressEvent>(
             new UnboundedChannelOptions { SingleReader = true }
         );
@@ -216,7 +223,16 @@ public sealed class BlockTransferEngine
                     break;
                 case TransferDirection.Download:
                     await DownloadAsync(index, item, ct);
-                    FileMetadata.WriteBlobAttributes(item.DestPath, item);
+                    FileMetadata.WriteBlobAttributes(item.DestPath, item, _saveProperties);
+                    if (_verify)
+                    {
+                        if (item.ContentMD5 is not null)
+                            await VerifyAsync(index, item, ct);
+                        else
+                            System.Console.Error.WriteLine(
+                                $"warning: '{item.SourcePath}' has no Content-MD5, skipping verification"
+                            );
+                    }
                     break;
                 case TransferDirection.ServerSideCopy:
                     await ServerSideCopyAsync(index, item, ct);
@@ -477,6 +493,49 @@ public sealed class BlockTransferEngine
         }
 
         await Task.WhenAll(blockTasks);
+    }
+
+    private async Task VerifyAsync(int index, TransferItem item, CancellationToken ct)
+    {
+        _progressChannel.Writer.TryWrite(
+            new TransferProgressEvent(index, 0, item.Size, TransferStatus.Verifying, null)
+        );
+
+        using var md5 = MD5.Create();
+        await using var fs = new FileStream(
+            item.DestPath,
+            FileMode.Open,
+            FileAccess.Read,
+            FileShare.Read,
+            bufferSize: 81920,
+            useAsync: true
+        );
+
+        var buffer = new byte[81920];
+        long totalRead = 0;
+        int bytesRead;
+        while ((bytesRead = await fs.ReadAsync(buffer.AsMemory(), ct)) > 0)
+        {
+            md5.TransformBlock(buffer, 0, bytesRead, null, 0);
+            totalRead += bytesRead;
+            _progressChannel.Writer.TryWrite(
+                new TransferProgressEvent(
+                    index,
+                    totalRead,
+                    item.Size,
+                    TransferStatus.Verifying,
+                    null
+                )
+            );
+        }
+
+        md5.TransformFinalBlock([], 0, 0);
+        var computedHash = Convert.ToBase64String(md5.Hash!);
+
+        if (computedHash != item.ContentMD5)
+            throw new InvalidOperationException(
+                $"Hash mismatch: expected {item.ContentMD5}, computed {computedHash}"
+            );
     }
 
     private async Task ServerSideCopyAsync(int index, TransferItem item, CancellationToken ct)

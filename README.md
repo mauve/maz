@@ -95,6 +95,35 @@ Which means you don't need to specify separate arguments, and tab-completion wor
 
 ![Screenshot of maz copy](./docs/copy-1.png)
 
+### Extended File Attributes
+
+When downloading blobs, `maz copy` stores blob metadata as extended file
+attributes (xattr on Linux/macOS, NTFS Alternate Data Streams on Windows).
+
+| Attribute                       | Stored when         | Description              |
+| ------------------------------- | ------------------- | ------------------------ |
+| `maz.blob.url`                  | Always              | Full blob URL            |
+| `maz.blob.content-type`         | Always              | MIME type                |
+| `maz.blob.tag.{key}`            | Always              | Blob index tag (per tag) |
+| `maz.blob.content-md5`          | `--save-properties` | Base64 Content-MD5       |
+| `maz.blob.etag`                 | `--save-properties` | ETag value               |
+| `maz.blob.last-modified`        | `--save-properties` | ISO 8601 timestamp       |
+| `maz.blob.cache-control`        | `--save-properties` | Cache-Control header     |
+| `maz.blob.content-disposition`  | `--save-properties` | Content-Disposition      |
+| `maz.blob.content-encoding`     | `--save-properties` | Content-Encoding         |
+| `maz.blob.content-language`     | `--save-properties` | Content-Language         |
+| `maz.blob.blob-type`            | `--save-properties` | BlockBlob / PageBlob     |
+| `maz.blob.access-tier`          | `--save-properties` | Hot / Cool / Archive     |
+
+On Linux, attributes are prefixed with `user.` (e.g. `user.maz.blob.url`).
+Read them with `getfattr -d file` (Linux), `xattr -l file` (macOS), or
+`Get-Content file -Stream maz.blob.url` (Windows). Attributes are best-effort:
+silently skipped on filesystems without xattr support (FAT32, NFS, etc.).
+
+Use `--verify` to re-read each downloaded file and compare its MD5 hash against
+the blob's Content-MD5 header. Blobs without Content-MD5 are skipped with a
+warning to stderr.
+
 ### Help flags
 
 | Flag                       | Description                                                     |
