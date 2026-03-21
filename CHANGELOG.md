@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+
+## [0.9.0] - 2026-03-21
 ### Added
 - `maz storage browse` — interactive TUI for browsing Azure Blob Storage
   - Navigate containers and blobs as a virtual folder tree with lazy loading
