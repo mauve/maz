@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Azure.ResourceManager;
 
 namespace Console.Rendering;
@@ -47,7 +48,7 @@ internal class JsonDirectRenderer(JsonSerializerOptions options) : IRenderer
 {
     public Task RenderAsync(TextWriter output, object data, CancellationToken ct)
     {
-        output.WriteLine(JsonSerializer.Serialize(data, options));
+        output.WriteLine(JsonSerializeHelper.SerializeSafe(data, options));
         return Task.CompletedTask;
     }
 }
@@ -97,7 +98,7 @@ internal class JsonPrettyArmResourceRenderer : IRenderer
             type.GetProperty("Data")
             ?? throw new InvalidOperationException($"Type {type.FullName} has no Data property.");
         var dataValue = dataProp.GetValue(data);
-        var json = JsonSerializer.Serialize(dataValue, Options);
+        var json = JsonSerializeHelper.SerializeSafe(dataValue, Options);
         output.WriteLine(JsonSyntaxHighlighter.Colorize(json));
         return Task.CompletedTask;
     }
@@ -130,7 +131,7 @@ internal class JsonCollectionRenderer<T>(JsonSerializerOptions options) : IColle
             })
             .ToList();
 
-        output.WriteLine(JsonSerializer.Serialize(dataItems, options));
+        output.WriteLine(JsonSerializeHelper.SerializeSafeList(dataItems, options));
     }
 }
 
@@ -152,7 +153,7 @@ internal class JsonLCollectionRenderer<T> : ICollectionRenderer
         {
             object? dataItem =
                 item is ArmResource ? item.GetType().GetProperty("Data")?.GetValue(item) : item;
-            output.WriteLine(JsonSerializer.Serialize(dataItem, JsonSerializerOptions.Default));
+            output.WriteLine(JsonSerializeHelper.SerializeSafe(dataItem, JsonSerializerOptions.Default));
         }
     }
 }
@@ -184,8 +185,43 @@ internal class JsonPrettyCollectionRenderer<T> : ICollectionRenderer
             })
             .ToList();
 
-        var json = JsonSerializer.Serialize(dataItems, Options);
+        var json = JsonSerializeHelper.SerializeSafeList(dataItems, Options);
         output.WriteLine(JsonSyntaxHighlighter.Colorize(json));
+    }
+}
+
+// ── Trim-safe serialization helpers ───────────────────────────────────────────
+
+/// <summary>
+/// Serializes an object to JSON, handling <see cref="JsonNode"/> items without
+/// reflection (which is disabled in trimmed/AOT builds).
+/// </summary>
+file static class JsonSerializeHelper
+{
+    public static string SerializeSafe(object? data, JsonSerializerOptions options)
+    {
+        if (data is JsonNode node)
+            return options.WriteIndented
+                ? node.ToJsonString(new JsonSerializerOptions { WriteIndented = true })
+                : node.ToJsonString();
+        return JsonSerializer.Serialize(data, data?.GetType() ?? typeof(object), options);
+    }
+
+    public static string SerializeSafeList(List<object?> items, JsonSerializerOptions options)
+    {
+        if (items.Count > 0 && items[0] is JsonNode)
+        {
+            var array = new JsonArray();
+            foreach (var item in items)
+            {
+                if (item is JsonNode node)
+                    array.Add(node.DeepClone());
+            }
+            return options.WriteIndented
+                ? array.ToJsonString(new JsonSerializerOptions { WriteIndented = true })
+                : array.ToJsonString();
+        }
+        return JsonSerializer.Serialize(items, options);
     }
 }
 
