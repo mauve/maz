@@ -87,6 +87,17 @@ internal static class CliCompletionProviderRegistry
     ) => _providers.TryGetValue(alias, out var fn) ? fn : null;
 }
 
+internal static class CliArgumentCompletionRegistry
+{
+    private static readonly Dictionary<string, string[][]> _registrations = new();
+
+    internal static void Register(string commandPath, string[][] argumentCompletions) =>
+        _registrations[commandPath] = argumentCompletions;
+
+    internal static string[][]? Resolve(string commandPath) =>
+        _registrations.TryGetValue(commandPath, out var values) ? values : null;
+}
+
 internal static class CliCompletionHandler
 {
     // Public entry point — uses the compile-time generated tree and providers.
@@ -142,7 +153,7 @@ internal static class CliCompletionHandler
         }
 
         // Static path: walk the compile-time generated tree
-        var node = FindActiveNode(root, tokens, trailingSpace);
+        var (node, commandPath) = FindActiveNode(root, tokens, trailingSpace);
 
         if (wordToComplete.StartsWith('-'))
         {
@@ -155,15 +166,33 @@ internal static class CliCompletionHandler
         foreach (var child in node.Children)
             if (child.Name.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
                 output.WriteLine(child.Name);
+
+        // Argument completions — only when no child commands matched
+        if (node.Children.Length == 0)
+        {
+            var argCompletions = CliArgumentCompletionRegistry.Resolve(commandPath);
+            if (argCompletions != null)
+            {
+                // Count consumed positional tokens (non-option, non-command tokens after the command path)
+                int positionalIndex = CountPositionalArgs(tokens, trailingSpace, commandPath);
+                if (positionalIndex >= 0 && positionalIndex < argCompletions.Length)
+                {
+                    foreach (var v in argCompletions[positionalIndex])
+                        if (v.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+                            output.WriteLine(v);
+                }
+            }
+        }
     }
 
-    private static CompletionNode FindActiveNode(
+    private static (CompletionNode node, string commandPath) FindActiveNode(
         CompletionNode root,
         List<string> tokens,
         bool trailingSpace
     )
     {
         var current = root;
+        var pathParts = new List<string> { root.Name };
         for (int i = 1; i < tokens.Count; i++)
         {
             var token = tokens[i];
@@ -175,8 +204,32 @@ internal static class CliCompletionHandler
             if (sub.Name == null) // default struct = not found
                 break;
             current = sub;
+            pathParts.Add(sub.Name);
         }
-        return current;
+        return (current, string.Join(' ', pathParts));
+    }
+
+    private static int CountPositionalArgs(
+        List<string> tokens,
+        bool trailingSpace,
+        string commandPath
+    )
+    {
+        var pathParts = commandPath.Split(' ');
+        int pathDepth = pathParts.Length;
+        int positional = 0;
+
+        // Tokens after the command path that are not options are positional args
+        for (int i = pathDepth; i < tokens.Count; i++)
+        {
+            var token = tokens[i];
+            if (!trailingSpace && i == tokens.Count - 1)
+                break; // this is the word being completed
+            if (token.StartsWith('-'))
+                continue;
+            positional++;
+        }
+        return positional;
     }
 
     private static List<string> Tokenize(string line)

@@ -14,6 +14,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Auto-completion for enum-typed CLI options (e.g. `--format json⇥`)
   - Source generator emits `StaticValueProviders` from `[Description]` attributes on enums
   - Completions stay in sync with enum definitions automatically — no manual registration
+- Auto-completion for positional CLI arguments (e.g. `maz completion ⇥` suggests bash/zsh/fish/pwsh)
+  - Runtime registry (`CliArgumentCompletionRegistry`) for commands with known argument values
+  - Supports multiple positional arguments with per-index completion values
+  - `CliArgument<T>.CompletionValues` property for self-describing argument metadata
 
 ### Fixed
 - Fix 403 on `maz copy` when authenticated with Storage Blob Data Reader
