@@ -81,7 +81,8 @@ public sealed class AzureRestClient
         }
         else
         {
-            url = $"{BaseUrl}{path}?api-version={apiVersion}";
+            var separator = path.Contains('?') ? '&' : '?';
+            url = $"{BaseUrl}{path}{separator}api-version={apiVersion}";
         }
 
         var request = new HttpRequestMessage(method, url);
