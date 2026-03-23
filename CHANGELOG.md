@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
+### Added
+- `maz iam check` (alias: `maz rbac check`) — inspect RBAC role assignments for a resource
+  - Flexible resource input: name, rg/name, sub/rg/name, full ARM ID, or portal URL
+  - Optional principal filter: `me` (default), UPN, or object ID; omit to show all assignments
+  - Resolves principal IDs and role definition IDs to display names via MS Graph
+  - Output columns: Role, Scope, Principal, PrincipalType, GrantedOn, GrantedBy
+  - `--resource-type` hint to disambiguate when multiple resources share a name
+- Auto-completion for enum-typed CLI options (e.g. `--format json⇥`)
+  - Source generator emits `StaticValueProviders` from `[Description]` attributes on enums
+  - Completions stay in sync with enum definitions automatically — no manual registration
+
+### Fixed
+- Fix 403 on `maz copy` when authenticated with Storage Blob Data Reader
+  - `ListBlobsAsync` no longer requests `include=tags` unconditionally; tags are only fetched when `--tag-filter` is specified (tags require Storage Blob Data Owner)
+- Fix `AzureRestClient` producing malformed URLs when path contains query parameters
+- Fix `--format json-pretty` crash in trimmed builds caused by reflection-based `JsonSerializer.Serialize`
 
 ## [0.9.0] - 2026-03-21
 ### Added
@@ -38,7 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Documentation of the xattr/ADS attribute scheme in README and `--help`
 
 ### Changed
-- `ListBlobsAsync` now requests `include=tags` to fetch blob tags inline (zero extra API calls)
+- `ListBlobsAsync` supports optional `includeTags` parameter for inline tag fetching
 - `BlobProperties` record expanded with Content-MD5, ETag, Cache-Control, Content-Disposition, Content-Encoding, Content-Language, blob type, and access tier
 
 ## [0.7.2] - 2026-03-21
