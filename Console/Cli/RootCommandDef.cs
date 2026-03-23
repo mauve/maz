@@ -3,6 +3,7 @@ using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Copy;
 using Console.Cli.Commands.Group;
+using Console.Cli.Commands.Iam;
 using Console.Cli.Commands.JmesPath;
 using Console.Cli.Shared;
 
@@ -28,6 +29,7 @@ public partial class RootCommandDef : CommandDef
     public readonly AcrCommandDef Acr;
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
+    public readonly IamCommandDef Iam;
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
     public readonly JmesPathCommandDef JmesPath;
@@ -48,6 +50,7 @@ public partial class RootCommandDef : CommandDef
         Acr = new AcrCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
+        Iam = new IamCommandDef(Auth);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
         Copy = new CopyCommandDef(Auth, Interactive);
