@@ -155,6 +155,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         public string? ArityExpr;
         public bool HasNullableAnnotation;
         public string? AllowedValuesText; // joined display string for [allowed:]
+        public string[]? AllowedValues; // individual allowed values for completion
         public string? DefaultText; // pre-formatted display string for [default:]
     }
 
@@ -348,6 +349,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                     var elemTypeName = GetNonNullableTypeName(elemTypeSymbol);
                     m.CustomParserExpr = BuildEnumCollectionSwitchParser(elemTypeName, enumDescs);
                     m.AllowedValuesText = string.Join(", ", enumDescs.Select(d => d.Item2));
+                    m.AllowedValues = enumDescs.Select(d => d.Item2).ToArray();
                 }
                 else
                 {
@@ -386,6 +388,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                     m.HasNullableAnnotation
                 );
                 m.AllowedValuesText = string.Join(", ", enumDescs.Select(d => d.Item2));
+                m.AllowedValues = enumDescs.Select(d => d.Item2).ToArray();
             }
             else
             {
@@ -1181,6 +1184,10 @@ public class CliOptionGenerator : IIncrementalGenerator
         var dynamicProviders = new Dictionary<string, string>(StringComparer.Ordinal);
         CollectDynamicProviders(rootModel, dict, dynamicProviders, new HashSet<string>());
 
+        // Collect enum completions: alias → allowed values
+        var enumCompletions = new Dictionary<string, string[]>(StringComparer.Ordinal);
+        CollectEnumCompletions(rootModel, dict, enumCompletions, new HashSet<string>());
+
         // Build the node tree
         var visited = new HashSet<string>(StringComparer.Ordinal);
         var root = BuildNodeData(
@@ -1218,6 +1225,24 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine("        {");
         foreach (var kvp in dynamicProviders)
             sb.AppendLine($"            [{Quote(kvp.Key)}] = new {kvp.Value}(),");
+        sb.AppendLine("        };");
+        sb.AppendLine();
+
+        // StaticValueProviders map — enum-typed options get auto-completed values
+        sb.AppendLine(
+            "    internal static readonly System.Collections.Generic.IReadOnlyDictionary<string, string[]> StaticValueProviders ="
+        );
+        sb.AppendLine(
+            "        new System.Collections.Generic.Dictionary<string, string[]>"
+        );
+        sb.AppendLine("        {");
+        foreach (var kvp in enumCompletions)
+        {
+            var valuesLiteral = string.Join(", ", kvp.Value.Select(Quote));
+            sb.AppendLine(
+                $"            [{Quote(kvp.Key)}] = new string[] {{ {valuesLiteral} }},"
+            );
+        }
         sb.AppendLine("        };");
         sb.AppendLine();
 
@@ -1554,6 +1579,39 @@ public class CliOptionGenerator : IIncrementalGenerator
         {
             if (dict.TryGetValue(child.TypeName, out var childModel))
                 CollectDynamicProviders(childModel, dict, result, visited);
+        }
+    }
+
+    /// <summary>
+    /// Walks the full command tree collecting enum-typed options for static value completion.
+    /// Returns alias → allowed values mappings.
+    /// </summary>
+    static void CollectEnumCompletions(
+        ClassModel model,
+        Dictionary<string, ClassModel> dict,
+        Dictionary<string, string[]> result,
+        HashSet<string> visited
+    )
+    {
+        var modelKey =
+            model.Namespace.Length > 0 ? $"{model.Namespace}.{model.ClassName}" : model.ClassName;
+        if (!visited.Add(modelKey))
+            return;
+
+        foreach (var opt in model.Options)
+        {
+            if (opt.AllowedValues is null || opt.AllowedValues.Length == 0)
+                continue;
+            var allAliases = new[] { opt.PrimaryAlias }.Concat(opt.ExtraAliases);
+            foreach (var alias in allAliases)
+                if (!result.ContainsKey(alias))
+                    result[alias] = opt.AllowedValues;
+        }
+
+        foreach (var child in model.Children)
+        {
+            if (dict.TryGetValue(child.TypeName, out var childModel))
+                CollectEnumCompletions(childModel, dict, result, visited);
         }
     }
 }
