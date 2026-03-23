@@ -126,7 +126,18 @@ internal static class CliCompletionHandler
                 var context = new CliCompletionContext(wordToComplete, null);
                 foreach (var c in await provider.GetCompletionsAsync(context))
                     output.WriteLine(c);
+                return;
             }
+
+            // Static value completion (e.g. --format <TAB> for enum options)
+            if (CompletionTree.StaticValueProviders.TryGetValue(precedingToken, out var values))
+            {
+                foreach (var v in values)
+                    if (v.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+                        output.WriteLine(v);
+                return;
+            }
+
             return;
         }
 

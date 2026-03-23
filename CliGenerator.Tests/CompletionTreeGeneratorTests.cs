@@ -72,12 +72,25 @@ public class CompletionTreeGeneratorTests
             {
             }
 
+            public enum OutputFormat
+            {
+                [Description("json")] Json,
+                [Description("jsonl")] JsonL,
+                [Description("json-pretty")] JsonPretty,
+                [Description("column")] Column,
+                [Description("text")] Text,
+            }
+
             // A partial option pack with generated options
             public partial class SubOptionPack : OptionPack
             {
                 /// <summary>Output format</summary>
                 [CliOption("--output", "-o")]
                 public partial string? Output { get; }
+
+                /// <summary>The format to use.</summary>
+                [CliOption("--format", "-f")]
+                public partial OutputFormat? Format { get; }
 
                 /// <summary>Hidden advanced option</summary>
                 [CliOption("--secret", Advanced = true)]
@@ -247,6 +260,70 @@ public class CompletionTreeGeneratorTests
         Assert.IsTrue(
             text.Contains("IReadOnlyDictionary"),
             "DynamicProviders should use IReadOnlyDictionary"
+        );
+    }
+
+    [TestMethod]
+    public void StaticValueProvidersMapIsGenerated()
+    {
+        var text = CliGeneratorTestHelpers.GetGeneratedText(
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
+
+        Assert.IsTrue(
+            text.Contains("StaticValueProviders"),
+            "StaticValueProviders field should be emitted"
+        );
+    }
+
+    [TestMethod]
+    public void StaticValueProvidersContainsEnumOptionAliases()
+    {
+        var text = CliGeneratorTestHelpers.GetGeneratedText(
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
+
+        // --format and -f are aliases for the enum-typed option
+        Assert.IsTrue(
+            text.Contains("[\"--format\"]"),
+            "StaticValueProviders should contain --format alias"
+        );
+        Assert.IsTrue(
+            text.Contains("[\"-f\"]"),
+            "StaticValueProviders should contain -f alias"
+        );
+    }
+
+    [TestMethod]
+    public void StaticValueProvidersContainsAllEnumValues()
+    {
+        var text = CliGeneratorTestHelpers.GetGeneratedText(
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
+
+        // All enum Description values should appear as completion values
+        Assert.IsTrue(text.Contains("\"json\""), "Should contain 'json' enum value");
+        Assert.IsTrue(text.Contains("\"jsonl\""), "Should contain 'jsonl' enum value");
+        Assert.IsTrue(text.Contains("\"json-pretty\""), "Should contain 'json-pretty' enum value");
+        Assert.IsTrue(text.Contains("\"column\""), "Should contain 'column' enum value");
+        Assert.IsTrue(text.Contains("\"text\""), "Should contain 'text' enum value");
+    }
+
+    [TestMethod]
+    public void StaticValueProvidersExcludesNonEnumOptions()
+    {
+        var text = CliGeneratorTestHelpers.GetGeneratedText(
+            CliGeneratorTestHelpers.RunAndGetResult(Source),
+            "CompletionTree.g.cs"
+        );
+
+        // --output is a string option, not an enum — should not be in StaticValueProviders
+        Assert.IsFalse(
+            text.Contains("[\"--output\"]"),
+            "Non-enum options should not appear in StaticValueProviders"
         );
     }
 }
