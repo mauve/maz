@@ -39,6 +39,7 @@ public partial class CompletionCommandDef : CommandDef
     {
         Name = "shell",
         Description = "Target shell: bash, zsh, fish, pwsh",
+        CompletionValues = ["bash", "zsh", "fish", "pwsh"],
     };
 
     internal override IEnumerable<CliArgument<string>> EnumerateArguments()

@@ -146,4 +146,58 @@ public class CliCompletionHandlerTests
         var results = await Complete("maz ");
         Assert.IsTrue(results.Length >= 2, "Should have at least 2 top-level commands");
     }
+
+    // ── Argument completion tests ──
+
+    [TestMethod]
+    public async Task ArgumentCompletion_SuggestsRegisteredValues()
+    {
+        CliArgumentCompletionRegistry.Register(
+            "maz account show",
+            [["dev", "staging", "prod"]]
+        );
+        var results = await Complete("maz account show ");
+        CollectionAssert.Contains(results, "dev");
+        CollectionAssert.Contains(results, "staging");
+        CollectionAssert.Contains(results, "prod");
+    }
+
+    [TestMethod]
+    public async Task ArgumentCompletion_PartialValueFiltersResults()
+    {
+        CliArgumentCompletionRegistry.Register(
+            "maz account show",
+            [["dev", "staging", "prod"]]
+        );
+        var results = await Complete("maz account show d");
+        CollectionAssert.Contains(results, "dev");
+        Assert.IsFalse(results.Contains("staging"), "Non-matching values should be filtered out");
+        Assert.IsFalse(results.Contains("prod"), "Non-matching values should be filtered out");
+    }
+
+    [TestMethod]
+    public async Task ArgumentCompletion_UnregisteredCommand_ProducesNoArgCompletions()
+    {
+        // "maz account list" has no registered argument completions
+        var results = await Complete("maz storage blob list ");
+        // Should only contain child commands (none for a leaf) and no argument completions
+        Assert.AreEqual(0, results.Length);
+    }
+
+    [TestMethod]
+    public async Task ArgumentCompletion_SecondArgUsesCorrectIndex()
+    {
+        CliArgumentCompletionRegistry.Register(
+            "maz storage blob upload",
+            [["container-a", "container-b"], ["file1.txt", "file2.txt"]]
+        );
+        // First arg already provided ("container-a"), now completing second
+        var results = await Complete("maz storage blob upload container-a ");
+        CollectionAssert.Contains(results, "file1.txt");
+        CollectionAssert.Contains(results, "file2.txt");
+        Assert.IsFalse(
+            results.Contains("container-a"),
+            "First argument values should not appear for second position"
+        );
+    }
 }

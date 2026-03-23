@@ -11,6 +11,7 @@ public class CliArgument<T>
     public T? Value { get; set; }
     public bool WasProvided { get; set; }
     public bool Hidden { get; init; }
+    public string[]? CompletionValues { get; init; }
 
     /// <summary>
     /// When true, this argument consumes all remaining positional tokens.

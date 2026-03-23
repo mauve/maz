@@ -1212,7 +1212,7 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine("#nullable enable");
         sb.AppendLine("namespace Console.Cli;");
         sb.AppendLine();
-        sb.AppendLine("internal static class CompletionTree");
+        sb.AppendLine("internal static partial class CompletionTree");
         sb.AppendLine("{");
 
         // DynamicProviders map
