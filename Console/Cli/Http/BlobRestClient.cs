@@ -28,14 +28,17 @@ public sealed class BlobRestClient
         string account,
         string container,
         string? prefix,
-        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct
+        bool includeTags = false,
+        [System.Runtime.CompilerServices.EnumeratorCancellation] CancellationToken ct = default
     )
     {
         string? marker = null;
         do
         {
             var url =
-                $"https://{account}.blob.core.windows.net/{container}?restype=container&comp=list&maxresults=5000&include=tags";
+                $"https://{account}.blob.core.windows.net/{container}?restype=container&comp=list&maxresults=5000";
+            if (includeTags)
+                url += "&include=tags";
             if (!string.IsNullOrEmpty(prefix))
                 url += $"&prefix={Uri.EscapeDataString(prefix)}";
             if (marker is not null)

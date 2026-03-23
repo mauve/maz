@@ -203,7 +203,8 @@ public sealed class TransferPlan
                 _source.AccountName!,
                 _source.ContainerName!,
                 _source.BlobPrefix,
-                ct
+                includeTags: !string.IsNullOrEmpty(_tagQuery),
+                ct: ct
             );
         }
 
@@ -274,7 +275,8 @@ public sealed class TransferPlan
             _source.AccountName!,
             _source.ContainerName!,
             _source.BlobPrefix,
-            ct
+            includeTags: !string.IsNullOrEmpty(_tagQuery),
+            ct: ct
         );
 
         await foreach (var blob in blobs.WithCancellation(ct))

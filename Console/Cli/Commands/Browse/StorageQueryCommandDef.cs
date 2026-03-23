@@ -119,7 +119,7 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
             else
             {
                 await foreach (var blob in client.ListBlobsAsync(
-                    target.Account, container, prefix, ct))
+                    target.Account, container, prefix, ct: ct))
                 {
                     if (!MatchesFilters(blob.Name, prefix, includeGlob, excludeGlob))
                         continue;

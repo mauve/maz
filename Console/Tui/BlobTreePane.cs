@@ -573,7 +573,7 @@ internal sealed class BlobTreePane
         // Build a tree from flat blob list
         var folderMap = new Dictionary<string, FolderNode>(StringComparer.Ordinal);
 
-        await foreach (var blob in _client.ListBlobsAsync(_account, containerName, prefix, ct))
+        await foreach (var blob in _client.ListBlobsAsync(_account, containerName, prefix, ct: ct))
         {
             ScannedBlobCount++;
 
