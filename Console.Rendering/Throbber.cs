@@ -1,6 +1,6 @@
 namespace Console.Rendering;
 
-internal sealed class Throbber : IDisposable
+public sealed class Throbber : IDisposable
 {
 
     private readonly Timer? _timer;

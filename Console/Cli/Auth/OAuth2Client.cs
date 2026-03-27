@@ -15,18 +15,25 @@ namespace Console.Cli.Auth;
 /// </summary>
 internal sealed class OAuth2Client
 {
-    private const string AzureCliClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
+    internal const string AzureCliClientId = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
     private const string DefaultScope = "https://management.azure.com/.default";
 
     private readonly HttpClient _http;
     private readonly MsalCache _cache;
     private readonly DiagnosticLog _log;
+    private readonly string _clientId;
 
-    public OAuth2Client(MsalCache cache, DiagnosticLog log, HttpClient? http = null)
+    public OAuth2Client(
+        MsalCache cache,
+        DiagnosticLog log,
+        HttpClient? http = null,
+        string? clientId = null
+    )
     {
         _cache = cache;
         _log = log;
         _http = http ?? new HttpClient();
+        _clientId = clientId ?? AzureCliClientId;
     }
 
     // ── Interactive Browser (Authorization Code + PKCE) ───────────────
@@ -51,7 +58,7 @@ internal sealed class OAuth2Client
         var scopeString = BuildScopeString(scopes);
         var authorizeUrl =
             $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize"
-            + $"?client_id={AzureCliClientId}"
+            + $"?client_id={_clientId}"
             + $"&response_type=code"
             + $"&redirect_uri={Uri.EscapeDataString(redirectUri)}"
             + $"&scope={Uri.EscapeDataString(scopeString)}"
@@ -107,7 +114,7 @@ internal sealed class OAuth2Client
 
         // Write to cache
         foreach (var scope in scopes)
-            _cache.WriteTokenResponse(tokenResponse, scope, AzureCliClientId);
+            _cache.WriteTokenResponse(tokenResponse, scope, _clientId);
 
         return tokenResponse;
     }
@@ -126,7 +133,7 @@ internal sealed class OAuth2Client
             $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/devicecode",
             new Dictionary<string, string>
             {
-                ["client_id"] = AzureCliClientId,
+                ["client_id"] = _clientId,
                 ["scope"] = scopeString,
             },
             ct
@@ -154,7 +161,7 @@ internal sealed class OAuth2Client
                     tenant,
                     new Dictionary<string, string>
                     {
-                        ["client_id"] = AzureCliClientId,
+                        ["client_id"] = _clientId,
                         ["grant_type"] = "urn:ietf:params:oauth:grant-type:device_code",
                         ["device_code"] = deviceCode,
                     },
@@ -162,7 +169,7 @@ internal sealed class OAuth2Client
                 );
 
                 foreach (var scope in scopes)
-                    _cache.WriteTokenResponse(tokenResponse, scope, AzureCliClientId);
+                    _cache.WriteTokenResponse(tokenResponse, scope, _clientId);
 
                 return tokenResponse;
             }
@@ -294,7 +301,7 @@ internal sealed class OAuth2Client
             tenant,
             new Dictionary<string, string>
             {
-                ["client_id"] = clientId ?? AzureCliClientId,
+                ["client_id"] = clientId ?? _clientId,
                 ["grant_type"] = "refresh_token",
                 ["refresh_token"] = refreshToken,
                 ["scope"] = scope,
@@ -302,7 +309,7 @@ internal sealed class OAuth2Client
             ct
         );
 
-        _cache.WriteTokenResponse(response, scope, clientId ?? AzureCliClientId);
+        _cache.WriteTokenResponse(response, scope, clientId ?? _clientId);
         return response;
     }
 
@@ -345,7 +352,7 @@ internal sealed class OAuth2Client
             tenant,
             new Dictionary<string, string>
             {
-                ["client_id"] = AzureCliClientId,
+                ["client_id"] = _clientId,
                 ["grant_type"] = "authorization_code",
                 ["code"] = code,
                 ["redirect_uri"] = redirectUri,

@@ -5,6 +5,7 @@ using Console.Cli.Commands.Copy;
 using Console.Cli.Commands.Group;
 using Console.Cli.Commands.Iam;
 using Console.Cli.Commands.JmesPath;
+using Console.Cli.Commands.Pim;
 using Console.Cli.Shared;
 
 namespace Console.Cli;
@@ -30,6 +31,7 @@ public partial class RootCommandDef : CommandDef
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
     public readonly IamCommandDef Iam;
+    public readonly PimCommandDef Pim;
     public readonly CompletionCommandDef Completion;
     public readonly ConfigureCommandDef Configure;
     public readonly JmesPathCommandDef JmesPath;
@@ -51,6 +53,7 @@ public partial class RootCommandDef : CommandDef
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
         Iam = new IamCommandDef(Auth);
+        Pim = new PimCommandDef(Auth, Interactive);
         Completion = new CompletionCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
         Copy = new CopyCommandDef(Auth, Interactive);
