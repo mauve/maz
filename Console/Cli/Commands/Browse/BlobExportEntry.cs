@@ -43,9 +43,12 @@ internal partial class BlobExportJsonContext : JsonSerializerContext
 {
     private static BlobExportJsonContext? _relaxed;
 
-    public static BlobExportJsonContext RelaxedEncoding => _relaxed ??= new(new JsonSerializerOptions
-    {
-        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    });
+    public static BlobExportJsonContext RelaxedEncoding =>
+        _relaxed ??= new(
+            new JsonSerializerOptions
+            {
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            }
+        );
 }

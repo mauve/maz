@@ -154,7 +154,9 @@ public class CliCompletionHandlerTests
     {
         CliArgumentCompletionRegistry.Register(
             "maz account show",
-            [["dev", "staging", "prod"]]
+            [
+                ["dev", "staging", "prod"],
+            ]
         );
         var results = await Complete("maz account show ");
         CollectionAssert.Contains(results, "dev");
@@ -167,7 +169,9 @@ public class CliCompletionHandlerTests
     {
         CliArgumentCompletionRegistry.Register(
             "maz account show",
-            [["dev", "staging", "prod"]]
+            [
+                ["dev", "staging", "prod"],
+            ]
         );
         var results = await Complete("maz account show d");
         CollectionAssert.Contains(results, "dev");
@@ -189,7 +193,10 @@ public class CliCompletionHandlerTests
     {
         CliArgumentCompletionRegistry.Register(
             "maz storage blob upload",
-            [["container-a", "container-b"], ["file1.txt", "file2.txt"]]
+            [
+                ["container-a", "container-b"],
+                ["file1.txt", "file2.txt"],
+            ]
         );
         // First arg already provided ("container-a"), now completing second
         var results = await Complete("maz storage blob upload container-a ");

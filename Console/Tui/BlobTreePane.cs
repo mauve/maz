@@ -74,19 +74,18 @@ internal sealed class BlobTreePane
     // ── Visual row types ────────────────────────────────────────────────
 
     private abstract record VisualRow;
+
     private sealed record ContainerRow(ContainerNode Node, int Depth) : VisualRow;
+
     private sealed record FolderRow(FolderNode Node, int Depth) : VisualRow;
+
     private sealed record BlobRow(BlobNode Node, int Depth) : VisualRow;
+
     private sealed record LoadingRow(int Depth) : VisualRow;
 
     // ── Constructor ─────────────────────────────────────────────────────
 
-    public BlobTreePane(
-        BlobRestClient client,
-        string account,
-        string? container,
-        string? prefix
-    )
+    public BlobTreePane(BlobRestClient client, string account, string? container, string? prefix)
     {
         _client = client;
         _account = account;
@@ -131,11 +130,11 @@ internal sealed class BlobTreePane
         var containers = new List<ContainerNode>();
         await foreach (var item in _client.ListContainersAsync(_account, ct))
         {
-            containers.Add(
-                new ContainerNode { Name = item.Name, FullPath = item.Name }
-            );
+            containers.Add(new ContainerNode { Name = item.Name, FullPath = item.Name });
         }
-        containers.Sort((a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase));
+        containers.Sort(
+            (a, b) => string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase)
+        );
         _roots.Clear();
         _roots.AddRange(containers);
     }
@@ -151,7 +150,9 @@ internal sealed class BlobTreePane
         int blobCount = 0;
         long totalSize = 0;
 
-        await foreach (var item in _client.ListBlobsByHierarchyAsync(_account, containerName, prefix, ct))
+        await foreach (
+            var item in _client.ListBlobsByHierarchyAsync(_account, containerName, prefix, ct)
+        )
         {
             if (item.IsPrefix)
             {
@@ -162,12 +163,14 @@ internal sealed class BlobTreePane
                     displayName = displayName[prefix.Length..];
                 displayName = displayName.TrimEnd('/');
 
-                children.Add(new FolderNode
-                {
-                    Name = displayName,
-                    FullPath = item.Name,
-                    Container = containerName,
-                });
+                children.Add(
+                    new FolderNode
+                    {
+                        Name = displayName,
+                        FullPath = item.Name,
+                        Container = containerName,
+                    }
+                );
             }
             else if (item.Blob is not null)
             {
@@ -175,27 +178,31 @@ internal sealed class BlobTreePane
                 if (prefix is not null && displayName.StartsWith(prefix, StringComparison.Ordinal))
                     displayName = displayName[prefix.Length..];
 
-                children.Add(new BlobNode
-                {
-                    Name = displayName,
-                    FullPath = item.Blob.Name,
-                    Container = containerName,
-                    Blob = item.Blob,
-                });
+                children.Add(
+                    new BlobNode
+                    {
+                        Name = displayName,
+                        FullPath = item.Blob.Name,
+                        Container = containerName,
+                        Blob = item.Blob,
+                    }
+                );
                 blobCount++;
                 totalSize += item.Blob.Size;
             }
         }
 
-        children.Sort((a, b) =>
-        {
-            // Folders first, then blobs, both alphabetical
-            var aIsFolder = a is FolderNode;
-            var bIsFolder = b is FolderNode;
-            if (aIsFolder != bIsFolder)
-                return aIsFolder ? -1 : 1;
-            return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-        });
+        children.Sort(
+            (a, b) =>
+            {
+                // Folders first, then blobs, both alphabetical
+                var aIsFolder = a is FolderNode;
+                var bIsFolder = b is FolderNode;
+                if (aIsFolder != bIsFolder)
+                    return aIsFolder ? -1 : 1;
+                return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+            }
+        );
 
         container.Children.Clear();
         container.Children.AddRange(children);
@@ -203,10 +210,7 @@ internal sealed class BlobTreePane
         TotalBlobCount += blobCount;
     }
 
-    private async Task LoadSubfolderChildrenAsync(
-        FolderNode folder,
-        CancellationToken ct
-    )
+    private async Task LoadSubfolderChildrenAsync(FolderNode folder, CancellationToken ct)
     {
         var prefix = folder.FullPath;
         if (!prefix.EndsWith('/'))
@@ -216,7 +220,9 @@ internal sealed class BlobTreePane
         int blobCount = 0;
         long totalSize = 0;
 
-        await foreach (var item in _client.ListBlobsByHierarchyAsync(_account, folder.Container, prefix, ct))
+        await foreach (
+            var item in _client.ListBlobsByHierarchyAsync(_account, folder.Container, prefix, ct)
+        )
         {
             if (item.IsPrefix)
             {
@@ -226,12 +232,14 @@ internal sealed class BlobTreePane
                     displayName = displayName[prefix.Length..];
                 displayName = displayName.TrimEnd('/');
 
-                children.Add(new FolderNode
-                {
-                    Name = displayName,
-                    FullPath = item.Name,
-                    Container = folder.Container,
-                });
+                children.Add(
+                    new FolderNode
+                    {
+                        Name = displayName,
+                        FullPath = item.Name,
+                        Container = folder.Container,
+                    }
+                );
             }
             else if (item.Blob is not null)
             {
@@ -239,26 +247,30 @@ internal sealed class BlobTreePane
                 if (displayName.StartsWith(prefix, StringComparison.Ordinal))
                     displayName = displayName[prefix.Length..];
 
-                children.Add(new BlobNode
-                {
-                    Name = displayName,
-                    FullPath = item.Blob.Name,
-                    Container = folder.Container,
-                    Blob = item.Blob,
-                });
+                children.Add(
+                    new BlobNode
+                    {
+                        Name = displayName,
+                        FullPath = item.Blob.Name,
+                        Container = folder.Container,
+                        Blob = item.Blob,
+                    }
+                );
                 blobCount++;
                 totalSize += item.Blob.Size;
             }
         }
 
-        children.Sort((a, b) =>
-        {
-            var aIsFolder = a is FolderNode;
-            var bIsFolder = b is FolderNode;
-            if (aIsFolder != bIsFolder)
-                return aIsFolder ? -1 : 1;
-            return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
-        });
+        children.Sort(
+            (a, b) =>
+            {
+                var aIsFolder = a is FolderNode;
+                var bIsFolder = b is FolderNode;
+                if (aIsFolder != bIsFolder)
+                    return aIsFolder ? -1 : 1;
+                return string.Compare(a.Name, b.Name, StringComparison.OrdinalIgnoreCase);
+            }
+        );
 
         folder.Children.Clear();
         folder.Children.AddRange(children);
@@ -577,9 +589,10 @@ internal sealed class BlobTreePane
         {
             ScannedBlobCount++;
 
-            var relativeName = prefix is not null && blob.Name.StartsWith(prefix, StringComparison.Ordinal)
-                ? blob.Name[prefix.Length..]
-                : blob.Name;
+            var relativeName =
+                prefix is not null && blob.Name.StartsWith(prefix, StringComparison.Ordinal)
+                    ? blob.Name[prefix.Length..]
+                    : blob.Name;
 
             if (glob is not null && !glob.IsMatch(relativeName))
                 continue;
@@ -658,7 +671,9 @@ internal sealed class BlobTreePane
             IsLoaded = true,
         };
 
-        await foreach (var tagItem in _client.FindBlobsByTagsAsync(_account, container, tagQuery, ct))
+        await foreach (
+            var tagItem in _client.FindBlobsByTagsAsync(_account, container, tagQuery, ct)
+        )
         {
             if (glob is not null && !glob.IsMatch(tagItem.Name))
                 continue;
@@ -667,14 +682,16 @@ internal sealed class BlobTreePane
                 ? tagItem.Name[(tagItem.Name.LastIndexOf('/') + 1)..]
                 : tagItem.Name;
 
-            containerNode.Children.Add(new BlobNode
-            {
-                Name = displayName,
-                FullPath = tagItem.Name,
-                Container = container,
-                // Tag queries don't return size/date — show placeholder
-                Blob = new BlobItem(tagItem.Name, 0, null, null),
-            });
+            containerNode.Children.Add(
+                new BlobNode
+                {
+                    Name = displayName,
+                    FullPath = tagItem.Name,
+                    Container = container,
+                    // Tag queries don't return size/date — show placeholder
+                    Blob = new BlobItem(tagItem.Name, 0, null, null),
+                }
+            );
             TotalBlobCount++;
         }
 
@@ -699,8 +716,7 @@ internal sealed class BlobTreePane
     {
         void Walk(List<TreeNode> nodes, string container)
         {
-            nodes.RemoveAll(n =>
-                n is BlobNode bn && keys.Contains($"{container}/{bn.FullPath}"));
+            nodes.RemoveAll(n => n is BlobNode bn && keys.Contains($"{container}/{bn.FullPath}"));
             foreach (var node in nodes)
             {
                 if (node is FolderNode fn)
@@ -761,8 +777,7 @@ internal sealed class BlobTreePane
         }
     }
 
-    private static bool IsSelectable(VisualRow row) =>
-        row is ContainerRow or FolderRow or BlobRow;
+    private static bool IsSelectable(VisualRow row) => row is ContainerRow or FolderRow or BlobRow;
 
     private void ClampSelection()
     {
@@ -866,11 +881,9 @@ internal sealed class BlobTreePane
                 if (Ansi.VisibleLength(line) > maxLine)
                     line = line[..Math.Max(0, maxLine)];
 
-                var full = line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
-                WriteCell(
-                    selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full),
-                    width
-                );
+                var full =
+                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
+                WriteCell(selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full), width);
                 break;
             }
             case FolderRow fr:
@@ -888,7 +901,8 @@ internal sealed class BlobTreePane
                 if (Ansi.VisibleLength(line) > maxLine)
                     line = line[..Math.Max(0, maxLine)];
 
-                var full = line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
+                var full =
+                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
                 WriteCell(selected ? Ansi.Color(full, "\x1b[7m") : full, width);
                 break;
             }
@@ -904,18 +918,16 @@ internal sealed class BlobTreePane
                 // Right-side: size + date
                 var sizeStr = FormatSize(br.Node.Blob.Size);
                 var dateStr = br.Node.Blob.LastModified?.ToString("yyyy-MM-dd") ?? "";
-                var info = $"  {sizeStr,10}  {dateStr}";
+                var info = $"  {sizeStr, 10}  {dateStr}";
 
                 var maxLine = width - Ansi.VisibleLength(info);
                 if (Ansi.VisibleLength(line) > maxLine && maxLine > 5)
                     line = line[..Math.Max(0, maxLine)];
 
-                var full = line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
+                var full =
+                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
                 if (isChecked)
-                    WriteCell(
-                        selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full),
-                        width
-                    );
+                    WriteCell(selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full), width);
                 else
                     WriteCell(selected ? Ansi.Color(full, "\x1b[7m") : full, width);
                 break;

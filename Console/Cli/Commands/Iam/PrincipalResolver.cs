@@ -45,7 +45,7 @@ internal static class PrincipalResolver
         return ExtractOid(token.Token)
             ?? throw new InvocationException(
                 "Could not extract object ID (oid) from the access token. "
-                + "Ensure you are authenticated with a user or service principal identity."
+                    + "Ensure you are authenticated with a user or service principal identity."
             );
     }
 
@@ -77,8 +77,10 @@ internal static class PrincipalResolver
 
         var url = $"https://graph.microsoft.com/v1.0/users/{Uri.EscapeDataString(upn)}?$select=id";
         var request = new HttpRequestMessage(HttpMethod.Get, url);
-        request.Headers.Authorization =
-            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Token);
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(
+            "Bearer",
+            token.Token
+        );
 
         log.HttpRequest(HttpMethod.Get, url, request);
         var response = await _http.SendAsync(request, ct);
@@ -88,15 +90,13 @@ internal static class PrincipalResolver
             var errorBody = await response.Content.ReadAsStringAsync(ct);
             throw new InvocationException(
                 $"Failed to resolve user '{upn}' via MS Graph: "
-                + $"HTTP {(int)response.StatusCode}\n{errorBody}"
+                    + $"HTTP {(int)response.StatusCode}\n{errorBody}"
             );
         }
 
         var content = await response.Content.ReadAsStringAsync(ct);
         var json = JsonNode.Parse(content);
         return json?["id"]?.GetValue<string>()
-            ?? throw new InvocationException(
-                $"MS Graph returned no 'id' for user '{upn}'."
-            );
+            ?? throw new InvocationException($"MS Graph returned no 'id' for user '{upn}'.");
     }
 }

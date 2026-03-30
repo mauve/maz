@@ -131,11 +131,7 @@ internal sealed class OAuth2Client
 
         var deviceCodeResponse = await PostFormAsync(
             $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/devicecode",
-            new Dictionary<string, string>
-            {
-                ["client_id"] = _clientId,
-                ["scope"] = scopeString,
-            },
+            new Dictionary<string, string> { ["client_id"] = _clientId, ["scope"] = scopeString },
             ct
         );
 

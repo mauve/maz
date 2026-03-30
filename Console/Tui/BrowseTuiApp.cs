@@ -102,8 +102,8 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
 
         try
         {
-            bool hasStartupFilter = !string.IsNullOrEmpty(_initialGlob)
-                || !string.IsNullOrEmpty(_initialTagQuery);
+            bool hasStartupFilter =
+                !string.IsNullOrEmpty(_initialGlob) || !string.IsNullOrEmpty(_initialTagQuery);
 
             if (!string.IsNullOrEmpty(_initialGlob))
             {
@@ -183,8 +183,8 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
             }
 
             // Tick throbber and counters while loading
-            bool isLoading = _tree.IsFilterLoading || _tree.HasPendingLoads
-                || _backgroundActions.Count > 0;
+            bool isLoading =
+                _tree.IsFilterLoading || _tree.HasPendingLoads || _backgroundActions.Count > 0;
             if (isLoading)
                 needsRedraw = true;
 
@@ -387,21 +387,20 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
 
         if (_activeTagQuery is not null && _container is not null)
         {
-            _filterTask = WrapFilterTask(_tree.LoadByTagQueryAsync(
-                _container,
-                _activeTagQuery,
-                _activeGlobMatcher,
-                linkedCt
-            ));
+            _filterTask = WrapFilterTask(
+                _tree.LoadByTagQueryAsync(_container, _activeTagQuery, _activeGlobMatcher, linkedCt)
+            );
         }
         else if (_activeGlob is not null)
         {
-            _filterTask = WrapFilterTask(_tree.LoadFilteredAsync(
-                _container,
-                _prefix is not null ? _prefix + "/" : null,
-                _activeGlobMatcher,
-                linkedCt
-            ));
+            _filterTask = WrapFilterTask(
+                _tree.LoadFilteredAsync(
+                    _container,
+                    _prefix is not null ? _prefix + "/" : null,
+                    _activeGlobMatcher,
+                    linkedCt
+                )
+            );
         }
         else
         {
@@ -470,9 +469,8 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         }
 
         // Accept by Enter or by shortcut key
-        char? shortcut = key.Key == ConsoleKey.Enter
-            ? _actionMenuItems[_actionMenuIndex].Key
-            : key.KeyChar;
+        char? shortcut =
+            key.Key == ConsoleKey.Enter ? _actionMenuItems[_actionMenuIndex].Key : key.KeyChar;
 
         _focus = Focus.Tree;
 
@@ -546,10 +544,14 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         if (blobs.Count == 0)
             return;
 
-        ShowTextPrompt("Download to directory:", ".", dir =>
-        {
-            _backgroundActions.Add(DownloadBlobsAsync(blobs, dir, ct));
-        });
+        ShowTextPrompt(
+            "Download to directory:",
+            ".",
+            dir =>
+            {
+                _backgroundActions.Add(DownloadBlobsAsync(blobs, dir, ct));
+            }
+        );
     }
 
     private async Task DownloadBlobsAsync(
@@ -578,7 +580,12 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
                 if (localDir is not null)
                     Directory.CreateDirectory(localDir);
 
-                await using var stream = await _client.GetBlobAsync(account, container, blob.Name, ct);
+                await using var stream = await _client.GetBlobAsync(
+                    account,
+                    container,
+                    blob.Name,
+                    ct
+                );
                 await using var file = File.Create(localPath);
                 await stream.CopyToAsync(file, ct);
                 done++;
@@ -590,9 +597,11 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
             SetStatus($"Downloading {done + failed}/{blobs.Count}...");
         }
 
-        SetStatus(failed > 0
-            ? $"Downloaded {done}/{blobs.Count}, {failed} failed"
-            : $"Downloaded {done} blob(s) to {directory}");
+        SetStatus(
+            failed > 0
+                ? $"Downloaded {done}/{blobs.Count}, {failed} failed"
+                : $"Downloaded {done} blob(s) to {directory}"
+        );
     }
 
     private void StartExportAction()
@@ -601,49 +610,56 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         if (blobs.Count == 0)
             return;
 
-        ShowTextPrompt("Export NDJSON to file:", "blobs.jsonl", path =>
-        {
-            try
+        ShowTextPrompt(
+            "Export NDJSON to file:",
+            "blobs.jsonl",
+            path =>
             {
-                path = path.StartsWith('~')
-                    ? Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                        path[1..].TrimStart('/', '\\')
-                    )
-                    : path;
-
-                var dir = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dir))
-                    Directory.CreateDirectory(dir);
-
-                using var writer = new StreamWriter(path, append: false, Encoding.UTF8);
-                foreach (var (account, container, blob) in blobs)
+                try
                 {
-                    var entry = new BlobExportEntry
-                    {
-                        Account = account,
-                        Container = container,
-                        Blob = blob.Name,
-                        Url = $"https://{account}.blob.core.windows.net/{container}/{blob.Name}",
-                        Size = blob.Size,
-                        ContentType = blob.ContentType,
-                        ContentMd5 = blob.ContentMD5,
-                        CreatedOn = blob.CreationTime?.ToString("o"),
-                        LastModified = blob.LastModified?.ToString("o"),
-                    };
-                    writer.WriteLine(JsonSerializer.Serialize(
-                        entry,
-                        BlobExportJsonContext.RelaxedEncoding.BlobExportEntry
-                    ));
-                }
+                    path = path.StartsWith('~')
+                        ? Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+                            path[1..].TrimStart('/', '\\')
+                        )
+                        : path;
 
-                SetStatus($"Exported {blobs.Count} blob(s) to {path}");
+                    var dir = Path.GetDirectoryName(path);
+                    if (!string.IsNullOrEmpty(dir))
+                        Directory.CreateDirectory(dir);
+
+                    using var writer = new StreamWriter(path, append: false, Encoding.UTF8);
+                    foreach (var (account, container, blob) in blobs)
+                    {
+                        var entry = new BlobExportEntry
+                        {
+                            Account = account,
+                            Container = container,
+                            Blob = blob.Name,
+                            Url =
+                                $"https://{account}.blob.core.windows.net/{container}/{blob.Name}",
+                            Size = blob.Size,
+                            ContentType = blob.ContentType,
+                            ContentMd5 = blob.ContentMD5,
+                            CreatedOn = blob.CreationTime?.ToString("o"),
+                            LastModified = blob.LastModified?.ToString("o"),
+                        };
+                        writer.WriteLine(
+                            JsonSerializer.Serialize(
+                                entry,
+                                BlobExportJsonContext.RelaxedEncoding.BlobExportEntry
+                            )
+                        );
+                    }
+
+                    SetStatus($"Exported {blobs.Count} blob(s) to {path}");
+                }
+                catch (Exception ex)
+                {
+                    SetStatus($"Export failed: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                SetStatus($"Export failed: {ex.Message}");
-            }
-        });
+        );
     }
 
     private void StartDeleteAction(CancellationToken ct)
@@ -652,13 +668,17 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         if (blobs.Count == 0)
             return;
 
-        ShowTextPrompt($"Delete {blobs.Count} blob(s)? Type 'yes' to confirm:", "", input =>
-        {
-            if (input.Equals("yes", StringComparison.OrdinalIgnoreCase))
-                _backgroundActions.Add(DeleteBlobsAsync(blobs, ct));
-            else
-                SetStatus("Delete cancelled");
-        });
+        ShowTextPrompt(
+            $"Delete {blobs.Count} blob(s)? Type 'yes' to confirm:",
+            "",
+            input =>
+            {
+                if (input.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                    _backgroundActions.Add(DeleteBlobsAsync(blobs, ct));
+                else
+                    SetStatus("Delete cancelled");
+            }
+        );
     }
 
     private async Task DeleteBlobsAsync(
@@ -686,9 +706,11 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         }
 
         _tree.RemoveBlobs(deletedKeys);
-        SetStatus(failed > 0
-            ? $"Deleted {done}/{blobs.Count}, {failed} failed"
-            : $"Deleted {done} blob(s)");
+        SetStatus(
+            failed > 0
+                ? $"Deleted {done}/{blobs.Count}, {failed} failed"
+                : $"Deleted {done} blob(s)"
+        );
     }
 
     private void StartSetTagAction()
@@ -697,16 +719,20 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         if (blobs.Count == 0)
             return;
 
-        ShowTextPrompt("Tag key=value:", "", input =>
-        {
-            var parts = input.Split('=', 2);
-            if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]))
+        ShowTextPrompt(
+            "Tag key=value:",
+            "",
+            input =>
             {
-                SetStatus("Invalid format. Use: key=value");
-                return;
+                var parts = input.Split('=', 2);
+                if (parts.Length != 2 || string.IsNullOrWhiteSpace(parts[0]))
+                {
+                    SetStatus("Invalid format. Use: key=value");
+                    return;
+                }
+                _backgroundActions.Add(SetTagAsync(blobs, parts[0].Trim(), parts[1].Trim()));
             }
-            _backgroundActions.Add(SetTagAsync(blobs, parts[0].Trim(), parts[1].Trim()));
-        });
+        );
     }
 
     private async Task SetTagAsync(
@@ -735,9 +761,11 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
             SetStatus($"Tagging {done + failed}/{blobs.Count}...");
         }
 
-        SetStatus(failed > 0
-            ? $"Tagged {done}/{blobs.Count}, {failed} failed"
-            : $"Set '{tagKey}={tagValue}' on {done} blob(s)");
+        SetStatus(
+            failed > 0
+                ? $"Tagged {done}/{blobs.Count}, {failed} failed"
+                : $"Set '{tagKey}={tagValue}' on {done} blob(s)"
+        );
     }
 
     private void StartInfoAction(CancellationToken ct)
@@ -819,8 +847,15 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         System.Console.Write("\x1b[?2026h"); // begin synchronized output
 
         // Layout: filter bar (0-1) + tree (flex) + detail pane (0-N) + status bar (1)
-        int filterBarHeight = (_activeGlob is not null || _activeTagQuery is not null
-            || _focus == Focus.GlobFilter || _focus == Focus.TagFilter) ? 1 : 0;
+        int filterBarHeight =
+            (
+                _activeGlob is not null
+                || _activeTagQuery is not null
+                || _focus == Focus.GlobFilter
+                || _focus == Focus.TagFilter
+            )
+                ? 1
+                : 0;
         int detailPaneHeight = _detailLines is not null
             ? Math.Min(_detailLines.Count + 2, Math.Max(4, _height / 3)) // +2 for border+title
             : 0;
@@ -875,7 +910,10 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
 
         // Show scanned/matched counts when filtering, plain count otherwise
         string countInfo;
-        if (_tree.IsFilterLoading || _tree.ScannedBlobCount > 0 && _tree.ScannedBlobCount != _tree.TotalBlobCount)
+        if (
+            _tree.IsFilterLoading
+            || _tree.ScannedBlobCount > 0 && _tree.ScannedBlobCount != _tree.TotalBlobCount
+        )
             countInfo = $" ({_tree.ScannedBlobCount} scanned) {_tree.TotalBlobCount} matched";
         else
             countInfo = $" {_tree.TotalBlobCount} blobs";
@@ -889,10 +927,13 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         if (Ansi.VisibleLength(filterText) > maxFilter && maxFilter > 5)
             filterText = ResultsPane.TruncateAnsi(filterText, maxFilter);
 
-        var padding = Math.Max(0, _width - Ansi.VisibleLength(filterText) - Ansi.VisibleLength(countInfo));
-        System.Console.Write(Ansi.BrandBar(
-            filterText + new string(' ', padding) + countInfo, _width
-        ));
+        var padding = Math.Max(
+            0,
+            _width - Ansi.VisibleLength(filterText) - Ansi.VisibleLength(countInfo)
+        );
+        System.Console.Write(
+            Ansi.BrandBar(filterText + new string(' ', padding) + countInfo, _width)
+        );
     }
 
     private void DrawDetailPane(int top, int height)
@@ -906,9 +947,7 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         var close = " Esc to close ";
         var borderLen = _width - title.Length - close.Length;
         if (borderLen > 0)
-            System.Console.Write(
-                Ansi.Dim("─" + title + new string('─', borderLen) + close + "─")
-            );
+            System.Console.Write(Ansi.Dim("─" + title + new string('─', borderLen) + close + "─"));
         else
             System.Console.Write(Ansi.Dim(new string('─', _width)));
 
@@ -1017,7 +1056,8 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         }
         else
         {
-            bar = "  ↑↓ Navigate │ ←→ Collapse/Expand │ Space Select │ Ctrl+A All │ / Glob │ t Tag │ Enter Act │ Esc Exit";
+            bar =
+                "  ↑↓ Navigate │ ←→ Collapse/Expand │ Space Select │ Ctrl+A All │ / Glob │ t Tag │ Enter Act │ Esc Exit";
         }
 
         System.Console.Write(Ansi.BrandBar(bar, _width));
@@ -1043,4 +1083,3 @@ internal sealed class BrowseTuiApp : IAsyncDisposable
         return ValueTask.CompletedTask;
     }
 }
-

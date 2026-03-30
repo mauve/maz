@@ -153,7 +153,9 @@ internal class JsonLCollectionRenderer<T> : ICollectionRenderer
         {
             object? dataItem =
                 item is ArmResource ? item.GetType().GetProperty("Data")?.GetValue(item) : item;
-            output.WriteLine(JsonSerializeHelper.SerializeSafe(dataItem, JsonSerializerOptions.Default));
+            output.WriteLine(
+                JsonSerializeHelper.SerializeSafe(dataItem, JsonSerializerOptions.Default)
+            );
         }
     }
 }

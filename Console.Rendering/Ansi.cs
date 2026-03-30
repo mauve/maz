@@ -53,7 +53,18 @@ public static partial class Ansi
 
     /// <summary>Braille spinner animation frames (10 frames, ~80ms per tick).</summary>
     public static readonly string[] ThrobberFrames =
-        ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+    [
+        "⠋",
+        "⠙",
+        "⠹",
+        "⠸",
+        "⠼",
+        "⠴",
+        "⠦",
+        "⠧",
+        "⠇",
+        "⠏",
+    ];
 
     public static string StyleOptionDescription(string text)
     {

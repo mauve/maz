@@ -473,7 +473,9 @@ internal sealed class EditorPane
         if (_autocompleteLoading)
         {
             MoveTo(cursorScreenRow + 1, popupLeft);
-            var spinner = Ansi.ThrobberFrames[_autocompleteSpinnerFrame % Ansi.ThrobberFrames.Length];
+            var spinner = Ansi.ThrobberFrames[
+                _autocompleteSpinnerFrame % Ansi.ThrobberFrames.Length
+            ];
             var text = (" " + spinner + " loading…").PadRight(PopupWidth);
             if (text.Length > PopupWidth)
                 text = text[..PopupWidth];

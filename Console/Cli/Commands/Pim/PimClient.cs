@@ -30,9 +30,13 @@ internal sealed class PimClient
     private const string GraphPowerShellClientId = "14d82eec-204b-4c2f-b7e8-296a70dab67e";
 
     private static readonly string[] DirectoryRoleScopes =
-        ["https://graph.microsoft.com/RoleManagement.ReadWrite.Directory"];
+    [
+        "https://graph.microsoft.com/RoleManagement.ReadWrite.Directory",
+    ];
     private static readonly string[] GroupPimScopes =
-        ["https://graph.microsoft.com/PrivilegedAccess.ReadWrite.AzureADGroup"];
+    [
+        "https://graph.microsoft.com/PrivilegedAccess.ReadWrite.AzureADGroup",
+    ];
 
     public PimClient(TokenCredential credential, DiagnosticLog log)
     {
@@ -44,9 +48,12 @@ internal sealed class PimClient
         // Graph PowerShell app registration which has PIM scopes preauthorized.
         var cache = new MsalCache(log);
         var graphOAuth = new OAuth2Client(cache, log, clientId: GraphPowerShellClientId);
-        _graphPimCredential = new ChainedTokenCredential(
-            new MsalCacheCredential(cache, graphOAuth, log),
-            new BrowserCredential(graphOAuth, log)
+        _graphPimCredential = new CachingTokenCredential(
+            new ChainedTokenCredential(
+                new MsalCacheCredential(cache, graphOAuth, log),
+                new BrowserCredential(graphOAuth, log)
+            ),
+            log
         );
     }
 
@@ -62,7 +69,9 @@ internal sealed class PimClient
             $"/providers/Microsoft.Authorization/roleEligibilityScheduleInstances?$filter={filter}";
 
         var items = new List<JsonNode>();
-        await foreach (var item in _arm.GetAllAsync(path, ArmPimApiVersion, "value", "nextLink", ct))
+        await foreach (
+            var item in _arm.GetAllAsync(path, ArmPimApiVersion, "value", "nextLink", ct)
+        )
         {
             if (item is JsonNode node)
                 items.Add(node);
@@ -83,19 +92,20 @@ internal sealed class PimClient
             var props = item["properties"];
             var roleDefId = props?["roleDefinitionId"]?.GetValue<string>() ?? "";
             var scope = props?["scope"]?.GetValue<string>() ?? "";
-            var scheduleId =
-                props?["roleEligibilityScheduleId"]?.GetValue<string>() ?? "";
+            var scheduleId = props?["roleEligibilityScheduleId"]?.GetValue<string>() ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.Role,
-                DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
-                Scope: scope,
-                ScopeDisplayName: FormatScope(scope),
-                PrincipalId: principalId,
-                RoleDefinitionId: roleDefId,
-                EligibilityScheduleId: scheduleId,
-                GroupId: ""
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.Role,
+                    DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
+                    Scope: scope,
+                    ScopeDisplayName: FormatScope(scope),
+                    PrincipalId: principalId,
+                    RoleDefinitionId: roleDefId,
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: ""
+                )
+            );
         }
 
         return result;
@@ -130,16 +140,18 @@ internal sealed class PimClient
                 ?? item["id"]?.GetValue<string>()
                 ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.Group,
-                DisplayName: groupNames.GetValueOrDefault(groupId, groupId),
-                Scope: groupId,
-                ScopeDisplayName: groupNames.GetValueOrDefault(groupId, groupId),
-                PrincipalId: principalId,
-                RoleDefinitionId: "",
-                EligibilityScheduleId: scheduleId,
-                GroupId: groupId
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.Group,
+                    DisplayName: groupNames.GetValueOrDefault(groupId, groupId),
+                    Scope: groupId,
+                    ScopeDisplayName: groupNames.GetValueOrDefault(groupId, groupId),
+                    PrincipalId: principalId,
+                    RoleDefinitionId: "",
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: groupId
+                )
+            );
         }
 
         return result;
@@ -174,16 +186,18 @@ internal sealed class PimClient
                 ?? item["id"]?.GetValue<string>()
                 ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.DirectoryRole,
-                DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
-                Scope: "/",
-                ScopeDisplayName: "Directory",
-                PrincipalId: principalId,
-                RoleDefinitionId: roleDefId,
-                EligibilityScheduleId: scheduleId,
-                GroupId: ""
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.DirectoryRole,
+                    DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
+                    Scope: "/",
+                    ScopeDisplayName: "Directory",
+                    PrincipalId: principalId,
+                    RoleDefinitionId: roleDefId,
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: ""
+                )
+            );
         }
 
         return result;
@@ -222,16 +236,18 @@ internal sealed class PimClient
                 ?? item["id"]?.GetValue<string>()
                 ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.DirectoryRole,
-                DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
-                Scope: "/",
-                ScopeDisplayName: "Directory",
-                PrincipalId: principalId,
-                RoleDefinitionId: roleDefId,
-                EligibilityScheduleId: scheduleId,
-                GroupId: ""
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.DirectoryRole,
+                    DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
+                    Scope: "/",
+                    ScopeDisplayName: "Directory",
+                    PrincipalId: principalId,
+                    RoleDefinitionId: roleDefId,
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: ""
+                )
+            );
         }
 
         return result;
@@ -249,7 +265,9 @@ internal sealed class PimClient
             $"/providers/Microsoft.Authorization/roleAssignmentScheduleInstances?$filter={filter}";
 
         var items = new List<JsonNode>();
-        await foreach (var item in _arm.GetAllAsync(path, ArmPimApiVersion, "value", "nextLink", ct))
+        await foreach (
+            var item in _arm.GetAllAsync(path, ArmPimApiVersion, "value", "nextLink", ct)
+        )
         {
             if (item is JsonNode node)
             {
@@ -274,19 +292,20 @@ internal sealed class PimClient
             var props = item["properties"];
             var roleDefId = props?["roleDefinitionId"]?.GetValue<string>() ?? "";
             var scope = props?["scope"]?.GetValue<string>() ?? "";
-            var scheduleId =
-                props?["roleAssignmentScheduleId"]?.GetValue<string>() ?? "";
+            var scheduleId = props?["roleAssignmentScheduleId"]?.GetValue<string>() ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.Role,
-                DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
-                Scope: scope,
-                ScopeDisplayName: FormatScope(scope),
-                PrincipalId: principalId,
-                RoleDefinitionId: roleDefId,
-                EligibilityScheduleId: scheduleId,
-                GroupId: ""
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.Role,
+                    DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
+                    Scope: scope,
+                    ScopeDisplayName: FormatScope(scope),
+                    PrincipalId: principalId,
+                    RoleDefinitionId: roleDefId,
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: ""
+                )
+            );
         }
 
         return result;
@@ -326,16 +345,18 @@ internal sealed class PimClient
                 ?? item["id"]?.GetValue<string>()
                 ?? "";
 
-            result.Add(new PimEligibleAssignment(
-                Kind: PimAssignmentKind.Group,
-                DisplayName: groupNames.GetValueOrDefault(groupId, groupId),
-                Scope: groupId,
-                ScopeDisplayName: groupNames.GetValueOrDefault(groupId, groupId),
-                PrincipalId: principalId,
-                RoleDefinitionId: "",
-                EligibilityScheduleId: scheduleId,
-                GroupId: groupId
-            ));
+            result.Add(
+                new PimEligibleAssignment(
+                    Kind: PimAssignmentKind.Group,
+                    DisplayName: groupNames.GetValueOrDefault(groupId, groupId),
+                    Scope: groupId,
+                    ScopeDisplayName: groupNames.GetValueOrDefault(groupId, groupId),
+                    PrincipalId: principalId,
+                    RoleDefinitionId: "",
+                    EligibilityScheduleId: scheduleId,
+                    GroupId: groupId
+                )
+            );
         }
 
         return result;
@@ -431,10 +452,7 @@ internal sealed class PimClient
         await GraphPostAsync(url, body, ct, GroupPimScopes);
     }
 
-    public async Task DeactivateGroupAsync(
-        PimEligibleAssignment assignment,
-        CancellationToken ct
-    )
+    public async Task DeactivateGroupAsync(PimEligibleAssignment assignment, CancellationToken ct)
     {
         var body = new JsonObject
         {
@@ -474,8 +492,7 @@ internal sealed class PimClient
             },
         };
 
-        var url =
-            $"{GraphBaseUrl}/roleManagement/directory/roleAssignmentScheduleRequests";
+        var url = $"{GraphBaseUrl}/roleManagement/directory/roleAssignmentScheduleRequests";
         await GraphPostAsync(url, body, ct, DirectoryRoleScopes);
     }
 
@@ -492,14 +509,17 @@ internal sealed class PimClient
             ["action"] = "selfDeactivate",
         };
 
-        var url =
-            $"{GraphBaseUrl}/roleManagement/directory/roleAssignmentScheduleRequests";
+        var url = $"{GraphBaseUrl}/roleManagement/directory/roleAssignmentScheduleRequests";
         await GraphPostAsync(url, body, ct, DirectoryRoleScopes);
     }
 
     // ── Graph helpers ─────────────────────────────────────────────────────
 
-    private async Task<List<JsonNode>> GraphGetAllAsync(string url, CancellationToken ct, string[]? scopes = null)
+    private async Task<List<JsonNode>> GraphGetAllAsync(
+        string url,
+        CancellationToken ct,
+        string[]? scopes = null
+    )
     {
         var items = new List<JsonNode>();
         string? currentUrl = url;
@@ -549,10 +569,7 @@ internal sealed class PimClient
         var cred = scopes[0].Contains("graph.microsoft.com/.default")
             ? _credential
             : _graphPimCredential;
-        var token = await cred.GetTokenAsync(
-            new TokenRequestContext(scopes),
-            ct
-        );
+        var token = await cred.GetTokenAsync(new TokenRequestContext(scopes), ct);
 
         var request = new HttpRequestMessage(method, url);
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);

@@ -2,7 +2,6 @@ namespace Console.Rendering;
 
 public sealed class Throbber : IDisposable
 {
-
     private readonly Timer? _timer;
     private readonly string _message;
     private int _frame;

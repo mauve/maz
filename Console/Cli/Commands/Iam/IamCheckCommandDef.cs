@@ -93,7 +93,9 @@ public partial class IamCheckCommandDef(AuthOptionPack auth) : CommandDef
 
         // 4. Fetch role assignments (paginated)
         var assignments = new List<JsonNode>();
-        await foreach (var item in client.GetAllAsync(assignmentPath, "2022-04-01", "value", "nextLink", ct))
+        await foreach (
+            var item in client.GetAllAsync(assignmentPath, "2022-04-01", "value", "nextLink", ct)
+        )
         {
             if (item is JsonNode node)
                 assignments.Add(node);
@@ -115,19 +117,27 @@ public partial class IamCheckCommandDef(AuthOptionPack auth) : CommandDef
         }
 
         // Resolve all unique role definition IDs in parallel
-        var resolveTasks = roleDefCache.Keys.Select(async id =>
-        {
-            try
+        var resolveTasks = roleDefCache
+            .Keys.Select(async id =>
             {
-                var roleDef = await client.SendAsync(HttpMethod.Get, id, "2022-04-01", null, ct);
-                var roleName = roleDef["properties"]?["roleName"]?.GetValue<string>() ?? id;
-                return (Id: id, Name: roleName);
-            }
-            catch
-            {
-                return (Id: id, Name: id);
-            }
-        }).ToList();
+                try
+                {
+                    var roleDef = await client.SendAsync(
+                        HttpMethod.Get,
+                        id,
+                        "2022-04-01",
+                        null,
+                        ct
+                    );
+                    var roleName = roleDef["properties"]?["roleName"]?.GetValue<string>() ?? id;
+                    return (Id: id, Name: roleName);
+                }
+                catch
+                {
+                    return (Id: id, Name: id);
+                }
+            })
+            .ToList();
 
         var resolved = await Task.WhenAll(resolveTasks);
         foreach (var (id, name) in resolved)
@@ -165,25 +175,23 @@ public partial class IamCheckCommandDef(AuthOptionPack auth) : CommandDef
             var createdBy = props?["createdBy"]?.GetValue<string>() ?? "";
             var createdByDisplay = displayNames.GetValueOrDefault(createdBy, createdBy);
 
-            output.Add(new JsonObject
-            {
-                ["Role"] = roleName,
-                ["Scope"] = assignmentScope,
-                ["Principal"] = principalDisplay,
-                ["PrincipalType"] = principalType,
-                ["GrantedOn"] = createdOn,
-                ["GrantedBy"] = createdByDisplay,
-            });
+            output.Add(
+                new JsonObject
+                {
+                    ["Role"] = roleName,
+                    ["Scope"] = assignmentScope,
+                    ["Principal"] = principalDisplay,
+                    ["PrincipalType"] = principalType,
+                    ["GrantedOn"] = createdOn,
+                    ["GrantedBy"] = createdByDisplay,
+                }
+            );
         }
 
         // 8. Render table
         var rendererFactory = Render.GetRendererFactory();
         var renderer = rendererFactory.CreateCollectionRenderer<JsonNode>();
-        await renderer.RenderAllAsync(
-            System.Console.Out,
-            ToAsyncEnumerable(output),
-            ct
-        );
+        await renderer.RenderAllAsync(System.Console.Out, ToAsyncEnumerable(output), ct);
 
         return 0;
     }

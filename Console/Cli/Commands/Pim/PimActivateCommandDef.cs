@@ -17,10 +17,8 @@ namespace Console.Cli.Commands.Pim;
 ///   maz pim activate "Storage Blob" --justification "investigating issue" --duration PT4H
 ///   maz pim activate "Admin Group"
 /// </remarks>
-public partial class PimActivateCommandDef(
-    AuthOptionPack auth,
-    InteractiveOptionPack interactive
-) : CommandDef
+public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptionPack interactive)
+    : CommandDef
 {
     public override string Name => "activate";
     protected internal override bool IsManualCommand => true;
@@ -76,29 +74,46 @@ public partial class PimActivateCommandDef(
             dirRolesTask = pimClient.ListEligibleDirectoryRolesAsync(principalId, ct);
             groupsTask = pimClient.ListEligibleGroupsAsync(principalId, ct);
 
-            try { await Task.WhenAll(rolesTask, dirRolesTask, groupsTask); }
-            catch { /* individual results checked below */ }
+            try
+            {
+                await Task.WhenAll(rolesTask, dirRolesTask, groupsTask);
+            }
+            catch
+            { /* individual results checked below */
+            }
         }
 
         if (rolesTask.IsFaulted)
-            log.Trace($"Role eligibility query failed: {rolesTask.Exception?.InnerException?.Message}");
+            log.Trace(
+                $"Role eligibility query failed: {rolesTask.Exception?.InnerException?.Message}"
+            );
         if (dirRolesTask.IsFaulted)
-            log.Trace($"Directory role eligibility query failed: {dirRolesTask.Exception?.InnerException?.Message}");
+            log.Trace(
+                $"Directory role eligibility query failed: {dirRolesTask.Exception?.InnerException?.Message}"
+            );
         if (groupsTask.IsFaulted)
-            log.Trace($"Group eligibility query failed: {groupsTask.Exception?.InnerException?.Message}");
+            log.Trace(
+                $"Group eligibility query failed: {groupsTask.Exception?.InnerException?.Message}"
+            );
 
         var eligibleRoles = rolesTask.IsCompletedSuccessfully ? rolesTask.Result : [];
         var eligibleDirRoles = dirRolesTask.IsCompletedSuccessfully ? dirRolesTask.Result : [];
         var eligibleGroups = groupsTask.IsCompletedSuccessfully ? groupsTask.Result : [];
 
-        if (eligibleRoles.Count == 0 && eligibleDirRoles.Count == 0 && eligibleGroups.Count == 0
-            && rolesTask.IsFaulted && dirRolesTask.IsFaulted && groupsTask.IsFaulted)
+        if (
+            eligibleRoles.Count == 0
+            && eligibleDirRoles.Count == 0
+            && eligibleGroups.Count == 0
+            && rolesTask.IsFaulted
+            && dirRolesTask.IsFaulted
+            && groupsTask.IsFaulted
+        )
         {
             throw new InvocationException(
                 "Failed to query PIM eligible assignments.\n"
-                + $"  Roles: {rolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Directory roles: {dirRolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Groups: {groupsTask.Exception?.InnerException?.Message}"
+                    + $"  Roles: {rolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Directory roles: {dirRolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Groups: {groupsTask.Exception?.InnerException?.Message}"
             );
         }
 
@@ -106,16 +121,14 @@ public partial class PimActivateCommandDef(
 
         // 3. Filter by name (case-insensitive substring)
         var matches = allEligible
-            .Where(a =>
-                a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase)
-            )
+            .Where(a => a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (matches.Count == 0)
         {
             throw new InvocationException(
                 $"No eligible PIM assignment found matching '{nameValue}'.\n"
-                + $"Found {allEligible.Count} eligible assignment(s) total."
+                    + $"Found {allEligible.Count} eligible assignment(s) total."
             );
         }
 
@@ -133,7 +146,10 @@ public partial class PimActivateCommandDef(
             var items = matches
                 .Select(m =>
                 {
-                    return (Label: m.DisplayName, Detail: $"[{KindLabel(m.Kind)}] {m.ScopeDisplayName}");
+                    return (
+                        Label: m.DisplayName,
+                        Detail: $"[{KindLabel(m.Kind)}] {m.ScopeDisplayName}"
+                    );
                 })
                 .ToArray();
 
@@ -151,7 +167,7 @@ public partial class PimActivateCommandDef(
             );
             throw new InvocationException(
                 $"Multiple PIM assignments match '{nameValue}'. "
-                + $"Use a more specific name or run interactively:\n{listing}"
+                    + $"Use a more specific name or run interactively:\n{listing}"
             );
         }
 
@@ -174,7 +190,11 @@ public partial class PimActivateCommandDef(
                     case PimAssignmentKind.Role:
                     {
                         var response = await pimClient.ActivateRoleAsync(
-                            selected, justification, duration, ct);
+                            selected,
+                            justification,
+                            duration,
+                            ct
+                        );
 
                         if ((int)response.StatusCode >= 400)
                         {
@@ -182,12 +202,14 @@ public partial class PimActivateCommandDef(
                             if (IsAlreadyActiveError(errorBody))
                             {
                                 System.Console.Error.WriteLine(
-                                    $"Role '{selected.DisplayName}' is already active.");
+                                    $"Role '{selected.DisplayName}' is already active."
+                                );
                                 return 0;
                             }
 
                             throw new HttpRequestException(
-                                $"Activation failed: HTTP {(int)response.StatusCode}\n{errorBody}");
+                                $"Activation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
+                            );
                         }
 
                         var armClient = new AzureRestClient(cred, log);
@@ -197,19 +219,23 @@ public partial class PimActivateCommandDef(
 
                     case PimAssignmentKind.DirectoryRole:
                         await pimClient.ActivateDirectoryRoleAsync(
-                            selected, justification, duration, ct);
+                            selected,
+                            justification,
+                            duration,
+                            ct
+                        );
                         break;
 
                     case PimAssignmentKind.Group:
-                        await pimClient.ActivateGroupAsync(
-                            selected, justification, duration, ct);
+                        await pimClient.ActivateGroupAsync(selected, justification, duration, ct);
                         break;
                 }
             }
             catch (HttpRequestException ex) when (IsAlreadyActiveError(ex.Message))
             {
                 System.Console.Error.WriteLine(
-                    $"{KindLabel(selected.Kind)} '{selected.DisplayName}' is already active.");
+                    $"{KindLabel(selected.Kind)} '{selected.DisplayName}' is already active."
+                );
                 return 0;
             }
         }
@@ -220,17 +246,21 @@ public partial class PimActivateCommandDef(
         return 0;
     }
 
-    private static string KindLabel(PimAssignmentKind kind) => kind switch
-    {
-        PimAssignmentKind.Role => "Role",
-        PimAssignmentKind.DirectoryRole => "Directory role",
-        PimAssignmentKind.Group => "Group",
-        _ => kind.ToString(),
-    };
+    private static string KindLabel(PimAssignmentKind kind) =>
+        kind switch
+        {
+            PimAssignmentKind.Role => "Role",
+            PimAssignmentKind.DirectoryRole => "Directory role",
+            PimAssignmentKind.Group => "Group",
+            _ => kind.ToString(),
+        };
 
     private static bool IsAlreadyActiveError(string message) =>
         message.Contains("RoleAssignmentExists", StringComparison.OrdinalIgnoreCase)
         || message.Contains("ActiveDurationTooShort", StringComparison.OrdinalIgnoreCase)
-        || message.Contains("unableToActivateExistingAssignment", StringComparison.OrdinalIgnoreCase)
+        || message.Contains(
+            "unableToActivateExistingAssignment",
+            StringComparison.OrdinalIgnoreCase
+        )
         || message.Contains("already has an active", StringComparison.OrdinalIgnoreCase);
 }

@@ -21,8 +21,10 @@ internal static class ResourceScopeResolver
     )
     {
         // If it's already a full ARM ID, use it directly
-        if (resource.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase)
-            && resource.Contains("/providers/", StringComparison.OrdinalIgnoreCase))
+        if (
+            resource.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase)
+            && resource.Contains("/providers/", StringComparison.OrdinalIgnoreCase)
+        )
         {
             return resource;
         }
@@ -66,12 +68,13 @@ internal static class ResourceScopeResolver
 
         if (data.Count > 1 && resourceType is null)
         {
-            var types = data
-                .Select(r => $"  {r?["type"]?.GetValue<string>()} ({r?["id"]?.GetValue<string>()})")
+            var types = data.Select(r =>
+                    $"  {r?["type"]?.GetValue<string>()} ({r?["id"]?.GetValue<string>()})"
+                )
                 .ToList();
             throw new InvocationException(
                 $"'{resource}' matched {data.Count} resources. Use --resource-type to disambiguate:\n"
-                + string.Join("\n", types)
+                    + string.Join("\n", types)
             );
         }
 

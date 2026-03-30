@@ -284,7 +284,9 @@ internal sealed class ResultsPane
             return;
 
         // ── Title ──
-        var spinner = _isLoading ? Ansi.ThrobberFrames[_spinnerFrame % Ansi.ThrobberFrames.Length] + " " : "  ";
+        var spinner = _isLoading
+            ? Ansi.ThrobberFrames[_spinnerFrame % Ansi.ThrobberFrames.Length] + " "
+            : "  ";
         var wsInfo = _workspaceName.Length > 0 ? $"[{_workspaceName}]  " : "";
         var rowCount =
             _isLoading ? "running…"

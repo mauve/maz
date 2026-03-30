@@ -429,11 +429,7 @@ public sealed class BlobRestClient
         );
 
         var request = new HttpRequestMessage(HttpMethod.Put, url);
-        request.Content = new StringContent(
-            tagSet.ToString(),
-            Encoding.UTF8,
-            "application/xml"
-        );
+        request.Content = new StringContent(tagSet.ToString(), Encoding.UTF8, "application/xml");
         request.Headers.Add("x-ms-version", "2024-11-04");
         await _auth.ApplyAsync(request, ct);
 
@@ -478,12 +474,18 @@ public sealed class BlobRestClient
         var name = blob.Element("Name")?.Value ?? "";
         var props = blob.Element("Properties");
         var size = long.TryParse(props?.Element("Content-Length")?.Value, out var s) ? s : 0;
-        var lastModified = DateTimeOffset.TryParse(props?.Element("Last-Modified")?.Value, out var lm)
+        var lastModified = DateTimeOffset.TryParse(
+            props?.Element("Last-Modified")?.Value,
+            out var lm
+        )
             ? lm
             : (DateTimeOffset?)null;
         var contentType = props?.Element("Content-Type")?.Value;
         var contentMD5 = props?.Element("Content-MD5")?.Value;
-        var creationTime = DateTimeOffset.TryParse(props?.Element("Creation-Time")?.Value, out var ct2)
+        var creationTime = DateTimeOffset.TryParse(
+            props?.Element("Creation-Time")?.Value,
+            out var ct2
+        )
             ? ct2
             : (DateTimeOffset?)null;
 

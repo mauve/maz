@@ -17,10 +17,8 @@ namespace Console.Cli.Commands.Pim;
 ///   maz pim deactivate "Storage Blob"
 ///   maz pim deactivate "Admin Group"
 /// </remarks>
-public partial class PimDeactivateCommandDef(
-    AuthOptionPack auth,
-    InteractiveOptionPack interactive
-) : CommandDef
+public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOptionPack interactive)
+    : CommandDef
 {
     public override string Name => "deactivate";
     protected internal override bool IsManualCommand => true;
@@ -68,29 +66,44 @@ public partial class PimDeactivateCommandDef(
             dirRolesTask = pimClient.ListActiveDirectoryRolesAsync(principalId, ct);
             groupsTask = pimClient.ListActiveGroupsAsync(principalId, ct);
 
-            try { await Task.WhenAll(rolesTask, dirRolesTask, groupsTask); }
-            catch { /* individual results checked below */ }
+            try
+            {
+                await Task.WhenAll(rolesTask, dirRolesTask, groupsTask);
+            }
+            catch
+            { /* individual results checked below */
+            }
         }
 
         if (rolesTask.IsFaulted)
             log.Trace($"Active role query failed: {rolesTask.Exception?.InnerException?.Message}");
         if (dirRolesTask.IsFaulted)
-            log.Trace($"Active directory role query failed: {dirRolesTask.Exception?.InnerException?.Message}");
+            log.Trace(
+                $"Active directory role query failed: {dirRolesTask.Exception?.InnerException?.Message}"
+            );
         if (groupsTask.IsFaulted)
-            log.Trace($"Active group query failed: {groupsTask.Exception?.InnerException?.Message}");
+            log.Trace(
+                $"Active group query failed: {groupsTask.Exception?.InnerException?.Message}"
+            );
 
         var activeRoles = rolesTask.IsCompletedSuccessfully ? rolesTask.Result : [];
         var activeDirRoles = dirRolesTask.IsCompletedSuccessfully ? dirRolesTask.Result : [];
         var activeGroups = groupsTask.IsCompletedSuccessfully ? groupsTask.Result : [];
 
-        if (activeRoles.Count == 0 && activeDirRoles.Count == 0 && activeGroups.Count == 0
-            && rolesTask.IsFaulted && dirRolesTask.IsFaulted && groupsTask.IsFaulted)
+        if (
+            activeRoles.Count == 0
+            && activeDirRoles.Count == 0
+            && activeGroups.Count == 0
+            && rolesTask.IsFaulted
+            && dirRolesTask.IsFaulted
+            && groupsTask.IsFaulted
+        )
         {
             throw new InvocationException(
                 "Failed to query PIM active assignments.\n"
-                + $"  Roles: {rolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Directory roles: {dirRolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Groups: {groupsTask.Exception?.InnerException?.Message}"
+                    + $"  Roles: {rolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Directory roles: {dirRolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Groups: {groupsTask.Exception?.InnerException?.Message}"
             );
         }
 
@@ -98,16 +111,14 @@ public partial class PimDeactivateCommandDef(
 
         // 3. Filter by name
         var matches = allActive
-            .Where(a =>
-                a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase)
-            )
+            .Where(a => a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         if (matches.Count == 0)
         {
             throw new InvocationException(
                 $"No active PIM assignment found matching '{nameValue}'.\n"
-                + $"Found {allActive.Count} active PIM assignment(s) total."
+                    + $"Found {allActive.Count} active PIM assignment(s) total."
             );
         }
 
@@ -125,7 +136,10 @@ public partial class PimDeactivateCommandDef(
             var items = matches
                 .Select(m =>
                 {
-                    return (Label: m.DisplayName, Detail: $"[{KindLabel(m.Kind)}] {m.ScopeDisplayName}");
+                    return (
+                        Label: m.DisplayName,
+                        Detail: $"[{KindLabel(m.Kind)}] {m.ScopeDisplayName}"
+                    );
                 })
                 .ToArray();
 
@@ -143,7 +157,7 @@ public partial class PimDeactivateCommandDef(
             );
             throw new InvocationException(
                 $"Multiple active PIM assignments match '{nameValue}'. "
-                + $"Use a more specific name or run interactively:\n{listing}"
+                    + $"Use a more specific name or run interactively:\n{listing}"
             );
         }
 
@@ -161,7 +175,8 @@ public partial class PimDeactivateCommandDef(
                     {
                         var errorBody = await response.Content.ReadAsStringAsync(ct);
                         throw new HttpRequestException(
-                            $"Deactivation failed: HTTP {(int)response.StatusCode}\n{errorBody}");
+                            $"Deactivation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
+                        );
                     }
 
                     var armClient = new AzureRestClient(cred, log);
@@ -179,17 +194,16 @@ public partial class PimDeactivateCommandDef(
             }
         }
 
-        System.Console.Error.WriteLine(
-            $"Deactivated {kindLabel} '{selected.DisplayName}'."
-        );
+        System.Console.Error.WriteLine($"Deactivated {kindLabel} '{selected.DisplayName}'.");
         return 0;
     }
 
-    private static string KindLabel(PimAssignmentKind kind) => kind switch
-    {
-        PimAssignmentKind.Role => "Role",
-        PimAssignmentKind.DirectoryRole => "Directory role",
-        PimAssignmentKind.Group => "Group",
-        _ => kind.ToString(),
-    };
+    private static string KindLabel(PimAssignmentKind kind) =>
+        kind switch
+        {
+            PimAssignmentKind.Role => "Role",
+            PimAssignmentKind.DirectoryRole => "Directory role",
+            PimAssignmentKind.Group => "Group",
+            _ => kind.ToString(),
+        };
 }

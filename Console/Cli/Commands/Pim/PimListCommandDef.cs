@@ -59,8 +59,20 @@ public partial class PimListCommandDef(AuthOptionPack auth) : CommandDef
 
         using (var throbber = new Throbber("Fetching PIM assignments..."))
         {
-            try { await Task.WhenAll(eligibleRolesTask, eligibleDirRolesTask, eligibleGroupsTask, activeRolesTask, activeDirRolesTask, activeGroupsTask); }
-            catch { /* individual results checked below */ }
+            try
+            {
+                await Task.WhenAll(
+                    eligibleRolesTask,
+                    eligibleDirRolesTask,
+                    eligibleGroupsTask,
+                    activeRolesTask,
+                    activeDirRolesTask,
+                    activeGroupsTask
+                );
+            }
+            catch
+            { /* individual results checked below */
+            }
         }
 
         LogIfFaulted(log, "Eligible roles", eligibleRolesTask);
@@ -77,14 +89,20 @@ public partial class PimListCommandDef(AuthOptionPack auth) : CommandDef
         var activeDirRoles = Result(activeDirRolesTask);
         var activeGroups = Result(activeGroupsTask);
 
-        if (eligibleRoles.Count == 0 && eligibleDirRoles.Count == 0 && eligibleGroups.Count == 0
-            && eligibleRolesTask.IsFaulted && eligibleDirRolesTask.IsFaulted && eligibleGroupsTask.IsFaulted)
+        if (
+            eligibleRoles.Count == 0
+            && eligibleDirRoles.Count == 0
+            && eligibleGroups.Count == 0
+            && eligibleRolesTask.IsFaulted
+            && eligibleDirRolesTask.IsFaulted
+            && eligibleGroupsTask.IsFaulted
+        )
         {
             throw new InvocationException(
                 "Failed to query PIM eligible assignments.\n"
-                + $"  Roles: {eligibleRolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Directory roles: {eligibleDirRolesTask.Exception?.InnerException?.Message}\n"
-                + $"  Groups: {eligibleGroupsTask.Exception?.InnerException?.Message}"
+                    + $"  Roles: {eligibleRolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Directory roles: {eligibleDirRolesTask.Exception?.InnerException?.Message}\n"
+                    + $"  Groups: {eligibleGroupsTask.Exception?.InnerException?.Message}"
             );
         }
 
@@ -103,23 +121,36 @@ public partial class PimListCommandDef(AuthOptionPack auth) : CommandDef
                 .ToList();
         }
 
-        allEligible.Sort((a, b) =>
-        {
-            var kindCmp = a.Kind.CompareTo(b.Kind);
-            return kindCmp != 0 ? kindCmp : string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase);
-        });
+        allEligible.Sort(
+            (a, b) =>
+            {
+                var kindCmp = a.Kind.CompareTo(b.Kind);
+                return kindCmp != 0
+                    ? kindCmp
+                    : string.Compare(
+                        a.DisplayName,
+                        b.DisplayName,
+                        StringComparison.OrdinalIgnoreCase
+                    );
+            }
+        );
+
+        var structuredOutput =
+            Render.Format is OutputFormat.Json or OutputFormat.JsonL or OutputFormat.JsonPretty;
 
         var output = new JsonArray();
         foreach (var item in allEligible)
         {
             var isActive = activeKeys.Contains(ActiveKey(item));
-            output.Add(new JsonObject
-            {
-                [nameof(Name)] = item.DisplayName,
-                ["Type"] = KindLabel(item.Kind),
-                ["Status"] = isActive ? "Active" : "Eligible",
-                ["Scope"] = item.ScopeDisplayName,
-            });
+            output.Add(
+                new JsonObject
+                {
+                    [nameof(Name)] = item.DisplayName,
+                    ["Type"] = KindLabel(item.Kind),
+                    ["Status"] = isActive ? "Active" : "Eligible",
+                    ["Scope"] = structuredOutput ? item.Scope : item.ScopeDisplayName,
+                }
+            );
         }
 
         // 5. Render
@@ -130,21 +161,23 @@ public partial class PimListCommandDef(AuthOptionPack auth) : CommandDef
         return 0;
     }
 
-    private static string ActiveKey(PimEligibleAssignment a) => a.Kind switch
-    {
-        PimAssignmentKind.Role => $"role:{a.RoleDefinitionId}:{a.Scope}",
-        PimAssignmentKind.DirectoryRole => $"dirrole:{a.RoleDefinitionId}",
-        PimAssignmentKind.Group => $"group:{a.GroupId}",
-        _ => $"{a.Kind}:{a.DisplayName}",
-    };
+    private static string ActiveKey(PimEligibleAssignment a) =>
+        a.Kind switch
+        {
+            PimAssignmentKind.Role => $"role:{a.RoleDefinitionId}:{a.Scope}",
+            PimAssignmentKind.DirectoryRole => $"dirrole:{a.RoleDefinitionId}",
+            PimAssignmentKind.Group => $"group:{a.GroupId}",
+            _ => $"{a.Kind}:{a.DisplayName}",
+        };
 
-    private static string KindLabel(PimAssignmentKind kind) => kind switch
-    {
-        PimAssignmentKind.Role => "Role",
-        PimAssignmentKind.DirectoryRole => "Directory Role",
-        PimAssignmentKind.Group => "Group",
-        _ => kind.ToString(),
-    };
+    private static string KindLabel(PimAssignmentKind kind) =>
+        kind switch
+        {
+            PimAssignmentKind.Role => "Role",
+            PimAssignmentKind.DirectoryRole => "Directory Role",
+            PimAssignmentKind.Group => "Group",
+            _ => kind.ToString(),
+        };
 
     private static List<PimEligibleAssignment> Result(Task<List<PimEligibleAssignment>> task) =>
         task.IsCompletedSuccessfully ? task.Result : [];

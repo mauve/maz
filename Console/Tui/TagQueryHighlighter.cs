@@ -67,9 +67,11 @@ internal static class TagQueryHighlighter
             }
 
             // Keywords: AND, OR
-            if (i + 3 <= input.Length
+            if (
+                i + 3 <= input.Length
                 && input[i..(i + 3)].Equals("AND", StringComparison.OrdinalIgnoreCase)
-                && (i + 3 >= input.Length || !char.IsLetterOrDigit(input[i + 3])))
+                && (i + 3 >= input.Length || !char.IsLetterOrDigit(input[i + 3]))
+            )
             {
                 sb.Append("\x1b[1;34m"); // bold blue
                 sb.Append(input[i..(i + 3)]);
@@ -78,9 +80,11 @@ internal static class TagQueryHighlighter
                 continue;
             }
 
-            if (i + 2 <= input.Length
+            if (
+                i + 2 <= input.Length
                 && input[i..(i + 2)].Equals("OR", StringComparison.OrdinalIgnoreCase)
-                && (i + 2 >= input.Length || !char.IsLetterOrDigit(input[i + 2])))
+                && (i + 2 >= input.Length || !char.IsLetterOrDigit(input[i + 2]))
+            )
             {
                 sb.Append("\x1b[1;34m"); // bold blue
                 sb.Append(input[i..(i + 2)]);

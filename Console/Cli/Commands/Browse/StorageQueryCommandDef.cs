@@ -33,8 +33,7 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
     public readonly CliArgument<string> Target = new()
     {
         Name = "target",
-        Description =
-            "Storage target: account, account/container, or account/container/prefix.",
+        Description = "Storage target: account, account/container, or account/container/prefix.",
     };
 
     internal override IEnumerable<CliArgument<string>> EnumerateArguments()
@@ -68,7 +67,8 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
 
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
-        var targetRaw = Target.Value
+        var targetRaw =
+            Target.Value
             ?? throw new InvocationException(
                 "A target is required: account, account/container, or account/container/prefix."
             );
@@ -77,7 +77,12 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
         var target = Commands.Browse.StorageTargetHelper.ParseTarget(targetRaw);
 
         var blobAuth = Commands.Browse.StorageTargetHelper.BuildAuthStrategy(
-            target.Account, SasToken, AccountKey, _auth, log);
+            target.Account,
+            SasToken,
+            AccountKey,
+            _auth,
+            log
+        );
         var client = new BlobRestClient(blobAuth, log);
 
         var includeGlob = !string.IsNullOrEmpty(Include) ? new GlobMatcher(Include) : null;
@@ -85,7 +90,12 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
         var prefix = target.Prefix is not null ? target.Prefix + "/" : null;
 
         using var stdout = System.Console.OpenStandardOutput();
-        using var writer = new System.IO.StreamWriter(stdout, System.Text.Encoding.UTF8, 4096, leaveOpen: true)
+        using var writer = new System.IO.StreamWriter(
+            stdout,
+            System.Text.Encoding.UTF8,
+            4096,
+            leaveOpen: true
+        )
         {
             AutoFlush = false,
         };
@@ -106,20 +116,31 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
         {
             if (!string.IsNullOrEmpty(TagQuery))
             {
-                await foreach (var tagItem in client.FindBlobsByTagsAsync(
-                    target.Account, container, TagQuery, ct))
+                await foreach (
+                    var tagItem in client.FindBlobsByTagsAsync(
+                        target.Account,
+                        container,
+                        TagQuery,
+                        ct
+                    )
+                )
                 {
                     if (!MatchesFilters(tagItem.Name, prefix, includeGlob, excludeGlob))
                         continue;
 
-                    WriteEntry(writer, target.Account, container,
-                        new BlobItem(tagItem.Name, 0, null, null));
+                    WriteEntry(
+                        writer,
+                        target.Account,
+                        container,
+                        new BlobItem(tagItem.Name, 0, null, null)
+                    );
                 }
             }
             else
             {
-                await foreach (var blob in client.ListBlobsAsync(
-                    target.Account, container, prefix, ct: ct))
+                await foreach (
+                    var blob in client.ListBlobsAsync(target.Account, container, prefix, ct: ct)
+                )
                 {
                     if (!MatchesFilters(blob.Name, prefix, includeGlob, excludeGlob))
                         continue;
@@ -152,10 +173,12 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
             CreatedOn = blob.CreationTime?.ToString("o"),
             LastModified = blob.LastModified?.ToString("o"),
         };
-        writer.WriteLine(JsonSerializer.Serialize(
-            entry,
-            Commands.Browse.BlobExportJsonContext.RelaxedEncoding.BlobExportEntry
-        ));
+        writer.WriteLine(
+            JsonSerializer.Serialize(
+                entry,
+                Commands.Browse.BlobExportJsonContext.RelaxedEncoding.BlobExportEntry
+            )
+        );
     }
 
     private static bool MatchesFilters(
@@ -165,10 +188,10 @@ public partial class StorageQueryCommandDef(AuthOptionPack auth) : CommandDef
         GlobMatcher? excludeGlob
     )
     {
-        var relativeName = prefix is not null
-            && blobName.StartsWith(prefix, StringComparison.Ordinal)
-            ? blobName[prefix.Length..]
-            : blobName;
+        var relativeName =
+            prefix is not null && blobName.StartsWith(prefix, StringComparison.Ordinal)
+                ? blobName[prefix.Length..]
+                : blobName;
 
         if (includeGlob is not null && !includeGlob.IsMatch(relativeName))
             return false;

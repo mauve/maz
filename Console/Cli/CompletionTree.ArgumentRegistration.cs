@@ -6,7 +6,9 @@ internal static partial class CompletionTree
     {
         CliArgumentCompletionRegistry.Register(
             "maz completion",
-            [["bash", "zsh", "fish", "pwsh"]]
+            [
+                ["bash", "zsh", "fish", "pwsh"],
+            ]
         );
     }
 }

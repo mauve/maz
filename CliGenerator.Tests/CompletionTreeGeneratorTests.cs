@@ -290,10 +290,7 @@ public class CompletionTreeGeneratorTests
             text.Contains("[\"--format\"]"),
             "StaticValueProviders should contain --format alias"
         );
-        Assert.IsTrue(
-            text.Contains("[\"-f\"]"),
-            "StaticValueProviders should contain -f alias"
-        );
+        Assert.IsTrue(text.Contains("[\"-f\"]"), "StaticValueProviders should contain -f alias");
     }
 
     [TestMethod]

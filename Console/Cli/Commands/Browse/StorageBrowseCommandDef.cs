@@ -36,8 +36,7 @@ public partial class StorageBrowseCommandDef(AuthOptionPack auth) : CommandDef
     public readonly CliArgument<string> Target = new()
     {
         Name = "target",
-        Description =
-            "Storage target: account, account/container, or account/container/prefix.",
+        Description = "Storage target: account, account/container, or account/container/prefix.",
     };
 
     internal override IEnumerable<CliArgument<string>> EnumerateArguments()
@@ -68,11 +67,10 @@ public partial class StorageBrowseCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         if (!InteractiveOptionPack.IsEffectivelyInteractive(true))
-            throw new InvocationException(
-                "The browse command requires an interactive terminal."
-            );
+            throw new InvocationException("The browse command requires an interactive terminal.");
 
-        var targetRaw = Target.Value
+        var targetRaw =
+            Target.Value
             ?? throw new InvocationException(
                 "A target is required: account, account/container, or account/container/prefix."
             );
@@ -80,7 +78,12 @@ public partial class StorageBrowseCommandDef(AuthOptionPack auth) : CommandDef
         var log = DiagnosticOptionPack.GetLog();
         var target = StorageTargetHelper.ParseTarget(targetRaw);
         var blobAuth = StorageTargetHelper.BuildAuthStrategy(
-            target.Account, SasToken, AccountKey, _auth, log);
+            target.Account,
+            SasToken,
+            AccountKey,
+            _auth,
+            log
+        );
         var client = new BlobRestClient(blobAuth, log);
 
         if (DiagnosticOptionPack.GetVerboseLevel() > 0)

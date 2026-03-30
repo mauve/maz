@@ -1232,16 +1232,12 @@ public class CliOptionGenerator : IIncrementalGenerator
         sb.AppendLine(
             "    internal static readonly System.Collections.Generic.IReadOnlyDictionary<string, string[]> StaticValueProviders ="
         );
-        sb.AppendLine(
-            "        new System.Collections.Generic.Dictionary<string, string[]>"
-        );
+        sb.AppendLine("        new System.Collections.Generic.Dictionary<string, string[]>");
         sb.AppendLine("        {");
         foreach (var kvp in enumCompletions)
         {
             var valuesLiteral = string.Join(", ", kvp.Value.Select(Quote));
-            sb.AppendLine(
-                $"            [{Quote(kvp.Key)}] = new string[] {{ {valuesLiteral} }},"
-            );
+            sb.AppendLine($"            [{Quote(kvp.Key)}] = new string[] {{ {valuesLiteral} }},");
         }
         sb.AppendLine("        };");
         sb.AppendLine();
