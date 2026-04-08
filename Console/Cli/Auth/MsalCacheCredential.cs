@@ -63,7 +63,7 @@ internal sealed class MsalCacheCredential : TokenCredential
             )
                 continue;
 
-            var refreshToken = _cache.FindRefreshToken(account.HomeAccountId);
+            var refreshToken = _cache.FindRefreshToken(account.HomeAccountId, _oauth.ClientId);
             if (refreshToken is null)
                 continue;
 

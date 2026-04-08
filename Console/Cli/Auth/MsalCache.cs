@@ -76,17 +76,20 @@ internal sealed class MsalCache
 
     /// <summary>
     /// Finds a refresh token for a given home account ID across both caches.
+    /// When <paramref name="clientId"/> is provided only refresh tokens issued
+    /// to that client registration are considered, preventing cross-client
+    /// invalid_grant failures.
     /// </summary>
-    public string? FindRefreshToken(string homeAccountId)
+    public string? FindRefreshToken(string homeAccountId, string? clientId = null)
     {
-        var rt = FindRefreshTokenInFile(AzCliCachePath, homeAccountId);
+        var rt = FindRefreshTokenInFile(AzCliCachePath, homeAccountId, clientId);
         if (rt is not null)
         {
             _log.Credential($"Refresh token found (az cli)");
             return rt;
         }
 
-        rt = FindRefreshTokenInFile(SharedDeveloperCachePath, homeAccountId);
+        rt = FindRefreshTokenInFile(SharedDeveloperCachePath, homeAccountId, clientId);
         if (rt is not null)
             _log.Credential($"Refresh token found (shared developer)");
         return rt;
@@ -283,7 +286,7 @@ internal sealed class MsalCache
         return null;
     }
 
-    private string? FindRefreshTokenInFile(string path, string homeAccountId)
+    private string? FindRefreshTokenInFile(string path, string homeAccountId, string? clientId = null)
     {
         var data = ReadCacheFile(path);
         if (data is null)
@@ -298,8 +301,17 @@ internal sealed class MsalCache
                 continue;
 
             var entryHomeId = entry["home_account_id"]?.GetValue<string>();
-            if (string.Equals(entryHomeId, homeAccountId, StringComparison.OrdinalIgnoreCase))
-                return entry["secret"]?.GetValue<string>();
+            if (!string.Equals(entryHomeId, homeAccountId, StringComparison.OrdinalIgnoreCase))
+                continue;
+
+            if (clientId is not null)
+            {
+                var entryClientId = entry["client_id"]?.GetValue<string>();
+                if (!string.Equals(entryClientId, clientId, StringComparison.OrdinalIgnoreCase))
+                    continue;
+            }
+
+            return entry["secret"]?.GetValue<string>();
         }
 
         return null;

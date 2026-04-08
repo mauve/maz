@@ -2,8 +2,6 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json.Nodes;
 using Azure.Core;
-using Azure.Identity;
-using Console.Cli.Auth;
 using Console.Cli.Http;
 using Console.Cli.Shared;
 
@@ -11,23 +9,18 @@ namespace Console.Cli.Commands.Pim;
 
 /// <summary>
 /// Facade for Azure PIM APIs: ARM role-based PIM and MS Graph group-based PIM.
-/// Uses the ARM credential for Azure RBAC role PIM, and a separate credential
-/// chain with the Microsoft Graph PowerShell client ID for directory role and
-/// group PIM (the Azure CLI app registration lacks PIM Graph scopes).
+/// All authentication uses a single credential (built by <see cref="AuthOptionPack.GetPimCredential"/>)
+/// so a single browser login covers both ARM and Graph PIM resources.
 /// </summary>
 internal sealed class PimClient
 {
     private readonly AzureRestClient _arm;
-    private readonly TokenCredential _credential;
     private readonly TokenCredential _graphPimCredential;
     private readonly DiagnosticLog _log;
     private static readonly HttpClient Http = new();
 
     private const string ArmPimApiVersion = "2020-10-01";
     private const string GraphBaseUrl = "https://graph.microsoft.com/v1.0";
-
-    /// <summary>Microsoft Graph PowerShell / CLI app registration, has PIM scopes preauthorized.</summary>
-    private const string GraphPowerShellClientId = "14d82eec-204b-4c2f-b7e8-296a70dab67e";
 
     private static readonly string[] DirectoryRoleScopes =
     [
@@ -38,23 +31,11 @@ internal sealed class PimClient
         "https://graph.microsoft.com/PrivilegedAccess.ReadWrite.AzureADGroup",
     ];
 
-    public PimClient(TokenCredential credential, DiagnosticLog log)
+    public PimClient(TokenCredential armCredential, TokenCredential graphPimCredential, DiagnosticLog log)
     {
-        _credential = credential;
         _log = log;
-        _arm = new AzureRestClient(credential, log);
-
-        // Build a separate credential chain for Graph PIM calls using the
-        // Graph PowerShell app registration which has PIM scopes preauthorized.
-        var cache = new MsalCache(log);
-        var graphOAuth = new OAuth2Client(cache, log, clientId: GraphPowerShellClientId);
-        _graphPimCredential = new CachingTokenCredential(
-            new ChainedTokenCredential(
-                new MsalCacheCredential(cache, graphOAuth, log),
-                new BrowserCredential(graphOAuth, log)
-            ),
-            log
-        );
+        _graphPimCredential = graphPimCredential;
+        _arm = new AzureRestClient(armCredential, log);
     }
 
     // ── Eligible assignments ──────────────────────────────────────────────
@@ -564,11 +545,7 @@ internal sealed class PimClient
     )
     {
         scopes ??= ["https://graph.microsoft.com/.default"];
-        // Use the Graph PowerShell credential for PIM-scoped calls,
-        // fall back to the default credential for .default calls (name resolution etc.)
-        var cred = scopes[0].Contains("graph.microsoft.com/.default")
-            ? _credential
-            : _graphPimCredential;
+        var cred = _graphPimCredential;
         var token = await cred.GetTokenAsync(new TokenRequestContext(scopes), ct);
 
         var request = new HttpRequestMessage(method, url);
@@ -642,7 +619,7 @@ internal sealed class PimClient
 
         try
         {
-            var token = await _credential.GetTokenAsync(
+            var token = await _graphPimCredential.GetTokenAsync(
                 new TokenRequestContext(["https://graph.microsoft.com/.default"]),
                 ct
             );

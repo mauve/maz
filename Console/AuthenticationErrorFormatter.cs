@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Azure.Identity;
 using Console.Cli;
+using Console.Cli.Auth;
 using Console.Rendering;
 
 namespace Console;
@@ -19,17 +20,17 @@ internal static partial class AuthenticationErrorFormatter
         ["AADSTS50173"] =
             "The token was issued before the password was changed. Please re-authenticate.",
         ["AADSTS65001"] = "The application requires consent that has not been granted.",
+        ["AADSTS65004"] = "The user did not consent to the application.",
         ["AADSTS7000215"] = "Invalid client secret.",
         ["AADSTS700016"] = "The application was not found in the directory.",
+        ["AADSTS50105"] = "The user is not assigned to a role for the application.",
     };
 
-    private static readonly Dictionary<string, (string Name, string[] FixHints)> CredentialHints =
+    // Hints for Azure SDK credential types that we cannot control the exception types of.
+    // Keyed on substrings that appear in ChainedTokenCredential's aggregated message.
+    private static readonly Dictionary<string, (string Name, string[] FixHints)> ExternalCredentialHints =
         new()
         {
-            ["MsalCacheCredential"] = (
-                "MSAL Cache",
-                ["Re-authenticate:", "  maz logout", "  maz login"]
-            ),
             ["Azure CLI"] = (
                 "Azure CLI",
                 ["Re-authenticate:", "  maz login", "  (or: az logout && az login)"]
@@ -59,7 +60,6 @@ internal static partial class AuthenticationErrorFormatter
                     "Verify the managed identity is assigned to this resource and has the required roles.",
                 ]
             ),
-            ["BrowserCredential"] = ("Browser", ["Re-authenticate:", "  maz login"]),
             ["InteractiveBrowserCredential"] = (
                 "Interactive Browser",
                 ["Re-authenticate:", "  maz login"]
@@ -92,46 +92,136 @@ internal static partial class AuthenticationErrorFormatter
     )
     {
         var sb = new StringBuilder();
-        var allMessages = CollectMessages(ex);
-
-        var aadCode = ExtractAadStsCode(allMessages);
-        var failedCredential = DetectFailedCredential(allMessages, configuredTypes);
-        var tenantId = ExtractTenantId(allMessages);
-
         sb.AppendLine(Ansi.Red(Ansi.Bold("Authentication failed")));
         sb.AppendLine();
 
-        // Describe what failed
+        if (ex is BrowserAuthException bae)
+            FormatBrowserAuthFailure(sb, bae);
+        else
+            FormatChainedAuthFailure(sb, ex, configuredTypes);
+
+        return sb.ToString().TrimEnd();
+    }
+
+    private static void FormatBrowserAuthFailure(StringBuilder sb, BrowserAuthException ex)
+    {
         var entries = new List<(string, string)>();
-        if (
-            failedCredential is not null
-            && CredentialHints.TryGetValue(failedCredential, out var hint)
-        )
+
+        entries.Add(("Credential", Ansi.Bold("Browser")));
+
+        if (ex.AadError is not null)
+        {
+            var errorValue = Ansi.Yellow(ex.AadError);
+            entries.Add(("Error", errorValue));
+        }
+
+        if (ex.AadStsCode is not null)
+        {
+            var stsValue = Ansi.Yellow(ex.AadStsCode);
+            if (AadStsDescriptions.TryGetValue(ex.AadStsCode, out var stsDesc))
+                stsValue += $" \u2014 {stsDesc}";
+            entries.Add(("AADSTS", stsValue));
+        }
+
+        if (ex.AadErrorDescription is not null && ex.AadErrorDescription != ex.AadError)
+            entries.Add(("Detail", Ansi.Dim(TruncateDescription(ex.AadErrorDescription))));
+
+        AppendDefinitionList(sb, entries);
+        sb.AppendLine();
+
+        // Contextual remediation based on the typed error
+        sb.AppendLine(Ansi.Bold("  To fix:"));
+        foreach (var line in GetBrowserFixHints(ex))
+            sb.AppendLine($"    {line}");
+        sb.AppendLine();
+    }
+
+    private static IEnumerable<string> GetBrowserFixHints(BrowserAuthException ex)
+    {
+        if (ex.IsUserCancellation)
+        {
+            yield return "You declined the sign-in request.";
+            yield return "Run 'maz login' again if this was unintentional.";
+            yield break;
+        }
+
+        if (ex.IsConsentRequired)
+        {
+            yield return "The application requires admin consent.";
+            yield return "Ask your Azure AD administrator to grant consent,";
+            yield return "or configure a custom app registration (see docs/custom-app-registration.md).";
+            yield break;
+        }
+
+        switch (ex.AadStsCode)
+        {
+            case "AADSTS50076" or "AADSTS50079":
+                yield return "Multi-factor authentication is required.";
+                yield return "Run 'maz login' and complete the MFA prompt.";
+                yield break;
+            case "AADSTS700082" or "AADSTS70043":
+                yield return "Your session has expired.";
+                yield return "Run:  maz logout && maz login";
+                yield break;
+            case "AADSTS50173":
+                yield return "Your password was changed since this token was issued.";
+                yield return "Run:  maz logout && maz login";
+                yield break;
+            case "AADSTS700016":
+                yield return "The application was not found in the directory.";
+                yield return "Check the client ID in your maz configuration.";
+                yield break;
+            case "AADSTS50105":
+                yield return "Your account is not assigned to a role for this application.";
+                yield return "Ask your administrator to assign you access.";
+                yield break;
+        }
+
+        yield return "Re-authenticate:";
+        yield return "  maz logout";
+        yield return "  maz login";
+    }
+
+    private static void FormatChainedAuthFailure(
+        StringBuilder sb,
+        AuthenticationFailedException ex,
+        IReadOnlyList<CredentialType>? configuredTypes
+    )
+    {
+        var message = CollectMessages(ex);
+
+        // Extract AADSTS code from the aggregated message — for Azure SDK credentials
+        // (CLI, PowerShell, etc.) we cannot control the exception types, so we still
+        // parse the message here.
+        var aadCode = ExtractAadStsCode(message);
+
+        // Detect which external credential failed based on known message substrings.
+        var failedHintKey = DetectExternalCredential(message, configuredTypes);
+
+        var entries = new List<(string, string)>();
+
+        if (failedHintKey is not null && ExternalCredentialHints.TryGetValue(failedHintKey, out var hint))
             entries.Add(("Credential", Ansi.Bold(hint.Name)));
+
         if (aadCode is not null)
         {
             var errorValue = Ansi.Yellow(aadCode);
             if (AadStsDescriptions.TryGetValue(aadCode, out var desc))
                 errorValue += $" \u2014 {desc}";
-            entries.Add(("Error", errorValue));
+            entries.Add(("AADSTS", errorValue));
         }
+
+        var tenantId = ExtractTenantId(message);
         if (tenantId is not null)
             entries.Add(("Tenant", Ansi.Dim(tenantId)));
 
         if (entries.Count > 0)
         {
-            using var block = new StringWriter();
-            DefinitionList.Write(block, entries);
-            sb.Append(block.ToString());
+            AppendDefinitionList(sb, entries);
+            sb.AppendLine();
         }
 
-        sb.AppendLine();
-
-        // Remediation hints from our own credential descriptions
-        if (
-            failedCredential is not null
-            && CredentialHints.TryGetValue(failedCredential, out var credHint)
-        )
+        if (failedHintKey is not null && ExternalCredentialHints.TryGetValue(failedHintKey, out var credHint))
         {
             sb.AppendLine(Ansi.Bold("  To fix:"));
             foreach (var line in credHint.FixHints)
@@ -139,10 +229,10 @@ internal static partial class AuthenticationErrorFormatter
             sb.AppendLine();
         }
 
-        // Suggest alternate credential types if configured types are known
+        // Suggest alternate credential types when the configured chain is known
         if (configuredTypes is { Count: > 0 })
         {
-            var alternates = SuggestAlternates(configuredTypes, failedCredential);
+            var alternates = SuggestAlternates(configuredTypes, failedHintKey);
             if (alternates.Count > 0)
             {
                 sb.AppendLine(Ansi.Dim("  Alternatively, try a different credential type:"));
@@ -151,8 +241,13 @@ internal static partial class AuthenticationErrorFormatter
                 sb.AppendLine();
             }
         }
+    }
 
-        return sb.ToString().TrimEnd();
+    private static void AppendDefinitionList(StringBuilder sb, List<(string, string)> entries)
+    {
+        using var block = new StringWriter();
+        DefinitionList.Write(block, entries);
+        sb.Append(block.ToString());
     }
 
     private static string CollectMessages(Exception? ex)
@@ -174,44 +269,52 @@ internal static partial class AuthenticationErrorFormatter
     }
 
     /// <summary>
-    /// Maps CredentialType enum to the hint key strings used in CredentialHints.
+    /// Detects which external (Azure SDK) credential failed by scanning the aggregated
+    /// ChainedTokenCredential message for known credential name substrings. This string
+    /// matching is limited to credentials whose exception types we cannot control.
     /// </summary>
-    private static readonly Dictionary<CredentialType, string> CredentialTypeToHintKey = new()
-    {
-        [CredentialType.MsalCache] = "MsalCacheCredential",
-        [CredentialType.Cli] = "Azure CLI",
-        [CredentialType.Dev] = "Azure Developer CLI",
-        [CredentialType.PowerShell] = "Azure PowerShell",
-        [CredentialType.Env] = "EnvironmentCredential",
-        [CredentialType.ManagedIdentity] = "ManagedIdentityCredential",
-        [CredentialType.Browser] = "BrowserCredential",
-        [CredentialType.VisualStudio] = "VisualStudioCredential",
-        [CredentialType.SharedTokenCache] = "SharedTokenCacheCredential",
-        [CredentialType.DeviceCode] = "DeviceCodeCredential",
-        [CredentialType.WorkloadIdentity] = "WorkloadIdentityCredential",
-    };
-
-    private static string? DetectFailedCredential(
+    private static string? DetectExternalCredential(
         string messages,
         IReadOnlyList<CredentialType>? configuredTypes
     )
     {
-        // Only match credentials actually in the configured chain
+        // Walk configured types in reverse — the last credential that failed is most relevant.
         if (configuredTypes is { Count: > 0 })
         {
-            // Walk the chain in reverse — the last credential that failed is most relevant
             for (int i = configuredTypes.Count - 1; i >= 0; i--)
             {
                 if (
                     CredentialTypeToHintKey.TryGetValue(configuredTypes[i], out var key)
+                    && ExternalCredentialHints.ContainsKey(key)
                     && messages.Contains(key, StringComparison.OrdinalIgnoreCase)
                 )
                     return key;
             }
         }
 
+        // Fallback: scan all known hint keys
+        foreach (var key in ExternalCredentialHints.Keys)
+        {
+            if (messages.Contains(key, StringComparison.OrdinalIgnoreCase))
+                return key;
+        }
+
         return null;
     }
+
+    private static readonly Dictionary<CredentialType, string> CredentialTypeToHintKey = new()
+    {
+        [CredentialType.Cli] = "Azure CLI",
+        [CredentialType.Dev] = "Azure Developer CLI",
+        [CredentialType.PowerShell] = "Azure PowerShell",
+        [CredentialType.Env] = "EnvironmentCredential",
+        [CredentialType.ManagedIdentity] = "ManagedIdentityCredential",
+        [CredentialType.Browser] = "InteractiveBrowserCredential",
+        [CredentialType.VisualStudio] = "VisualStudioCredential",
+        [CredentialType.SharedTokenCache] = "SharedTokenCacheCredential",
+        [CredentialType.DeviceCode] = "DeviceCodeCredential",
+        [CredentialType.WorkloadIdentity] = "WorkloadIdentityCredential",
+    };
 
     private static string? ExtractTenantId(string messages)
     {
@@ -221,10 +324,9 @@ internal static partial class AuthenticationErrorFormatter
 
     private static List<string> SuggestAlternates(
         IReadOnlyList<CredentialType> configured,
-        string? failedCredential
+        string? failedHintKey
     )
     {
-        // Map CredentialType to the description string used in CLI option values
         static string ToCliValue(CredentialType t) =>
             t switch
             {
@@ -243,9 +345,18 @@ internal static partial class AuthenticationErrorFormatter
             };
 
         var failedType = CredentialTypeToHintKey
-            .FirstOrDefault(kv => kv.Value == failedCredential)
+            .FirstOrDefault(kv => kv.Value == failedHintKey)
             .Key;
         return configured.Where(t => t != failedType).Select(ToCliValue).ToList();
+    }
+
+    private static string TruncateDescription(string description)
+    {
+        // AAD descriptions often contain a long trace ID at the end after "Trace ID:"
+        var traceIdx = description.IndexOf("Trace ID:", StringComparison.OrdinalIgnoreCase);
+        if (traceIdx > 0)
+            description = description[..traceIdx].TrimEnd(' ', '\n', '\r', '.');
+        return description;
     }
 
     [GeneratedRegex(@"AADSTS\d+")]

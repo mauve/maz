@@ -40,7 +40,6 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog();
-        var cred = _auth.GetCredential(log);
         var isInteractive = InteractiveOptionPack.IsEffectivelyInteractive(
             _interactive.Interactive
         );
@@ -49,13 +48,14 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
         if (string.IsNullOrWhiteSpace(nameValue))
             throw new InvocationException("The <name> argument is required.");
 
-        // 1. Resolve current user's principal ID
+        var (armCred, pimCred) = _auth.GetPimCredentials(log);
         var principalId =
-            await PrincipalResolver.ResolveAsync("me", cred, log, ct)
+            await PrincipalResolver.ResolveAsync("me", armCred, log, ct)
             ?? throw new InvocationException("Could not resolve current user identity.");
 
-        // 2. Query active roles, directory roles, and groups in parallel
-        var pimClient = new PimClient(cred, log);
+        var pimClient = new PimClient(armCred, pimCred, log);
+
+        // Query active roles, directory roles, and groups in parallel
         Task<List<PimEligibleAssignment>> rolesTask;
         Task<List<PimEligibleAssignment>> dirRolesTask;
         Task<List<PimEligibleAssignment>> groupsTask;
@@ -179,7 +179,7 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
                         );
                     }
 
-                    var armClient = new AzureRestClient(cred, log);
+                    var armClient = new AzureRestClient(armCred, log);
                     await LroPoller.PollAsync(response, armClient, "2020-10-01", log, ct);
                     break;
                 }

@@ -53,8 +53,22 @@ internal sealed class BrowserCredential : TokenCredential
             var expiresOn = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresIn);
             return new AccessToken(response.AccessToken, expiresOn);
         }
-        catch (Exception ex) when (ex is not CredentialUnavailableException)
+        catch (AadAuthorizationException ex)
         {
+            // AAD actively rejected the request (user denied, consent missing, policy blocked, etc.)
+            // Throw AuthenticationFailedException to stop the ChainedTokenCredential chain — there
+            // is no point trying another credential when the user or AAD has refused this one.
+            throw new BrowserAuthException(ex);
+        }
+        catch (OAuth2Exception ex)
+        {
+            // Token exchange failed after a successful redirect (e.g. invalid_grant).
+            throw new BrowserAuthException(ex);
+        }
+        catch (Exception ex) when (ex is not AuthenticationFailedException)
+        {
+            // Transient issue (timeout, listener error, network) — allow the chain to try
+            // the next credential type if one is configured.
             throw new CredentialUnavailableException(
                 $"Interactive browser authentication failed: {ex.Message}",
                 ex

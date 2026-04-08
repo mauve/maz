@@ -23,6 +23,8 @@ internal sealed class OAuth2Client
     private readonly DiagnosticLog _log;
     private readonly string _clientId;
 
+    public string ClientId => _clientId;
+
     public OAuth2Client(
         MsalCache cache,
         DiagnosticLog log,
@@ -78,10 +80,25 @@ internal sealed class OAuth2Client
 
             var query = context.Request.Url?.Query;
             var queryParams = System.Web.HttpUtility.ParseQueryString(query ?? "");
+
+            var errorCode = queryParams["error"];
+            if (errorCode is not null)
+            {
+                var errorDescription = queryParams["error_description"] ?? errorCode;
+                var authEx = new AadAuthorizationException(errorCode, errorDescription);
+                var errorHtml = System.Text.Encoding.UTF8.GetBytes(BuildLoginErrorHtml(authEx));
+                context.Response.StatusCode = 400;
+                context.Response.ContentType = "text/html";
+                context.Response.ContentLength64 = errorHtml.Length;
+                await context.Response.OutputStream.WriteAsync(errorHtml, ct);
+                context.Response.Close();
+                throw authEx;
+            }
+
             code =
                 queryParams["code"]
                 ?? throw new InvalidOperationException(
-                    $"Authorization failed: {queryParams["error_description"] ?? queryParams["error"] ?? "no code received"}"
+                    "Authorization failed: no code received"
                 );
 
             var returnedState = queryParams["state"];
@@ -506,7 +523,95 @@ internal sealed class OAuth2Client
         return port;
     }
 
-    // ── Browser success page ──────────────────────────────────────────
+    // ── Browser success / error pages ─────────────────────────────────
+
+    private static string BuildLoginErrorHtml(AadAuthorizationException ex)
+    {
+        var message = System.Web.HttpUtility.HtmlEncode(ex.AadErrorDescription);
+        var hint = GetLoginErrorHint(ex);
+        var hintHtml = hint is not null
+            ? $"""<div class="hint">{System.Web.HttpUtility.HtmlEncode(hint)}</div>"""
+            : """<div class="hint">return to your terminal for details</div>""";
+
+        return $$"""
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>maz — authentication error</title>
+        <style>
+          *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a2e;
+            font-family: 'Courier New', Courier, monospace;
+          }
+          .card { text-align: center; padding: 3rem 4rem; max-width: 640px; }
+          pre.logo {
+            font-size: clamp(0.55rem, 1.8vw, 1rem);
+            line-height: 1.15;
+            letter-spacing: 0.05em;
+            white-space: pre;
+            display: inline-block;
+            color: #f87171;
+          }
+          .status {
+            margin-top: 1.8rem;
+            font-size: 1.1rem;
+            color: #f87171;
+          }
+          .message {
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: #9ca3af;
+            word-break: break-word;
+          }
+          .hint {
+            margin-top: 1.6rem;
+            font-size: 0.85rem;
+            color: #6b7280;
+          }
+        </style>
+        </head>
+        <body>
+          <div class="card">
+            <pre class="logo">&#10;███╗   ███╗ █████╗ ███████╗&#10;████╗ ████║██╔══██╗╚══███╔╝&#10;██╔████╔██║███████║  ███╔╝ &#10;██║╚██╔╝██║██╔══██║ ███╔╝  &#10;██║ ╚═╝ ██║██║  ██║███████╗&#10;╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝</pre>
+            <div class="status">&#10007; authentication failed</div>
+            <div class="message">{{message}}</div>
+            {{hintHtml}}
+          </div>
+        </body>
+        </html>
+        """;
+    }
+
+    private static string? GetLoginErrorHint(AadAuthorizationException ex) =>
+        ex switch
+        {
+            { IsUserCancellation: true } =>
+                "You declined the sign-in. Close this tab and try again if this was unintentional.",
+            { IsConsentRequired: true } =>
+                "This application needs admin consent. Ask your Azure AD administrator to grant access, or configure a custom app registration (see docs/custom-app-registration.md).",
+            { AadStsCode: "AADSTS50076" or "AADSTS50079" } =>
+                "Multi-factor authentication is required. Close this tab and try the command again.",
+            { AadStsCode: "AADSTS700082" or "AADSTS70043" } =>
+                "Your session has expired. Close this tab and run 'maz login' again.",
+            { AadStsCode: "AADSTS50173" } =>
+                "Your password was changed. Close this tab and run 'maz login' again.",
+            { AadStsCode: "AADSTS70011" } =>
+                "The requested scope is not valid for this application. Check your configuration.",
+            { AadStsCode: "AADSTS700016" } =>
+                "The application was not found in the directory. Verify the client ID in your configuration.",
+            { AadStsCode: "AADSTS50105" } =>
+                "Your account is not assigned to this application. Ask your administrator to assign you access.",
+            { AadError: "interaction_required" or "login_required" } =>
+                "Your session requires re-authentication. Close this tab and run 'maz login' again.",
+            _ => null,
+        };
 
     private const string LoginSuccessHtml = """
         <!DOCTYPE html>
@@ -608,10 +713,12 @@ internal sealed class OAuth2TokenResponse
 internal sealed class OAuth2Exception : Exception
 {
     public string Error { get; }
+    public string Description { get; }
 
     public OAuth2Exception(string error, string description)
         : base($"{error}: {description}")
     {
         Error = error;
+        Description = description;
     }
 }

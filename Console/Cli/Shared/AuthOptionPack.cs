@@ -45,7 +45,11 @@ public partial class AuthOptionPack : OptionPack
     [CliOption("--auth-default-tenant-id", Global = true, Advanced = true)]
     public partial string? DefaultTenantId { get; }
 
-    /// <summary>Client ID of the identity which will authenticate.</summary>
+    /// <summary>
+    /// Client ID of the Azure AD application to use for all interactive and MSAL
+    /// authentication flows. When set, a single browser login covers both ARM and
+    /// Graph PIM resources. See `docs/custom-app-registration.md` for setup.
+    /// </summary>
     [CliOption("--auth-client-id", Global = true, Advanced = true, EnvVar = "AZURE_CLIENT_ID")]
     public partial string? AuthenticationClientId { get; }
 
@@ -76,8 +80,13 @@ public partial class AuthOptionPack : OptionPack
 
     public bool GetInteractive() => Interactive;
 
+    /// <summary>Client ID of the Microsoft Graph PowerShell app, which has PIM scopes pre-authorized.</summary>
+    internal const string GraphPowerShellClientId = "14d82eec-204b-4c2f-b7e8-296a70dab67e";
+
     private TokenCredential? _credential;
     private DiagnosticLog? _credentialLog;
+    private TokenCredential? _pimCredential;
+    private DiagnosticLog? _pimCredentialLog;
 
     public TokenCredential GetCredential(DiagnosticLog log)
     {
@@ -85,11 +94,52 @@ public partial class AuthOptionPack : OptionPack
             return _credential;
         log.Credential($"Chain: {string.Join(" → ", AllowedCredentialTypes)}");
         _credentialLog = log;
-        _credential = new CachingTokenCredential(BuildCredentialChain(log), log);
+        _credential = new CachingTokenCredential(
+            BuildCredentialChain(log, oauthClientId: AuthenticationClientId),
+            log
+        );
         return _credential;
     }
 
-    private ChainedTokenCredential BuildCredentialChain(DiagnosticLog log)
+    /// <summary>
+    /// Builds a credential using the Microsoft Graph PowerShell client ID for
+    /// interactive and MSAL flows (or <see cref="AuthenticationClientId"/> when set).
+    /// A single browser login then covers both ARM and Graph PIM resources,
+    /// reducing browser prompts to one.
+    /// </summary>
+    public TokenCredential GetPimCredential(DiagnosticLog log)
+    {
+        if (_pimCredential is not null && _pimCredentialLog == log)
+            return _pimCredential;
+        var clientId = AuthenticationClientId ?? GraphPowerShellClientId;
+        var label = AuthenticationClientId is not null ? "custom" : "PIM";
+        log.Credential($"Chain: {string.Join(" → ", AllowedCredentialTypes)} ({label})");
+        _pimCredentialLog = log;
+        _pimCredential = new CachingTokenCredential(
+            BuildCredentialChain(log, oauthClientId: clientId),
+            log
+        );
+        return _pimCredential;
+    }
+
+    /// <summary>
+    /// Returns the (Arm, Graph) credential pair for PIM commands.
+    /// When <see cref="AuthenticationClientId"/> is configured the same credential
+    /// is returned for both, so a single browser login covers ARM and Graph PIM.
+    /// Otherwise the default ARM credential and the Graph PowerShell credential
+    /// are returned separately (two browser logins on a fresh auth).
+    /// </summary>
+    public (TokenCredential Arm, TokenCredential Graph) GetPimCredentials(DiagnosticLog log)
+    {
+        if (AuthenticationClientId is not null)
+        {
+            var unified = GetPimCredential(log);
+            return (unified, unified);
+        }
+        return (GetCredential(log), GetPimCredential(log));
+    }
+
+    private ChainedTokenCredential BuildCredentialChain(DiagnosticLog log, string? oauthClientId = null)
     {
         var allowedTypes = AllowedCredentialTypes;
         var authorityHost = AuthorityHost;
@@ -152,7 +202,7 @@ public partial class AuthOptionPack : OptionPack
             {
                 case CredentialType.MsalCache:
                     var cache = new MsalCache(log);
-                    var oauth = new OAuth2Client(cache, log);
+                    var oauth = new OAuth2Client(cache, log, clientId: oauthClientId);
                     credentials.Add(new MsalCacheCredential(cache, oauth, log));
                     break;
                 case CredentialType.Cli:
@@ -191,7 +241,7 @@ public partial class AuthOptionPack : OptionPack
 
                     {
                         var browserCache = new MsalCache(log);
-                        var browserOAuth = new OAuth2Client(browserCache, log);
+                        var browserOAuth = new OAuth2Client(browserCache, log, clientId: oauthClientId);
                         credentials.Add(new BrowserCredential(browserOAuth, log, defaultTenantId));
                     }
                     break;

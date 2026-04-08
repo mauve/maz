@@ -39,17 +39,16 @@ public partial class PimListCommandDef(AuthOptionPack auth) : CommandDef
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog();
-        var cred = _auth.GetCredential(log);
         var filterValue = GetValue(Filter);
 
-        // 1. Resolve current user
+        var (armCred, pimCred) = _auth.GetPimCredentials(log);
         var principalId =
-            await PrincipalResolver.ResolveAsync("me", cred, log, ct)
+            await PrincipalResolver.ResolveAsync("me", armCred, log, ct)
             ?? throw new InvocationException("Could not resolve current user identity.");
 
-        // 2. Query eligible and active assignments in parallel
-        var pimClient = new PimClient(cred, log);
+        var pimClient = new PimClient(armCred, pimCred, log);
 
+        // Query eligible and active assignments in parallel
         var eligibleRolesTask = pimClient.ListEligibleRolesAsync(principalId, ct);
         var eligibleDirRolesTask = pimClient.ListEligibleDirectoryRolesAsync(principalId, ct);
         var eligibleGroupsTask = pimClient.ListEligibleGroupsAsync(principalId, ct);

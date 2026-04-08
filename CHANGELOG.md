@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+### Added
+- `maz pim` — PIM (Privileged Identity Management) commands for activating and deactivating eligible role assignments
+  - `maz pim list` — list eligible and active role, directory role, and group assignments
+  - `maz pim activate <name>` — activate an eligible assignment by name with optional justification and duration
+  - `maz pim deactivate <name>` — deactivate an active assignment
+  - Covers Azure RBAC roles (ARM), Azure AD directory roles, and PIM-managed groups
+- `maz configure` — new step 6/6: optional custom Azure AD application (client) ID
+  - A single custom app registration covering both ARM and Graph PIM scopes reduces browser sign-ins from 2 to 1 after a fresh logout
+  - See `docs/custom-app-registration.md` for setup instructions
+- `docs/custom-app-registration.md` — guide for registering a custom Azure AD app to enable single sign-in for PIM commands
+- `AadAuthorizationException` — structured exception carrying `AadError`, `AadErrorDescription`, `AadStsCode`, `IsUserCancellation`, and `IsConsentRequired` properties; thrown by the OAuth2 redirect handler instead of a plain `InvalidOperationException`
+- `BrowserAuthException` — typed subclass of `AuthenticationFailedException` thrown by `BrowserCredential` when interactive auth definitively fails; stops the credential chain immediately and carries the same structured AAD error properties
+
+### Changed
+- `maz pim` auth: unified credential flow uses `GraphPowerShellClientId` for both ARM and Graph PIM calls, reducing browser popups from 3 → 1 after `maz logout`
+  - When `auth-client-id` is configured in `maz configure`, the same credential is used for all PIM calls (1 popup for both ARM and Graph)
+- `MsalCache.FindRefreshToken` now filters by `clientId` when provided, preventing cross-client `invalid_grant` failures caused by refresh tokens issued to a different app registration
+- `BrowserCredential` error handling improved: AAD errors and token exchange failures now throw `BrowserAuthException` (stops credential chain) while transient failures (timeout, network) continue to throw `CredentialUnavailableException` (allows chain to continue)
+- `AuthenticationErrorFormatter` restructured to use typed exception properties instead of string matching:
+  - `BrowserAuthException` is formatted using its structured `AadError`, `AadStsCode`, and convenience properties — no regex or substring matching
+  - Contextual "To fix" hints are now error-specific (consent required, MFA, expired session, app not found, etc.)
+  - String matching is retained only for external Azure SDK credential types whose exception types cannot be changed
+- Browser authentication error page now shows a contextual fix hint based on the specific AAD error code (consent denied, MFA required, session expired, etc.) in addition to the error description
+
 ## [0.10.0] - 2026-03-23
 ### Added
 - `maz iam check` (alias: `maz rbac check`) — inspect RBAC role assignments for a resource

@@ -51,7 +51,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
 
         var existing = MazConfig.Current;
         var boxWidth = WizardUi.GetTermWidth() - 1;
-        const int total = 5;
+        const int total = 6;
 
         // ── Step 1/5: Allowed subscriptions ───────────────────────────────────
         WizardUi.RenderTopBorder("Allowed Subscriptions", 0, total, boxWidth);
@@ -226,7 +226,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         WizardUi.RenderBottomBorder("  ↑↓ to move  Enter to confirm  ", boxWidth);
         System.Console.WriteLine();
 
-        // ── Step 5/5: Require confirmation ────────────────────────────────────
+        // ── Step 5/6: Require confirmation ────────────────────────────────────
         WizardUi.RenderTopBorder("Require Confirmation", 4, total, boxWidth);
         System.Console.WriteLine();
 
@@ -261,6 +261,56 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         WizardUi.RenderBottomBorder("  y / n  Enter to confirm  ", boxWidth);
         System.Console.WriteLine();
 
+        // ── Step 6/6: Custom Azure AD application (optional) ─────────────────
+        WizardUi.RenderTopBorder("Custom Azure AD Application (optional)", 5, total, boxWidth);
+        System.Console.WriteLine();
+        System.Console.WriteLine(
+            "  By default maz uses two Microsoft app registrations: one for Azure"
+        );
+        System.Console.WriteLine(
+            "  Resource Manager and one for Graph PIM, requiring two browser sign-ins"
+        );
+        System.Console.WriteLine(
+            "  after a fresh logout. A custom app with both permission sets reduces"
+        );
+        System.Console.WriteLine("  this to one sign-in.");
+        System.Console.WriteLine();
+        System.Console.WriteLine(
+            "  See docs/custom-app-registration.md for setup instructions."
+        );
+        System.Console.WriteLine();
+
+        var currentClientId = existing.GlobalDefaults.TryGetValue("auth-client-id", out var cid)
+            ? cid
+            : null;
+        var clientIdPrompt = currentClientId is not null
+            ? $" [current: {currentClientId}]"
+            : " (blank = use Microsoft defaults)";
+        System.Console.Write($"  Azure AD application (client) ID{clientIdPrompt}: ");
+        var clientIdInput = System.Console.ReadLine()?.Trim() ?? "";
+
+        string? customClientId;
+        if (!string.IsNullOrEmpty(clientIdInput))
+        {
+            customClientId = clientIdInput;
+            System.Console.WriteLine($"  \x1b[2m→ Client ID: {customClientId}\x1b[0m");
+        }
+        else if (string.IsNullOrEmpty(clientIdInput) && currentClientId is not null)
+        {
+            // Explicit blank entry clears the existing value
+            customClientId = null;
+            System.Console.WriteLine("  \x1b[2m→ Cleared — will use Microsoft defaults\x1b[0m");
+        }
+        else
+        {
+            customClientId = null;
+            System.Console.WriteLine("  \x1b[2m→ Using Microsoft defaults\x1b[0m");
+        }
+
+        System.Console.WriteLine();
+        WizardUi.RenderBottomBorder("  Paste client ID and press Enter  ", boxWidth);
+        System.Console.WriteLine();
+
         // ── Done ───────────────────────────────────────────────────────────────
         WriteConfigFile(
             configPath,
@@ -268,10 +318,11 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
             defaultSubscription,
             defaultRg,
             defaultFormat,
-            requireConfirmation
+            requireConfirmation,
+            customClientId
         );
 
-        WizardUi.RenderTopBorder("Done", 4, total, boxWidth);
+        WizardUi.RenderTopBorder("Done", 5, total, boxWidth);
         System.Console.WriteLine();
         System.Console.WriteLine($"  \x1b[32m✓\x1b[0m  Configuration written to {configPath}");
         System.Console.WriteLine();
@@ -286,7 +337,8 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         string? defaultSubscription,
         string? defaultResourceGroup,
         string defaultFormat,
-        bool requireConfirmation
+        bool requireConfirmation,
+        string? customClientId
     )
     {
         var dir = Path.GetDirectoryName(path);
@@ -330,6 +382,10 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
             w.WriteLine("; resource-group = my-rg");
         w.WriteLine($"format = {defaultFormat}");
         w.WriteLine($"require-confirmation = {requireConfirmation.ToString().ToLowerInvariant()}");
+        if (customClientId is not null)
+            w.WriteLine($"auth-client-id = {customClientId}");
+        else
+            w.WriteLine("; auth-client-id = <guid>  ; custom app for single sign-in (see docs/custom-app-registration.md)");
         w.WriteLine();
 
         w.WriteLine("; Per-command overrides: [cmd.COMMAND PATH]");
