@@ -5,6 +5,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-05-13
+### Added
+- `maz pim` (no subcommand) — interactive TUI when run in a terminal: browse all eligible assignments with Active/Eligible status, pick one, then activate or deactivate it
+- `maz pim activate` — `<name>` argument is now optional; omitting it in interactive mode shows a full picker of all eligible assignments
+- `maz pim activate --scope`/`-s` — filter matches by scope display name (substring), enabling non-interactive disambiguation when the same role is eligible on multiple resources
+- `maz pim deactivate --scope`/`-s` — same scope filter for deactivation
+
+### Changed
+- PIM pickers (`maz pim activate`, `maz pim deactivate`) now use a two-line layout: role/group name and Active/Eligible status on line 1, resource type and scope on line 2 — no more truncation
+- Scope display now resolves subscription display names (via ARM) instead of showing a truncated GUID, and prefixes the resource type (`Subscription: prod`, `Resource group: my-rg (prod)`, `Management group: …`)
+- Non-interactive disambiguation error now says `Use --scope to narrow down or run interactively` instead of `Use a more specific name`
+- `RadioList` supports an optional `multiLine` layout for two-line items
+
 ## [0.11.0] - 2026-04-13
 ### Added
 - `maz pim` — PIM (Privileged Identity Management) commands for activating and deactivating eligible role assignments

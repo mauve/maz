@@ -67,6 +67,13 @@ internal sealed class PimClient
 
         var roleNames = await ResolveRoleDefinitionNamesAsync(roleDefIds!, ct);
 
+        var scopes = items
+            .Select(i => i["properties"]?["scope"]?.GetValue<string>() ?? "")
+            .Where(s => s.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var subNames = await ResolveSubscriptionNamesAsync(scopes, ct);
+
         var result = new List<PimEligibleAssignment>();
         foreach (var item in items)
         {
@@ -80,7 +87,7 @@ internal sealed class PimClient
                     Kind: PimAssignmentKind.Role,
                     DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
                     Scope: scope,
-                    ScopeDisplayName: FormatScope(scope),
+                    ScopeDisplayName: FormatScope(scope, subNames),
                     PrincipalId: principalId,
                     RoleDefinitionId: roleDefId,
                     EligibilityScheduleId: scheduleId,
@@ -267,6 +274,13 @@ internal sealed class PimClient
 
         var roleNames = await ResolveRoleDefinitionNamesAsync(roleDefIds!, ct);
 
+        var scopes = items
+            .Select(i => i["properties"]?["scope"]?.GetValue<string>() ?? "")
+            .Where(s => s.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+        var subNames = await ResolveSubscriptionNamesAsync(scopes, ct);
+
         var result = new List<PimEligibleAssignment>();
         foreach (var item in items)
         {
@@ -280,7 +294,7 @@ internal sealed class PimClient
                     Kind: PimAssignmentKind.Role,
                     DisplayName: roleNames.GetValueOrDefault(roleDefId, roleDefId),
                     Scope: scope,
-                    ScopeDisplayName: FormatScope(scope),
+                    ScopeDisplayName: FormatScope(scope, subNames),
                     PrincipalId: principalId,
                     RoleDefinitionId: roleDefId,
                     EligibilityScheduleId: scheduleId,
@@ -701,17 +715,81 @@ internal sealed class PimClient
         return result;
     }
 
-    private static string FormatScope(string scope)
+    private static string FormatScope(string scope, Dictionary<string, string>? subNames = null)
     {
         // "/subscriptions/{sub}/resourceGroups/{rg}/..." → abbreviated form
         var parts = scope.Split('/', StringSplitOptions.RemoveEmptyEntries);
 
         if (parts.Length >= 4 && parts[0] == "subscriptions" && parts[2] == "resourceGroups")
-            return $"{parts[3]}/{string.Join("/", parts.Skip(4))}".TrimEnd('/');
+        {
+            var subDisplay = subNames?.GetValueOrDefault(parts[1]) ?? parts[1];
+            var rg = parts[3];
+            if (parts.Length > 4)
+            {
+                // Resource within an RG: show sub/rg/resource
+                var rest = string.Join("/", parts.Skip(4));
+                return $"Resource: {subDisplay}/{rg}/{rest}";
+            }
+            return $"Resource group: {rg} ({subDisplay})";
+        }
+
+        if (parts.Length == 0)
+            return "Tenant";
 
         if (parts.Length >= 2 && parts[0] == "subscriptions")
-            return $"subscription:{parts[1][..Math.Min(8, parts[1].Length)]}...";
+        {
+            var subDisplay = subNames?.GetValueOrDefault(parts[1]) ?? parts[1];
+            return $"Subscription: {subDisplay}";
+        }
+
+        if (parts.Length >= 2 && parts[0] == "providers" && parts[1] == "Microsoft.Management" && parts.Length >= 4 && parts[2] == "managementGroups")
+            return $"Management group: {parts[3]}";
 
         return scope;
+    }
+
+    private async Task<Dictionary<string, string>> ResolveSubscriptionNamesAsync(
+        IEnumerable<string> scopes,
+        CancellationToken ct
+    )
+    {
+        var subIds = scopes
+            .Select(s =>
+            {
+                var parts = s.Split('/', StringSplitOptions.RemoveEmptyEntries);
+                return parts.Length >= 2 && parts[0] == "subscriptions" ? parts[1] : null;
+            })
+            .Where(id => id is not null)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        if (subIds.Count == 0)
+            return result;
+
+        var tasks = subIds.Select(async id =>
+        {
+            try
+            {
+                var json = await _arm.SendAsync(
+                    HttpMethod.Get,
+                    $"/subscriptions/{id}",
+                    "2022-09-01",
+                    null,
+                    ct
+                );
+                var name = json["displayName"]?.GetValue<string>() ?? id!;
+                return (Id: id!, Name: name);
+            }
+            catch
+            {
+                return (Id: id!, Name: id!);
+            }
+        });
+
+        foreach (var (id, name) in await Task.WhenAll(tasks))
+            result[id] = name;
+
+        return result;
     }
 }

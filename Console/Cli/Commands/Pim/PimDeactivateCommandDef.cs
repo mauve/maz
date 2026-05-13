@@ -14,6 +14,7 @@ namespace Console.Cli.Commands.Pim;
 ///
 /// Examples:
 ///   maz pim deactivate Reader
+///   maz pim deactivate Reader --scope my-subscription
 ///   maz pim deactivate "Storage Blob"
 ///   maz pim deactivate "Admin Group"
 /// </remarks>
@@ -37,6 +38,9 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
         yield return AssignmentName;
     }
 
+    [CliOption("--scope", "-s")]
+    public partial string? Scope { get; }
+
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog();
@@ -45,6 +49,7 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
         );
 
         var nameValue = GetValue(AssignmentName);
+        var scopeValue = Scope;
         if (string.IsNullOrWhiteSpace(nameValue))
             throw new InvocationException("The <name> argument is required.");
 
@@ -114,10 +119,23 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
             .Where(a => a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase))
             .ToList();
 
+        // 4. Filter by scope if provided
+        if (!string.IsNullOrWhiteSpace(scopeValue))
+        {
+            matches = matches
+                .Where(m =>
+                    m.ScopeDisplayName.Contains(scopeValue, StringComparison.OrdinalIgnoreCase)
+                )
+                .ToList();
+        }
+
         if (matches.Count == 0)
         {
+            var filterDesc = string.IsNullOrWhiteSpace(scopeValue)
+                ? $"'{nameValue}'"
+                : $"'{nameValue}' in scope '{scopeValue}'";
             throw new InvocationException(
-                $"No active PIM assignment found matching '{nameValue}'.\n"
+                $"No active PIM assignment found matching {filterDesc}.\n"
                     + $"Found {allActive.Count} active PIM assignment(s) total."
             );
         }
@@ -143,7 +161,7 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
                 })
                 .ToArray();
 
-            var index = RadioList.Show(items, 0, ct);
+            var index = RadioList.Show(items, 0, multiLine: true, ct);
             selected = matches[index];
         }
         else
@@ -157,7 +175,7 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
             );
             throw new InvocationException(
                 $"Multiple active PIM assignments match '{nameValue}'. "
-                    + $"Use a more specific name or run interactively:\n{listing}"
+                    + $"Use --scope to narrow down or run interactively:\n{listing}"
             );
         }
 

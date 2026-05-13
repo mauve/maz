@@ -11,9 +11,12 @@ namespace Console.Cli.Commands.Pim;
 /// <remarks>
 /// Activates a Privileged Identity Management (PIM) eligible assignment.
 /// Searches across both Azure RBAC roles and Entra ID group memberships.
+/// When run interactively without arguments, shows a picker of all eligible assignments.
 ///
 /// Examples:
+///   maz pim activate
 ///   maz pim activate Reader
+///   maz pim activate Reader --scope my-subscription
 ///   maz pim activate "Storage Blob" --justification "investigating issue" --duration PT4H
 ///   maz pim activate "Admin Group"
 /// </remarks>
@@ -29,7 +32,7 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
     public readonly CliArgument<string> AssignmentName = new()
     {
         Name = "name",
-        Description = "Role or group name to activate (substring match).",
+        Description = "Role or group name to activate (substring match). Omit to pick interactively.",
     };
 
     internal override IEnumerable<CliArgument<string>> EnumerateArguments()
@@ -43,6 +46,9 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
     [CliOption("--duration", "-d")]
     public partial string? Duration { get; }
 
+    [CliOption("--scope", "-s")]
+    public partial string? Scope { get; }
+
     protected override async Task<int> ExecuteAsync(CancellationToken ct)
     {
         var log = DiagnosticOptionPack.GetLog();
@@ -51,8 +57,12 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
         );
 
         var nameValue = GetValue(AssignmentName);
-        if (string.IsNullOrWhiteSpace(nameValue))
-            throw new InvocationException("The <name> argument is required.");
+        var scopeValue = Scope;
+
+        if (string.IsNullOrWhiteSpace(nameValue) && !isInteractive)
+            throw new InvocationException(
+                "The <name> argument is required in non-interactive mode."
+            );
 
         var duration = Duration ?? "PT8H";
 
@@ -119,15 +129,32 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
 
         var allEligible = eligibleRoles.Concat(eligibleDirRoles).Concat(eligibleGroups).ToList();
 
-        // 3. Filter by name (case-insensitive substring)
-        var matches = allEligible
-            .Where(a => a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase))
-            .ToList();
+        // 3. Filter by name (case-insensitive substring), skip if no name provided
+        var matches = string.IsNullOrWhiteSpace(nameValue)
+            ? allEligible
+            : allEligible
+                .Where(a => a.DisplayName.Contains(nameValue, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+        // 4. Filter by scope if provided
+        if (!string.IsNullOrWhiteSpace(scopeValue))
+        {
+            matches = matches
+                .Where(m =>
+                    m.ScopeDisplayName.Contains(scopeValue, StringComparison.OrdinalIgnoreCase)
+                )
+                .ToList();
+        }
 
         if (matches.Count == 0)
         {
+            var filterDesc = string.IsNullOrWhiteSpace(nameValue)
+                ? $"scope '{scopeValue}'"
+                : string.IsNullOrWhiteSpace(scopeValue)
+                    ? $"name '{nameValue}'"
+                    : $"name '{nameValue}' and scope '{scopeValue}'";
             throw new InvocationException(
-                $"No eligible PIM assignment found matching '{nameValue}'.\n"
+                $"No eligible PIM assignment found matching {filterDesc}.\n"
                     + $"Found {allEligible.Count} eligible assignment(s) total."
             );
         }
@@ -140,9 +167,10 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
         }
         else if (isInteractive)
         {
-            System.Console.Error.WriteLine(
-                $"Multiple assignments match '{nameValue}'. Select one:"
-            );
+            var header = string.IsNullOrWhiteSpace(nameValue)
+                ? "Select an assignment to activate:"
+                : $"Multiple assignments match '{nameValue}'. Select one:";
+            System.Console.Error.WriteLine(header);
             var items = matches
                 .Select(m =>
                 {
@@ -153,7 +181,7 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
                 })
                 .ToArray();
 
-            var index = RadioList.Show(items, 0, ct);
+            var index = RadioList.Show(items, 0, multiLine: true, ct);
             selected = matches[index];
         }
         else
@@ -167,7 +195,7 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
             );
             throw new InvocationException(
                 $"Multiple PIM assignments match '{nameValue}'. "
-                    + $"Use a more specific name or run interactively:\n{listing}"
+                    + $"Use --scope to narrow down or run interactively:\n{listing}"
             );
         }
 

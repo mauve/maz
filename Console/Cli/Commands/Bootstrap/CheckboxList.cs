@@ -101,11 +101,25 @@ internal static class RadioList
         (string Label, string Detail)[] items,
         int initialSelected,
         CancellationToken ct
+    ) => Show(items, initialSelected, multiLine: false, ct);
+
+    /// <summary>
+    /// Shows an interactive radio list with an optional two-line layout (label on line 1,
+    /// detail indented on line 2). Returns the selected index, or
+    /// <paramref name="initialSelected"/> on Escape.
+    /// </summary>
+    public static int Show(
+        (string Label, string Detail)[] items,
+        int initialSelected,
+        bool multiLine,
+        CancellationToken ct
     )
     {
         var selected = Math.Clamp(initialSelected, 0, items.Length - 1);
 
-        RenderRadio(items, selected);
+        RenderRadio(items, selected, multiLine);
+
+        int TotalLines() => multiLine ? items.Length * 2 + 1 : items.Length + 1;
 
         while (!ct.IsCancellationRequested)
         {
@@ -118,12 +132,12 @@ internal static class RadioList
                 selected = (selected + 1) % items.Length;
             else if (key.Key == ConsoleKey.Enter)
             {
-                ClearLines(items.Length + 1);
+                ClearLines(TotalLines());
                 return selected;
             }
             else if (key.Key == ConsoleKey.Escape)
             {
-                ClearLines(items.Length + 1);
+                ClearLines(TotalLines());
                 return initialSelected;
             }
             else
@@ -133,26 +147,39 @@ internal static class RadioList
 
             if (redraw)
             {
-                System.Console.Write($"\x1b[{items.Length + 1}A");
-                RenderRadio(items, selected);
+                System.Console.Write($"\x1b[{TotalLines()}A");
+                RenderRadio(items, selected, multiLine);
             }
         }
 
-        ClearLines(items.Length + 1);
+        ClearLines(TotalLines());
         return selected;
     }
 
-    private static void RenderRadio((string Label, string Detail)[] items, int selected)
+    private static void RenderRadio(
+        (string Label, string Detail)[] items,
+        int selected,
+        bool multiLine
+    )
     {
         for (var i = 0; i < items.Length; i++)
         {
             var (label, detail) = items[i];
             if (i == selected)
+            {
                 System.Console.WriteLine(
-                    $"  \x1b[35m❯\x1b[0m \x1b[1m{label, -24}\x1b[0m \x1b[2m{detail}\x1b[0m"
+                    $"  \x1b[35m❯\x1b[0m \x1b[1m{label}\x1b[0m"
                 );
+            }
             else
-                System.Console.WriteLine($"    {label, -24} \x1b[2m{detail}\x1b[0m");
+            {
+                System.Console.WriteLine($"    {label}");
+            }
+
+            if (multiLine)
+                System.Console.WriteLine($"      \x1b[2m{detail}\x1b[0m");
+            else if (!string.IsNullOrEmpty(detail))
+                System.Console.Write($"\x1b[1A\x1b[{label.Length + 5}C \x1b[2m{detail}\x1b[0m\n");
         }
         System.Console.WriteLine("  \x1b[2m↑↓ to move  Enter to confirm\x1b[0m");
     }
