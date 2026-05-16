@@ -105,9 +105,10 @@ internal static partial class AuthenticationErrorFormatter
 
     private static void FormatBrowserAuthFailure(StringBuilder sb, BrowserAuthException ex)
     {
-        var entries = new List<(string, string)>();
-
-        entries.Add(("Credential", Ansi.Bold("Browser")));
+        var entries = new List<(string, string)>
+        {
+            ("Credential", Ansi.Bold("Browser"))
+        };
 
         if (ex.AadError is not null)
         {

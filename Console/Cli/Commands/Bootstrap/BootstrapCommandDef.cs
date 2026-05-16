@@ -45,7 +45,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         var shell = DetectShell();
         var completionsSetup = IsCompletionAlreadySetup(shell);
         var content = await LoadGettingStartedAsync(ct);
-        var sections = content is not null ? SplitSections(content) : new List<string>();
+        var sections = content is not null ? SplitSections(content) : [];
         var steps = BuildWizardSteps(shell, completionsSetup, sections);
 
         await RunWizardAsync(steps, ct);
@@ -72,9 +72,8 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
         List<string> sections
     )
     {
-        var steps = new List<WizardStep>();
-
-        steps.Add(
+        var steps = new List<WizardStep>
+        {
             new WizardStep(
                 "Welcome to maz",
                 async w =>
@@ -95,7 +94,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                 },
                 DemoTag: "logo"
             )
-        );
+        };
 
         foreach (var section in sections)
         {

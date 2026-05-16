@@ -45,7 +45,7 @@ internal sealed partial class KustoTuiApp : IAsyncDisposable
 
     // Schema pane (initialised after _schema is constructed)
     private readonly SchemaPane _schemaPane;
-    private HashSet<string> _activeTables = new();
+    private HashSet<string> _activeTables = [];
     private string _lastQueriedText = ""; // for active-table re-detection after schema loads
     private bool _schemaTablesCached = false; // flipped once, triggers active-table re-detection
 

@@ -513,7 +513,7 @@ internal sealed class EditorPane
     {
         var matchSet = item.MatchIndices is not null
             ? new HashSet<int>(item.MatchIndices)
-            : new HashSet<int>();
+            : [];
 
         var sb = new System.Text.StringBuilder();
 

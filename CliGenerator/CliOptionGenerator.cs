@@ -1182,11 +1182,11 @@ public class CliOptionGenerator : IIncrementalGenerator
 
         // Collect dynamic providers: alias → fully-qualified type name
         var dynamicProviders = new Dictionary<string, string>(StringComparer.Ordinal);
-        CollectDynamicProviders(rootModel, dict, dynamicProviders, new HashSet<string>());
+        CollectDynamicProviders(rootModel, dict, dynamicProviders, []);
 
         // Collect enum completions: alias → allowed values
         var enumCompletions = new Dictionary<string, string[]>(StringComparer.Ordinal);
-        CollectEnumCompletions(rootModel, dict, enumCompletions, new HashSet<string>());
+        CollectEnumCompletions(rootModel, dict, enumCompletions, []);
 
         // Build the node tree
         var visited = new HashSet<string>(StringComparer.Ordinal);
@@ -1378,7 +1378,7 @@ public class CliOptionGenerator : IIncrementalGenerator
             ?? (fieldName is not null ? FieldToCliName(fieldName) : null)
             ?? model.ClassName.ToLowerInvariant();
 
-        var options = CollectNodeOptions(model, dict, manualDict, new HashSet<string>());
+        var options = CollectNodeOptions(model, dict, manualDict, []);
 
         var children = new List<NodeData>();
         foreach (var child in model.Children)
@@ -1405,7 +1405,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                         inlinedModel,
                         dict,
                         manualDict,
-                        new HashSet<string>()
+                        []
                     );
                     foreach (var o in inlinedOpts)
                         if (!options.Contains(o))

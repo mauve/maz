@@ -493,7 +493,7 @@ public sealed class BlobRestClient
         Dictionary<string, string>? tags = null;
         if (tagsElement is not null)
         {
-            tags = new Dictionary<string, string>();
+            tags = [];
             foreach (var tag in tagsElement.Elements("Tag"))
             {
                 var key = tag.Element("Key")?.Value;

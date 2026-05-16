@@ -289,7 +289,7 @@ public sealed class BlockTransferEngine
         // Chunked upload
         var blockCount = (int)Math.Ceiling((double)fileBytes.Length / _blockSize);
         var blockIds = new string[blockCount];
-        var completedBlocks = _journal?.GetCompletedBlocks(item.SourcePath) ?? new HashSet<int>();
+        var completedBlocks = _journal?.GetCompletedBlocks(item.SourcePath) ?? [];
         var uploadSemaphore = new SemaphoreSlim(_blocksPerBlob, _blocksPerBlob);
         long totalUploaded = completedBlocks.Count * (long)_blockSize;
 
@@ -397,7 +397,7 @@ public sealed class BlockTransferEngine
 
         // Chunked download
         var blockCount = (int)Math.Ceiling((double)item.Size / _blockSize);
-        var completedBlocks = _journal?.GetCompletedBlocks(item.SourcePath) ?? new HashSet<int>();
+        var completedBlocks = _journal?.GetCompletedBlocks(item.SourcePath) ?? [];
         var downloadSemaphore = new SemaphoreSlim(_blocksPerBlob, _blocksPerBlob);
         long totalDownloaded = completedBlocks.Count * (long)_blockSize;
 

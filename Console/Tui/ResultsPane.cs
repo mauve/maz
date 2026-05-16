@@ -24,8 +24,8 @@ internal sealed class ResultsPane
     // Cell selection state
     private int _selectedRow = 0;
     private int _selectedCol = 0;
-    private HashSet<string> _hiddenColumns = new();
-    private Dictionary<string, int> _manualWidths = new();
+    private HashSet<string> _hiddenColumns = [];
+    private Dictionary<string, int> _manualWidths = [];
 
     // Saved render dimensions for context menu positioning
     private int _renderTop;

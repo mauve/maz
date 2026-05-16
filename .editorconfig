@@ -10,3 +10,5 @@ max_line_length = 120
 # Compiler rules
 # https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs1591
 dotnet_diagnostic.CS1591.severity = none
+# Treat IDE0028 (collection initialization simplification) as error
+dotnet_diagnostic.IDE0028.severity = error

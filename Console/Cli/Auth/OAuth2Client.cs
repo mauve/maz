@@ -339,7 +339,7 @@ internal sealed class OAuth2Client
             // Use the OpenID Connect logout endpoint
             await PostFormAsync(
                 $"https://login.microsoftonline.com/{tenant}/oauth2/v2.0/logout",
-                new Dictionary<string, string>(),
+                [],
                 ct
             );
         }
@@ -504,11 +504,13 @@ internal sealed class OAuth2Client
 
     private static string BuildScopeString(IReadOnlyList<string> scopes)
     {
-        var set = new HashSet<string>(scopes, StringComparer.OrdinalIgnoreCase);
-        // Always include offline_access for refresh tokens and openid/profile for id_token
-        set.Add("offline_access");
-        set.Add("openid");
-        set.Add("profile");
+        var set = new HashSet<string>(scopes, StringComparer.OrdinalIgnoreCase)
+        {
+            // Always include offline_access for refresh tokens and openid/profile for id_token
+            "offline_access",
+            "openid",
+            "profile"
+        };
         if (set.Count == 3) // only the defaults, add management scope
             set.Add(DefaultScope);
         return string.Join(' ', set);

@@ -454,6 +454,7 @@ public sealed class ModelBuilder
 
         // Resolve parameters: path-level params first (operation-level take precedence via dedup)
         var opParams = opNode["parameters"]?.AsArray() ?? [];
+#pragma warning disable IDE0028
         var rawParams = pathLevelParams is { Count: > 0 }
             ? new System.Text.Json.Nodes.JsonArray(
                 pathLevelParams
@@ -462,6 +463,7 @@ public sealed class ModelBuilder
                     .ToArray()
             )
             : opParams;
+#pragma warning restore IDE0028
         var cliParams = new List<CliParamModel>();
         BodyModel? bodyModel = null;
 

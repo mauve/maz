@@ -110,7 +110,7 @@ public class CliParserTests
             Name = "--tags",
             Aliases = ["-t"],
             AllowMultipleArgumentsPerToken = true,
-            DefaultValueFactory = () => new List<string>(),
+            DefaultValueFactory = () => [],
         };
 
         internal override IEnumerable<CliOption> EnumerateAllOptions()
@@ -639,7 +639,7 @@ public class CliOptionTests
         {
             Name = "--tags",
             AllowMultipleArgumentsPerToken = true,
-            DefaultValueFactory = () => new List<string>(),
+            DefaultValueFactory = () => [],
         };
         opt.ApplyDefault();
         Assert.IsTrue(opt.TryParseMany(["a", "b", "c"]));
@@ -653,7 +653,7 @@ public class CliOptionTests
         {
             Name = "--nums",
             AllowMultipleArgumentsPerToken = true,
-            DefaultValueFactory = () => new List<int>(),
+            DefaultValueFactory = () => [],
             ElementParser = raw => int.Parse(raw),
         };
         opt.ApplyDefault();

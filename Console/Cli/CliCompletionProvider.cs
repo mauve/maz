@@ -59,7 +59,7 @@ internal static class CliCompletionProviderRegistry
     private static readonly Dictionary<
         string,
         Func<CliCompletionContext, ValueTask<IEnumerable<string>>>
-    > _providers = new();
+    > _providers = [];
 
     internal static void Register(string[] aliases, Type providerType)
     {
@@ -89,7 +89,7 @@ internal static class CliCompletionProviderRegistry
 
 internal static class CliArgumentCompletionRegistry
 {
-    private static readonly Dictionary<string, string[][]> _registrations = new();
+    private static readonly Dictionary<string, string[][]> _registrations = [];
 
     internal static void Register(string commandPath, string[][] argumentCompletions) =>
         _registrations[commandPath] = argumentCompletions;
