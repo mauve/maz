@@ -136,7 +136,12 @@ public partial class SubscriptionOptionPack : OptionPack
     internal static async Task<SubscriptionResource> ResolveAsync(ArmClient armClient, string? hint)
     {
         if (hint is null)
+        {
+            var configDefault = MazConfig.Current.DefaultSubscriptionId;
+            if (configDefault is not null)
+                return await ResolveAsync(armClient, configDefault);
             return await armClient.GetDefaultSubscriptionAsync();
+        }
 
         if (hint.StartsWith("/subscriptions/", StringComparison.OrdinalIgnoreCase))
             return armClient.GetSubscriptionResource(new(hint));
