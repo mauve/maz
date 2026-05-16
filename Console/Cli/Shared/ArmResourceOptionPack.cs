@@ -143,7 +143,7 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
                 subscriptionHint,
                 resourceGroupHint,
                 namePrefix,
-                ct
+                ct: ct
             );
         }
         catch
@@ -152,16 +152,6 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         }
     }
 
-    /// <summary>
-    /// Returns completion candidates for the resource name, scoped to the given hints.
-    /// </summary>
-    public abstract Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subscriptionHint,
-        string? resourceGroupHint,
-        string namePrefix,
-        CancellationToken ct = default
-    );
 
     /// <summary>
     /// Template method: fetch the specific ARM resource. Called after full resolution

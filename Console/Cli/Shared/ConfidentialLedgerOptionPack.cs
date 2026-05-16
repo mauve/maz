@@ -58,49 +58,4 @@ public partial class ConfidentialLedgerOptionPack
         return (await rg.GetConfidentialLedgerAsync(name, ct)).Value;
     }
 
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        var sub = await ResolveSubscriptionAsync(armClient, subHint);
-        var results = new List<string>();
-
-        if (rgHint is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (
-                var l in rg.Value.GetConfidentialLedgers().GetAllAsync(cancellationToken: ct)
-            )
-            {
-                if (l.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(l.Data.Name);
-            }
-        }
-        else
-        {
-            await foreach (var l in sub.GetConfidentialLedgersAsync(cancellationToken: ct))
-            {
-                if (l.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(l.Data.Name);
-            }
-        }
-
-        return results;
     }
-
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        TokenCredential? credential,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
-    }
-}

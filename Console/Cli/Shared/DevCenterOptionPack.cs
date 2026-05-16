@@ -57,47 +57,4 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
         return (await rg.GetDevCenterAsync(name, ct)).Value;
     }
 
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        var sub = await ResolveSubscriptionAsync(armClient, subHint);
-        var results = new List<string>();
-
-        if (rgHint is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var dc in rg.Value.GetDevCenters().GetAllAsync(cancellationToken: ct))
-            {
-                if (dc.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(dc.Data.Name);
-            }
-        }
-        else
-        {
-            await foreach (var dc in sub.GetDevCentersAsync(cancellationToken: ct))
-            {
-                if (dc.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(dc.Data.Name);
-            }
-        }
-
-        return results;
     }
-
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        TokenCredential? credential,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
-    }
-}

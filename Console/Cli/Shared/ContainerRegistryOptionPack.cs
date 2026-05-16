@@ -64,49 +64,4 @@ public partial class ContainerRegistryOptionPack
         return (await rg.GetContainerRegistryAsync(name, ct)).Value;
     }
 
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        var sub = await ResolveSubscriptionAsync(armClient, subHint);
-        var results = new List<string>();
-
-        if (rgHint is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (
-                var reg in rg.Value.GetContainerRegistries().GetAllAsync(cancellationToken: ct)
-            )
-            {
-                if (reg.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(reg.Data.Name);
-            }
-        }
-        else
-        {
-            await foreach (var reg in sub.GetContainerRegistriesAsync(cancellationToken: ct))
-            {
-                if (reg.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(reg.Data.Name);
-            }
-        }
-
-        return results;
     }
-
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        TokenCredential? credential,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
-    }
-}

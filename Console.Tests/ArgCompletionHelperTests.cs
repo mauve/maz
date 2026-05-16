@@ -10,6 +10,8 @@ using Azure.ResourceManager;
 using Console.Cli.Shared;
 using Console.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+#pragma warning disable IDE0028 // Collection initialization can be simplified
+
 
 namespace Console.Tests
 {
@@ -38,7 +40,7 @@ namespace Console.Tests
         private static void SetMazConfig(MazConfig cfg)
         {
             var prop = typeof(MazConfig).GetProperty("Current", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-            prop.SetValue(null, cfg);
+            prop!.SetValue(null, cfg);
         }
 
         [TestMethod]
@@ -62,7 +64,7 @@ namespace Console.Tests
                 null,
                 null,
                 "f",
-                fake
+                argClient: fake
             )).ToList();
 
             CollectionAssert.AreEquivalent(new List<string> { "foo", "fizz" }, candidates);
@@ -84,7 +86,7 @@ namespace Console.Tests
                 null,
                 "my-rg",
                 "",
-                fake
+                argClient: fake
             )).ToList();
 
             // Fake client should have been called with subscription scope set to ["sub-A"]
@@ -119,12 +121,43 @@ namespace Console.Tests
                 null,
                 null,
                 "",
-                fake
+                argClient: fake
             )).ToList();
 
             // 'keep' should be removed because it's explicitly denied; 'drop' is disallowed by subscription
             Assert.IsFalse(candidates.Contains("keep"));
             Assert.IsFalse(candidates.Contains("drop"));
         }
+
+        [TestMethod]
+        public async Task QueryCompletionCandidates_NormalizesDisplayNameHints()
+        {
+            var results = new List<ArgResource>
+            {
+                new ArgResource("sub-prod", "rg1", "myres")
+            };
+
+            var fake = new FakeArgClient(results);
+            SetMazConfig(new MazConfig
+            {
+                AllowedSubscriptions = new List<string> { "prod" }
+            });
+
+            var armClient = new ArmClient(new DefaultAzureCredential());
+
+            var candidates = (await ArgCompletionHelper.QueryCompletionCandidatesAsync(
+                armClient,
+                new DefaultAzureCredential(),
+                "Microsoft.Fake/fakes",
+                null,
+                null,
+                "",
+                argClient: fake,
+                normalizeSubscriptionHint: (ac, hint) => Task.FromResult(hint == "prod" ? "sub-prod" : null)
+            )).ToList();
+
+            CollectionAssert.Contains(candidates, "myres");
+        }
     }
 }
+#pragma warning restore IDE0028

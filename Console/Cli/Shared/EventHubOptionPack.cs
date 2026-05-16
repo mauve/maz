@@ -64,49 +64,4 @@ public partial class EventHubOptionPack
         return (await rg.GetEventHubsNamespaceAsync(name, ct)).Value;
     }
 
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        var sub = await ResolveSubscriptionAsync(armClient, subHint);
-        var results = new List<string>();
-
-        if (rgHint is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (
-                var ns in rg.Value.GetEventHubsNamespaces().GetAllAsync(cancellationToken: ct)
-            )
-            {
-                if (ns.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(ns.Data.Name);
-            }
-        }
-        else
-        {
-            await foreach (var ns in sub.GetEventHubsNamespacesAsync(cancellationToken: ct))
-            {
-                if (ns.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(ns.Data.Name);
-            }
-        }
-
-        return results;
     }
-
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        TokenCredential? credential,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
-    }
-}

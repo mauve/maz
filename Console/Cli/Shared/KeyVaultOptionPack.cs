@@ -91,47 +91,4 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
     // Completion
     // -----------------------------------------------------------------------
 
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        var sub = await ResolveSubscriptionAsync(armClient, subHint);
-        var results = new List<string>();
-
-        if (rgHint is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(rgHint, ct);
-            await foreach (var kv in rg.Value.GetKeyVaults().GetAllAsync(cancellationToken: ct))
-            {
-                if (kv.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(kv.Data.Name);
-            }
-        }
-        else
-        {
-            await foreach (var kv in sub.GetKeyVaultsAsync(cancellationToken: ct))
-            {
-                if (kv.Data.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                    results.Add(kv.Data.Name);
-            }
-        }
-
-        return results;
     }
-
-    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
-        ArmClient armClient,
-        TokenCredential? credential,
-        string? subHint,
-        string? rgHint,
-        string prefix,
-        CancellationToken ct = default
-    )
-    {
-        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
-    }
-}

@@ -20,6 +20,7 @@ internal static class ArgCompletionHelper
         string? resourceGroupHint,
         string prefix,
         IArgClient? argClient = null,
+        Func<ArmClient, string, Task<string?>>? normalizeSubscriptionHint = null,
         CancellationToken ct = default
     )
     {
@@ -91,7 +92,9 @@ internal static class ArgCompletionHelper
         {
             foreach (var h in config.AllowedSubscriptions)
             {
-                var id = await NormalizeSubscriptionHintToIdAsync(armClient, h);
+                var id = normalizeSubscriptionHint != null
+                    ? await normalizeSubscriptionHint(armClient, h)
+                    : await NormalizeSubscriptionHintToIdAsync(armClient, h);
                 if (id is not null) allowedSubs.Add(id);
             }
         }
@@ -99,7 +102,9 @@ internal static class ArgCompletionHelper
         {
             foreach (var h in config.DisallowedSubscriptions)
             {
-                var id = await NormalizeSubscriptionHintToIdAsync(armClient, h);
+                var id = normalizeSubscriptionHint != null
+                    ? await normalizeSubscriptionHint(armClient, h)
+                    : await NormalizeSubscriptionHintToIdAsync(armClient, h);
                 if (id is not null) disallowedSubs.Add(id);
             }
         }
