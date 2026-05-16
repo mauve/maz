@@ -33,6 +33,7 @@ public partial class RootCommandDef : CommandDef
     public readonly IamCommandDef Iam;
     public readonly PimCommandDef Pim;
     public readonly CompletionCommandDef Completion;
+    public readonly ConfigCommandDef Config;
     public readonly ConfigureCommandDef Configure;
     public readonly JmesPathCommandDef JmesPath;
     public readonly BootstrapCommandDef Bootstrap;
@@ -55,6 +56,7 @@ public partial class RootCommandDef : CommandDef
         Iam = new IamCommandDef(Auth);
         Pim = new PimCommandDef(Auth, Interactive);
         Completion = new CompletionCommandDef();
+        Config = new ConfigCommandDef();
         Configure = new ConfigureCommandDef(Auth, Interactive);
         Copy = new CopyCommandDef(Auth, Interactive);
         JmesPath = new JmesPathCommandDef(Auth);
