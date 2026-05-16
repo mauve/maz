@@ -19,11 +19,12 @@ internal static class ArgCompletionHelper
         string? subscriptionHint,
         string? resourceGroupHint,
         string prefix,
+        IArgClient? argClient = null,
         CancellationToken ct = default
     )
     {
         var config = MazConfig.Current;
-        var argClient = new ArmArgClient(credential ?? new DefaultAzureCredential(), DiagnosticLog.Null);
+        var argClientResolved = argClient ?? new ArmArgClient(credential ?? new DefaultAzureCredential(), DiagnosticLog.Null);
 
         // Determine subscription scope for ARG queries
         IEnumerable<string>? subscriptionScope = null;
@@ -79,7 +80,7 @@ internal static class ArgCompletionHelper
             kql = $"Resources | where type =~ '{resourceType}' and startswith(tolower(name), '{pEsc}') | project subscriptionId, resourceGroup, name | limit 200";
         }
 
-        var argResults = await argClient.QueryAsync(kql, subscriptionScope, ct);
+        var argResults = await argClientResolved.QueryAsync(kql, subscriptionScope, ct);
         if (argResults.Count == 0)
             return Array.Empty<string>();
 

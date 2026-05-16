@@ -91,4 +91,16 @@ public partial class ConfidentialLedgerOptionPack
 
         return results;
     }
+
+    public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
+        ArmClient armClient,
+        TokenCredential? credential,
+        string? subHint,
+        string? rgHint,
+        string prefix,
+        CancellationToken ct = default
+    )
+    {
+        return await base.GetCompletionCandidatesAsync(armClient, credential, subHint, rgHint, prefix, ct);
+    }
 }
