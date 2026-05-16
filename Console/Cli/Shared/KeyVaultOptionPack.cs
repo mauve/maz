@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.KeyVault;
 
@@ -69,44 +70,21 @@ public partial class KeyVaultOptionPack : DataplaneResourceOptionPack<KeyVaultRe
     // ARM resolution
     // -----------------------------------------------------------------------
 
+    protected override string ResourceType => "Microsoft.KeyVault/vaults";
+
     protected override async Task<KeyVaultResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetKeyVaultAsync(name, ct);
-        }
-
-        // No resource group specified — search all RGs in the subscription.
-        var matches = new List<KeyVaultResource>();
-        await foreach (var kv in sub.GetKeyVaultsAsync(cancellationToken: ct))
-        {
-            if (kv.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(kv);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException($"Key Vault '{name}' not found in subscription."),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} vaults:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetKeyVaultAsync(name, ct)).Value;
     }
 
     // -----------------------------------------------------------------------

@@ -36,7 +36,7 @@ public partial class DigitaltwinsdataDeletejobCreateCommandDef(AuthOptionPack au
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/deletions";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2023-10-31", null, ct);

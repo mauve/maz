@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Batch;
 
@@ -45,45 +46,21 @@ public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchA
     protected override Uri GetDataplaneRef(BatchAccountResource resource) =>
         new($"https://{resource.Data.AccountEndpoint}");
 
+    protected override string ResourceType => "Microsoft.Batch/batchAccounts";
+
     protected override async Task<BatchAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetBatchAccountAsync(name, ct);
-        }
-
-        var matches = new List<BatchAccountResource>();
-        await foreach (var account in sub.GetBatchAccountsAsync(cancellationToken: ct))
-        {
-            if (account.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(account);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Batch account '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetBatchAccountAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

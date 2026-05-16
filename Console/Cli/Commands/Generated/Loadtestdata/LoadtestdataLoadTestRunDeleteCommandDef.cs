@@ -32,7 +32,7 @@ public partial class LoadtestdataLoadTestRunDeleteCommandDef(AuthOptionPack auth
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://cnt-prod.loadtesting.azure.com/.default");
-        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/test-runs/{TestRunId}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2022-11-01", null, ct);

@@ -44,7 +44,7 @@ public partial class SearchdataDatasourceCreateCommandDef(AuthOptionPack auth) :
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://search.azure.com/.default");
-        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/datasources";
 
         var body = BodyJson is { } rawJson

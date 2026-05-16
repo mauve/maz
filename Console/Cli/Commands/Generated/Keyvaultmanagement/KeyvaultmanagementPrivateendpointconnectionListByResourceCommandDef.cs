@@ -26,7 +26,7 @@ public partial class KeyvaultmanagementPrivateendpointconnectionListByResourceCo
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();
         var path = $"{keyVaultId}/privateEndpointConnections";
 
         var allItems = client.GetAllAsync(path, "2026-02-01", "value", "nextLink", ct);

@@ -27,7 +27,7 @@ public partial class AttestationdataMetadataConfigurationShowCommandDef(AuthOpti
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://attest.azure.net/.default");
-        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/.well-known/openid-configuration";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-06-01", null, ct);

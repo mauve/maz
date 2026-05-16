@@ -30,7 +30,7 @@ public partial class AppconfigdataUpdateSnapshotUpdateCommandDef(AuthOptionPack 
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://azconfig.io/.default");
-        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/snapshots/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2024-09-01", null, ct);

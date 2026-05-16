@@ -48,7 +48,7 @@ public partial class BatchdataNodeCreateNodeUserCommandDef(AuthOptionPack auth) 
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://batch.core.windows.net/.default");
-        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/pools/{PoolId}/nodes/{NodeId}/users";
 
         var body = BodyJson is { } rawJson

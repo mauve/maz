@@ -31,7 +31,7 @@ public partial class KeyvaultKeyRotationPolicyShowCommandDef(AuthOptionPack auth
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/keys/{KeyName}/rotationpolicy";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "7.5", null, ct);

@@ -30,7 +30,7 @@ public partial class KeyvaultmanagementSecretUpdateCommandDef(AuthOptionPack aut
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();
         var path = $"{keyVaultId}/secrets/{SecretName}";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "2026-02-01", null, ct);

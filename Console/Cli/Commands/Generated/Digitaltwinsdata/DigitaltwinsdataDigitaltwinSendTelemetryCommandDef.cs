@@ -32,7 +32,7 @@ public partial class DigitaltwinsdataDigitaltwinSendTelemetryCommandDef(AuthOpti
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/digitaltwins/{Id}/telemetry";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2023-10-31", null, ct);

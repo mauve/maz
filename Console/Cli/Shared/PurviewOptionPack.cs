@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Purview;
 
@@ -39,45 +40,21 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
     protected override Uri GetDataplaneRef(PurviewAccountResource resource) =>
         new Uri(resource.Data.Endpoints.Catalog!);
 
+    protected override string ResourceType => "Microsoft.Purview/accounts";
+
     protected override async Task<PurviewAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetPurviewAccountAsync(name, ct);
-        }
-
-        var matches = new List<PurviewAccountResource>();
-        await foreach (var account in sub.GetPurviewAccountsAsync(cancellationToken: ct))
-        {
-            if (account.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(account);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Purview account '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetPurviewAccountAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

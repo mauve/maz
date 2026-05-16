@@ -27,7 +27,7 @@ public partial class DigitaltwinsdataImportjobListCommandDef(AuthOptionPack auth
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://digitaltwins.azure.net/.default");
-        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DigitalTwins.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/imports";
 
         var allItems = client.GetAllAsync(path, "2023-10-31", "value", "nextLink", ct);

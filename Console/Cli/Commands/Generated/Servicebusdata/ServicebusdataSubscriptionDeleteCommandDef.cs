@@ -36,7 +36,7 @@ public partial class ServicebusdataSubscriptionDeleteCommandDef(AuthOptionPack a
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://servicebus.azure.net/.default");
-        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/{TopicName}/subscriptions/{SubscriptionName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2021-05", null, ct);

@@ -32,7 +32,7 @@ public partial class PurviewdataTypeDeleteCommandDef(AuthOptionPack auth) : Comm
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://purview.azure.net/.default");
-        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/atlas/v2/types/typedef/name/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2023-09-01", null, ct);

@@ -32,7 +32,7 @@ public partial class DeiddataDeleteJobDeleteCommandDef(AuthOptionPack auth) : Co
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://deid.azure.net/.default");
-        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2024-11-15", null, ct);

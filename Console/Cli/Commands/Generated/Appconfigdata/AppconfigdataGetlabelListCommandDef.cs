@@ -38,7 +38,7 @@ public partial class AppconfigdataGetlabelListCommandDef(AuthOptionPack auth) : 
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://azconfig.io/.default");
-        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await AppConfig.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/labels";
 
         var allItems = client.GetAllAsync(path, "2024-09-01", "items", "@nextLink", ct);

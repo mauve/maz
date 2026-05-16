@@ -28,7 +28,7 @@ public partial class KeyvaultCertificateContactsSetCommandDef(AuthOptionPack aut
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/certificates/contacts";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "7.5", null, ct);

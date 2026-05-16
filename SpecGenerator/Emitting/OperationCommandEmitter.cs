@@ -254,12 +254,12 @@ public static class OperationCommandEmitter
 
                         if (isDataPlane)
                             w.Line(
-                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');"
+                                $"var dataplaneRef = (await {dataplanePackConfig!.FieldName}.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');"
                             );
 
                         if (usesResourcePack)
                             w.Line(
-                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();"
+                                $"var {armIdVar} = (await {resourcePackConfig!.FieldName}.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();"
                             );
 
                         if (usesResourceNameResolver)

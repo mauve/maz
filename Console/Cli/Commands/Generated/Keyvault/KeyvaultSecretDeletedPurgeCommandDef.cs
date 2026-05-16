@@ -32,7 +32,7 @@ public partial class KeyvaultSecretDeletedPurgeCommandDef(AuthOptionPack auth) :
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/deletedsecrets/{SecretName}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "7.5", null, ct);

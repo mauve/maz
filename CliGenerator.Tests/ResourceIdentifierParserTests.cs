@@ -78,13 +78,19 @@ public class ResourceIdentifierParserTests
     // -----------------------------------------------------------------------
 
     [TestMethod]
-    public void Parse_TypeShortPrefix_StripsPrefixAndReturnsBareNameOnly()
+    public void Parse_TypeShortPrefix_ThrowsArgumentException()
     {
-        // /kv/myvault → the /kv/ leading prefix is stripped → bare name "myvault"
-        var r = ResourceIdentifierParser.Parse("/kv/myvault");
-        Assert.IsNull(r.SubscriptionSegment);
-        Assert.IsNull(r.ResourceGroupSegment);
-        Assert.AreEqual("myvault", r.ResourceNameSegment);
+        // /kv/myvault — leading /kv/ prefix is not a recognised format and must be rejected
+        bool threw = false;
+        try
+        {
+            ResourceIdentifierParser.Parse("/kv/myvault");
+        }
+        catch (ArgumentException)
+        {
+            threw = true;
+        }
+        Assert.IsTrue(threw, "Expected ArgumentException for unrecognised '/' prefix");
     }
 
     // -----------------------------------------------------------------------
@@ -173,12 +179,18 @@ public class ResourceIdentifierParserTests
     }
 
     [TestMethod]
-    public void Parse_RgSegmentWithRgPrefix_NormalisesRg()
+    public void Parse_RgSegmentWithRgPrefix_ThrowsArgumentException()
     {
-        // "/rg/my-rg/my-vault" → leading /rg/ prefix stripped → "my-rg/my-vault"
-        var r = ResourceIdentifierParser.Parse("/rg/my-rg/my-vault");
-        Assert.IsNull(r.SubscriptionSegment);
-        Assert.AreEqual("my-rg", r.ResourceGroupSegment);
-        Assert.AreEqual("my-vault", r.ResourceNameSegment);
+        // "/rg/my-rg/my-vault" — leading /rg/ prefix is not a recognised format and must be rejected
+        bool threw = false;
+        try
+        {
+            ResourceIdentifierParser.Parse("/rg/my-rg/my-vault");
+        }
+        catch (ArgumentException)
+        {
+            threw = true;
+        }
+        Assert.IsTrue(threw, "Expected ArgumentException for unrecognised '/' prefix");
     }
 }

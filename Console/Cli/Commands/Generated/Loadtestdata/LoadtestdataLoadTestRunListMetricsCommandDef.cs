@@ -51,7 +51,7 @@ public partial class LoadtestdataLoadTestRunListMetricsCommandDef(AuthOptionPack
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://cnt-prod.loadtesting.azure.com/.default");
-        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await LoadTest.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/test-runs/{TestRunId}/metrics";
 
         var allItems = client.GetAllAsync(path, "2022-11-01", "value", "nextLink", ct);

@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ConfidentialLedger;
 
@@ -40,45 +41,21 @@ public partial class ConfidentialLedgerOptionPack
     protected override Uri GetDataplaneRef(ConfidentialLedgerResource resource) =>
         resource.Data.Properties.LedgerUri!;
 
+    protected override string ResourceType => "Microsoft.ConfidentialLedger/ledgers";
+
     protected override async Task<ConfidentialLedgerResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetConfidentialLedgerAsync(name, ct);
-        }
-
-        var matches = new List<ConfidentialLedgerResource>();
-        await foreach (var ledger in sub.GetConfidentialLedgersAsync(cancellationToken: ct))
-        {
-            if (ledger.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(ledger);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Confidential Ledger '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} ledgers:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetConfidentialLedgerAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

@@ -35,7 +35,7 @@ public partial class KeyvaultmanagementSecretCreateCommandDef(AuthOptionPack aut
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();
         var path = $"{keyVaultId}/secrets/{SecretName}";
 
         var body = BodyJson is { } rawJson

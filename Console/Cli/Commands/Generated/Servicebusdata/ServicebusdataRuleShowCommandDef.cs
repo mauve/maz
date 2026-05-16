@@ -43,7 +43,7 @@ public partial class ServicebusdataRuleShowCommandDef(AuthOptionPack auth) : Com
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://servicebus.azure.net/.default");
-        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await ServiceBus.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/{TopicName}/subscriptions/{SubscriptionName}/rules/{RuleName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-05", null, ct);

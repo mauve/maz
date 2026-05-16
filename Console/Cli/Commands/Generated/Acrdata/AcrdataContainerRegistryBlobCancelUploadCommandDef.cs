@@ -32,7 +32,7 @@ public partial class AcrdataContainerRegistryBlobCancelUploadCommandDef(AuthOpti
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://containerregistry.azure.net/.default");
-        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/{NextBlobUuidLink}";
 
         var result = await client.SendAsync(HttpMethod.Delete, path, "2021-07-01", null, ct);

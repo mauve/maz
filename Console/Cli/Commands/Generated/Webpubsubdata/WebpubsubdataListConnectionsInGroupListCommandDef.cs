@@ -46,7 +46,7 @@ public partial class WebpubsubdataListConnectionsInGroupListCommandDef(AuthOptio
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/groups/{Group}/connections";
 
         var allItems = client.GetAllAsync(path, "2024-12-01", "value", "nextLink", ct);

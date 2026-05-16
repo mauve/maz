@@ -39,7 +39,7 @@ public partial class LedgerdataCreateOrUpdateUserCreateOrUpdateCommandDef(AuthOp
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://confidential-ledger.azure.com/.default");
-        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Ledger.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/app/users/{UserId}";
 
         var body = BodyJson is { } rawJson

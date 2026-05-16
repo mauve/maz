@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Attestation;
 
@@ -40,45 +41,21 @@ public partial class AttestationOptionPack
     protected override Uri GetDataplaneRef(AttestationProviderResource resource) =>
         resource.Data.AttestUri!;
 
+    protected override string ResourceType => "Microsoft.Attestation/attestationProviders";
+
     protected override async Task<AttestationProviderResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetAttestationProviderAsync(name, ct);
-        }
-
-        var matches = new List<AttestationProviderResource>();
-        await foreach (var provider in sub.GetAttestationProvidersAsync(cancellationToken: ct))
-        {
-            if (provider.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(provider);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Attestation provider '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} providers:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetAttestationProviderAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

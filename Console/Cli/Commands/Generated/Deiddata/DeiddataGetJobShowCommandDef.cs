@@ -31,7 +31,7 @@ public partial class DeiddataGetJobShowCommandDef(AuthOptionPack auth) : Command
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://deid.azure.net/.default");
-        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DeidService.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/jobs/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2024-11-15", null, ct);

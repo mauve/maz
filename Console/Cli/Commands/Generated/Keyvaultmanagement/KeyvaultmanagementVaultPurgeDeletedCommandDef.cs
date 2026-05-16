@@ -35,7 +35,7 @@ public partial class KeyvaultmanagementVaultPurgeDeletedCommandDef(AuthOptionPac
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();
         var path = $"{keyVaultId}/purge";
 
         var httpResp = await client.SendRawAsync(HttpMethod.Post, path, "2026-02-01", null, ct);

@@ -30,7 +30,7 @@ public partial class KeyvaultmanagementPrivateendpointconnectionShowCommandDef(A
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log);
-        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct)).Id.ToString();
+        var keyVaultId = (await KeyVault.ResolveResourceAsync(new ArmClient(cred), ct: ct)).Id.ToString();
         var path = $"{keyVaultId}/privateEndpointConnections/{PrivateEndpointConnectionName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2026-02-01", null, ct);

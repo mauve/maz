@@ -83,9 +83,11 @@ public static class ResourceIdentifierParser
         }
         else if (raw.StartsWith('/'))
         {
-            // Generic leading /type/ prefix (e.g. /kv/, /rg/) — strip the prefix segment.
-            int secondSlash = raw.IndexOf('/', 1);
-            remaining = secondSlash >= 0 ? raw[(secondSlash + 1)..] : raw[1..];
+            throw new ArgumentException(
+                "Invalid format: values starting with '/' must use a recognised prefix "
+                    + "(/subscriptions/{guid}/..., /s/{token}/...) or be a portal URL.",
+                nameof(raw)
+            );
         }
 
         // Positional split on the remaining string.

@@ -31,7 +31,7 @@ public partial class AcrdataContainerRegistryShowCommandDef(AuthOptionPack auth)
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://containerregistry.azure.net/.default");
-        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/acr/v1/{ParamName}";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2021-07-01", null, ct);

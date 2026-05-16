@@ -43,7 +43,7 @@ public partial class WebpubsubdataGrantPermissionGrantCommandDef(AuthOptionPack 
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://webpubsub.azure.com/.default");
-        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await WebPubSub.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/api/hubs/{Hub}/permissions/{Permission}/connections/{ConnectionId}";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2024-12-01", null, ct);

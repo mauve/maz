@@ -28,7 +28,7 @@ public partial class AttestationdataAttestationAttestAzureGuestCommandDef(AuthOp
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://attest.azure.net/.default");
-        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await AttestationProvider.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/attest/AzureGuest";
 
         var result = await client.SendAsync(HttpMethod.Post, path, "2025-06-01", null, ct);

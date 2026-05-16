@@ -28,7 +28,7 @@ public partial class KeyvaultSecretDumpCommandDef(AuthOptionPack auth) : Command
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var armClient = new ArmClient(cred);
-        var vaultUri = await KeyVault.ResolveDataplaneRefAsync(armClient, ct);
+        var vaultUri = await KeyVault.ResolveDataplaneRefAsync(armClient, cred, ct: ct);
         var client = new AzureRestClient(cred, log, KvScope);
 
         var secretNames = new List<string>();

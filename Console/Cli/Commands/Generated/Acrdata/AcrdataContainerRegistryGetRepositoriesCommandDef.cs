@@ -35,7 +35,7 @@ public partial class AcrdataContainerRegistryGetRepositoriesCommandDef(AuthOptio
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://containerregistry.azure.net/.default");
-        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Acr.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/acr/v1/_catalog";
 
         var allItems = client.GetAllAsync(path, "2021-07-01", "repositories", "link", ct);

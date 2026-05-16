@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.DevCenter;
 
@@ -39,43 +40,21 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
     protected override Uri GetDataplaneRef(DevCenterResource resource) =>
         resource.Data.DevCenterUri!;
 
+    protected override string ResourceType => "Microsoft.DevCenter/devcenters";
+
     protected override async Task<DevCenterResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetDevCenterAsync(name, ct);
-        }
-
-        var matches = new List<DevCenterResource>();
-        await foreach (var dc in sub.GetDevCentersAsync(cancellationToken: ct))
-        {
-            if (dc.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(dc);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException($"Dev Center '{name}' not found in subscription."),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} dev centers:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetDevCenterAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

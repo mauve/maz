@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.WebPubSub;
 
@@ -39,45 +40,21 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
     protected override Uri GetDataplaneRef(WebPubSubResource resource) =>
         new Uri("https://" + resource.Data.HostName);
 
+    protected override string ResourceType => "Microsoft.SignalRService/webPubSub";
+
     protected override async Task<WebPubSubResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetWebPubSubAsync(name, ct);
-        }
-
-        var matches = new List<WebPubSubResource>();
-        await foreach (var svc in sub.GetWebPubSubsAsync(cancellationToken: ct))
-        {
-            if (svc.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(svc);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Web PubSub service '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} services:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetWebPubSubAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

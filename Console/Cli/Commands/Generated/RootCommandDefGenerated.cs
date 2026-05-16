@@ -135,42 +135,6 @@ public partial class RootCommandDef
     public NginxCommandDef Nginx = null!;
     public SphereCommandDef Sphere = null!;
     public WorkloadsCommandDef Workloads = null!;
-    public OracleCommandDef Oracle = null!;
-    public PaloaltonetworksCommandDef Paloaltonetworks = null!;
-    public PeeringCommandDef Peering = null!;
-    public PowerbidedicatedCommandDef Powerbidedicated = null!;
-    public RedhatopenshiftCommandDef Redhatopenshift = null!;
-    public ResourcemoverCommandDef Resourcemover = null!;
-    public SchedulerCommandDef Scheduler = null!;
-    public SerialconsoleCommandDef Serialconsole = null!;
-    public AzureactivedirectoryCommandDef Azureactivedirectory = null!;
-    public DatabasewatcherCommandDef Databasewatcher = null!;
-    public HealthdataaiservicesCommandDef Healthdataaiservices = null!;
-    public InformaticaCommandDef Informatica = null!;
-    public MarketplaceCommandDef Marketplace = null!;
-    public PostgresqlhscCommandDef Postgresqlhsc = null!;
-    public PurviewCommandDef Purview = null!;
-    public VoiceservicesCommandDef Voiceservices = null!;
-    public HelpCommandDef Help = null!;
-    public NetworkcloudCommandDef Networkcloud = null!;
-    public HybridaksCommandDef Hybridaks = null!;
-    public PolicyinsightsCommandDef Policyinsights = null!;
-    public ManagednetworkfabricCommandDef Managednetworkfabric = null!;
-    public HybridnetworkCommandDef Hybridnetwork = null!;
-    public CustomerinsightsCommandDef Customerinsights = null!;
-    public ServicebusdataCommandDef Servicebusdata = null!;
-    public AppconfigdataCommandDef Appconfigdata = null!;
-    public BatchdataCommandDef Batchdata = null!;
-    public AcrdataCommandDef Acrdata = null!;
-    public SearchdataCommandDef Searchdata = null!;
-    public AttestationdataCommandDef Attestationdata = null!;
-    public LedgerdataCommandDef Ledgerdata = null!;
-    public DigitaltwinsdataCommandDef Digitaltwinsdata = null!;
-    public DevcenterdataCommandDef Devcenterdata = null!;
-    public LoadtestdataCommandDef Loadtestdata = null!;
-    public PurviewdataCommandDef Purviewdata = null!;
-    public DeiddataCommandDef Deiddata = null!;
-    public WebpubsubdataCommandDef Webpubsubdata = null!;
 
     internal static readonly System.Collections.Generic.HashSet<string> KnownServices =
         new(System.StringComparer.Ordinal)
@@ -303,42 +267,6 @@ public partial class RootCommandDef
             "nginx",
             "sphere",
             "workloads",
-            "oracle",
-            "paloaltonetworks",
-            "peering",
-            "powerbidedicated",
-            "redhatopenshift",
-            "resourcemover",
-            "scheduler",
-            "serialconsole",
-            "azureactivedirectory",
-            "databasewatcher",
-            "healthdataaiservices",
-            "informatica",
-            "marketplace",
-            "postgresqlhsc",
-            "purview",
-            "voiceservices",
-            "help",
-            "networkcloud",
-            "hybridaks",
-            "policyinsights",
-            "managednetworkfabric",
-            "hybridnetwork",
-            "customerinsights",
-            "servicebusdata",
-            "appconfigdata",
-            "batchdata",
-            "acrdata",
-            "searchdata",
-            "attestationdata",
-            "ledgerdata",
-            "digitaltwinsdata",
-            "devcenterdata",
-            "loadtestdata",
-            "purviewdata",
-            "deiddata",
-            "webpubsubdata",
         };
 
     partial void InitGeneratedCommands(string? targetService)
@@ -599,77 +527,5 @@ public partial class RootCommandDef
             Sphere = new SphereCommandDef(Auth);
         if (targetService is null || targetService == "workloads")
             Workloads = new WorkloadsCommandDef(Auth);
-        if (targetService is null || targetService == "oracle")
-            Oracle = new OracleCommandDef(Auth);
-        if (targetService is null || targetService == "paloaltonetworks")
-            Paloaltonetworks = new PaloaltonetworksCommandDef(Auth);
-        if (targetService is null || targetService == "peering")
-            Peering = new PeeringCommandDef(Auth);
-        if (targetService is null || targetService == "powerbidedicated")
-            Powerbidedicated = new PowerbidedicatedCommandDef(Auth);
-        if (targetService is null || targetService == "redhatopenshift")
-            Redhatopenshift = new RedhatopenshiftCommandDef(Auth);
-        if (targetService is null || targetService == "resourcemover")
-            Resourcemover = new ResourcemoverCommandDef(Auth);
-        if (targetService is null || targetService == "scheduler")
-            Scheduler = new SchedulerCommandDef(Auth);
-        if (targetService is null || targetService == "serialconsole")
-            Serialconsole = new SerialconsoleCommandDef(Auth);
-        if (targetService is null || targetService == "azureactivedirectory")
-            Azureactivedirectory = new AzureactivedirectoryCommandDef(Auth);
-        if (targetService is null || targetService == "databasewatcher")
-            Databasewatcher = new DatabasewatcherCommandDef(Auth);
-        if (targetService is null || targetService == "healthdataaiservices")
-            Healthdataaiservices = new HealthdataaiservicesCommandDef(Auth);
-        if (targetService is null || targetService == "informatica")
-            Informatica = new InformaticaCommandDef(Auth);
-        if (targetService is null || targetService == "marketplace")
-            Marketplace = new MarketplaceCommandDef(Auth);
-        if (targetService is null || targetService == "postgresqlhsc")
-            Postgresqlhsc = new PostgresqlhscCommandDef(Auth);
-        if (targetService is null || targetService == "purview")
-            Purview = new PurviewCommandDef(Auth);
-        if (targetService is null || targetService == "voiceservices")
-            Voiceservices = new VoiceservicesCommandDef(Auth);
-        if (targetService is null || targetService == "help")
-            Help = new HelpCommandDef(Auth);
-        if (targetService is null || targetService == "networkcloud")
-            Networkcloud = new NetworkcloudCommandDef(Auth);
-        if (targetService is null || targetService == "hybridaks")
-            Hybridaks = new HybridaksCommandDef(Auth);
-        if (targetService is null || targetService == "policyinsights")
-            Policyinsights = new PolicyinsightsCommandDef(Auth);
-        if (targetService is null || targetService == "managednetworkfabric")
-            Managednetworkfabric = new ManagednetworkfabricCommandDef(Auth);
-        if (targetService is null || targetService == "hybridnetwork")
-            Hybridnetwork = new HybridnetworkCommandDef(Auth);
-        if (targetService is null || targetService == "customerinsights")
-            Customerinsights = new CustomerinsightsCommandDef(Auth);
-        if (targetService is null || targetService == "servicebusdata")
-            Servicebusdata = new ServicebusdataCommandDef(Auth);
-        if (targetService is null || targetService == "appconfigdata")
-            Appconfigdata = new AppconfigdataCommandDef(Auth);
-        if (targetService is null || targetService == "batchdata")
-            Batchdata = new BatchdataCommandDef(Auth);
-        if (targetService is null || targetService == "acrdata")
-            Acrdata = new AcrdataCommandDef(Auth);
-        if (targetService is null || targetService == "searchdata")
-            Searchdata = new SearchdataCommandDef(Auth);
-        if (targetService is null || targetService == "attestationdata")
-            Attestationdata = new AttestationdataCommandDef(Auth);
-        if (targetService is null || targetService == "ledgerdata")
-            Ledgerdata = new LedgerdataCommandDef(Auth);
-        if (targetService is null || targetService == "digitaltwinsdata")
-            Digitaltwinsdata = new DigitaltwinsdataCommandDef(Auth);
-        if (targetService is null || targetService == "devcenterdata")
-            Devcenterdata = new DevcenterdataCommandDef(Auth);
-        if (targetService is null || targetService == "loadtestdata")
-            Loadtestdata = new LoadtestdataCommandDef(Auth);
-        if (targetService is null || targetService == "purviewdata")
-            Purviewdata = new PurviewdataCommandDef(Auth);
-        if (targetService is null || targetService == "deiddata")
-            Deiddata = new DeiddataCommandDef(Auth);
-        if (targetService is null || targetService == "webpubsubdata")
-            Webpubsubdata = new WebpubsubdataCommandDef(Auth);
     }
 }

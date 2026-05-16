@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Storage;
 
@@ -49,46 +50,21 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
         return ResourceIdentifierParser.Parse(raw).ResourceNameSegment;
     }
 
+    protected override string ResourceType => "Microsoft.Storage/storageAccounts";
+
     protected override async Task<StorageAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetStorageAccountAsync(name, cancellationToken: ct);
-        }
-
-        // No RG — search all RGs in the subscription
-        var matches = new List<StorageAccountResource>();
-        await foreach (var sa in sub.GetStorageAccountsAsync(cancellationToken: ct))
-        {
-            if (sa.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(sa);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Storage account '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} accounts:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetStorageAccountAsync(name, cancellationToken: ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

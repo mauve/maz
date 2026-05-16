@@ -68,7 +68,7 @@ public partial class DevcenterdataEnvironmentCreateOrReplaceEnvironmentCommandDe
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://devcenter.azure.com/.default");
-        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await DevCenter.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/projects/{ProjectName}/users/{UserId}/environments/{EnvironmentName}";
 
         var body = BodyJson is { } rawJson

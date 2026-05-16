@@ -28,7 +28,7 @@ public partial class PurviewdataRelationshipUpdateCommandDef(AuthOptionPack auth
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://purview.azure.net/.default");
-        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await Purview.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/atlas/v2/relationship";
 
         var result = await client.SendAsync(HttpMethod.Put, path, "2023-09-01", null, ct);

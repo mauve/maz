@@ -48,7 +48,7 @@ public partial class BatchdataPoolReplacePoolPropertiesCommandDef(AuthOptionPack
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://batch.core.windows.net/.default");
-        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await BatchAccount.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/pools/{PoolId}/updateproperties";
 
         var body = BodyJson is { } rawJson

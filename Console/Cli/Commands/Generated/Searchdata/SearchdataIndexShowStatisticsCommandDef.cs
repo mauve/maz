@@ -31,7 +31,7 @@ public partial class SearchdataIndexShowStatisticsCommandDef(AuthOptionPack auth
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://search.azure.com/.default");
-        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await SearchService.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/indexes('{IndexName}')/search.stats";
 
         var result = await client.SendAsync(HttpMethod.Get, path, "2025-09-01", null, ct);

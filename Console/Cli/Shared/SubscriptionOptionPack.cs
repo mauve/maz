@@ -296,7 +296,7 @@ internal sealed class SubscriptionIdCompletionProvider : ICliCompletionProvider
             )
                 continue;
 
-            var name = (sub.Data.DisplayName ?? "").Replace("/", "-"); // GAP-14: strip '/' from display name
+            var name = (sub.Data.DisplayName ?? "").Replace("/", ""); // GAP-14: strip '/' from display name
             var candidate = $"/s/{name}:{id}";
 
             if (

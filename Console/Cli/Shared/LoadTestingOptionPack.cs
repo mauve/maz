@@ -1,3 +1,4 @@
+using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.LoadTesting;
 
@@ -39,45 +40,21 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
     protected override Uri GetDataplaneRef(LoadTestingResource resource) =>
         new Uri(resource.Data.DataPlaneUri!);
 
+    protected override string ResourceType => "Microsoft.LoadTestService/loadTests";
+
     protected override async Task<LoadTestingResource> GetResourceCoreAsync(
         ArmClient armClient,
-        string? resolvedSub,
-        string? resolvedRg,
+        string resolvedSub,
+        string resolvedRg,
         string name,
         CancellationToken ct
     )
     {
-        var sub = await ResolveSubscriptionAsync(armClient, resolvedSub);
-
-        if (resolvedRg is not null)
-        {
-            var rg = await sub.GetResourceGroupAsync(resolvedRg, ct);
-            return await rg.Value.GetLoadTestingResourceAsync(name, ct);
-        }
-
-        var matches = new List<LoadTestingResource>();
-        await foreach (var lt in sub.GetLoadTestingResourcesAsync(cancellationToken: ct))
-        {
-            if (lt.Data.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
-                matches.Add(lt);
-        }
-
-        return matches.Count switch
-        {
-            0 => throw new InvocationException(
-                $"Load Testing resource '{name}' not found in subscription."
-            ),
-            1 => matches[0],
-            _ => throw new InvocationException(
-                $"'{name}' is ambiguous — matched {matches.Count} resources:\n"
-                    + string.Join(
-                        "\n",
-                        matches.Select(m =>
-                            $"  {m.Data.Name}  (resource-group: {m.Id?.ResourceGroupName ?? "?"})"
-                        )
-                    )
-            ),
-        };
+        var rgId = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        );
+        var rg = armClient.GetResourceGroupResource(rgId);
+        return (await rg.GetLoadTestingResourceAsync(name, ct)).Value;
     }
 
     public override async Task<IEnumerable<string>> GetCompletionCandidatesAsync(

@@ -31,7 +31,7 @@ public partial class KeyvaultCertificatePolicyUpdateCommandDef(AuthOptionPack au
         var log = DiagnosticOptionPack.GetLog();
         var cred = _auth.GetCredential(log);
         var client = new AzureRestClient(cred, log, "https://vault.azure.net/.default");
-        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct)).ToString().TrimEnd('/');
+        var dataplaneRef = (await KeyVault.ResolveDataplaneRefAsync(new ArmClient(cred), ct: ct)).ToString().TrimEnd('/');
         var path = $"{dataplaneRef}/certificates/{CertificateName}/policy";
 
         var result = await client.SendAsync(HttpMethod.Patch, path, "7.5", null, ct);
