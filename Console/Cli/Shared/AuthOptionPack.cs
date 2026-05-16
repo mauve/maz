@@ -139,7 +139,10 @@ public partial class AuthOptionPack : OptionPack
         return (GetCredential(log), GetPimCredential(log));
     }
 
-    private ChainedTokenCredential BuildCredentialChain(DiagnosticLog log, string? oauthClientId = null)
+    private ChainedTokenCredential BuildCredentialChain(
+        DiagnosticLog log,
+        string? oauthClientId = null
+    )
     {
         var allowedTypes = AllowedCredentialTypes;
         var authorityHost = AuthorityHost;
@@ -241,7 +244,11 @@ public partial class AuthOptionPack : OptionPack
 
                     {
                         var browserCache = new MsalCache(log);
-                        var browserOAuth = new OAuth2Client(browserCache, log, clientId: oauthClientId);
+                        var browserOAuth = new OAuth2Client(
+                            browserCache,
+                            log,
+                            clientId: oauthClientId
+                        );
                         credentials.Add(new BrowserCredential(browserOAuth, log, defaultTenantId));
                     }
                     break;

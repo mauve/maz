@@ -97,9 +97,7 @@ internal sealed class OAuth2Client
 
             code =
                 queryParams["code"]
-                ?? throw new InvalidOperationException(
-                    "Authorization failed: no code received"
-                );
+                ?? throw new InvalidOperationException("Authorization failed: no code received");
 
             var returnedState = queryParams["state"];
             if (returnedState != state)
@@ -509,7 +507,7 @@ internal sealed class OAuth2Client
             // Always include offline_access for refresh tokens and openid/profile for id_token
             "offline_access",
             "openid",
-            "profile"
+            "profile",
         };
         if (set.Count == 3) // only the defaults, add management scope
             set.Add(DefaultScope);
@@ -536,59 +534,59 @@ internal sealed class OAuth2Client
             : """<div class="hint">return to your terminal for details</div>""";
 
         return $$"""
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <title>maz — authentication error</title>
-        <style>
-          *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-          body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #1a1a2e;
-            font-family: 'Courier New', Courier, monospace;
-          }
-          .card { text-align: center; padding: 3rem 4rem; max-width: 640px; }
-          pre.logo {
-            font-size: clamp(0.55rem, 1.8vw, 1rem);
-            line-height: 1.15;
-            letter-spacing: 0.05em;
-            white-space: pre;
-            display: inline-block;
-            color: #f87171;
-          }
-          .status {
-            margin-top: 1.8rem;
-            font-size: 1.1rem;
-            color: #f87171;
-          }
-          .message {
-            margin-top: 1rem;
-            font-size: 0.82rem;
-            color: #9ca3af;
-            word-break: break-word;
-          }
-          .hint {
-            margin-top: 1.6rem;
-            font-size: 0.85rem;
-            color: #6b7280;
-          }
-        </style>
-        </head>
-        <body>
-          <div class="card">
-            <pre class="logo">&#10;███╗   ███╗ █████╗ ███████╗&#10;████╗ ████║██╔══██╗╚══███╔╝&#10;██╔████╔██║███████║  ███╔╝ &#10;██║╚██╔╝██║██╔══██║ ███╔╝  &#10;██║ ╚═╝ ██║██║  ██║███████╗&#10;╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝</pre>
-            <div class="status">&#10007; authentication failed</div>
-            <div class="message">{{message}}</div>
-            {{hintHtml}}
-          </div>
-        </body>
-        </html>
-        """;
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>maz — authentication error</title>
+            <style>
+              *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+              body {
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background: #1a1a2e;
+                font-family: 'Courier New', Courier, monospace;
+              }
+              .card { text-align: center; padding: 3rem 4rem; max-width: 640px; }
+              pre.logo {
+                font-size: clamp(0.55rem, 1.8vw, 1rem);
+                line-height: 1.15;
+                letter-spacing: 0.05em;
+                white-space: pre;
+                display: inline-block;
+                color: #f87171;
+              }
+              .status {
+                margin-top: 1.8rem;
+                font-size: 1.1rem;
+                color: #f87171;
+              }
+              .message {
+                margin-top: 1rem;
+                font-size: 0.82rem;
+                color: #9ca3af;
+                word-break: break-word;
+              }
+              .hint {
+                margin-top: 1.6rem;
+                font-size: 0.85rem;
+                color: #6b7280;
+              }
+            </style>
+            </head>
+            <body>
+              <div class="card">
+                <pre class="logo">&#10;███╗   ███╗ █████╗ ███████╗&#10;████╗ ████║██╔══██╗╚══███╔╝&#10;██╔████╔██║███████║  ███╔╝ &#10;██║╚██╔╝██║██╔══██║ ███╔╝  &#10;██║ ╚═╝ ██║██║  ██║███████╗&#10;╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝</pre>
+                <div class="status">&#10007; authentication failed</div>
+                <div class="message">{{message}}</div>
+                {{hintHtml}}
+              </div>
+            </body>
+            </html>
+            """;
     }
 
     private static string? GetLoginErrorHint(AadAuthorizationException ex) =>

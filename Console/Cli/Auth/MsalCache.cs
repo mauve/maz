@@ -286,7 +286,11 @@ internal sealed class MsalCache
         return null;
     }
 
-    private string? FindRefreshTokenInFile(string path, string homeAccountId, string? clientId = null)
+    private string? FindRefreshTokenInFile(
+        string path,
+        string homeAccountId,
+        string? clientId = null
+    )
     {
         var data = ReadCacheFile(path);
         if (data is null)

@@ -71,12 +71,20 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
                     activeGroupsTask
                 );
             }
-            catch { /* individual results checked below */ }
+            catch
+            { /* individual results checked below */
+            }
         }
 
-        var eligibleRoles = eligibleRolesTask.IsCompletedSuccessfully ? eligibleRolesTask.Result : [];
-        var eligibleDirRoles = eligibleDirRolesTask.IsCompletedSuccessfully ? eligibleDirRolesTask.Result : [];
-        var eligibleGroups = eligibleGroupsTask.IsCompletedSuccessfully ? eligibleGroupsTask.Result : [];
+        var eligibleRoles = eligibleRolesTask.IsCompletedSuccessfully
+            ? eligibleRolesTask.Result
+            : [];
+        var eligibleDirRoles = eligibleDirRolesTask.IsCompletedSuccessfully
+            ? eligibleDirRolesTask.Result
+            : [];
+        var eligibleGroups = eligibleGroupsTask.IsCompletedSuccessfully
+            ? eligibleGroupsTask.Result
+            : [];
 
         var allEligible = eligibleRoles.Concat(eligibleDirRoles).Concat(eligibleGroups).ToList();
 
@@ -87,7 +95,9 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
         }
 
         var activeRoles = activeRolesTask.IsCompletedSuccessfully ? activeRolesTask.Result : [];
-        var activeDirRoles = activeDirRolesTask.IsCompletedSuccessfully ? activeDirRolesTask.Result : [];
+        var activeDirRoles = activeDirRolesTask.IsCompletedSuccessfully
+            ? activeDirRolesTask.Result
+            : [];
         var activeGroups = activeGroupsTask.IsCompletedSuccessfully ? activeGroupsTask.Result : [];
 
         var activeKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -100,7 +110,11 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
                 var kindCmp = a.Kind.CompareTo(b.Kind);
                 return kindCmp != 0
                     ? kindCmp
-                    : string.Compare(a.DisplayName, b.DisplayName, StringComparison.OrdinalIgnoreCase);
+                    : string.Compare(
+                        a.DisplayName,
+                        b.DisplayName,
+                        StringComparison.OrdinalIgnoreCase
+                    );
             }
         );
 
@@ -144,20 +158,29 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
             var justification = System.Console.ReadLine()?.Trim() ?? "";
             const string duration = "PT8H";
 
-            using var throbber = new Throbber($"Activating {kindLabel} '{selected.DisplayName}'...");
+            using var throbber = new Throbber(
+                $"Activating {kindLabel} '{selected.DisplayName}'..."
+            );
             try
             {
                 switch (selected.Kind)
                 {
                     case PimAssignmentKind.Role:
                     {
-                        var response = await pimClient.ActivateRoleAsync(selected, justification, duration, ct);
+                        var response = await pimClient.ActivateRoleAsync(
+                            selected,
+                            justification,
+                            duration,
+                            ct
+                        );
                         if ((int)response.StatusCode >= 400)
                         {
                             var errorBody = await response.Content.ReadAsStringAsync(ct);
                             if (IsAlreadyActiveError(errorBody))
                             {
-                                System.Console.Error.WriteLine($"Role '{selected.DisplayName}' is already active.");
+                                System.Console.Error.WriteLine(
+                                    $"Role '{selected.DisplayName}' is already active."
+                                );
                                 return 0;
                             }
                             throw new HttpRequestException(
@@ -169,7 +192,12 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
                         break;
                     }
                     case PimAssignmentKind.DirectoryRole:
-                        await pimClient.ActivateDirectoryRoleAsync(selected, justification, duration, ct);
+                        await pimClient.ActivateDirectoryRoleAsync(
+                            selected,
+                            justification,
+                            duration,
+                            ct
+                        );
                         break;
                     case PimAssignmentKind.Group:
                         await pimClient.ActivateGroupAsync(selected, justification, duration, ct);
@@ -178,15 +206,21 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
             }
             catch (HttpRequestException ex) when (IsAlreadyActiveError(ex.Message))
             {
-                System.Console.Error.WriteLine($"{KindLabel(selected.Kind)} '{selected.DisplayName}' is already active.");
+                System.Console.Error.WriteLine(
+                    $"{KindLabel(selected.Kind)} '{selected.DisplayName}' is already active."
+                );
                 return 0;
             }
-            System.Console.Error.WriteLine($"Activated {kindLabel} '{selected.DisplayName}' for {duration}.");
+            System.Console.Error.WriteLine(
+                $"Activated {kindLabel} '{selected.DisplayName}' for {duration}."
+            );
         }
         else
         {
             // Deactivate
-            using var throbber = new Throbber($"Deactivating {kindLabel} '{selected.DisplayName}'...");
+            using var throbber = new Throbber(
+                $"Deactivating {kindLabel} '{selected.DisplayName}'..."
+            );
             switch (selected.Kind)
             {
                 case PimAssignmentKind.Role:
@@ -237,6 +271,9 @@ public partial class PimCommandDef(AuthOptionPack auth, InteractiveOptionPack in
     private static bool IsAlreadyActiveError(string message) =>
         message.Contains("RoleAssignmentExists", StringComparison.OrdinalIgnoreCase)
         || message.Contains("ActiveDurationTooShort", StringComparison.OrdinalIgnoreCase)
-        || message.Contains("unableToActivateExistingAssignment", StringComparison.OrdinalIgnoreCase)
+        || message.Contains(
+            "unableToActivateExistingAssignment",
+            StringComparison.OrdinalIgnoreCase
+        )
         || message.Contains("already has an active", StringComparison.OrdinalIgnoreCase);
 }

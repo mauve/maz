@@ -28,63 +28,57 @@ internal static partial class AuthenticationErrorFormatter
 
     // Hints for Azure SDK credential types that we cannot control the exception types of.
     // Keyed on substrings that appear in ChainedTokenCredential's aggregated message.
-    private static readonly Dictionary<string, (string Name, string[] FixHints)> ExternalCredentialHints =
-        new()
-        {
-            ["Azure CLI"] = (
-                "Azure CLI",
-                ["Re-authenticate:", "  maz login", "  (or: az logout && az login)"]
-            ),
-            ["Azure Developer CLI"] = (
-                "Azure Developer CLI",
-                [
-                    "Re-authenticate the Azure Developer CLI:",
-                    "  azd auth logout",
-                    "  azd auth login",
-                ]
-            ),
-            ["Azure PowerShell"] = (
-                "Azure PowerShell",
-                ["Re-authenticate in PowerShell:", "  Disconnect-AzAccount", "  Connect-AzAccount"]
-            ),
-            ["EnvironmentCredential"] = (
-                "Environment",
-                [
-                    "Check that the environment variables are set and valid:",
-                    "  AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_CLIENT_SECRET (or AZURE_CLIENT_CERTIFICATE_PATH)",
-                ]
-            ),
-            ["ManagedIdentityCredential"] = (
-                "Managed Identity",
-                [
-                    "Verify the managed identity is assigned to this resource and has the required roles.",
-                ]
-            ),
-            ["InteractiveBrowserCredential"] = (
-                "Interactive Browser",
-                ["Re-authenticate:", "  maz login"]
-            ),
-            ["VisualStudioCredential"] = (
-                "Visual Studio",
-                [
-                    "Re-authenticate in Visual Studio: Tools → Options → Azure Service Authentication.",
-                ]
-            ),
-            ["SharedTokenCacheCredential"] = (
-                "Shared Token Cache",
-                ["The cached token is stale. Re-authenticate using the Azure CLI or Visual Studio."]
-            ),
-            ["DeviceCodeCredential"] = (
-                "Device Code",
-                ["Re-authenticate using the device code flow by running the command again."]
-            ),
-            ["WorkloadIdentityCredential"] = (
-                "Workload Identity",
-                [
-                    "Verify the federated token file is current and the workload identity is configured correctly.",
-                ]
-            ),
-        };
+    private static readonly Dictionary<
+        string,
+        (string Name, string[] FixHints)
+    > ExternalCredentialHints = new()
+    {
+        ["Azure CLI"] = (
+            "Azure CLI",
+            ["Re-authenticate:", "  maz login", "  (or: az logout && az login)"]
+        ),
+        ["Azure Developer CLI"] = (
+            "Azure Developer CLI",
+            ["Re-authenticate the Azure Developer CLI:", "  azd auth logout", "  azd auth login"]
+        ),
+        ["Azure PowerShell"] = (
+            "Azure PowerShell",
+            ["Re-authenticate in PowerShell:", "  Disconnect-AzAccount", "  Connect-AzAccount"]
+        ),
+        ["EnvironmentCredential"] = (
+            "Environment",
+            [
+                "Check that the environment variables are set and valid:",
+                "  AZURE_CLIENT_ID, AZURE_TENANT_ID, and AZURE_CLIENT_SECRET (or AZURE_CLIENT_CERTIFICATE_PATH)",
+            ]
+        ),
+        ["ManagedIdentityCredential"] = (
+            "Managed Identity",
+            ["Verify the managed identity is assigned to this resource and has the required roles."]
+        ),
+        ["InteractiveBrowserCredential"] = (
+            "Interactive Browser",
+            ["Re-authenticate:", "  maz login"]
+        ),
+        ["VisualStudioCredential"] = (
+            "Visual Studio",
+            ["Re-authenticate in Visual Studio: Tools → Options → Azure Service Authentication."]
+        ),
+        ["SharedTokenCacheCredential"] = (
+            "Shared Token Cache",
+            ["The cached token is stale. Re-authenticate using the Azure CLI or Visual Studio."]
+        ),
+        ["DeviceCodeCredential"] = (
+            "Device Code",
+            ["Re-authenticate using the device code flow by running the command again."]
+        ),
+        ["WorkloadIdentityCredential"] = (
+            "Workload Identity",
+            [
+                "Verify the federated token file is current and the workload identity is configured correctly.",
+            ]
+        ),
+    };
 
     public static string Format(
         AuthenticationFailedException ex,
@@ -105,10 +99,7 @@ internal static partial class AuthenticationErrorFormatter
 
     private static void FormatBrowserAuthFailure(StringBuilder sb, BrowserAuthException ex)
     {
-        var entries = new List<(string, string)>
-        {
-            ("Credential", Ansi.Bold("Browser"))
-        };
+        var entries = new List<(string, string)> { ("Credential", Ansi.Bold("Browser")) };
 
         if (ex.AadError is not null)
         {
@@ -156,11 +147,13 @@ internal static partial class AuthenticationErrorFormatter
 
         switch (ex.AadStsCode)
         {
-            case "AADSTS50076" or "AADSTS50079":
+            case "AADSTS50076"
+            or "AADSTS50079":
                 yield return "Multi-factor authentication is required.";
                 yield return "Run 'maz login' and complete the MFA prompt.";
                 yield break;
-            case "AADSTS700082" or "AADSTS70043":
+            case "AADSTS700082"
+            or "AADSTS70043":
                 yield return "Your session has expired.";
                 yield return "Run:  maz logout && maz login";
                 yield break;
@@ -201,7 +194,10 @@ internal static partial class AuthenticationErrorFormatter
 
         var entries = new List<(string, string)>();
 
-        if (failedHintKey is not null && ExternalCredentialHints.TryGetValue(failedHintKey, out var hint))
+        if (
+            failedHintKey is not null
+            && ExternalCredentialHints.TryGetValue(failedHintKey, out var hint)
+        )
             entries.Add(("Credential", Ansi.Bold(hint.Name)));
 
         if (aadCode is not null)
@@ -222,7 +218,10 @@ internal static partial class AuthenticationErrorFormatter
             sb.AppendLine();
         }
 
-        if (failedHintKey is not null && ExternalCredentialHints.TryGetValue(failedHintKey, out var credHint))
+        if (
+            failedHintKey is not null
+            && ExternalCredentialHints.TryGetValue(failedHintKey, out var credHint)
+        )
         {
             sb.AppendLine(Ansi.Bold("  To fix:"));
             foreach (var line in credHint.FixHints)

@@ -167,9 +167,7 @@ internal static class RadioList
             var (label, detail) = items[i];
             if (i == selected)
             {
-                System.Console.WriteLine(
-                    $"  \x1b[35m❯\x1b[0m \x1b[1m{label}\x1b[0m"
-                );
+                System.Console.WriteLine($"  \x1b[35m❯\x1b[0m \x1b[1m{label}\x1b[0m");
             }
             else
             {

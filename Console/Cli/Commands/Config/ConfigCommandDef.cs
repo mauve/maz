@@ -115,12 +115,14 @@ public partial class ConfigShowCommandDef : CommandDef
         else
         {
             var resolutionEntries = cfg
-                .ResolutionFilter.Select(e => (
-                    e.SubscriptionId,
-                    e.ResourceGroups.Count > 0
-                        ? string.Join(", ", e.ResourceGroups)
-                        : Ansi.Dim("(all resource groups)")
-                ))
+                .ResolutionFilter.Select(e =>
+                    (
+                        e.SubscriptionId,
+                        e.ResourceGroups.Count > 0
+                            ? string.Join(", ", e.ResourceGroups)
+                            : Ansi.Dim("(all resource groups)")
+                    )
+                )
                 .ToList();
             DefinitionList.Write(out_, resolutionEntries);
         }
@@ -137,7 +139,8 @@ public partial class ConfigShowCommandDef : CommandDef
             var cmdEntries = cfg
                 .CommandDefaults.OrderBy(kv => kv.Key)
                 .SelectMany(cmd =>
-                    cmd.Value.OrderBy(kv => kv.Key).Select(kv => ($"{cmd.Key} / {kv.Key}", kv.Value))
+                    cmd.Value.OrderBy(kv => kv.Key)
+                        .Select(kv => ($"{cmd.Key} / {kv.Key}", kv.Value))
                 )
                 .ToList();
             DefinitionList.Write(out_, cmdEntries);

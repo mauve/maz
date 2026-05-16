@@ -93,7 +93,7 @@ public partial class BootstrapCommandDef(AuthOptionPack auth, InteractiveOptionP
                     return [.. sw.ToString().Split('\n').Select(l => l.TrimEnd('\r'))];
                 },
                 DemoTag: "logo"
-            )
+            ),
         };
 
         foreach (var section in sections)

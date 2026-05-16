@@ -511,9 +511,7 @@ internal sealed class EditorPane
     /// </summary>
     private static string BuildPopupItemContent(CompletionItem item, bool selected)
     {
-        var matchSet = item.MatchIndices is not null
-            ? new HashSet<int>(item.MatchIndices)
-            : [];
+        var matchSet = item.MatchIndices is not null ? new HashSet<int>(item.MatchIndices) : [];
 
         var sb = new System.Text.StringBuilder();
 

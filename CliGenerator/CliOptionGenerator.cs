@@ -1401,12 +1401,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                     );
                     children.AddRange(inlinedChildren);
                     // Merge the inlined command's options into ours
-                    var inlinedOpts = CollectNodeOptions(
-                        inlinedModel,
-                        dict,
-                        manualDict,
-                        []
-                    );
+                    var inlinedOpts = CollectNodeOptions(inlinedModel, dict, manualDict, []);
                     foreach (var o in inlinedOpts)
                         if (!options.Contains(o))
                             options.Add(o);

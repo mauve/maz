@@ -275,9 +275,7 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         );
         System.Console.WriteLine("  this to one sign-in.");
         System.Console.WriteLine();
-        System.Console.WriteLine(
-            "  See docs/custom-app-registration.md for setup instructions."
-        );
+        System.Console.WriteLine("  See docs/custom-app-registration.md for setup instructions.");
         System.Console.WriteLine();
 
         var currentClientId = existing.GlobalDefaults.TryGetValue("auth-client-id", out var cid)
@@ -385,7 +383,9 @@ public partial class ConfigureCommandDef(AuthOptionPack auth, InteractiveOptionP
         if (customClientId is not null)
             w.WriteLine($"auth-client-id = {customClientId}");
         else
-            w.WriteLine("; auth-client-id = <guid>  ; custom app for single sign-in (see docs/custom-app-registration.md)");
+            w.WriteLine(
+                "; auth-client-id = <guid>  ; custom app for single sign-in (see docs/custom-app-registration.md)"
+            );
         w.WriteLine();
 
         w.WriteLine("; Per-command overrides: [cmd.COMMAND PATH]");

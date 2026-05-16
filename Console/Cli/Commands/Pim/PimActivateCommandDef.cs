@@ -32,7 +32,8 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
     public readonly CliArgument<string> AssignmentName = new()
     {
         Name = "name",
-        Description = "Role or group name to activate (substring match). Omit to pick interactively.",
+        Description =
+            "Role or group name to activate (substring match). Omit to pick interactively.",
     };
 
     internal override IEnumerable<CliArgument<string>> EnumerateArguments()
@@ -148,11 +149,10 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
 
         if (matches.Count == 0)
         {
-            var filterDesc = string.IsNullOrWhiteSpace(nameValue)
-                ? $"scope '{scopeValue}'"
-                : string.IsNullOrWhiteSpace(scopeValue)
-                    ? $"name '{nameValue}'"
-                    : $"name '{nameValue}' and scope '{scopeValue}'";
+            var filterDesc =
+                string.IsNullOrWhiteSpace(nameValue) ? $"scope '{scopeValue}'"
+                : string.IsNullOrWhiteSpace(scopeValue) ? $"name '{nameValue}'"
+                : $"name '{nameValue}' and scope '{scopeValue}'";
             throw new InvocationException(
                 $"No eligible PIM assignment found matching {filterDesc}.\n"
                     + $"Found {allEligible.Count} eligible assignment(s) total."

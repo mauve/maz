@@ -31,7 +31,11 @@ internal sealed class PimClient
         "https://graph.microsoft.com/PrivilegedAccess.ReadWrite.AzureADGroup",
     ];
 
-    public PimClient(TokenCredential armCredential, TokenCredential graphPimCredential, DiagnosticLog log)
+    public PimClient(
+        TokenCredential armCredential,
+        TokenCredential graphPimCredential,
+        DiagnosticLog log
+    )
     {
         _log = log;
         _graphPimCredential = graphPimCredential;
@@ -742,7 +746,13 @@ internal sealed class PimClient
             return $"Subscription: {subDisplay}";
         }
 
-        if (parts.Length >= 2 && parts[0] == "providers" && parts[1] == "Microsoft.Management" && parts.Length >= 4 && parts[2] == "managementGroups")
+        if (
+            parts.Length >= 2
+            && parts[0] == "providers"
+            && parts[1] == "Microsoft.Management"
+            && parts.Length >= 4
+            && parts[2] == "managementGroups"
+        )
             return $"Management group: {parts[3]}";
 
         return scope;
