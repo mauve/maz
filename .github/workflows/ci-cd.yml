@@ -40,6 +40,9 @@ jobs:
           - rid: win-x64
             asset: maz-win-x64.exe
             binary: maz.exe
+          - rid: win-arm64
+            asset: maz-win-arm64.exe
+            binary: maz.exe
           - rid: osx-x64
             asset: maz-osx-x64
             binary: maz
@@ -98,3 +101,60 @@ jobs:
         with:
           files: ./artifacts/*
           body_path: release-notes.md
+
+  install-smoke-test:
+    name: Install smoke test (${{ matrix.name }})
+    needs: release
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            name: win-x64 / PS 5.1
+            ps_shell: powershell
+          - runner: windows-latest
+            name: win-x64 / PS 7
+            ps_shell: pwsh
+          - runner: windows-11-arm
+            name: win-arm64 / PS 5.1
+            ps_shell: powershell
+          - runner: windows-11-arm
+            name: win-arm64 / PS 7
+            ps_shell: pwsh
+          - runner: ubuntu-latest
+            name: linux-x64
+          - runner: ubuntu-24.04-arm
+            name: linux-arm64
+          - runner: macos-13
+            name: osx-x64
+          - runner: macos-latest
+            name: osx-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install (Windows)
+        if: runner.os == 'Windows'
+        shell: ${{ matrix.ps_shell }}
+        env:
+          MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
+        run: ./install.ps1
+
+      - name: Install (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        env:
+          MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
+        run: bash ./install.sh
+
+      - name: Verify (Windows)
+        if: runner.os == 'Windows'
+        shell: ${{ matrix.ps_shell }}
+        run: |
+          $bin = "$env:RUNNER_TEMP/maz-bin/maz.exe"
+          & $bin --version
+
+      - name: Verify (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: $RUNNER_TEMP/maz-bin/maz --version

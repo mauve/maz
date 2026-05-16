@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-05-16
+### Fixed
+- `install.ps1` on Windows ARM64 now works: `win-arm64` binary is included in releases
+- `install.ps1` architecture detection now works in Windows PowerShell 5.1 (added `.ToString()` to enum comparison so the switch statement matches correctly in both PS 5.1 and PS 7)
+
+### Changed
+- Release pipeline now runs install script smoke tests on all 8 platform/shell combinations after each release (Windows x64 and ARM64 × PS 5.1 and PS 7, Linux x64 and ARM64, macOS x64 and ARM64)
+
 ## [0.12.0] - 2026-05-13
 ### Added
 - `maz pim` (no subcommand) — interactive TUI when run in a terminal: browse all eligible assignments with Active/Eligible status, pick one, then activate or deactivate it

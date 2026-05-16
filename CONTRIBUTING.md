@@ -170,7 +170,7 @@ Releases are created by pushing an annotated tag. CI builds self-contained binar
 
    `tag-release.sh` validates that the version is a plain `major.minor.patch` semver and refuses anything else.
 
-4. **Watch CI.** The `publish` job builds for all five platforms (`linux-x64`, `linux-arm64`, `win-x64`, `osx-x64`, `osx-arm64`) and embeds the version in the binary (`maz --version` will print `1.2.3`). The `release` job then creates the GitHub release with the `CHANGELOG.md` section as the body.
+4. **Watch CI.** The `publish` job builds for all six platforms (`linux-x64`, `linux-arm64`, `win-x64`, `win-arm64`, `osx-x64`, `osx-arm64`) and embeds the version in the binary (`maz --version` will print `1.2.3`). The `release` job then creates the GitHub release with the `CHANGELOG.md` section as the body. Finally, the `install-smoke-test` job runs the install scripts on all supported platforms and verifies the binary executes.
 
 ### Verifying the version locally
 

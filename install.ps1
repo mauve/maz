@@ -4,7 +4,7 @@ $Repo       = 'mauve/maz'
 $InstallDir = if ($env:MAZ_INSTALL_DIR) { $env:MAZ_INSTALL_DIR } else { "$HOME\.local\bin" }
 
 # Detect architecture
-$Arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture) {
+$Arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()) {
     'X64'   { 'x64'   }
     'Arm64' { 'arm64' }
     default { Write-Error "Unsupported architecture: $_"; exit 1 }
