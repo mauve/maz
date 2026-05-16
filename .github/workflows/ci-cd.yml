@@ -133,9 +133,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install (Windows)
-        if: runner.os == 'Windows'
-        shell: ${{ matrix.ps_shell }}
+      - name: Install (Windows, PS 5.1)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'powershell'
+        shell: powershell
+        env:
+          MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
+        run: ./install.ps1
+
+      - name: Install (Windows, PS 7)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'pwsh'
+        shell: pwsh
         env:
           MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
         run: ./install.ps1
@@ -147,9 +154,16 @@ jobs:
           MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
         run: bash ./install.sh
 
-      - name: Verify (Windows)
-        if: runner.os == 'Windows'
-        shell: ${{ matrix.ps_shell }}
+      - name: Verify (Windows, PS 5.1)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'powershell'
+        shell: powershell
+        run: |
+          $bin = "$env:RUNNER_TEMP/maz-bin/maz.exe"
+          & $bin --version
+
+      - name: Verify (Windows, PS 7)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'pwsh'
+        shell: pwsh
         run: |
           $bin = "$env:RUNNER_TEMP/maz-bin/maz.exe"
           & $bin --version
