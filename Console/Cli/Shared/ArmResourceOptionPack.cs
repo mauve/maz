@@ -121,6 +121,39 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
 
     /// <summary>
     /// Returns completion candidates for the resource name, scoped to the given hints.
+    /// Default implementation performs an Azure Resource Graph (ARG) query and applies
+    /// MazConfig filters. Subclasses may override to provide specialized behavior.
+    /// </summary>
+    public virtual async Task<IEnumerable<string>> GetCompletionCandidatesAsync(
+        ArmClient armClient,
+        TokenCredential? credential,
+        string? subscriptionHint,
+        string? resourceGroupHint,
+        string namePrefix,
+        CancellationToken ct = default
+    )
+    {
+        var cred = credential ?? new DefaultAzureCredential();
+        try
+        {
+            return await ArgCompletionHelper.QueryCompletionCandidatesAsync(
+                armClient,
+                cred,
+                ResourceType,
+                subscriptionHint,
+                resourceGroupHint,
+                namePrefix,
+                ct
+            );
+        }
+        catch
+        {
+            return Array.Empty<string>();
+        }
+    }
+
+    /// <summary>
+    /// Returns completion candidates for the resource name, scoped to the given hints.
     /// </summary>
     public abstract Task<IEnumerable<string>> GetCompletionCandidatesAsync(
         ArmClient armClient,
@@ -211,6 +244,7 @@ internal sealed class ArmResourceCompletionProvider<TPack, TResource> : ICliComp
             var pack = new TPack();
             var candidates = await pack.GetCompletionCandidatesAsync(
                 armClient,
+                credential,
                 subHint,
                 rgHint,
                 prefix
