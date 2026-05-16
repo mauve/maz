@@ -64,4 +64,4 @@ public partial class EventHubOptionPack
         return (await rg.GetEventHubsNamespaceAsync(name, ct)).Value;
     }
 
-    }
+}

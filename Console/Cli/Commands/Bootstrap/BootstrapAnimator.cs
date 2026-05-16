@@ -556,10 +556,10 @@ internal static class BootstrapAnimator
             System.Console.Write("\x1b[2K");
             if (i == selectedIndex)
                 System.Console.Write(
-                    "    " + Ansi.Green($"❯ {label, -16}") + Ansi.Dim($"  ({detail})")
+                    "    " + Ansi.Green($"❯ {label,-16}") + Ansi.Dim($"  ({detail})")
                 );
             else
-                System.Console.Write($"      {label, -16}" + Ansi.Dim($"  ({detail})"));
+                System.Console.Write($"      {label,-16}" + Ansi.Dim($"  ({detail})"));
         }
 
         // Hint at typewriterRow+1+items.Length

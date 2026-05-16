@@ -64,4 +64,4 @@ public partial class SearchServiceOptionPack
         return (await rg.GetSearchServiceAsync(name, cancellationToken: ct)).Value;
     }
 
-    }
+}

@@ -64,4 +64,4 @@ public partial class ContainerRegistryOptionPack
         return (await rg.GetContainerRegistryAsync(name, ct)).Value;
     }
 
-    }
+}

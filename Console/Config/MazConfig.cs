@@ -83,7 +83,8 @@ public sealed class MazConfig
     public IReadOnlyDictionary<
         string,
         IReadOnlyDictionary<string, string>
-    > CommandDefaults { get; init; } =
+    > CommandDefaults
+    { get; init; } =
         FrozenDictionary<string, IReadOnlyDictionary<string, string>>.Empty;
 
     // [resolution.*] — CFG1: per-subscription scoping filters

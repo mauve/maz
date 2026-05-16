@@ -58,4 +58,4 @@ public partial class ConfidentialLedgerOptionPack
         return (await rg.GetConfidentialLedgerAsync(name, ct)).Value;
     }
 
-    }
+}

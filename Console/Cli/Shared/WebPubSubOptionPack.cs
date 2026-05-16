@@ -57,4 +57,4 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
         return (await rg.GetWebPubSubAsync(name, ct)).Value;
     }
 
-    }
+}

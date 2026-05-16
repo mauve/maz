@@ -58,4 +58,4 @@ public partial class HealthDataAIDeidOptionPack
         return (await rg.GetDeidServiceAsync(name, ct)).Value;
     }
 
-    }
+}

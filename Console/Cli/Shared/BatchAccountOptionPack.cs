@@ -63,4 +63,4 @@ public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchA
         return (await rg.GetBatchAccountAsync(name, ct)).Value;
     }
 
-    }
+}

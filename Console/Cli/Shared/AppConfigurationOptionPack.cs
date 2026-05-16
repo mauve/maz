@@ -64,4 +64,4 @@ public partial class AppConfigurationOptionPack
         return (await rg.GetAppConfigurationStoreAsync(name, ct)).Value;
     }
 
-    }
+}

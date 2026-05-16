@@ -69,7 +69,7 @@ internal static class CheckboxList
         {
             var (label, detail) = items[i];
             var box = checkedState[i] ? "[x]" : "[ ]";
-            var line = $"  {box} {label, -24} {detail}";
+            var line = $"  {box} {label,-24} {detail}";
             if (i == cursor)
                 System.Console.WriteLine("\x1b[7m" + line + "\x1b[0m");
             else

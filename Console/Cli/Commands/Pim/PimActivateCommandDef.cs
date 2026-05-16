@@ -216,34 +216,34 @@ public partial class PimActivateCommandDef(AuthOptionPack auth, InteractiveOptio
                 switch (selected.Kind)
                 {
                     case PimAssignmentKind.Role:
-                    {
-                        var response = await pimClient.ActivateRoleAsync(
-                            selected,
-                            justification,
-                            duration,
-                            ct
-                        );
-
-                        if ((int)response.StatusCode >= 400)
                         {
-                            var errorBody = await response.Content.ReadAsStringAsync(ct);
-                            if (IsAlreadyActiveError(errorBody))
+                            var response = await pimClient.ActivateRoleAsync(
+                                selected,
+                                justification,
+                                duration,
+                                ct
+                            );
+
+                            if ((int)response.StatusCode >= 400)
                             {
-                                System.Console.Error.WriteLine(
-                                    $"Role '{selected.DisplayName}' is already active."
+                                var errorBody = await response.Content.ReadAsStringAsync(ct);
+                                if (IsAlreadyActiveError(errorBody))
+                                {
+                                    System.Console.Error.WriteLine(
+                                        $"Role '{selected.DisplayName}' is already active."
+                                    );
+                                    return 0;
+                                }
+
+                                throw new HttpRequestException(
+                                    $"Activation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
                                 );
-                                return 0;
                             }
 
-                            throw new HttpRequestException(
-                                $"Activation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
-                            );
+                            var armClient = new AzureRestClient(armCred, log);
+                            await LroPoller.PollAsync(response, armClient, "2020-10-01", log, ct);
+                            break;
                         }
-
-                        var armClient = new AzureRestClient(armCred, log);
-                        await LroPoller.PollAsync(response, armClient, "2020-10-01", log, ct);
-                        break;
-                    }
 
                     case PimAssignmentKind.DirectoryRole:
                         await pimClient.ActivateDirectoryRoleAsync(

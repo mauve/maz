@@ -866,78 +866,78 @@ internal sealed class BlobTreePane
         switch (row)
         {
             case ContainerRow cr:
-            {
-                var indent = new string(' ', cr.Depth * 2);
-                var arrow = cr.Node.IsExpanded ? "▼ " : "▶ ";
-                var name = cr.Node.Name + "/";
-                var line = $" {indent}{arrow}{name}";
+                {
+                    var indent = new string(' ', cr.Depth * 2);
+                    var arrow = cr.Node.IsExpanded ? "▼ " : "▶ ";
+                    var name = cr.Node.Name + "/";
+                    var line = $" {indent}{arrow}{name}";
 
-                // Right-side info
-                var info = "";
-                if (cr.Node.IsLoaded)
-                    info = $"  {cr.Node.Children.Count} items";
+                    // Right-side info
+                    var info = "";
+                    if (cr.Node.IsLoaded)
+                        info = $"  {cr.Node.Children.Count} items";
 
-                var maxLine = width - Ansi.VisibleLength(info);
-                if (Ansi.VisibleLength(line) > maxLine)
-                    line = line[..Math.Max(0, maxLine)];
+                    var maxLine = width - Ansi.VisibleLength(info);
+                    if (Ansi.VisibleLength(line) > maxLine)
+                        line = line[..Math.Max(0, maxLine)];
 
-                var full =
-                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
-                WriteCell(selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full), width);
-                break;
-            }
-            case FolderRow fr:
-            {
-                var indent = new string(' ', fr.Depth * 2);
-                var arrow = fr.Node.IsExpanded ? "▼ " : "▶ ";
-                var name = fr.Node.Name + "/";
-                var line = $" {indent}{arrow}{name}";
-
-                var info = "";
-                if (fr.Node.IsLoaded && fr.Node.BlobCount > 0)
-                    info = $"  {fr.Node.BlobCount} items  {FormatSize(fr.Node.TotalSize)}";
-
-                var maxLine = width - Ansi.VisibleLength(info);
-                if (Ansi.VisibleLength(line) > maxLine)
-                    line = line[..Math.Max(0, maxLine)];
-
-                var full =
-                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
-                WriteCell(selected ? Ansi.Color(full, "\x1b[7m") : full, width);
-                break;
-            }
-            case BlobRow br:
-            {
-                var indent = new string(' ', br.Depth * 2);
-                var key = $"{br.Node.Container}/{br.Node.FullPath}";
-                var isChecked = _selectedBlobs.Contains(key);
-                var checkbox = isChecked ? "[x] " : "[ ] ";
-                var name = br.Node.Name;
-                var line = $" {indent}{checkbox}{name}";
-
-                // Right-side: size + date
-                var sizeStr = FormatSize(br.Node.Blob.Size);
-                var dateStr = br.Node.Blob.LastModified?.ToString("yyyy-MM-dd") ?? "";
-                var info = $"  {sizeStr, 10}  {dateStr}";
-
-                var maxLine = width - Ansi.VisibleLength(info);
-                if (Ansi.VisibleLength(line) > maxLine && maxLine > 5)
-                    line = line[..Math.Max(0, maxLine)];
-
-                var full =
-                    line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
-                if (isChecked)
+                    var full =
+                        line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
                     WriteCell(selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full), width);
-                else
+                    break;
+                }
+            case FolderRow fr:
+                {
+                    var indent = new string(' ', fr.Depth * 2);
+                    var arrow = fr.Node.IsExpanded ? "▼ " : "▶ ";
+                    var name = fr.Node.Name + "/";
+                    var line = $" {indent}{arrow}{name}";
+
+                    var info = "";
+                    if (fr.Node.IsLoaded && fr.Node.BlobCount > 0)
+                        info = $"  {fr.Node.BlobCount} items  {FormatSize(fr.Node.TotalSize)}";
+
+                    var maxLine = width - Ansi.VisibleLength(info);
+                    if (Ansi.VisibleLength(line) > maxLine)
+                        line = line[..Math.Max(0, maxLine)];
+
+                    var full =
+                        line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
                     WriteCell(selected ? Ansi.Color(full, "\x1b[7m") : full, width);
-                break;
-            }
+                    break;
+                }
+            case BlobRow br:
+                {
+                    var indent = new string(' ', br.Depth * 2);
+                    var key = $"{br.Node.Container}/{br.Node.FullPath}";
+                    var isChecked = _selectedBlobs.Contains(key);
+                    var checkbox = isChecked ? "[x] " : "[ ] ";
+                    var name = br.Node.Name;
+                    var line = $" {indent}{checkbox}{name}";
+
+                    // Right-side: size + date
+                    var sizeStr = FormatSize(br.Node.Blob.Size);
+                    var dateStr = br.Node.Blob.LastModified?.ToString("yyyy-MM-dd") ?? "";
+                    var info = $"  {sizeStr,10}  {dateStr}";
+
+                    var maxLine = width - Ansi.VisibleLength(info);
+                    if (Ansi.VisibleLength(line) > maxLine && maxLine > 5)
+                        line = line[..Math.Max(0, maxLine)];
+
+                    var full =
+                        line + new string(' ', Math.Max(0, maxLine - Ansi.VisibleLength(line))) + info;
+                    if (isChecked)
+                        WriteCell(selected ? Ansi.Color(full, "\x1b[1;7m") : Ansi.Bold(full), width);
+                    else
+                        WriteCell(selected ? Ansi.Color(full, "\x1b[7m") : full, width);
+                    break;
+                }
             case LoadingRow lr:
-            {
-                var indent = new string(' ', lr.Depth * 2);
-                WriteCell(Ansi.Dim($" {indent}  ⠋ loading…"), width);
-                break;
-            }
+                {
+                    var indent = new string(' ', lr.Depth * 2);
+                    WriteCell(Ansi.Dim($" {indent}  ⠋ loading…"), width);
+                    break;
+                }
         }
     }
 

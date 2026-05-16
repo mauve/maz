@@ -228,8 +228,8 @@ static IEnumerable<CommandDef> AllCommands(CommandDef root)
 {
     yield return root;
     foreach (var sub in root.EnumerateChildren())
-    foreach (var cmd in AllCommands(sub))
-        yield return cmd;
+        foreach (var cmd in AllCommands(sub))
+            yield return cmd;
 }
 
 static void TrySetDefault(Console.Cli.Parsing.CliOption opt, string value)

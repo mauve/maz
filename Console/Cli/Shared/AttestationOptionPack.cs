@@ -58,4 +58,4 @@ public partial class AttestationOptionPack
         return (await rg.GetAttestationProviderAsync(name, ct)).Value;
     }
 
-    }
+}

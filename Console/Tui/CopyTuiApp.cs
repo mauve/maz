@@ -453,7 +453,7 @@ internal sealed class CopyTuiApp : IAsyncDisposable
         // Fixed-width fields: size(8) + gap(2) + bar + gap(1) + pct(4) + gap(2) + speed(9) + gap(2) + eta(8)
         var sizeStr = FormatSize(state.Item.Size).PadLeft(8);
         var percent = state.Item.Size > 0 ? (double)state.BytesTransferred / state.Item.Size : 0;
-        var pctStr = $"{percent * 100, 3:F0}%";
+        var pctStr = $"{percent * 100,3:F0}%";
         var speedStr = FormatSpeed(state.BytesPerSecond).PadLeft(9);
         var etaStr = (state.Eta.HasValue ? FormatTimeSpan(state.Eta.Value) : "--:--:--").PadLeft(8);
 

@@ -64,4 +64,4 @@ public partial class ServiceBusOptionPack
         return (await rg.GetServiceBusNamespaceAsync(name, ct)).Value;
     }
 
-    }
+}

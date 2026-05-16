@@ -57,4 +57,4 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
         return (await rg.GetPurviewAccountAsync(name, ct)).Value;
     }
 
-    }
+}

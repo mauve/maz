@@ -57,4 +57,4 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
         return (await rg.GetLoadTestingResourceAsync(name, ct)).Value;
     }
 
-    }
+}

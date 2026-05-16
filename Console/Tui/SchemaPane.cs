@@ -351,77 +351,77 @@ internal sealed class SchemaPane
         switch (item)
         {
             case TableRow tbl:
-            {
-                var arrow = tbl.IsExpanded ? "▼ " : "▶ ";
-                var maxName = Math.Max(0, width - 3);
-                var name = tbl.Name.Length > maxName ? tbl.Name[..maxName] : tbl.Name;
-                var line = " " + arrow + name;
-                if (tbl.IsActive)
-                    WriteCell(selected ? Ansi.Color(line, "\x1b[1;7m") : Ansi.Bold(line), width);
-                else
-                    WriteCell(selected ? Ansi.Color(line, "\x1b[7m") : line, width);
-                break;
-            }
+                {
+                    var arrow = tbl.IsExpanded ? "▼ " : "▶ ";
+                    var maxName = Math.Max(0, width - 3);
+                    var name = tbl.Name.Length > maxName ? tbl.Name[..maxName] : tbl.Name;
+                    var line = " " + arrow + name;
+                    if (tbl.IsActive)
+                        WriteCell(selected ? Ansi.Color(line, "\x1b[1;7m") : Ansi.Bold(line), width);
+                    else
+                        WriteCell(selected ? Ansi.Color(line, "\x1b[7m") : line, width);
+                    break;
+                }
             case ColumnRow col:
-            {
-                int typeMaxLen = col.ColType.Length > 0 ? Math.Min(col.ColType.Length, 8) : 0;
-                int typePartLen = typeMaxLen > 0 ? typeMaxLen + 1 : 0;
-                string line;
-                if (col.ShowCheckbox)
                 {
-                    // "  [x] Name  type"  or  "  [ ] Name  type"
-                    int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
-                    var namePart =
-                        col.ColName.Length > nameMaxLen
-                            ? col.ColName[..nameMaxLen]
-                            : col.ColName.PadRight(nameMaxLen);
-                    var typePart =
-                        typeMaxLen > 0
-                            ? " "
-                                + (
-                                    col.ColType.Length > typeMaxLen
-                                        ? col.ColType[..typeMaxLen]
-                                        : col.ColType
-                                )
-                            : "";
-                    var checkbox = col.IsHidden ? "[ ] " : "[x] ";
-                    line = $"  {checkbox}{namePart}{typePart}";
+                    int typeMaxLen = col.ColType.Length > 0 ? Math.Min(col.ColType.Length, 8) : 0;
+                    int typePartLen = typeMaxLen > 0 ? typeMaxLen + 1 : 0;
+                    string line;
+                    if (col.ShowCheckbox)
+                    {
+                        // "  [x] Name  type"  or  "  [ ] Name  type"
+                        int nameMaxLen = Math.Max(0, width - 7 - typePartLen); // "  [x] " = 7
+                        var namePart =
+                            col.ColName.Length > nameMaxLen
+                                ? col.ColName[..nameMaxLen]
+                                : col.ColName.PadRight(nameMaxLen);
+                        var typePart =
+                            typeMaxLen > 0
+                                ? " "
+                                    + (
+                                        col.ColType.Length > typeMaxLen
+                                            ? col.ColType[..typeMaxLen]
+                                            : col.ColType
+                                    )
+                                : "";
+                        var checkbox = col.IsHidden ? "[ ] " : "[x] ";
+                        line = $"  {checkbox}{namePart}{typePart}";
+                    }
+                    else
+                    {
+                        // "    Name  type"  (no checkbox, schema-only column)
+                        int nameMaxLen = Math.Max(0, width - 4 - typePartLen); // "    " = 4
+                        var namePart =
+                            col.ColName.Length > nameMaxLen
+                                ? col.ColName[..nameMaxLen]
+                                : col.ColName.PadRight(nameMaxLen);
+                        var typePart =
+                            typeMaxLen > 0
+                                ? " "
+                                    + (
+                                        col.ColType.Length > typeMaxLen
+                                            ? col.ColType[..typeMaxLen]
+                                            : col.ColType
+                                    )
+                                : "";
+                        line = $"    {namePart}{typePart}";
+                    }
+                    if (col.IsHidden)
+                        WriteCell(selected ? Ansi.Color(line, "\x1b[2;7m") : Ansi.Dim(line), width);
+                    else
+                        WriteCell(selected ? Ansi.Color(line, "\x1b[7m") : line, width);
+                    break;
                 }
-                else
-                {
-                    // "    Name  type"  (no checkbox, schema-only column)
-                    int nameMaxLen = Math.Max(0, width - 4 - typePartLen); // "    " = 4
-                    var namePart =
-                        col.ColName.Length > nameMaxLen
-                            ? col.ColName[..nameMaxLen]
-                            : col.ColName.PadRight(nameMaxLen);
-                    var typePart =
-                        typeMaxLen > 0
-                            ? " "
-                                + (
-                                    col.ColType.Length > typeMaxLen
-                                        ? col.ColType[..typeMaxLen]
-                                        : col.ColType
-                                )
-                            : "";
-                    line = $"    {namePart}{typePart}";
-                }
-                if (col.IsHidden)
-                    WriteCell(selected ? Ansi.Color(line, "\x1b[2;7m") : Ansi.Dim(line), width);
-                else
-                    WriteCell(selected ? Ansi.Color(line, "\x1b[7m") : line, width);
-                break;
-            }
             case SeparatorRow:
-            {
-                System.Console.Write(Ansi.Dim(new string('─', width)));
-                break;
-            }
+                {
+                    System.Console.Write(Ansi.Dim(new string('─', width)));
+                    break;
+                }
             case LoadingRow:
-            {
-                WriteCell(Ansi.Dim("  ⠋ loading…"), width);
-                break;
-            }
+                {
+                    WriteCell(Ansi.Dim("  ⠋ loading…"), width);
+                    break;
+                }
         }
     }
 

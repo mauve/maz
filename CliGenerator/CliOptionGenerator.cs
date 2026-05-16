@@ -538,9 +538,9 @@ public class CliOptionGenerator : IIncrementalGenerator
                 syntaxRef.GetSyntax() is PropertyDeclarationSyntax propDecl
                 && propDecl.ExpressionBody?.Expression
                     is LiteralExpressionSyntax
-                    {
-                        Token: { RawKind: (int)SyntaxKind.StringLiteralToken } tok
-                    }
+                {
+                    Token: { RawKind: (int)SyntaxKind.StringLiteralToken } tok
+                }
             )
                 return tok.ValueText;
         }
@@ -1397,7 +1397,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                         inlinedModel,
                         dict,
                         manualDict,
-                        new HashSet<string>(visited)
+                        [.. visited]
                     );
                     children.AddRange(inlinedChildren);
                     // Merge the inlined command's options into ours
@@ -1418,7 +1418,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                 childModel,
                 dict,
                 manualDict,
-                new HashSet<string>(visited)
+                [.. visited]
             );
             if (childNode is not null)
                 children.Add(childNode);
@@ -1455,7 +1455,7 @@ public class CliOptionGenerator : IIncrementalGenerator
                 childModel,
                 dict,
                 manualDict,
-                new HashSet<string>(visited)
+                [.. visited]
             );
             if (childNode is not null)
                 result.Add(childNode);

@@ -186,21 +186,21 @@ public partial class PimDeactivateCommandDef(AuthOptionPack auth, InteractiveOpt
             switch (selected.Kind)
             {
                 case PimAssignmentKind.Role:
-                {
-                    var response = await pimClient.DeactivateRoleAsync(selected, ct);
-
-                    if ((int)response.StatusCode >= 400)
                     {
-                        var errorBody = await response.Content.ReadAsStringAsync(ct);
-                        throw new HttpRequestException(
-                            $"Deactivation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
-                        );
-                    }
+                        var response = await pimClient.DeactivateRoleAsync(selected, ct);
 
-                    var armClient = new AzureRestClient(armCred, log);
-                    await LroPoller.PollAsync(response, armClient, "2020-10-01", log, ct);
-                    break;
-                }
+                        if ((int)response.StatusCode >= 400)
+                        {
+                            var errorBody = await response.Content.ReadAsStringAsync(ct);
+                            throw new HttpRequestException(
+                                $"Deactivation failed: HTTP {(int)response.StatusCode}\n{errorBody}"
+                            );
+                        }
+
+                        var armClient = new AzureRestClient(armCred, log);
+                        await LroPoller.PollAsync(response, armClient, "2020-10-01", log, ct);
+                        break;
+                    }
 
                 case PimAssignmentKind.DirectoryRole:
                     await pimClient.DeactivateDirectoryRoleAsync(selected, ct);

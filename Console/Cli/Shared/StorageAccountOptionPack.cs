@@ -67,4 +67,4 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
         return (await rg.GetStorageAccountAsync(name, cancellationToken: ct)).Value;
     }
 
-    }
+}
