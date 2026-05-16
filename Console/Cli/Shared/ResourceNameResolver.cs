@@ -73,7 +73,21 @@ public static class ResourceNameResolver
         CancellationToken ct = default
     )
     {
+        log?.Trace(
+            $"ResourceNameResolver.ResolveAsync: rawValue=\"{rawValue}\" "
+                + $"explicitSub={explicitSubscriptionId ?? "(none)"} "
+                + $"explicitRg={explicitResourceGroupName ?? "(none)"} "
+                + $"resourceType={resourceType}"
+        );
+
         var parsed = ResourceIdentifierParser.Parse(rawValue);
+
+        log?.Trace(
+            $"Parsed: sub={parsed.SubscriptionSegment ?? "(none)"} "
+                + $"rg={parsed.ResourceGroupSegment ?? "(none)"} "
+                + $"name={parsed.ResourceNameSegment}"
+                + (parsed.DiscardedChildPath is not null ? $" childPath={parsed.DiscardedChildPath}" : "")
+        );
 
         // GAP-11: child path handling
         if (parsed.DiscardedChildPath is not null)
@@ -96,6 +110,10 @@ public static class ResourceNameResolver
         string? effectiveSub;
         if (combinedHasSub && explicitSubscriptionId is not null)
         {
+            log?.Trace(
+                $"Subscription conflict: ignoring explicit --subscription-id=\"{explicitSubscriptionId}\", "
+                    + $"using embedded \"{parsed.SubscriptionSegment}\"."
+            );
             (warningWriter ?? System.Console.Error).WriteLine(
                 "Warning: ignoring --subscription-id; using the subscription embedded in the resource value."
             );
@@ -117,6 +135,10 @@ public static class ResourceNameResolver
         string? effectiveRg;
         if (combinedHasRg && explicitResourceGroupName is not null)
         {
+            log?.Trace(
+                $"Resource-group conflict: ignoring explicit --resource-group=\"{explicitResourceGroupName}\", "
+                    + $"using embedded \"{parsed.ResourceGroupSegment}\"."
+            );
             (warningWriter ?? System.Console.Error).WriteLine(
                 "Warning: ignoring --resource-group; using the resource group embedded in the resource value."
             );
@@ -137,20 +159,34 @@ public static class ResourceNameResolver
 
         var resourceName = parsed.ResourceNameSegment;
 
+        log?.Trace(
+            $"Effective after conflict resolution: sub={effectiveSub ?? "(none)"} "
+                + $"rg={effectiveRg ?? "(none)"} name={resourceName}"
+        );
+
         // Normalise subscription: if it's a /subscriptions/{guid} or /s/... form, extract the GUID.
         if (effectiveSub is not null)
             effectiveSub = await ResolveSubscriptionIdAsync(armClient, effectiveSub, ct);
 
         // CASE 1: both sub and rg known → no ARM/ARG call (GAP-8)
         if (effectiveSub is not null && effectiveRg is not null)
+        {
+            log?.Trace(
+                $"→ Case 1 (early): sub and rg both known — returning without ARM/ARG call. "
+                    + $"Result: ({effectiveSub}, {effectiveRg}, {resourceName})"
+            );
             return (effectiveSub, effectiveRg, resourceName);
+        }
 
         // Fall back to env var for sub if still missing
         if (effectiveSub is null)
         {
             var envSub = Environment.GetEnvironmentVariable("AZURE_SUBSCRIPTION_ID");
             if (envSub is not null)
+            {
+                log?.Trace($"Fallback: using AZURE_SUBSCRIPTION_ID=\"{envSub}\" for subscription.");
                 effectiveSub = await ResolveSubscriptionIdAsync(armClient, envSub, ct);
+            }
         }
 
         // Fall back to config default for sub if still missing
@@ -158,7 +194,10 @@ public static class ResourceNameResolver
         {
             var configSub = MazConfig.Current.DefaultSubscriptionId;
             if (configSub is not null)
+            {
+                log?.Trace($"Fallback: using config DefaultSubscriptionId=\"{configSub}\" for subscription.");
                 effectiveSub = await ResolveSubscriptionIdAsync(armClient, configSub, ct);
+            }
         }
 
         // Fall back to env var / config for rg if still missing
@@ -167,11 +206,19 @@ public static class ResourceNameResolver
             effectiveRg =
                 Environment.GetEnvironmentVariable("AZURE_RESOURCE_GROUP")
                 ?? MazConfig.Current.DefaultResourceGroup;
+            if (effectiveRg is not null)
+                log?.Trace($"Fallback: using env/config resource group \"{effectiveRg}\".");
         }
 
         // CASE 1 (re-check after env/config fallback)
         if (effectiveSub is not null && effectiveRg is not null)
+        {
+            log?.Trace(
+                $"→ Case 1 (after fallback): sub and rg now known — returning without ARM/ARG call. "
+                    + $"Result: ({effectiveSub}, {effectiveRg}, {resourceName})"
+            );
             return (effectiveSub, effectiveRg, resourceName);
+        }
 
         // ARG queries require a valid subscription GUID.
         // If effectiveSub is a display name or unrecognised format, try to resolve it via ARM.
@@ -179,13 +226,20 @@ public static class ResourceNameResolver
         // so the ARG query searches across all accessible subscriptions instead.
         if (effectiveSub is not null && !Guid.TryParse(effectiveSub, out _))
         {
+            log?.Trace(
+                $"Subscription \"{effectiveSub}\" is not a GUID — attempting to resolve via ARM."
+            );
             try
             {
                 var sub = await SubscriptionOptionPack.ResolveAsync(armClient, effectiveSub);
                 effectiveSub = sub.Data.SubscriptionId;
+                log?.Trace($"ARM resolved subscription to GUID: {effectiveSub}");
             }
             catch
             {
+                log?.Trace(
+                    $"ARM subscription resolution failed for \"{effectiveSub}\" — clearing subscription scope."
+                );
                 effectiveSub = null;
             }
         }
@@ -201,6 +255,10 @@ public static class ResourceNameResolver
         // CASE 2: rg known, sub unknown → find the subscription
         if (effectiveRg is not null)
         {
+            log?.Trace(
+                $"→ Case 2: rg known (\"{effectiveRg}\"), sub unknown — resolving via ARG/config."
+            );
+
             // CFG1: check if exactly one configured subscription contains this RG
             if (config.ResolutionFilter.Count > 0)
             {
@@ -214,8 +272,18 @@ public static class ResourceNameResolver
                     .Select(e => e.SubscriptionId)
                     .ToList();
 
+                log?.Trace(
+                    $"CFG1 filter: {config.ResolutionFilter.Count} entry/entries, "
+                        + $"{subCandidates.Count} candidate(s) for rg \"{effectiveRg}\"."
+                );
+
                 if (subCandidates.Count == 1)
+                {
+                    log?.Trace(
+                        $"CFG1 resolved: ({subCandidates[0]}, {effectiveRg}, {resourceName})"
+                    );
                     return (subCandidates[0], effectiveRg, resourceName);
+                }
                 if (subCandidates.Count > 1)
                     throw new InvocationException(
                         $"Resource group '{effectiveRg}' is ambiguous — it appears in multiple configured subscriptions:\n"
@@ -228,7 +296,16 @@ public static class ResourceNameResolver
                 $"Resources | where type =~ '{resourceType}' and name =~ '{resourceName}' "
                 + $"and resourceGroup =~ '{effectiveRg}' | project subscriptionId, resourceGroup, name";
 
+            log?.Trace($"ARG query (Case 2): {kql}");
+
             var argResults = await argClientResolved.QueryAsync(kql, subscriptions: null, ct);
+
+            log?.Trace(
+                $"ARG result: {argResults.Count} match(es)"
+                    + (argResults.Count > 0
+                        ? ": " + string.Join(", ", argResults.Select(r => $"({r.SubscriptionId}/{r.ResourceGroup}/{r.Name})"))
+                        : ".")
+            );
 
             return argResults.Count switch
             {
@@ -252,15 +329,28 @@ public static class ResourceNameResolver
         // CASE 3: bare name (rg unknown)
         if (effectiveSub is not null)
         {
+            log?.Trace(
+                $"→ Case 3a: sub known (\"{effectiveSub}\"), rg unknown — querying ARG within subscription."
+            );
+
             // Sub known, rg unknown: ARG query within sub
             var kql =
                 $"Resources | where type =~ '{resourceType}' and name =~ '{resourceName}' "
                 + "| project subscriptionId, resourceGroup, name";
 
+            log?.Trace($"ARG query (Case 3a, sub={effectiveSub}): {kql}");
+
             var argResults = await argClientResolved.QueryAsync(
                 kql,
                 subscriptions: [effectiveSub],
                 ct
+            );
+
+            log?.Trace(
+                $"ARG result: {argResults.Count} match(es)"
+                    + (argResults.Count > 0
+                        ? ": " + string.Join(", ", argResults.Select(r => $"({r.SubscriptionId}/{r.ResourceGroup}/{r.Name})"))
+                        : ".")
             );
 
             return argResults.Count switch
@@ -292,11 +382,27 @@ public static class ResourceNameResolver
                     ? config.ResolutionFilter.Select(e => e.SubscriptionId)
                     : null;
 
+            log?.Trace(
+                $"→ Case 3b: neither sub nor rg known — querying ARG across "
+                    + (subScope is not null ? "configured subscriptions." : "all accessible subscriptions.")
+            );
+
             var kql =
                 $"Resources | where type =~ '{resourceType}' and name =~ '{resourceName}' "
                 + "| project subscriptionId, resourceGroup, name";
 
+            log?.Trace(
+                $"ARG query (Case 3b{(subScope is not null ? ", scoped" : "")}): {kql}"
+            );
+
             var argResults = await argClientResolved.QueryAsync(kql, subScope, ct);
+
+            log?.Trace(
+                $"ARG result: {argResults.Count} match(es)"
+                    + (argResults.Count > 0
+                        ? ": " + string.Join(", ", argResults.Select(r => $"({r.SubscriptionId}/{r.ResourceGroup}/{r.Name})"))
+                        : ".")
+            );
 
             return argResults.Count switch
             {

@@ -2,6 +2,7 @@ using System.Reflection;
 using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Copy;
+using Console.Cli.Commands.Debug;
 using Console.Cli.Commands.Group;
 using Console.Cli.Commands.Iam;
 using Console.Cli.Commands.JmesPath;
@@ -40,6 +41,7 @@ public partial class RootCommandDef : CommandDef
     public readonly CopyCommandDef Copy;
     public readonly LoginCommandDef Login;
     public readonly LogoutCommandDef Logout;
+    public readonly DebugCommandDef Debug;
 
     partial void InitGeneratedCommands(string? targetService);
 
@@ -63,6 +65,7 @@ public partial class RootCommandDef : CommandDef
         Bootstrap = new BootstrapCommandDef(Auth, Interactive);
         Login = new LoginCommandDef();
         Logout = new LogoutCommandDef();
+        Debug = new DebugCommandDef();
         InitGeneratedCommands(targetService);
     }
 

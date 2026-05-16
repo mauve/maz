@@ -1,16 +1,19 @@
 using System.Reflection;
+using Console.Cli.Shared;
 
 namespace Console.Cli;
 
 public sealed class CliCompletionContext
 {
     public string WordToComplete { get; }
+    public DiagnosticLog Log { get; }
     private readonly RootCommandDef? _root;
 
-    internal CliCompletionContext(string wordToComplete, RootCommandDef? root)
+    internal CliCompletionContext(string wordToComplete, RootCommandDef? root, DiagnosticLog? log = null)
     {
         WordToComplete = wordToComplete;
         _root = root;
+        Log = log ?? DiagnosticLog.Null;
     }
 
     /// <summary>
@@ -110,15 +113,18 @@ internal static class CliCompletionHandler
             System.Console.Out
         );
 
-    // Testable overload — accepts an injected tree, providers, and output writer.
+    // Testable overload — accepts an injected tree, providers, output writer, and optional
+    // diagnostic log (used by 'maz debug suggest' to trace the completion logic).
     internal static async Task HandleAsync(
         string commandLine,
         int cursorPosition,
         CompletionNode root,
         IReadOnlyDictionary<string, ICliCompletionProvider> dynamicProviders,
-        TextWriter output
+        TextWriter output,
+        DiagnosticLog? log = null
     )
     {
+        log ??= DiagnosticLog.Null;
         var line =
             cursorPosition < commandLine.Length ? commandLine[..cursorPosition] : commandLine;
         var tokens = Tokenize(line);
@@ -129,43 +135,108 @@ internal static class CliCompletionHandler
             ? (tokens.Count > 0 ? tokens[^1] : null)
             : (tokens.Count >= 2 ? tokens[^2] : null);
 
+        log.Trace(
+            $"tokens=[{string.Join(", ", tokens.Select(t => $"\"{t}\""))}]"
+        );
+        log.Trace(
+            $"wordToComplete=\"{wordToComplete}\" "
+                + $"precedingToken={FormatNullable(precedingToken)} "
+                + $"trailingSpace={trailingSpace}"
+        );
+
         // Dynamic value completion (e.g. --subscription-id <TAB>)
         if (precedingToken?.StartsWith('-') == true)
         {
+            log.Trace(
+                "path: preceding token is an option → checking dynamic/static value providers"
+            );
+
             if (dynamicProviders.TryGetValue(precedingToken, out var provider))
             {
-                var context = new CliCompletionContext(wordToComplete, null);
-                foreach (var c in await provider.GetCompletionsAsync(context))
+                log.Trace(
+                    $"dynamic provider found for \"{precedingToken}\" ({provider.GetType().Name})"
+                );
+                var context = new CliCompletionContext(wordToComplete, null, log);
+                IEnumerable<string> completions;
+                try
+                {
+                    completions = await provider.GetCompletionsAsync(context);
+                }
+                catch (Exception ex)
+                {
+                    log.Trace($"provider threw: {ex.GetType().Name}: {ex.Message}");
+                    return;
+                }
+
+                int count = 0;
+                foreach (var c in completions)
+                {
                     output.WriteLine(c);
+                    count++;
+                }
+                log.Trace($"provider returned {count} completion(s)");
                 return;
             }
 
             // Static value completion (e.g. --format <TAB> for enum options)
             if (CompletionTree.StaticValueProviders.TryGetValue(precedingToken, out var values))
             {
+                log.Trace(
+                    $"static value provider found for \"{precedingToken}\" ({values.Length} value(s))"
+                );
+                int count = 0;
                 foreach (var v in values)
+                {
                     if (v.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+                    {
                         output.WriteLine(v);
+                        count++;
+                    }
+                }
+                log.Trace($"emitted {count} static value(s)");
                 return;
             }
 
+            log.Trace(
+                $"no provider found for option \"{precedingToken}\" — no completions"
+            );
             return;
         }
 
         // Static path: walk the compile-time generated tree
         var (node, commandPath) = FindActiveNode(root, tokens, trailingSpace);
+        log.Trace($"path: static tree, command path=\"{commandPath}\"");
 
         if (wordToComplete.StartsWith('-'))
         {
+            log.Trace(
+                $"completing option at node \"{commandPath}\" ({node.Options.Length} options available)"
+            );
+            int count = 0;
             foreach (var opt in node.Options)
+            {
                 if (opt.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+                {
                     output.WriteLine(opt);
+                    count++;
+                }
+            }
+            log.Trace($"emitted {count} option(s)");
             return;
         }
 
+        int childCount = 0;
         foreach (var child in node.Children)
+        {
             if (child.Name.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+            {
                 output.WriteLine(child.Name);
+                childCount++;
+            }
+        }
+        log.Trace(
+            $"node \"{commandPath}\" has {node.Children.Length} child(ren), emitted {childCount} matching \"{wordToComplete}\""
+        );
 
         // Argument completions — only when no child commands matched
         if (node.Children.Length == 0)
@@ -173,17 +244,35 @@ internal static class CliCompletionHandler
             var argCompletions = CliArgumentCompletionRegistry.Resolve(commandPath);
             if (argCompletions != null)
             {
-                // Count consumed positional tokens (non-option, non-command tokens after the command path)
                 int positionalIndex = CountPositionalArgs(tokens, trailingSpace, commandPath);
+                log.Trace(
+                    $"positional arg completions registered for \"{commandPath}\", positionalIndex={positionalIndex}"
+                );
                 if (positionalIndex >= 0 && positionalIndex < argCompletions.Length)
                 {
+                    int count = 0;
                     foreach (var v in argCompletions[positionalIndex])
+                    {
                         if (v.StartsWith(wordToComplete, StringComparison.OrdinalIgnoreCase))
+                        {
                             output.WriteLine(v);
+                            count++;
+                        }
+                    }
+                    log.Trace($"emitted {count} positional arg completion(s)");
                 }
+            }
+            else
+            {
+                log.Trace(
+                    $"no positional arg completions registered for \"{commandPath}\""
+                );
             }
         }
     }
+
+    private static string FormatNullable(string? value) =>
+        value is null ? "(none)" : $"\"{value}\"";
 
     private static (CompletionNode node, string commandPath) FindActiveNode(
         CompletionNode root,

@@ -80,8 +80,8 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
     /// </summary>
     /// <param name="armClient">ARM client used to fetch the resolved resource.</param>
     /// <param name="credential">
-    /// Credential for ARG queries. When <c>null</c> the ARG client falls back to
-    /// <see cref="DefaultAzureCredential"/>; pass the command's credential to avoid
+    /// Credential for ARG queries. When <c>null</c>, falls back to a default
+    /// <see cref="AuthOptionPack"/> credential chain; pass the command's credential to avoid
     /// an extra credential-chain evaluation.
     /// </param>
     /// <param name="log">Optional diagnostic log.</param>
@@ -111,7 +111,7 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
             ResourceGroupPack,
             armClient,
             ResourceType,
-            credential ?? new DefaultAzureCredential(),
+            credential ?? new AuthOptionPack().GetCredential(log ?? DiagnosticLog.Null),
             log,
             ct
         );
@@ -130,10 +130,11 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
         string? subscriptionHint,
         string? resourceGroupHint,
         string namePrefix,
+        DiagnosticLog? log = null,
         CancellationToken ct = default
     )
     {
-        var cred = credential ?? new DefaultAzureCredential();
+        var cred = credential ?? new AuthOptionPack().GetCredential(log ?? DiagnosticLog.Null);
         try
         {
             return await ArgCompletionHelper.QueryCompletionCandidatesAsync(
@@ -143,11 +144,13 @@ public abstract class ArmResourceOptionPack<TResource> : OptionPack
                 subscriptionHint,
                 resourceGroupHint,
                 namePrefix,
+                log: log,
                 ct: ct
             );
         }
-        catch
+        catch (Exception ex)
         {
+            log?.Trace($"ArgCompletionHelper threw: {ex.GetType().Name}: {ex.Message}");
             return Array.Empty<string>();
         }
     }
@@ -191,8 +194,9 @@ internal sealed class ArmResourceCompletionProvider<TPack, TResource> : ICliComp
 {
     public async ValueTask<IEnumerable<string>> GetCompletionsAsync(CliCompletionContext context)
     {
+        var log = context.Log;
         var auth = context.GetOptionPack<AuthOptionPack>();
-        var credential = auth?.GetCredential(DiagnosticLog.Null) ?? new DefaultAzureCredential();
+        var credential = auth?.GetCredential(log) ?? new AuthOptionPack().GetCredential(log);
         var armClient = new ArmClient(credential);
         var word = context.WordToComplete;
 
@@ -229,6 +233,11 @@ internal sealed class ArmResourceCompletionProvider<TPack, TResource> : ICliComp
         subHint ??= context.GetOptionPack<SubscriptionOptionPack>()?.SubscriptionId;
         rgHint ??= context.GetOptionPack<ResourceGroupOptionPack>()?.ResourceGroupName;
 
+        log.Trace(
+            $"ArmResourceCompletionProvider<{typeof(TPack).Name}>: "
+                + $"word=\"{word}\" prefix=\"{prefix}\" subHint={subHint ?? "(none)"} rgHint={rgHint ?? "(none)"}"
+        );
+
         try
         {
             var pack = new TPack();
@@ -237,12 +246,16 @@ internal sealed class ArmResourceCompletionProvider<TPack, TResource> : ICliComp
                 credential,
                 subHint,
                 rgHint,
-                prefix
+                prefix,
+                log: log
             );
-            return candidates.Select(c => headPfx + c);
+            var results = candidates.Select(c => headPfx + c).ToList();
+            log.Trace($"ArmResourceCompletionProvider: {results.Count} candidate(s) after filtering");
+            return results;
         }
-        catch
+        catch (Exception ex)
         {
+            log.Trace($"ArmResourceCompletionProvider: GetCompletionCandidatesAsync threw: {ex.GetType().Name}: {ex.Message}");
             return [];
         }
     }

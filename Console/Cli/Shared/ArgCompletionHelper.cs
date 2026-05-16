@@ -21,11 +21,13 @@ internal static class ArgCompletionHelper
         string prefix,
         IArgClient? argClient = null,
         Func<ArmClient, string, Task<string?>>? normalizeSubscriptionHint = null,
+        DiagnosticLog? log = null,
         CancellationToken ct = default
     )
     {
+        log ??= DiagnosticLog.Null;
         var config = MazConfig.Current;
-        var argClientResolved = argClient ?? new ArmArgClient(credential ?? new DefaultAzureCredential(), DiagnosticLog.Null);
+        var argClientResolved = argClient ?? new ArmArgClient(credential ?? new AuthOptionPack().GetCredential(log), log);
 
         // Determine subscription scope for ARG queries
         IEnumerable<string>? subscriptionScope = null;
@@ -37,9 +39,11 @@ internal static class ArgCompletionHelper
                 {
                     var sub = await SubscriptionOptionPack.ResolveAsync(armClient, subscriptionHint);
                     subscriptionScope = new[] { sub.Data.SubscriptionId };
+                    log.Trace($"ArgCompletionHelper: resolved subscriptionHint \"{subscriptionHint}\" → {sub.Data.SubscriptionId}");
                 }
-                catch
+                catch (Exception ex)
                 {
+                    log.Trace($"ArgCompletionHelper: failed to resolve subscriptionHint \"{subscriptionHint}\": {ex.GetType().Name}: {ex.Message}");
                     subscriptionScope = null;
                 }
             }
@@ -55,33 +59,44 @@ internal static class ArgCompletionHelper
                     .ToList();
 
                 if (subCandidates.Count > 0)
+                {
                     subscriptionScope = subCandidates;
+                    log.Trace($"ArgCompletionHelper: CFG1 filter → {subCandidates.Count} subscription(s) for rg \"{resourceGroupHint}\"");
+                }
             }
             else if (string.IsNullOrWhiteSpace(subscriptionHint) && config.ResolutionFilter.Count > 0)
             {
                 subscriptionScope = config.ResolutionFilter.Select(e => e.SubscriptionId).ToList();
+                log.Trace($"ArgCompletionHelper: CFG1 filter → {config.ResolutionFilter.Count} subscription(s) (no hint)");
             }
         }
-        catch
+        catch (Exception ex)
         {
+            log.Trace($"ArgCompletionHelper: subscription scope resolution threw: {ex.GetType().Name}: {ex.Message}");
             subscriptionScope = null;
         }
 
+        if (subscriptionScope is null)
+            log.Trace("ArgCompletionHelper: subscription scope = all accessible subscriptions");
+
         // Build KQL for name-prefix search (case-insensitive)
-        var prefixLower = (prefix ?? "").ToLowerInvariant();
-        var pEsc = prefixLower.Replace("'", "''");
+        var pEsc = (prefix ?? "").Replace("'", "''");
         string kql;
         if (resourceGroupHint is not null)
         {
             var rgEsc = resourceGroupHint.Replace("'", "''");
-            kql = $"Resources | where type =~ '{resourceType}' and resourceGroup =~ '{rgEsc}' and startswith(tolower(name), '{pEsc}') | project subscriptionId, resourceGroup, name | limit 200";
+            kql = $"Resources | where type =~ '{resourceType}' and resourceGroup =~ '{rgEsc}' and name startswith '{pEsc}' | project subscriptionId, resourceGroup, name | limit 200";
         }
         else
         {
-            kql = $"Resources | where type =~ '{resourceType}' and startswith(tolower(name), '{pEsc}') | project subscriptionId, resourceGroup, name | limit 200";
+            kql = $"Resources | where type =~ '{resourceType}' and name startswith '{pEsc}' | project subscriptionId, resourceGroup, name | limit 200";
         }
 
+        log.Trace($"ArgCompletionHelper: ARG query: {kql}");
+
         var argResults = await argClientResolved.QueryAsync(kql, subscriptionScope, ct);
+        log.Trace($"ArgCompletionHelper: ARG returned {argResults.Count} row(s)");
+
         if (argResults.Count == 0)
             return Array.Empty<string>();
 
@@ -143,7 +158,9 @@ internal static class ArgCompletionHelper
             results.Add(name);
         }
 
-        return results.Distinct(StringComparer.OrdinalIgnoreCase);
+        var distinct = results.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+        log.Trace($"ArgCompletionHelper: {distinct.Count} candidate(s) after config filtering");
+        return distinct;
     }
 
     private static string NormalizeRg(string rg) => string.IsNullOrEmpty(rg) ? rg : (rg.StartsWith("/rg/", StringComparison.OrdinalIgnoreCase) ? rg[4..] : rg);
