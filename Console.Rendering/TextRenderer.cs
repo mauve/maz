@@ -59,7 +59,17 @@ internal class TextItemRenderer(
             {
                 if (node is null)
                     continue;
-                var formatted = ValueFormatter.Format(node.ToString(), fmtOpts);
+                // Extract typed value from JsonValue for proper formatting (✓/✗ for booleans, etc.)
+                object? value = node switch
+                {
+                    JsonValue jv when jv.TryGetValue<bool>(out var b) => b,
+                    JsonValue jv when jv.TryGetValue<long>(out var l) => l,
+                    JsonValue jv when jv.TryGetValue<double>(out var d) => d,
+                    JsonValue jv when jv.TryGetValue<string>(out var s) => s,
+                    JsonValue jv when jv.TryGetValue<int>(out var n) => (long)n,
+                    _ => node.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
+                };
+                var formatted = ValueFormatter.Format(value, fmtOpts);
                 entries.Add((key, ApplyAnsi(formatted)));
             }
             if (entries.Count > 0)

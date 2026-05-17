@@ -46,42 +46,59 @@ public static class DefinitionList
         }
     }
 
-    // Splits text into lines ≤ maxWidth visible chars, breaking only at spaces.
-    // ANSI codes don't count toward width. A single word wider than maxWidth overflows intact.
+    // Splits text into lines ≤ maxWidth visible chars, respecting embedded newlines and breaking
+    // long lines at spaces. ANSI codes don't count toward width.
+    // A single word wider than maxWidth overflows intact.
     public static List<string> WordWrap(string text, int maxWidth)
     {
         if (string.IsNullOrEmpty(text))
             return [text ?? ""];
 
-        var lines = new List<string>();
-        var current = new StringBuilder();
-        var currentWidth = 0;
-
-        foreach (var word in text.Split(' '))
+        var result = new List<string>();
+        // Respect embedded newlines as hard line breaks (e.g. from pretty-printed JSON)
+        var rawLines = text.Split('\n');
+        for (var i = 0; i < rawLines.Length; i++)
         {
-            var wLen = Ansi.VisibleLength(word);
-            if (currentWidth == 0)
+            var line = rawLines[i].TrimEnd('\r');
+            // Skip the empty string produced by a trailing newline
+            if (i == rawLines.Length - 1 && line.Length == 0)
+                break;
+
+            if (Ansi.VisibleLength(line) <= maxWidth)
             {
-                current.Append(word);
-                currentWidth = wLen;
+                result.Add(line);
+                continue;
             }
-            else if (currentWidth + 1 + wLen <= maxWidth)
+
+            // Word-wrap this individual line (preserves leading whitespace in first word)
+            var current = new StringBuilder();
+            var currentWidth = 0;
+            foreach (var word in line.Split(' '))
             {
-                current.Append(' ');
-                current.Append(word);
-                currentWidth += 1 + wLen;
+                var wLen = Ansi.VisibleLength(word);
+                if (currentWidth == 0)
+                {
+                    current.Append(word);
+                    currentWidth = wLen;
+                }
+                else if (currentWidth + 1 + wLen <= maxWidth)
+                {
+                    current.Append(' ');
+                    current.Append(word);
+                    currentWidth += 1 + wLen;
+                }
+                else
+                {
+                    result.Add(current.ToString());
+                    current.Clear();
+                    current.Append(word);
+                    currentWidth = wLen;
+                }
             }
-            else
-            {
-                lines.Add(current.ToString());
-                current.Clear();
-                current.Append(word);
-                currentWidth = wLen;
-            }
+            if (current.Length > 0)
+                result.Add(current.ToString());
         }
 
-        if (current.Length > 0)
-            lines.Add(current.ToString());
-        return lines;
+        return result.Count > 0 ? result : [""];
     }
 }
