@@ -5,6 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-05-17
+### Added
+- `maz config show` — print current configuration (auth, default subscription, filters, etc.)
+- `maz debug suggest <cmdline>` — run the tab-completion handler for an arbitrary command line and print detailed diagnostic output (cursor position, ARG queries, auth traces, resolution steps)
+- Tab completion now uses Azure Resource Graph (ARG) for all resource option packs, and respects subscription and resource-group allow/deny filters from `maz configure`
+
+### Fixed
+- `maz keyvaultmanagement vault show` (and all 15 other resource-specific `show` commands) crashed with `Reflection-based serialization has been disabled` at runtime. All Azure SDK ARM network calls in option packs have been replaced with direct ARM REST calls via `AzureRestClient`, which is compatible with the AOT/trimmed build
+- `maz config` default subscription was ignored during tab completion — it is now used when no `--subscription` flag is present
+- ARM resource resolution: resources can now be addressed by name alone, `rg/name`, `sub/rg/name`, full ARM ID, or Azure portal URL (GAP-1, 2, 3, 14, 15, 16)
+- `ResourceIdentifierParser` now rejects unrecognised leading `/` prefixes with a clear error instead of silently stripping them
+- Subscription display names containing `/` are now handled correctly in completion tokens
+- `show` command output for JSON object properties (e.g. `systemData`, `properties`) was misaligned due to embedded newlines not being treated as hard line breaks in `WordWrap`; booleans rendered as `True`/`False` instead of `✓`/`✗`
+
+### Changed
+- Release pipeline smoke tests no longer run on macOS — the required GitHub-hosted runners (`macos-13`, `macos-latest`) are not reliably available. Windows (x64, ARM64) and Linux (x64, ARM64) smoke tests are retained
+
 ## [0.13.0] - 2026-05-16
 ### Fixed
 - `install.ps1` on Windows ARM64 now works: `win-arm64` binary is included in releases

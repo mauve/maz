@@ -125,10 +125,6 @@ jobs:
             name: linux-x64
           - runner: ubuntu-24.04-arm
             name: linux-arm64
-          - runner: macos-13
-            name: osx-x64
-          - runner: macos-latest
-            name: osx-arm64
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
