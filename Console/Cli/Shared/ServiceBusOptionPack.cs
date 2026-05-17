@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ServiceBus;
@@ -44,12 +45,14 @@ public partial class ServiceBusOptionPack
 
     protected override string? RawResourceValue => ServiceBusNamespace;
 
-    protected override Uri GetDataplaneRef(ServiceBusNamespaceResource resource) =>
-        new($"https://{resource.Data.Name}.servicebus.windows.net");
+    protected override string DataplaneArmApiVersion => "2024-01-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["name"]!.GetValue<string>()}.servicebus.windows.net");
 
     protected override string ResourceType => "Microsoft.ServiceBus/namespaces";
 
-    protected override async Task<ServiceBusNamespaceResource> GetResourceCoreAsync(
+    protected override Task<ServiceBusNamespaceResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -57,11 +60,10 @@ public partial class ServiceBusOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetServiceBusNamespaceAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetServiceBusNamespaceResource(id));
     }
 
 }

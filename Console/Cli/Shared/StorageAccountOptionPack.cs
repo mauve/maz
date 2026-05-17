@@ -52,7 +52,7 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
 
     protected override string ResourceType => "Microsoft.Storage/storageAccounts";
 
-    protected override async Task<StorageAccountResource> GetResourceCoreAsync(
+    protected override Task<StorageAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -60,11 +60,10 @@ public partial class StorageAccountOptionPack : ArmResourceOptionPack<StorageAcc
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetStorageAccountAsync(name, cancellationToken: ct)).Value;
+        return Task.FromResult(armClient.GetStorageAccountResource(id));
     }
 
 }

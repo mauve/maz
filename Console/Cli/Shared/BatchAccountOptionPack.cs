@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Batch;
@@ -43,12 +44,14 @@ public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchA
 
     protected override string? RawResourceValue => BatchAccountName;
 
-    protected override Uri GetDataplaneRef(BatchAccountResource resource) =>
-        new($"https://{resource.Data.AccountEndpoint}");
+    protected override string DataplaneArmApiVersion => "2025-06-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["properties"]!["accountEndpoint"]!.GetValue<string>()}");
 
     protected override string ResourceType => "Microsoft.Batch/batchAccounts";
 
-    protected override async Task<BatchAccountResource> GetResourceCoreAsync(
+    protected override Task<BatchAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -56,11 +59,10 @@ public partial class BatchAccountOptionPack : DataplaneResourceOptionPack<BatchA
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetBatchAccountAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetBatchAccountResource(id));
     }
 
 }

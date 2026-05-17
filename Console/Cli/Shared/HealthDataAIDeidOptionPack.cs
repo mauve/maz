@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.HealthDataAIServices;
@@ -38,12 +39,14 @@ public partial class HealthDataAIDeidOptionPack
 
     protected override string? RawResourceValue => ServiceName;
 
-    protected override Uri GetDataplaneRef(DeidServiceResource resource) =>
-        new Uri(resource.Data.Properties.ServiceUri!);
+    protected override string DataplaneArmApiVersion => "2024-09-20";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["serviceUri"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.HealthDataAIServices/deidServices";
 
-    protected override async Task<DeidServiceResource> GetResourceCoreAsync(
+    protected override Task<DeidServiceResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -51,11 +54,10 @@ public partial class HealthDataAIDeidOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetDeidServiceAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetDeidServiceResource(id));
     }
 
 }

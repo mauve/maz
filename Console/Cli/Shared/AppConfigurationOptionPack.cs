@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.AppConfiguration;
@@ -44,12 +45,14 @@ public partial class AppConfigurationOptionPack
 
     protected override string? RawResourceValue => AppConfigName;
 
-    protected override Uri GetDataplaneRef(AppConfigurationStoreResource resource) =>
-        new(resource.Data.Endpoint!);
+    protected override string DataplaneArmApiVersion => "2024-05-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["endpoint"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.AppConfiguration/configurationStores";
 
-    protected override async Task<AppConfigurationStoreResource> GetResourceCoreAsync(
+    protected override Task<AppConfigurationStoreResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -57,11 +60,10 @@ public partial class AppConfigurationOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetAppConfigurationStoreAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetAppConfigurationStoreResource(id));
     }
 
 }

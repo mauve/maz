@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.LoadTesting;
@@ -37,12 +38,14 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
 
     protected override string? RawResourceValue => ResourceName;
 
-    protected override Uri GetDataplaneRef(LoadTestingResource resource) =>
-        new Uri(resource.Data.DataPlaneUri!);
+    protected override string DataplaneArmApiVersion => "2022-12-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["dataPlaneUri"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.LoadTestService/loadTests";
 
-    protected override async Task<LoadTestingResource> GetResourceCoreAsync(
+    protected override Task<LoadTestingResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -50,11 +53,10 @@ public partial class LoadTestingOptionPack : DataplaneResourceOptionPack<LoadTes
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetLoadTestingResourceAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetLoadTestingResource(id));
     }
 
 }

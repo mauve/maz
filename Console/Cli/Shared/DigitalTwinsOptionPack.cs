@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.DigitalTwins;
@@ -38,12 +39,14 @@ public partial class DigitalTwinsOptionPack
 
     protected override string? RawResourceValue => InstanceName;
 
-    protected override Uri GetDataplaneRef(DigitalTwinsDescriptionResource resource) =>
-        new Uri("https://" + resource.Data.HostName);
+    protected override string DataplaneArmApiVersion => "2023-01-31";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["properties"]!["hostName"]!.GetValue<string>()}");
 
     protected override string ResourceType => "Microsoft.DigitalTwins/digitalTwinsInstances";
 
-    protected override async Task<DigitalTwinsDescriptionResource> GetResourceCoreAsync(
+    protected override Task<DigitalTwinsDescriptionResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -51,11 +54,10 @@ public partial class DigitalTwinsOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetDigitalTwinsDescriptionAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetDigitalTwinsDescriptionResource(id));
     }
 
 }

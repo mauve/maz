@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.DevCenter;
@@ -37,12 +38,14 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
 
     protected override string? RawResourceValue => DevCenterName;
 
-    protected override Uri GetDataplaneRef(DevCenterResource resource) =>
-        resource.Data.DevCenterUri!;
+    protected override string DataplaneArmApiVersion => "2023-04-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["devCenterUri"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.DevCenter/devcenters";
 
-    protected override async Task<DevCenterResource> GetResourceCoreAsync(
+    protected override Task<DevCenterResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -50,11 +53,10 @@ public partial class DevCenterOptionPack : DataplaneResourceOptionPack<DevCenter
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetDevCenterAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetDevCenterResource(id));
     }
 
 }

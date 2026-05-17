@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Purview;
@@ -37,12 +38,14 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
 
     protected override string? RawResourceValue => AccountName;
 
-    protected override Uri GetDataplaneRef(PurviewAccountResource resource) =>
-        new Uri(resource.Data.Endpoints.Catalog!);
+    protected override string DataplaneArmApiVersion => "2021-12-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["endpoints"]!["catalog"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.Purview/accounts";
 
-    protected override async Task<PurviewAccountResource> GetResourceCoreAsync(
+    protected override Task<PurviewAccountResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -50,11 +53,10 @@ public partial class PurviewOptionPack : DataplaneResourceOptionPack<PurviewAcco
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetPurviewAccountAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetPurviewAccountResource(id));
     }
 
 }

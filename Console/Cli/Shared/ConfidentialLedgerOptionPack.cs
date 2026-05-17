@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ConfidentialLedger;
@@ -38,12 +39,14 @@ public partial class ConfidentialLedgerOptionPack
 
     protected override string? RawResourceValue => LedgerName;
 
-    protected override Uri GetDataplaneRef(ConfidentialLedgerResource resource) =>
-        resource.Data.Properties.LedgerUri!;
+    protected override string DataplaneArmApiVersion => "2026-02-23";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["ledgerUri"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.ConfidentialLedger/ledgers";
 
-    protected override async Task<ConfidentialLedgerResource> GetResourceCoreAsync(
+    protected override Task<ConfidentialLedgerResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -51,11 +54,10 @@ public partial class ConfidentialLedgerOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetConfidentialLedgerAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetConfidentialLedgerResource(id));
     }
 
 }

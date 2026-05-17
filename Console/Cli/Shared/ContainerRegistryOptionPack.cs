@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.ContainerRegistry;
@@ -44,12 +45,14 @@ public partial class ContainerRegistryOptionPack
 
     protected override string? RawResourceValue => RegistryName;
 
-    protected override Uri GetDataplaneRef(ContainerRegistryResource resource) =>
-        new($"https://{resource.Data.LoginServer}");
+    protected override string DataplaneArmApiVersion => "2025-11-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["properties"]!["loginServer"]!.GetValue<string>()}");
 
     protected override string ResourceType => "Microsoft.ContainerRegistry/registries";
 
-    protected override async Task<ContainerRegistryResource> GetResourceCoreAsync(
+    protected override Task<ContainerRegistryResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -57,11 +60,10 @@ public partial class ContainerRegistryOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetContainerRegistryAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetContainerRegistryResource(id));
     }
 
 }

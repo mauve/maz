@@ -1,7 +1,9 @@
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization.Metadata;
 using Azure.Core;
 using Console.Cli.Shared;
 
@@ -55,6 +57,32 @@ public sealed class AzureRestClient
         return string.IsNullOrWhiteSpace(content)
             ? JsonValue.Create((object?)null)!
             : JsonNode.Parse(content)!;
+    }
+
+    /// <summary>
+    /// Sends an authenticated HTTP request and deserializes the response body using
+    /// source-generated JSON metadata — no reflection.
+    /// </summary>
+    public async Task<T> SendAsync<T>(
+        HttpMethod method,
+        string path,
+        string apiVersion,
+        JsonNode? body,
+        JsonTypeInfo<T> typeInfo,
+        CancellationToken ct
+    )
+    {
+        var response = await SendRawAsync(method, path, apiVersion, body, ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorBody = await response.Content.ReadAsStringAsync(ct);
+            throw new HttpRequestException(
+                $"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}).\n{errorBody}"
+            );
+        }
+        var content = await response.Content.ReadAsStringAsync(ct);
+        return JsonSerializer.Deserialize(content, typeInfo)
+            ?? throw new InvalidOperationException("ARM response deserialized to null.");
     }
 
     /// <summary>

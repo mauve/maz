@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Search;
@@ -44,12 +45,14 @@ public partial class SearchServiceOptionPack
 
     protected override string? RawResourceValue => SearchServiceName;
 
-    protected override Uri GetDataplaneRef(SearchServiceResource resource) =>
-        new($"https://{resource.Data.Name}.search.windows.net");
+    protected override string DataplaneArmApiVersion => "2025-05-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["name"]!.GetValue<string>()}.search.windows.net");
 
     protected override string ResourceType => "Microsoft.Search/searchServices";
 
-    protected override async Task<SearchServiceResource> GetResourceCoreAsync(
+    protected override Task<SearchServiceResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -57,11 +60,10 @@ public partial class SearchServiceOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetSearchServiceAsync(name, cancellationToken: ct)).Value;
+        return Task.FromResult(armClient.GetSearchServiceResource(id));
     }
 
 }

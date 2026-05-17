@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.WebPubSub;
@@ -37,12 +38,14 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
 
     protected override string? RawResourceValue => ServiceName;
 
-    protected override Uri GetDataplaneRef(WebPubSubResource resource) =>
-        new Uri("https://" + resource.Data.HostName);
+    protected override string DataplaneArmApiVersion => "2024-03-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["properties"]!["hostName"]!.GetValue<string>()}");
 
     protected override string ResourceType => "Microsoft.SignalRService/webPubSub";
 
-    protected override async Task<WebPubSubResource> GetResourceCoreAsync(
+    protected override Task<WebPubSubResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -50,11 +53,10 @@ public partial class WebPubSubOptionPack : DataplaneResourceOptionPack<WebPubSub
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetWebPubSubAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetWebPubSubResource(id));
     }
 
 }

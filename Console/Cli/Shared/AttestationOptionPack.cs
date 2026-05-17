@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Attestation;
@@ -38,12 +39,14 @@ public partial class AttestationOptionPack
 
     protected override string? RawResourceValue => ProviderName;
 
-    protected override Uri GetDataplaneRef(AttestationProviderResource resource) =>
-        resource.Data.AttestUri!;
+    protected override string DataplaneArmApiVersion => "2021-06-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new(json["properties"]!["attestUri"]!.GetValue<string>());
 
     protected override string ResourceType => "Microsoft.Attestation/attestationProviders";
 
-    protected override async Task<AttestationProviderResource> GetResourceCoreAsync(
+    protected override Task<AttestationProviderResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -51,11 +54,10 @@ public partial class AttestationOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetAttestationProviderAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetAttestationProviderResource(id));
     }
 
 }

@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.EventHubs;
@@ -44,12 +45,14 @@ public partial class EventHubOptionPack
 
     protected override string? RawResourceValue => EventHubNamespace;
 
-    protected override Uri GetDataplaneRef(EventHubsNamespaceResource resource) =>
-        new($"https://{resource.Data.Name}.servicebus.windows.net");
+    protected override string DataplaneArmApiVersion => "2024-01-01";
+
+    protected override Uri GetDataplaneRefFromJson(JsonNode json) =>
+        new($"https://{json["name"]!.GetValue<string>()}.servicebus.windows.net");
 
     protected override string ResourceType => "Microsoft.EventHub/namespaces";
 
-    protected override async Task<EventHubsNamespaceResource> GetResourceCoreAsync(
+    protected override Task<EventHubsNamespaceResource> GetResourceCoreAsync(
         ArmClient armClient,
         string resolvedSub,
         string resolvedRg,
@@ -57,11 +60,10 @@ public partial class EventHubOptionPack
         CancellationToken ct
     )
     {
-        var rgId = new ResourceIdentifier(
-            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}"
+        var id = new ResourceIdentifier(
+            $"/subscriptions/{resolvedSub}/resourceGroups/{resolvedRg}/providers/{ResourceType}/{name}"
         );
-        var rg = armClient.GetResourceGroupResource(rgId);
-        return (await rg.GetEventHubsNamespaceAsync(name, ct)).Value;
+        return Task.FromResult(armClient.GetEventHubsNamespaceResource(id));
     }
 
 }
