@@ -1,3 +1,4 @@
+using System.Text.Json.Nodes;
 using Console.Rendering;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -235,5 +236,101 @@ public class TextRendererTests
         await renderer.RenderAllAsync(writer, items, CancellationToken.None);
 
         StringAssert.Contains(writer.ToString(), "(no results)");
+    }
+
+    // ── JsonObject: nested object rendering ───────────────────────────────
+
+    private static TextRendererFactory DefaultFactory() =>
+        new(showAll: false, showEnvelope: false, new ValueFormatterOptions());
+
+    [TestMethod]
+    public async Task Render_JsonNestedObject_RendersAsDefinitionList()
+    {
+        var renderer = DefaultFactory().CreateRendererForType(typeof(object));
+        var json = """
+            {
+                "name": "Alice",
+                "manager": {
+                    "id": "abc-123",
+                    "displayName": "Bob"
+                }
+            }
+            """;
+        var obj = (JsonObject)JsonNode.Parse(json)!;
+
+        using var writer = new StringWriter();
+        await renderer.RenderAsync(writer, obj, CancellationToken.None);
+
+        var output = writer.ToString();
+        StringAssert.Contains(output, "name");
+        StringAssert.Contains(output, "Alice");
+        StringAssert.Contains(output, "manager");
+        StringAssert.Contains(output, "id");
+        StringAssert.Contains(output, "abc-123");
+        StringAssert.Contains(output, "displayName");
+        StringAssert.Contains(output, "Bob");
+        Assert.IsFalse(output.Contains("{\""), "Nested object should not render as raw JSON");
+    }
+
+    // ── JsonObject: empty array rendering ────────────────────────────────
+
+    [TestMethod]
+    public async Task Render_JsonEmptyArray_RendersSquareBrackets()
+    {
+        var renderer = DefaultFactory().CreateRendererForType(typeof(object));
+        var obj = (JsonObject)JsonNode.Parse("""{"phones": []}""")!;
+
+        using var writer = new StringWriter();
+        await renderer.RenderAsync(writer, obj, CancellationToken.None);
+
+        var output = writer.ToString();
+        StringAssert.Contains(output, "phones");
+        StringAssert.Contains(output, "[]");
+    }
+
+    // ── JsonObject: scalar array rendering ───────────────────────────────
+
+    [TestMethod]
+    public async Task Render_JsonScalarArray_RendersIndexedList()
+    {
+        var renderer = DefaultFactory().CreateRendererForType(typeof(object));
+        var obj = (JsonObject)JsonNode.Parse("""{"phones": ["+1 555-1234", "+1 555-5678"]}""")!;
+
+        using var writer = new StringWriter();
+        await renderer.RenderAsync(writer, obj, CancellationToken.None);
+
+        var output = writer.ToString();
+        StringAssert.Contains(output, "- [0]");
+        StringAssert.Contains(output, "+1 555-1234");
+        StringAssert.Contains(output, "- [1]");
+        StringAssert.Contains(output, "+1 555-5678");
+    }
+
+    // ── JsonObject: array of objects rendering ────────────────────────────
+
+    [TestMethod]
+    public async Task Render_JsonObjectArray_RendersEachObjectInline()
+    {
+        var renderer = DefaultFactory().CreateRendererForType(typeof(object));
+        var json = """
+            {
+                "members": [
+                    {"id": "id1", "name": "Alice"},
+                    {"id": "id2", "name": "Bob"}
+                ]
+            }
+            """;
+        var obj = (JsonObject)JsonNode.Parse(json)!;
+
+        using var writer = new StringWriter();
+        await renderer.RenderAsync(writer, obj, CancellationToken.None);
+
+        var output = writer.ToString();
+        StringAssert.Contains(output, "- [0]");
+        StringAssert.Contains(output, "id1");
+        StringAssert.Contains(output, "Alice");
+        StringAssert.Contains(output, "- [1]");
+        StringAssert.Contains(output, "id2");
+        StringAssert.Contains(output, "Bob");
     }
 }

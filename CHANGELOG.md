@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-05-22
+### Fixed
+- `--format text` now renders nested JSON objects recursively as indented definition lists instead of raw JSON blobs
+- `--format text` arrays render as `[]` (dim) when empty, or as an indented list with a dim `- [N]` index prefix per item
+- Array items that are objects start on the same line as their `- [N]` prefix, with subsequent properties continuation-indented
+- Property names in `--format text` output are now bold+underline when the terminal supports it
+
 ## [0.15.0] - 2026-05-22
 ### Added
 - `maz entra user show <user>` — show details of an Entra ID user account (UPN, object ID, or `me`)

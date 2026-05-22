@@ -54,26 +54,7 @@ internal class TextItemRenderer(
         // JsonNode: render JSON properties directly instead of using reflection
         if (dataValue is JsonObject jsonObj)
         {
-            var entries = new List<(string Label, string Value)>();
-            foreach (var (key, node) in jsonObj)
-            {
-                if (node is null)
-                    continue;
-                // Extract typed value from JsonValue for proper formatting (✓/✗ for booleans, etc.)
-                object? value = node switch
-                {
-                    JsonValue jv when jv.TryGetValue<bool>(out var b) => b,
-                    JsonValue jv when jv.TryGetValue<long>(out var l) => l,
-                    JsonValue jv when jv.TryGetValue<double>(out var d) => d,
-                    JsonValue jv when jv.TryGetValue<string>(out var s) => s,
-                    JsonValue jv when jv.TryGetValue<int>(out var n) => (long)n,
-                    _ => node.ToJsonString(new System.Text.Json.JsonSerializerOptions { WriteIndented = true }),
-                };
-                var formatted = ValueFormatter.Format(value, fmtOpts);
-                entries.Add((key, ApplyAnsi(formatted)));
-            }
-            if (entries.Count > 0)
-                DefinitionList.Write(output, entries);
+            RenderJsonObject(output, jsonObj, indent: 2);
             output.WriteLine();
             return Task.CompletedTask;
         }
@@ -85,8 +66,8 @@ internal class TextItemRenderer(
             var entries = new List<(string Label, string Value)>();
             foreach (var prop in properties)
             {
-                if (TryFormatField(dataType, prop, dataValue, out var formattedValue))
-                    entries.Add((prop.Name, formattedValue!));
+                if (TryFormatField(dataType, prop, dataValue, out var label, out var formattedValue))
+                    entries.Add((label!, formattedValue!));
             }
 
             if (entries.Count > 0)
@@ -97,17 +78,140 @@ internal class TextItemRenderer(
         return Task.CompletedTask;
     }
 
+    // ── JsonNode recursive rendering ──────────────────────────────────────
+
+    private void RenderJsonObject(TextWriter output, JsonObject obj, int indent)
+    {
+        var maxLabelWidth = obj.Select(kv => kv.Key.Length).DefaultIfEmpty(0).Max();
+        var consoleWidth = DefinitionList.GetConsoleWidth();
+
+        foreach (var (key, node) in obj)
+            RenderJsonProperty(output, key, node, indent, maxLabelWidth, consoleWidth);
+    }
+
+    private void RenderJsonProperty(
+        TextWriter output,
+        string key,
+        JsonNode? node,
+        int indent,
+        int maxLabelWidth,
+        int consoleWidth
+    )
+    {
+        if (node is null)
+            return;
+
+        var indentStr = new string(' ', indent);
+        var styledKey = Ansi.Header(key);
+        var pad = maxLabelWidth - key.Length;
+        var labelPart = $"{indentStr}{styledKey}: {new string(' ', pad)}";
+        var valueStart = indent + maxLabelWidth + 2;
+
+        if (node is JsonObject nestedObj)
+        {
+            output.WriteLine($"{indentStr}{styledKey}:");
+            RenderJsonObject(output, nestedObj, indent + 4);
+            return;
+        }
+
+        if (node is JsonArray arr)
+        {
+            RenderJsonArray(output, arr, indent, labelPart, valueStart, consoleWidth);
+            return;
+        }
+
+        // JsonValue (scalar)
+        var value = ExtractJsonValue(node);
+        var fv = ValueFormatter.Format(value, fmtOpts);
+        var formatted = ApplyAnsi(fv);
+        var lines = DefinitionList.WordWrap(formatted, Math.Max(1, consoleWidth - valueStart));
+        for (var i = 0; i < lines.Count; i++)
+            output.WriteLine(i == 0 ? labelPart + lines[i] : new string(' ', valueStart) + lines[i]);
+    }
+
+    private void RenderJsonArray(
+        TextWriter output,
+        JsonArray arr,
+        int indent,
+        string labelPart,
+        int valueStart,
+        int consoleWidth
+    )
+    {
+        if (arr.Count == 0)
+        {
+            output.WriteLine(labelPart + Ansi.Dim("[]"));
+            return;
+        }
+
+        output.WriteLine(labelPart.TrimEnd());
+
+        var itemIndent = indent + 4;
+        var indexWidth = Math.Max(1, (arr.Count - 1).ToString().Length);
+
+        for (var i = 0; i < arr.Count; i++)
+        {
+            var item = arr[i];
+            var indexStr = Ansi.Dim($"- [{i.ToString().PadLeft(indexWidth)}]");
+            var indexPrefix = new string(' ', itemIndent) + indexStr + "  ";
+            // visible: itemIndent + "- [" (3) + indexWidth + "]" (1) + "  " (2)
+            var indexPrefixVisibleLen = itemIndent + indexWidth + 6;
+
+            if (item is null)
+            {
+                output.WriteLine(indexPrefix + Ansi.Dim("null"));
+            }
+            else if (item is JsonObject itemObj)
+            {
+                // Render object into a buffer with no indent, then inline with the index prefix
+                using var buf = new StringWriter();
+                RenderJsonObject(buf, itemObj, indent: 0);
+                var objLines = buf.ToString()
+                    .Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries);
+                var continuation = new string(' ', indexPrefixVisibleLen);
+                for (var j = 0; j < objLines.Length; j++)
+                    output.WriteLine(j == 0 ? indexPrefix + objLines[j] : continuation + objLines[j]);
+            }
+            else if (item is JsonArray nestedArr)
+            {
+                RenderJsonArray(output, nestedArr, itemIndent, indexPrefix, indexPrefixVisibleLen, consoleWidth);
+            }
+            else
+            {
+                var value = ExtractJsonValue(item);
+                var fv = ValueFormatter.Format(value, fmtOpts);
+                output.WriteLine(indexPrefix + ApplyAnsi(fv));
+            }
+        }
+    }
+
+    private static object? ExtractJsonValue(JsonNode node) =>
+        node switch
+        {
+            JsonValue jv when jv.TryGetValue<bool>(out var b) => b,
+            JsonValue jv when jv.TryGetValue<long>(out var l) => l,
+            JsonValue jv when jv.TryGetValue<double>(out var d) => d,
+            JsonValue jv when jv.TryGetValue<string>(out var s) => s,
+            JsonValue jv when jv.TryGetValue<int>(out var n) => (long)n,
+            _ => node.ToJsonString(),
+        };
+
+    // ── Reflection-based rendering ────────────────────────────────────────
+
     private bool TryFormatField(
         Type dataType,
         PropertyInfo prop,
         object dataValue,
+        out string? label,
         out string? formattedValue
     )
     {
+        label = null;
         formattedValue = null;
 
         if (showAll)
         {
+            label = Ansi.Header(prop.Name);
             formattedValue = ApplyAnsi(ValueFormatter.Format(prop.GetValue(dataValue), fmtOpts));
             return true;
         }
@@ -124,6 +228,7 @@ internal class TextItemRenderer(
             var v = prop.GetValue(dataValue);
             if (v == null)
                 return false;
+            label = Ansi.Header(prop.Name);
             formattedValue = ApplyAnsi(ValueFormatter.Format(v, fmtOpts));
             return true;
         }
@@ -131,6 +236,7 @@ internal class TextItemRenderer(
         // registryResult == true: always show
         {
             var v = prop.GetValue(dataValue);
+            label = Ansi.Header(prop.Name);
             formattedValue = ApplyAnsi(ValueFormatter.Format(v, fmtOpts));
             return true;
         }
