@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.16.1] - 2026-05-22
+### Fixed
+- `--format json-pretty` no longer crashes with a reflection-based serialization error
+
 ## [0.16.0] - 2026-05-22
 ### Fixed
 - `--format text` now renders nested JSON objects recursively as indented definition lists instead of raw JSON blobs

@@ -78,7 +78,7 @@ internal class JsonPrettyDirectRenderer : IRenderer
 
     public Task RenderAsync(TextWriter output, object data, CancellationToken ct)
     {
-        var json = JsonSerializer.Serialize(data, Options);
+        var json = JsonSerializeHelper.SerializeSafe(data, Options);
         output.WriteLine(JsonSyntaxHighlighter.Colorize(json));
         return Task.CompletedTask;
     }
