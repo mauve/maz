@@ -3,6 +3,7 @@ using Console.Cli.Commands;
 using Console.Cli.Commands.Bootstrap;
 using Console.Cli.Commands.Copy;
 using Console.Cli.Commands.Debug;
+using Console.Cli.Commands.Entra;
 using Console.Cli.Commands.Group;
 using Console.Cli.Commands.Iam;
 using Console.Cli.Commands.JmesPath;
@@ -29,6 +30,7 @@ public partial class RootCommandDef : CommandDef
 
     public readonly AccountCommandDef Account;
     public readonly AcrCommandDef Acr;
+    public readonly EntraCommandDef Entra;
     public readonly GetTokenCommandDef GetToken;
     public readonly GroupCommandDef Group;
     public readonly IamCommandDef Iam;
@@ -53,6 +55,7 @@ public partial class RootCommandDef : CommandDef
         GlobalBehavior = new GlobalBehaviorOptionPack();
         Account = new AccountCommandDef(Auth);
         Acr = new AcrCommandDef(Auth);
+        Entra = new EntraCommandDef(Auth);
         GetToken = new GetTokenCommandDef(Auth);
         Group = new GroupCommandDef(Auth);
         Iam = new IamCommandDef(Auth);

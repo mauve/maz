@@ -5,6 +5,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-05-22
+### Added
+- `maz entra user show <user>` — show details of an Entra ID user account (UPN, object ID, or `me`)
+  - `--manager` — embed manager information (separate Graph call)
+  - `--licenses` — embed assigned license details (separate Graph call)
+  - `--sign-in-activity` — include last sign-in activity (requires Azure AD P2)
+  - `--extension-attributes` — include on-premises extension attributes (`extensionAttribute1–15`)
+  - `--custom-security-attributes` — include Azure AD custom security attributes
+  - `--custom-attributes` — shortcut enabling both `--extension-attributes` and `--custom-security-attributes`
+  - `--select` — append raw OData `$select` fields to the default selection
+- `maz entra user list` — list user accounts in the tenant with OData filtering and keyword search
+  - `--filter` — OData `$filter` expression
+  - `--search` — keyword search (sets `ConsistencyLevel: eventual`)
+  - `--department` / `--job-title` — convenience filter shortcuts
+  - `--top` — limit number of results
+  - All expansion flags from `show` are also available
+- `maz entra user get-member-groups <user>` — list group memberships
+  - `--transitive` — include nested memberships; output labels each group as **Direct** or **Transitive**
+  - `--security-enabled-only` — filter to security-enabled groups only
+- `maz ad` alias — `maz ad user ...` works as an alias for `maz entra user ...`
+
 ## [0.14.0] - 2026-05-17
 ### Added
 - `maz config show` — print current configuration (auth, default subscription, filters, etc.)
