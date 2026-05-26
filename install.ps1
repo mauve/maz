@@ -1,12 +1,15 @@
 $ErrorActionPreference = 'Stop'
 
+# Windows PowerShell 5.x defaults to TLS 1.0; GitHub requires TLS 1.2+
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 $Repo       = 'mauve/maz'
 $InstallDir = if ($env:MAZ_INSTALL_DIR) { $env:MAZ_INSTALL_DIR } else { "$HOME\.local\bin" }
 
-# Detect architecture
-$Arch = switch ([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture.ToString()) {
-    'X64'   { 'x64'   }
-    'Arm64' { 'arm64' }
+# Detect architecture — $env:PROCESSOR_ARCHITECTURE works on all PowerShell versions
+$Arch = switch ($env:PROCESSOR_ARCHITECTURE) {
+    'AMD64' { 'x64'   }
+    'ARM64' { 'arm64' }
     default { Write-Error "Unsupported architecture: $_"; exit 1 }
 }
 
@@ -49,7 +52,7 @@ if ($UserPath -notlike "*$InstallDir*") {
 
 # Prompt user to run bootstrap
 Write-Host ''
-if ($Host.UI.SupportsVirtualTerminal) {
+if ($Host.UI.SupportsVirtualTerminal -eq $true) {
     Write-Host "`e[1;36mRun 'maz bootstrap' to get started.`e[0m"
 } else {
     Write-Host "Run 'maz bootstrap' to get started." -ForegroundColor Cyan

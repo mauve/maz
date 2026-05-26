@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.16.2] - 2026-05-26
+### Fixed
+- `install.ps1` now works on Windows PowerShell 5.x: replaced `[System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture` (unavailable on older .NET Framework) with `$env:PROCESSOR_ARCHITECTURE`; added TLS 1.2 enforcement for GitHub API/download compatibility
+
 ## [0.16.1] - 2026-05-22
 ### Fixed
 - `--format json-pretty` no longer crashes with a reflection-based serialization error
