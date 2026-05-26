@@ -112,59 +112,102 @@ jobs:
           - runner: windows-latest
             name: win-x64 / PS 5.1
             ps_shell: powershell
+            ps_version: 5
           - runner: windows-latest
             name: win-x64 / PS 7
             ps_shell: pwsh
+            ps_version: 7
           - runner: windows-11-arm
             name: win-arm64 / PS 5.1
             ps_shell: powershell
+            ps_version: 5
           - runner: windows-11-arm
             name: win-arm64 / PS 7
             ps_shell: pwsh
+            ps_version: 7
           - runner: ubuntu-latest
             name: linux-x64
           - runner: ubuntu-24.04-arm
             name: linux-arm64
     runs-on: ${{ matrix.runner }}
     steps:
-      - uses: actions/checkout@v4
+      - name: Check PowerShell version (Windows, PS 5.1)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'powershell'
+        shell: powershell
+        run: |
+          $major = $PSVersionTable.PSVersion.Major
+          if ($major -ne ${{ matrix.ps_version }}) {
+            Write-Error "Expected PowerShell ${{ matrix.ps_version }}.x but got $major.x"
+            exit 1
+          }
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
+
+      - name: Check PowerShell version (Windows, PS 7)
+        if: runner.os == 'Windows' && matrix.ps_shell == 'pwsh'
+        shell: pwsh
+        run: |
+          $major = $PSVersionTable.PSVersion.Major
+          if ($major -ne ${{ matrix.ps_version }}) {
+            Write-Error "Expected PowerShell ${{ matrix.ps_version }}.x but got $major.x"
+            exit 1
+          }
+          Write-Host "PowerShell version: $($PSVersionTable.PSVersion)"
 
       - name: Install (Windows, PS 5.1)
         if: runner.os == 'Windows' && matrix.ps_shell == 'powershell'
         shell: powershell
         env:
           MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
-        run: ./install.ps1
+        run: irm "https://raw.githubusercontent.com/mauve/maz/$env:GITHUB_REF_NAME/install.ps1" | iex
 
       - name: Install (Windows, PS 7)
         if: runner.os == 'Windows' && matrix.ps_shell == 'pwsh'
         shell: pwsh
         env:
           MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
-        run: ./install.ps1
+        run: irm "https://raw.githubusercontent.com/mauve/maz/$env:GITHUB_REF_NAME/install.ps1" | iex
 
       - name: Install (Unix)
         if: runner.os != 'Windows'
         shell: bash
         env:
           MAZ_INSTALL_DIR: ${{ runner.temp }}/maz-bin
-        run: bash ./install.sh
+        run: curl -fsSL "https://raw.githubusercontent.com/mauve/maz/$GITHUB_REF_NAME/install.sh" | bash
 
       - name: Verify (Windows, PS 5.1)
         if: runner.os == 'Windows' && matrix.ps_shell == 'powershell'
         shell: powershell
         run: |
-          $bin = "$env:RUNNER_TEMP/maz-bin/maz.exe"
-          & $bin --version
+          $bin      = "$env:RUNNER_TEMP/maz-bin/maz.exe"
+          $output   = & $bin --version
+          $expected = $env:GITHUB_REF_NAME -replace '^v', ''
+          Write-Host $output
+          if (-not $output.StartsWith($expected)) {
+            Write-Error "Version mismatch: expected output starting with '$expected', got '$output'"
+            exit 1
+          }
 
       - name: Verify (Windows, PS 7)
         if: runner.os == 'Windows' && matrix.ps_shell == 'pwsh'
         shell: pwsh
         run: |
-          $bin = "$env:RUNNER_TEMP/maz-bin/maz.exe"
-          & $bin --version
+          $bin      = "$env:RUNNER_TEMP/maz-bin/maz.exe"
+          $output   = & $bin --version
+          $expected = $env:GITHUB_REF_NAME -replace '^v', ''
+          Write-Host $output
+          if (-not $output.StartsWith($expected)) {
+            Write-Error "Version mismatch: expected output starting with '$expected', got '$output'"
+            exit 1
+          }
 
       - name: Verify (Unix)
         if: runner.os != 'Windows'
         shell: bash
-        run: $RUNNER_TEMP/maz-bin/maz --version
+        run: |
+          output="$("$RUNNER_TEMP/maz-bin/maz" --version)"
+          expected="${GITHUB_REF_NAME#v}"
+          echo "$output"
+          if [[ "$output" != "$expected"* ]]; then
+            echo "error: version mismatch: expected output starting with '$expected', got '$output'" >&2
+            exit 1
+          fi

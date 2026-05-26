@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.16.3] - 2026-05-26
+### Changed
+- Install smoke tests now fetch and execute scripts via URL (matching the README commands) instead of running local files from checkout, eliminating the gap between what CI tests and what users run
+- Install smoke tests now assert the installed binary reports a version that matches the release tag
+- Windows install smoke tests now assert they are running under the expected PowerShell major version (5 or 7) to catch silent shell fallbacks
+
 ## [0.16.2] - 2026-05-26
 ### Fixed
 - `install.ps1` now works on Windows PowerShell 5.x: replaced `[System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture` (unavailable on older .NET Framework) with `$env:PROCESSOR_ARCHITECTURE`; added TLS 1.2 enforcement for GitHub API/download compatibility
